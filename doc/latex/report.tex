@@ -2,6 +2,7 @@
 \usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}
+\usepackage{todonotes}
 \usepackage{amsmath}
 \usepackage[titletoc,title]{appendix}
 \usepackage{amssymb}
@@ -97,11 +98,15 @@ foo
 
 \subsection{Motivation}
 
-foo
+Music and signal processing literature often show promising results by using variants of the Fourier transform. However, implementations of these variants are not readily found or available on popular open-source software websites. For example, when I wrote this thesis, the most popular open-source software sharing website, GitHub,\footnote{\href{https://github.com}{https://github.com}} did not contain any implementations of the warped-frequency DFT, even though this is a promising technique that has shown several improvements.
+
+Moreover, popular open-source DFT and FFT libraries, such as fftw, ffts, KissFFT, numpy and scipy and even vendor-specific libraries such as Intel Performance Primitives (IPP) or cuFFT (CUDA FFT for NVIDIA GPUs) typically only contain the standard FFT. New FFT libraries are written regularly, citing even better performance from taking advantage of new processor instructions (such as AVX512\todo{citethisrust}), but few of them try to revisit whether variants of the FFT could lead to even better results, such as the sparse FFT which can be computed in  $O(k \log n)$ time where $k << n$.
+
+A colloquial sentiment that can be seen in a few places is that for a relatively small size 1D Fourier transform (which is the most typical case in music systems), the variants are not worthwhile as the cost of the full FFT for the small 1D case is already minimal \todo{would be sick to get this} -- these comments cite that much larger 2D, 3D, or higher-dimension DFTs would benefit more from the variants. Another goal is to revisit this sentiment by indeed verifying whether the variants for 1D audio are useful.
 
 \subsection{Thesis objective}
 
-foo
+The primary objective of this thesis is to collect implementations of different variants of the discrete Fourier transform (DFT) and fast Fourier transform (FFT) in a single library with a well-defined interface that resembles the traditional DFT or FFT as closely as possible. The intention is to be able to be substitute any of the variants in existing codebases with minor (or ideally, no) code changes, to reduce the friction of adoption. For maximum compatibility, the core library is written in C, with bindings created for Python. The majority of higher-level tools and languages used for MIR and DSP applications have capabilities for using C libraries, so that the FFTN would only need to have additional wrappers or bindings created to support arbitrary languages. \todo{need C universal abi citation}
 
 \subsection{Related work}
 
@@ -109,13 +114,19 @@ foo
 
 \subsection{Contribution and results}
 
-foo
+My intended and favorite contribution of this thesis is the creation and open-source publication of a new Fourier transform library, named ``FFTN,'' which stands for a \textit{Featureful Fourier Transform from the North}. The name is chosen in the same spirit as FFTW (Fastest Fourier Transform in the West), created in U.C. Berkeley in the West coast of the United States, and FFTS (Fastest Fourier Transform in the South), created in Australia. \todo{cite the whitepapers} The goal of my library is not speed, but to gather many variants of the Fast Fourier transform in a single place, intended to be explored and experimented with as drop-in replacements of the traditional FFT in music systems. Hence, the word Featureful denotes the availability of all of the variants in a single library, and North is because I created it in my city of Montr{\'e}al, Canada (which is further North than Australia or Berkeley).
+
+Additionally, a recent paper \cite{emomucs} was studied which achieved state-of-the-art results in music emotion classification using a neural network architecture with log-mel spectrograms as input features. It was shown that using several of the variants from FFTN led to improved results, in both computational or memory usage footprint and improved classification F-score.
 
 \subsection{Outline}
 
 foo
 
 \section{The Fourier transform}
+
+foo
+
+\subsection{Fourier transform}
 
 foo
 
@@ -127,15 +138,17 @@ foo
 
 foo
 
+\subsection{Common operations with the Fourier transform}
+
+correlations, convolutions, STFT
+
+\subsubsection{Correlation and convolution}
+
+\subsubsection{Time-frequency analysis}
+
+\subsubsection{Cepstral coefficients}
+
 \subsection{Usage in music systems}
-
-foo
-
-\subsubsection{Signal processing}
-
-foo
-
-\subsubsection{Machine learning}
 
 foo
 
@@ -148,15 +161,25 @@ foo
 
 foo
 
-\subsection{Pruned}
+\subsubsection{Pruned}
 
 foo
 
 \subsection{Nonuniform}
 
-foo
+\qquad \textit{abbreviations:} NFT (nonuniform Fourier transform), NUFFT (nonuniform Fast Fourier Transform)
 
-\subsection{Warped}
+A characteristic of the standard DFT is that the output frequencies are evenly spaced. For an $N$-point DFT, the DFT coefficient at bin (or index) 0 corresponds to the DC component of the sound, and every non-zero coefficient corresponds to a frequency $\frac{n}{\mathit{fs}}, n \in (0, N)$, where $\mathit{fs}$ is the sampling rate of the input signal. In practice, since frequencies above the Nyquist rate cannot be represented, the useful bins of a DFT are between $1$ and $\frac{N}{2}+1$, representing the frequencies $\frac{1}{\mathit{fs}}$ Hz and $\frac{\mathit{fs}}{2} = f_{\text{nyq}}$ Hz. Each bin in between is spaced $\frac{1}{\mathit{fs}}$ apart from the previous and next bin.
+
+The human auditory system has a non-linear frequency response, with a finer frequency resolution at lower frequencies. \todo{cite BCJ Moore or Plack} This has implications in both speech and music processing -- in music, low frequency bass notes establish the harmonic basis of a song. \todo{cite doerfler} Common approaches, such as spectrograms using the log, Mel, Bark, or octave psychoacoustic frequency scales, involve reducing an $N$-point DFT to an $L$-point DFT where $L$ represents nonuniform frequencies on the nonlinear Mel or Bark scales \todo{cite psychoacoustic scales}.
+
+The variant of the DFT which attempts to output $L$ non-linear frequencies directly (without first computing linearly-spaced $N > L$ points, many of which will be discarded) is the nonuniform (or nonequispaced) DFT, also referred to as the NFT (nonuniform or nonequispaced Fourier transform) and NUFFT (nonuniform Fast Fourier transform). The most recent implementation of the NUFFT is by \citet{nufft1} with source code available,\footnote{\href{https://finufft.readthedocs.io/en/latest/index.html}{https://finufft.readthedocs.io/en/latest/index.html}} which in turn derives from earlier work \cite{nufft2, nufft3}.
+
+\subsubsection{Warped}
+
+An earlier variant of Fourier transform for a signal with a few known and arbitrary sinusoidal frequency components is the notch Fourier transform \cite{notch}.
+
+\subsubsection{Relation to the Constant-Q transform}
 
 foo
 
@@ -173,10 +196,6 @@ foo
 foo
 
 \subsection{Existing libraries}
-
-foo
-
-\subsection{Benchmarks}
 
 foo
 
@@ -200,15 +219,11 @@ foo
 
 foo
 
-\subsection{CPU footprint}
+\subsection{Computational footprint}
 
 foo
 
-\subsection{Signal processing}
-
-foo
-
-\subsection{Machine learning}
+\subsection{Substitution in a real-world music system}
 
 foo
 
