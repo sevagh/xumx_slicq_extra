@@ -1,0 +1,248 @@
+\documentclass[letter,12pt]{article}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[titletoc,title]{appendix}
+\usepackage{amssymb}
+\usepackage{makecell}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{subfig}
+\usepackage{titling}
+\usepackage[compatibility=false]{caption}
+\usepackage[parfill]{parskip}
+\setlength{\droptitle}{1cm}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage{setspace}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\usepackage[
+    %backend=biber, 
+    natbib=true,
+    style=numeric,
+    sorting=none,
+]{biblatex}
+\addbibresource{citations.bib}
+
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{tight_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{itemize}}
+
+\newlength{\mintednumbersep}
+\AtBeginDocument{%
+  \sbox0{\tiny00}%
+  \setlength\mintednumbersep{8pt}%
+  \addtolength\mintednumbersep{-\wd0}%
+}
+
+\title{A Featureful Fourier Transform from the North}
+
+\author{\vspace{2em}\\Sevag Hanssian \\
+  McGill University \\
+ \texttt{sevag.hanssian@mail.mcgill.ca} \\
+ \texttt{sevagh@protonmail.com} \\\ \\\ \\
+ Thesis for Master of Arts in Music Technology}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\vfill
+\clearpage %force a page break
+
+\tableofcontents
+
+\vfill
+\clearpage %force a page break
+
+\listoffigures
+
+\listoflistings
+
+\vfill
+\clearpage %force a page break
+
+\begin{abstract}
+	The Discrete Fourier transform, along with the popular and fast and 
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+foo
+
+\subsection{Motivation}
+
+foo
+
+\subsection{Thesis objective}
+
+foo
+
+\subsection{Related work}
+
+foo
+
+\subsection{Contribution and results}
+
+foo
+
+\subsection{Outline}
+
+foo
+
+\section{The Fourier transform}
+
+foo
+
+\subsection{Discrete Fourier transform}
+
+foo
+
+\subsection{Fast Fourier transform}
+
+foo
+
+\subsection{Usage in music systems}
+
+foo
+
+\subsubsection{Signal processing}
+
+foo
+
+\subsubsection{Machine learning}
+
+foo
+
+\section{Variants of the Fourier transform}
+\label{sec:theory}
+
+foo
+
+\subsection{Sparse}
+
+foo
+
+\subsection{Pruned}
+
+foo
+
+\subsection{Nonuniform}
+
+foo
+
+\subsection{Warped}
+
+foo
+
+\subsection{Fractional}
+
+foo
+
+\subsubsection{Sparse-fractional}
+
+foo
+
+\section{Fourier transform libraries}
+
+foo
+
+\subsection{Existing libraries}
+
+foo
+
+\subsection{Benchmarks}
+
+foo
+
+\subsection{Designing a new library}
+
+foo
+
+\subsection{Performance optimizations}
+
+foo
+
+\subsection{Benchmarks}
+
+foo
+
+\section{Results}
+
+foo
+
+\subsection{Memory footprint}
+
+foo
+
+\subsection{CPU footprint}
+
+foo
+
+\subsection{Signal processing}
+
+foo
+
+\subsection{Machine learning}
+
+foo
+
+\section{Conclusions}
+
+foo
+
+\subsection{Evaluation}
+
+foo
+
+\subsection{Outlook}
+
+foo
+
+\subsection{Summary}
+
+foo
+
+\vfill
+\clearpage % force a page break before references
+
+%\nocite{*}
+\section{References}
+\printbibliography[heading=none]
+
+\vfill
+\clearpage %force a page break
+
+\begin{appendices}
+
+\section{Extra stuff}
+\label{appendix:rthpss}
+
+\end{appendices}
+
+\end{document}

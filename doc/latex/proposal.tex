@@ -1,0 +1,91 @@
+\documentclass[letter,12pt]{scrartcl}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+%\setlength{\parindent}{0pt}
+%\usepackage[shortlabels]{enumitem}
+%\usepackage{graphicx}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{verbatim}
+%\usepackage{listings}
+%\usepackage{minted}
+%\usepackage{subfig}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage{setspace}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\usepackage[
+    %backend=biber, 
+    natbib=true,
+    style=authoryear,
+    sorting=none
+]{biblatex}
+\addbibresource{citations.bib}
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+\title{A Featureful Fourier Transform from the North}
+\author{Sevag Hanssian, sevag.hanssian@mail.mcgill.ca}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction / Motivation}
+
+The discrete Fourier transform (DFT) is an important algorithm in the modern world, and ubiquitous in many fields including sonar, seismology, audio, music, and speech. It is used to decompose time-domain acoustic signals into their frequency components for time-frequency analysis. Music information retrieval (MIR) systems commonly apply the DFT to compute the spectrum of the music signal, which can be used directly in digital signal processing (DSP) -based algorithms (\cite{fitzgerald}), or as input features for machine learning models (\cite{musicnn1}).
+
+Despite its importance, the DFT has some deficiencies in real-world music systems. The DFT outputs a linearly spaced frequency spectrum, yet the human auditory system has non-linear frequency resolution. Analyzing music and speech with accurate human auditory models is essential; a common approach is to adjust the frequency outputs of the DFT to fit the psychoacoustic Mel or Bark frequency scales. Real-world signals, including music and audio, tend to be sparse (\cite{sparse}), where only a subset of the output of the DFT contains useful information; in practice, some of the outputs of the DFT are ignored or discarded.
+
+In my thesis, I propose to describe and implement several variants of the DFT that address these points. First, considering perception, the \textit{non-uniform} and \textit{warped} DFTs will be explored, which can be used to modify the output spectrum to more closely resemble the human auditory system's frequency resolution. From the related perspective of time-frequency resolution, the \textit{fractional} DFT will also be examined. Next, from the angle of computational efficiency, the \textit{sparse} and \textit{pruned} DFTs are explored, which compute fewer data points. These variants of the DFT can be considered separately, or combined in a hybrid algorithm. Finally, the effects of substituting variants of the DFT in different MIR systems will be analyzed.
+
+\section{Previous Work}
+
+\citet{warped1} and \citet{warped2} describe the implementation and audio applications of the warped-frequency DFT. The related non-uniform DFT is examined in depth by \citet{nufft1}, and a modern implementation is available in \citet{nufft2}. \citet{betterbss} demonstrated improved results when using warped-frequency STFTs in music source separation tasks. The sparse DFT is described in \citet{sparse} and accompanied by a high-quality reference implementation. The pruned DFT is described by \citet{pruned}, and implementation ideas are provided by the popular open source FFT library, fftw, in \href{http://www.fftw.org/pruned.html}{http://www.fftw.org/pruned.html}.\\
+
+\citet{bettermfcc} showed how using Mel-Frequency Cepstral Coefficients (MFCC) based on the warped DFT improved the accuracy of a speech processing task over the regular DFT-based MFCC. A similar study in the domain of music can be undertaken on MIR models that use mel spectrograms, MFCCs (or the Bark-scale equivalents) as input features. \citet{fractional1} improved the accuracy of a machine learning musical instrument classifier by replacing MFCC features with MFCCs based on Fractional Fourier Transforms (FrFT). Implementation ideas for the FrFT are described in \citet{fractional2}.
+
+%Finally, two influential, open-source FFT libraries that exist are the Fastest Fourier Transform in the West\footnote{\href{
+
+\section{Proposed Research / Methodology}
+
+The thesis can be broken up into these sections:
+\begin{enumerate}
+	\item
+		Present the motivation for why the DFT is important to music systems. Show a range of MIR systems that use the DFT/FFT.
+	\item
+		Describe the mathematical formula of the DFT and a pseudocode implementation of the FFT (including the original Cooley-Tukey algorithm and modern state of the art mixed radix implementations). Describe the range and state of popular open-source FFT libraries (FFTW, KissFFT, Intel IPP, numpy/scipy FFT, Nvidia cuFFT, etc.), along with benchmarks.
+	\item
+		Introduce the variants: sparse, pruned, non-uniform, warped, and fractional FFTs. Describe the mathematical formulae and pseudocode implementations. Develop a library implementing 1D FFTs and the variants.
+	\item
+		Describe operations based on the FFT, such as the STFT and frequency-domain convolution and correlation, per variant.
+	\item
+		Substitute DFT variants in a recent, state-of-the-art MIR system and provide an in-depth analysis of results, benchmarks, and profiling to describe the impact. From this case study, attempt to extrapolate or generalize the results to determine if using these variants in MIR systems is worthwhile.
+\end{enumerate}
+
+\section{Contributions / Summary}
+
+The DFT and its most popular implementation, the FFT, are hugely important in many MIR systems and applications. I hope to explore whether variants of the classic DFT and FFT show promise in improving the results, or reducing the computational footprint, of a state-of-the-art MIR system. If favorable results can be shown, while taking into account the implementation cost of replacing the DFT with the variant, this could demonstrate a potentially promising avenue of improvements to a wide class of MIR systems.
+
+\vfill
+\clearpage %force a page break
+
+%\nocite{*}
+\printbibheading[title={References},heading=bibnumbered]
+\printbibliography[heading=none]
+
+\vfill
+\clearpage %force a page break
+
+\end{document}
