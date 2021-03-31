@@ -35,6 +35,7 @@
     sorting=none,
 ]{biblatex}
 \addbibresource{citations.bib}
+\input{variables.tex}
 
 \setcounter{biburllcpenalty}{7000}
 \setcounter{biburlucpenalty}{8000}
@@ -58,7 +59,7 @@
   \addtolength\mintednumbersep{-\wd0}%
 }
 
-\title{Fancy Fourier Transforms in the North}
+\title{\ThesisTitle}
 
 \author{\vspace{2em}\\Sevag Hanssian \\
   McGill University \\
@@ -88,25 +89,25 @@
 \clearpage %force a page break
 
 \begin{abstract}
-	The Discrete Fourier transform, along with the popular and fast and 
+	The discrete Fourier transform (DFT), along with the Fast Fourier Transform (FFT) \cite{cooleytukey} algorithm for its efficient computation, rank among the most important algorithms in applied engineering and computer science \cite{dftimportant}. The DFT is used in digital signal processing applications to decompose a discrete-time acoustic signal into a sum of its frequency components, generating a spectrum to perform what is known as spectral or frequency analysis. This Master's thesis first proposes to describe and implement the sparse, pruned, nonuniform, warped, and fractional variants of the DFT or FFT. Next, the use of the standard DFT and FFT in real-world music systems will be revisited to explore whether using the variants can be beneficial. The main result achieved is that a combination of several of the variants showed a reduction in computational footprint and improvement in accuracy in a recent state-of-the-art music system\todo{REAL-WORLD SOTA}.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-foo
+   Despite its importance, the DFT has some deficiencies in real-world signals. First, the human auditory system has a nonlinear frequency resolution, with finer frequency discrimation at low frequencies \todo{cite this}, but the DFT outputs linearly-spaced frequencies. Second, real-world signals are typically sparse, with most of their energy concentrated in few frequency components \cite{sparseintro}, yet the DFT outputs values for many frequencies, most of which are discarded.
 
 \subsection{Motivation}
 
-Music and signal processing literature often show promising results by using variants of the Fourier transform. However, implementations of these variants are not readily found or available on popular open-source software websites. For example, when I wrote this thesis, the most popular open-source software sharing website, GitHub,\footnote{\href{https://github.com}{https://github.com}} did not contain any implementations of the warped-frequency DFT, even though this is a promising technique that has shown several improvements.
+Music and signal processing literature often show promising results by using variants of the Fourier transform\todo{cite proposal shit here}.
 
-Moreover, popular open-source DFT and FFT libraries, such as fftw, ffts, KissFFT, numpy and scipy and even vendor-specific libraries such as Intel Performance Primitives (IPP) or cuFFT (CUDA FFT for NVIDIA GPUs) typically only contain the standard FFT. New FFT libraries are written regularly, citing even better performance from taking advantage of new processor instructions (such as AVX512\todo{citethisrust}), but few of them try to revisit whether variants of the FFT could lead to even better results, such as the sparse FFT which can be computed in  $O(k \log n)$ time where $k << n$.
+However, implementations of these variants are not readily found or available in common DFT/FFT software libraries. At the time of writing this thesis, fftw,\footnote{\href{http://www.fftw.org/}{http://www.fftw.org/}} ffts,\footnote{\href{https://github.com/anthonix/ffts/}{https://github.com/anthonix/ffts/}} numpy,\footnote{\href{https://numpy.org/doc/stable/reference/routines.fft.html}{https://numpy.org/doc/stable/reference/routines.fft.html}} scipy,\footnote{\href{https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html}{https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html}} and hardware-specific libraries such as Intel Performance Primitives (IPP),\footnote{\href{https://software.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-1-signal-and-data-processing/transform-functions/fourier-transform-functions/fast-fourier-transform-functions.html}{https://software.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-1-signal-and-data-processing/transform-functions/fourier-transform-functions/fast-fourier-transform-functions.html}} cuFFT (CUDA FFT for NVIDIA GPUs),\footnote{\href{https://docs.nvidia.com/cuda/cufft/index.html}{https://docs.nvidia.com/cuda/cufft/index.html}} and Ne10 for ARM processors\footnote{\href{https://projectne10.github.io/Ne10/doc/group__groupDSPs.html}{https://projectne10.github.io/Ne10/doc/group\_\_groupDSPs.html}} only contain the standard FFT algorithms. New FFT libraries are written regularly, citing even better performance from taking advantage of new processor instructions,\footnote{\href{https://users.rust-lang.org/t/rustfft-5-0-0-experimental-1-now-faster-than-fftw/53049}{https://users.rust-lang.org/t/rustfft-5-0-0-experimental-1-now-faster-than-fftw/53049}} but few of them try to revisit whether variants of the FFT could lead to even better results, such as the sparse or pruned FFTs which compute a $k$-point FFT in $O(k \log n)$ time where $k << n$, assuming that those $k$ frequency components are more important than the full $n$ outputs of the regular FFT.
 
-A colloquial sentiment that can be seen in a few places is that for a relatively small size 1D Fourier transform (which is the most typical case in music systems), the variants are not worthwhile as the cost of the full FFT for the small 1D case is already minimal \todo{would be sick to get this} -- these comments cite that much larger 2D, 3D, or higher-dimension DFTs would benefit more from the variants. Another goal is to revisit this sentiment by indeed verifying whether the variants for 1D audio are useful.
+A statement on pruned FFTs from the fftw website\footnote{\href{http://www.fftw.org/pruned.html}{http://www.fftw.org/pruned.html}} recommends ``not bothering to consider a pruned 1d FFT,'' since the computational cost savings of pruning may not be worth losing the optimization of the regular FFT for the 1-dimensional case (it is a different story for 2d or higher dimension Fourier transforms, but those are not used for music analysis). This thesis also seeks to revisit this idea, to see whether sparse or pruned FFTs for 1-dimensional audio signals are worth using. In machine or deep learning systems, thousands and thousands of FFTs are computed for large amounts of audio training data, and my hypothesis is that seemingly negligible computational savings for small 1d FFTs might stack up when performing many of them.
 
 \subsection{Thesis objective}
 
-The primary objective of this thesis is to collect implementations of different variants of the discrete Fourier transform (DFT) and fast Fourier transform (FFT) in a single library with a well-defined interface that resembles the traditional DFT or FFT as closely as possible. The intention is to be able to be substitute any of the variants in existing codebases with minor (or ideally, no) code changes, to reduce the friction of adoption. For maximum compatibility, the core library is written in C, with bindings created for Python. The majority of higher-level tools and languages used for MIR and DSP applications have capabilities for using C libraries, so that the FFTN would only need to have additional wrappers or bindings created to support arbitrary languages. \todo{need C universal abi citation}
+The primary objective of this thesis is to collect implementations of different variants of the discrete Fourier transform (DFT) and fast Fourier transform (FFT) in a single library with a well-defined interface that resembles the traditional DFT or FFT as closely as possible. The intention is to be able to be substitute any of the variants in existing codebases with minor (or ideally, no) code changes, to reduce the friction of adoption. For maximum compatibility, the core library is written in C, with bindings created for Python. The majority of higher-level tools and languages used for MIR and DSP applications have capabilities for using C libraries, so that the fftn would only need to have additional wrappers or bindings created to support arbitrary languages. \todo{need C universal abi citation}
 
 \subsection{Related work}
 
@@ -114,9 +115,9 @@ foo
 
 \subsection{Contribution and results}
 
-My intended and favorite contribution of this thesis is the creation and open-source publication of a new Fourier transform library, named ``FFTN,'' which stands for a \textit{Fancy Fourier Transforms in the North}. The name is chosen in the same spirit as FFTW (Fastest Fourier Transform in the West), created in U.C. Berkeley in the West coast of the United States, and FFTS (Fastest Fourier Transform in the South), created in Australia. \todo{cite the whitepapers} The goal of my library is not speed, but to gather many variants of the Fast Fourier transform in a single place, intended to be explored and experimented with as drop-in replacements of the traditional FFT in music systems. Hence, the word Fancy denotes the availability of interesting variants in a single library, and North is because I created it in my city of Montr{\'e}al, Canada (which is further North than Australia or Berkeley).
+My intended and favorite contribution of this thesis is the creation and open-source publication of a new Fourier transform library,\footnote{\href{https://github.com/sevagh/fftn}{https://github.com/sevagh/fftn}} named ``fftn,'' which stands for a \textit{Fancy Fourier Transforms in the North}. The name is chosen in the same spirit as fftw\cite{fftw} (Fastest Fourier Transform in the West), created at the Massachusetts Institute of Technology (MIT) in the United States and named after the ``Fastest Gun in the West'' trope from Spaghetti Western movies,\footnote{\href{http://www.fftw.org/faq/section1.html\#west}{http://www.fftw.org/faq/section1.html\#west}} and ffts\cite{ffts} (Fastest Fourier Transform in the South), created at The University of Waikato in New Zealand which is located in the southern hemisphere of the world. The goal of my library is not speed through further optimizing the standard FFT, but to gather many variants of the FFT (which may inherently include a speedup) in a single place, intended to be explored and experimented with as drop-in replacements of the traditional FFT in music systems. Hence, the word \textit{Fancy} denotes the implementation of interesting and uncommon variants, and north is because I created it in my city of Montr{\'e}al, Canada (which is further north than New Zealand or MIT).
 
-Additionally, a recent paper \cite{emomucs} was studied which achieved state-of-the-art results in music emotion classification using a neural network architecture with log-mel spectrograms as input features. It was shown that using several of the variants from FFTN led to improved results, in both computational or memory usage footprint and improved classification F-score.
+Additionally, a recent paper \todo{PICK SOTA!}
 
 \subsection{Outline}
 
@@ -153,15 +154,6 @@ correlations, convolutions, STFT
 foo
 
 \section{Variants of the Fourier transform}
-\label{sec:theory}
-
-foo
-
-\subsection{Sparse}
-
-foo
-
-\subsubsection{Pruned}
 
 foo
 
@@ -180,6 +172,14 @@ The variant of the DFT which attempts to output $L$ non-linear frequencies direc
 An earlier variant of Fourier transform for a signal with a few known and arbitrary sinusoidal frequency components is the notch Fourier transform \cite{notch}.
 
 \subsubsection{Relation to the Constant-Q transform}
+
+foo
+
+\subsection{Sparse}
+
+foo
+
+\subsubsection{Pruned}
 
 foo
 
