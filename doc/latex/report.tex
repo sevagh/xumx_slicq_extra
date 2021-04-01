@@ -101,13 +101,13 @@
 
 Music and signal processing literature often show promising results by using variants of the Fourier transform\todo{cite proposal shit here}.
 
-However, implementations of these variants are not readily found or available in common DFT/FFT software libraries. At the time of writing this thesis, fftw,\footnote{\href{http://www.fftw.org/}{http://www.fftw.org/}} ffts,\footnote{\href{https://github.com/anthonix/ffts/}{https://github.com/anthonix/ffts/}} numpy,\footnote{\href{https://numpy.org/doc/stable/reference/routines.fft.html}{https://numpy.org/doc/stable/reference/routines.fft.html}} scipy,\footnote{\href{https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html}{https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html}} and hardware-specific libraries such as Intel Performance Primitives (IPP),\footnote{\href{https://software.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-1-signal-and-data-processing/transform-functions/fourier-transform-functions/fast-fourier-transform-functions.html}{https://software.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-1-signal-and-data-processing/transform-functions/fourier-transform-functions/fast-fourier-transform-functions.html}} cuFFT (CUDA FFT for NVIDIA GPUs),\footnote{\href{https://docs.nvidia.com/cuda/cufft/index.html}{https://docs.nvidia.com/cuda/cufft/index.html}} and Ne10 for ARM processors\footnote{\href{https://projectne10.github.io/Ne10/doc/group__groupDSPs.html}{https://projectne10.github.io/Ne10/doc/group\_\_groupDSPs.html}} only contain the standard FFT algorithms. New FFT libraries are written regularly, citing even better performance from taking advantage of new processor instructions,\footnote{\href{https://users.rust-lang.org/t/rustfft-5-0-0-experimental-1-now-faster-than-fftw/53049}{https://users.rust-lang.org/t/rustfft-5-0-0-experimental-1-now-faster-than-fftw/53049}} but few of them try to revisit whether variants of the FFT could lead to even better results, such as the sparse or pruned FFTs which compute a $k$-point FFT in $O(k \log n)$ time where $k << n$, assuming that those $k$ frequency components are more important than the full $n$ outputs of the regular FFT.
-
-A statement on pruned FFTs from the fftw website\footnote{\href{http://www.fftw.org/pruned.html}{http://www.fftw.org/pruned.html}} recommends ``not bothering to consider a pruned 1d FFT,'' since the computational cost savings of pruning may not be worth losing the optimization of the regular FFT for the 1-dimensional case (it is a different story for 2d or higher dimension Fourier transforms, but those are not used for music analysis). This thesis also seeks to revisit this idea, to see whether sparse or pruned FFTs for 1-dimensional audio signals are worth using. In machine or deep learning systems, thousands and thousands of FFTs are computed for large amounts of audio training data, and my hypothesis is that seemingly negligible computational savings for small 1d FFTs might stack up when performing many of them.
+However, implementations of these variants are not readily found or available in common DFT/FFT software libraries. At the time of writing this thesis, fftw,\footnote{\href{http://www.fftw.org/}{http://www.fftw.org/}} ffts,\footnote{\href{https://github.com/anthonix/ffts/}{https://github.com/anthonix/ffts/}} numpy,\footnote{\href{https://numpy.org/doc/stable/reference/routines.fft.html}{https://numpy.org/doc/stable/reference/routines.fft.html}} scipy,\footnote{\href{https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html}{https://docs.scipy.org/doc/scipy/reference/tutorial/fft.html}} and hardware-specific libraries such as Intel Performance Primitives (IPP),\footnote{\href{https://software.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-1-signal-and-data-processing/transform-functions/fourier-transform-functions/fast-fourier-transform-functions.html}{https://software.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-1-signal-and-data-processing/transform-functions/fourier-transform-functions/fast-fourier-transform-functions.html}} cuFFT (CUDA FFT for NVIDIA GPUs),\footnote{\href{https://docs.nvidia.com/cuda/cufft/index.html}{https://docs.nvidia.com/cuda/cufft/index.html}} and Ne10 for ARM processors\footnote{\href{https://projectne10.github.io/Ne10/doc/group__groupDSPs.html}{https://projectne10.github.io/Ne10/doc/group\_\_groupDSPs.html}} only contain the standard FFT algorithms. New FFT libraries are written regularly, citing even better performance from taking advantage of new processor instructions,\footnote{\href{https://users.rust-lang.org/t/rustfft-5-0-0-experimental-1-now-faster-than-fftw/53049}{https://users.rust-lang.org/t/rustfft-5-0-0-experimental-1-now-faster-than-fftw/53049}} but few of them implement more than the standard FFT.
 
 \subsection{Thesis objective}
 
 The primary objective of this thesis is to collect implementations of different variants of the discrete Fourier transform (DFT) and fast Fourier transform (FFT) in a single library with a well-defined interface that resembles the traditional DFT or FFT as closely as possible. The intention is to be able to be substitute any of the variants in existing codebases with minor (or ideally, no) code changes, to reduce the friction of adoption. For maximum compatibility, the core library is written in C, with bindings created for Python. The majority of higher-level tools and languages used for MIR and DSP applications have capabilities for using C libraries, so that the fftn would only need to have additional wrappers or bindings created to support arbitrary languages. \todo{need C universal abi citation}
+
+The secondary objective of this thesis is to substitute the implemented variants in a state-of-the-art music system and determine whether 
 
 \subsection{Related work}
 
@@ -157,37 +157,49 @@ foo
 
 foo
 
-\subsection{Nonuniform}
+\subsection{Psychoacoustic DFT}
 
-\qquad \textit{abbreviations:} NFT (nonuniform Fourier transform), NUFFT (nonuniform Fast Fourier Transform)
+\qquad \textit{abbreviations:} NFT (nonuniform Fourier transform), NUFFT (nonuniform FFT), WDFT (warped DFT)
 
 A characteristic of the standard DFT is that the output frequencies are evenly spaced. For an $N$-point DFT, the DFT coefficient at bin (or index) 0 corresponds to the DC component of the sound, and every non-zero coefficient corresponds to a frequency $\frac{n}{\mathit{fs}}, n \in (0, N)$, where $\mathit{fs}$ is the sampling rate of the input signal. In practice, since frequencies above the Nyquist rate cannot be represented, the useful bins of a DFT are between $1$ and $\frac{N}{2}+1$, representing the frequencies $\frac{1}{\mathit{fs}}$ Hz and $\frac{\mathit{fs}}{2} = f_{\text{nyq}}$ Hz. Each bin in between is spaced $\frac{1}{\mathit{fs}}$ apart from the previous and next bin.
 
-The human auditory system has a non-linear frequency response, with a finer frequency resolution at lower frequencies. \todo{cite BCJ Moore or Plack} This has implications in both speech and music processing -- in music, low frequency bass notes establish the harmonic basis of a song. \todo{cite doerfler} Common approaches, such as spectrograms using the log, Mel, Bark, or octave psychoacoustic frequency scales, involve reducing an $N$-point DFT to an $L$-point DFT where $L$ represents nonuniform frequencies on the nonlinear Mel or Bark scales \todo{cite psychoacoustic scales}.
+The human auditory system has a non-linear frequency response, with a finer frequency resolution at lower frequencies. \todo{BCJ Moore or Plack} This has implications in both speech and music processing. In music, low frequency bass notes establish the harmonic basis of a song. \todo{doerfler} Common approaches, such as spectrograms using the log, Mel, Bark, or octave psychoacoustic frequency scales, involve reducing an $N$-point DFT to an $L$-point DFT where $L$ represents nonuniform frequencies on the nonlinear Mel or Bark scales \todo{cite psychoacoustic scales}.
+
+\todo{nice psychoacoustic diagrams here}
+
+\subsubsection{Warped DFT}
+
+The warped DFT \cite{warped1, warped2}.
+
+ In warped DFT, such nonuni-form frequency samples are obtained by a nonlinear warping ofuniform spacing. In nonuniform DFT, the frequency samples arecompletely arbitrary [3]. The above DFT variants are arrangedin the increasing order of flexibility.1
+
+
+\subsubsection{Nonuniform DFT}
+
+A generalization of the warped DFT.
 
 The variant of the DFT which attempts to output $L$ non-linear frequencies directly (without first computing linearly-spaced $N > L$ points, many of which will be discarded) is the nonuniform (or nonequispaced) DFT, also referred to as the NFT (nonuniform or nonequispaced Fourier transform) and NUFFT (nonuniform Fast Fourier transform). The most recent implementation of the NUFFT is by \citet{nufft1} with source code available,\footnote{\href{https://finufft.readthedocs.io/en/latest/index.html}{https://finufft.readthedocs.io/en/latest/index.html}} which in turn derives from earlier work \cite{nufft2, nufft3}.
-
-\subsubsection{Warped}
-
-An earlier variant of Fourier transform for a signal with a few known and arbitrary sinusoidal frequency components is the notch Fourier transform \cite{notch}.
 
 \subsubsection{Relation to the Constant-Q transform}
 
 foo
 
-\subsection{Sparse}
+\subsection{Sparse and pruned DFT}
+
+
+A statement on pruned FFTs from the fftw website\footnote{\href{http://www.fftw.org/pruned.html}{http://www.fftw.org/pruned.html}} recommends ``not bothering to consider a pruned 1d FFT,'' since the computational cost savings of pruning may not be worth losing the optimization of the regular FFT for the 1-dimensional case (it is a different story for 2d or higher dimension Fourier transforms, but those are not used for music analysis). This thesis also seeks to revisit this idea, to see whether sparse or pruned FFTs for 1-dimensional audio signals are worth using. In machine or deep learning systems, thousands and thousands of FFTs are computed for large amounts of audio training data, and my hypothesis is that seemingly negligible computational savings for small 1d FFTs might stack up when performing many of them.
+
+Hassanieh et al say that k now only has to be a little less than n, not very less - \todo{tie into fftw}
+
+ could lead to even better results, such as the sparse or pruned FFTs which compute a $k$-point FFT in $O(k \log n)$ time where $k << n$, assuming that those $k$ frequency components are more important than the full $n$ outputs of the regular FFT.
+
+
+
+\subsection{Discrete Fractional Fourier transform}
 
 foo
 
-\subsubsection{Pruned}
-
-foo
-
-\subsection{Fractional}
-
-foo
-
-\subsubsection{Sparse-fractional}
+\subsubsection{Sparse Discrete Fractional Fourier Transform}
 
 foo
 
