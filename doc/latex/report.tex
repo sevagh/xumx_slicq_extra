@@ -205,19 +205,7 @@ spectrograms, etc.
 \section{Variants of the Fourier transform}
 \label{sec:theoryvariant}
 
-These won't be covered but
-
-\todo[inline]{Discrete Fractional Fourier transform + Sparse Discrete Fractional Fourier Transform}
-
-better fractional is \citet{betterfractional}
-
-\todo[inline]{Notch FFT}
-
-\todo[inline]{QIFFT, XQIFFT}
-
-foo
-
-These useful ones will be covered instead
+These useful ones will be covered.
 
 \subsection{Nonuniform and warped DFT}
 
@@ -236,15 +224,13 @@ As described by \citet{warpedcomparison} in their paper comparing different warp
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[WDFT filterbank]{{\includegraphics[height=5cm]{./wdft.png} }}
-	\subfloat[WDLDFT filterbank]{{\includegraphics[height=5cm]{./wdldft.png} }}
+	\subfloat[WDFT filterbank\label{fig:wdftsa}]{{\includegraphics[height=5cm]{./wdft.png} }}
+	\subfloat[WDLDFT filterbank\label{fig:wdftsb}]{{\includegraphics[height=5cm]{./wdldft.png} }}
 	\caption{Two approaches to the warped DFT}
 	\label{fig:wdfts}
 \end{figure}
 
-\citet{warped1} describe that the WDLDFT approach leads only to an approximation of the warped-frequency magnitudes, while the WDFT leads to an exact solution. Additionally, \citet{warpedcomparison} found that in their psychoacoustic experiment, the WDFT performed better than the WDLDFT. Therefore, the implementation of the WDFT in this thesis will be the version based on the NDFT \cite{warped1}, taking into account the most recently proposed implementation details \cite{warped2}.
-
-\todo[inline]{benefit of temporal resolution same as cqt}
+\citet{warped1} describe that the WDLDFT approach leads only to an approximation of the warped-frequency magnitudes, while the WDFT leads to an exact solution. Additionally, \citet{warpedcomparison} found that in their psychoacoustic audio coding experiments, the WDFT and WDLDFT both performed better than the standard DFT for coding stationary signals like bagpipes, but found that the WDFT performed better on transient attack signals like castanets due to its better time resolution. Therefore, the implementation of the WDFT in this thesis will be the version based on the NDFT \cite{warped1}, taking into account the most recently proposed implementation details \cite{warped2}.
 
 \subsubsection{Relation to the Constant-Q transform}
 
@@ -268,7 +254,17 @@ This is illustrated in figure \ref{fig:violin}, showing a linear and CQT represe
 	\label{fig:violin}
 \end{figure}
 
-The first formulation of the CQT was constructed using specific window sizes for each frequency region of interest, and was not designed to be invertible, thus making it only suitable for analysis. Subsequent work \cite{balazs, jaillet} applied formal frame theory to create a perfectly invertible and minimally redundant Constant-Q transform using the Nonstationary Gabor Transform (NSGT, or NSDGT for the discrete-time variant).
+\todo[inline]{describe puckette brown cqt with FFT operations}
+
+\todo[inline]{cite here the good time resolution of the 2-dictionary CQT, dorfler stuff thesis}
+
+The first formulation of the CQT was constructed using specific window sizes for each frequency region of interest, and was not designed to be invertible, thus making it only suitable for analysis.
+
+Several papers created CQT implementations with some level of approximation error in the inverse transform \cite{klapuricqt, fitzgeraldcqt}. In fact, \citet{klapuricqt}'s implementation is currently the implementation of the CQT in librosa \cite{librosa}, a popular and modern open-source Music Information Retrieval library for Python.
+
+Subsequent work by \citet{balazs, jaillet, invertiblecqt} applied formal frame theory to create a perfectly invertible and minimally redundant Constant-Q transform using the Nonstationary Gabor Transform (NSGT, or NSDGT for the discrete-time variant). The CQ-NSGT is the implementation of the CQT in the MATLAB Wavelet Toolbox.\footnote{\href{https://www.mathworks.com/help/wavelet/ref/cqt.html}{https://www.mathworks.com/help/wavelet/ref/cqt.html}} \todo[inline]{deal with number of FFTs in the computation}
+
+In their CQT paper, \citet{klapuricqt} reference the warped DFT from \citet{warpedold1, warpedold2} as an interesting option for a CQT, but ruled it out for lacking a stable inverse transform. Those implementations are in fact similar to those already mentioned \cite{earlywarped1, earlywarped2} in that they use the warped delay line (WDLDFT) implementation, shown previously in figure \ref{fig:wdftsb}. Therefore, \citet{warped2}'s WDFT with the low error IIWDFT inversion scheme may be a better choice as an alternative to the CQT.
 
 \subsection{Sparse and pruned DFT}
 
