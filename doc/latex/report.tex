@@ -1,5 +1,5 @@
 \documentclass[letter,12pt,notitlepage]{article}
-\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage[left=4cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}
 \usepackage{todonotes}
@@ -78,7 +78,7 @@
 \vspace{3.5em}
 
 \begin{abstract}
-	The discrete Fourier transform (DFT), and the Fast Fourier Transform (FFT) algorithm for its efficient computation, rank among the most important algorithms in applied engineering and computer science in the modern world. The FFT is used in digital signal processing applications such as audio, seismology, and medical imaging to decompose a signal into a sum of its frequency components. This thesis first describes the DFT and FFT, their use in music systems, and several variants which may be beneficial for music applications. Next, a new software library is proposed which implements the FFT variants with an interface designed to be a drop-in replacement of the standard FFT. Finally, the variants are substituted in two recent state-of-the-art music systems, showing reduced computational footprint and an improvement in accuracy.
+	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Two tasks where such models have recently achieved success are audio beat tracking and music source separation. The Constant-Q Transform (CQT) and the warped STFT are alternative time-frequency representations that may be more suitable for music than the STFT. In this thesis, first the STFT, CQT, and warped STFT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with the CQT and warped STFT in two modern deep learning models for the audio beat tracking and music source separation tasks respectively, showing significant improvements in the results.
 \end{abstract}
 
 \vfill
@@ -135,7 +135,7 @@ foo
 
 \subsection{Contribution and results}
 
-The primary contribution of this thesis is the creation and open-source publication of a new Fourier transform library,\footnote{\href{https://github.com/sevagh/fftn}{https://github.com/sevagh/fftn}} named fftn, which stands for a \textit{Fast Fourier Transforms from the North}. \todo{building on ffts} The name is chosen in the same spirit as FFTW \cite{fftw1} (Fastest Fourier Transform in the West), created at the Massachusetts Institute of Technology (MIT) in the United States and named after the ``Fastest Gun in the West'' from movies about the American Wild West.\footnote{\href{http://www.fftw.org/faq/section1.html\#west}{http://www.fftw.org/faq/section1.html\#west}} Another project named along these lines is ffts \cite{ffts} (Fastest Fourier Transform in the South), created at The University of Waikato in New Zealand which is located in the southern hemisphere of the world. The goal of my library is not to further optimize the FFT, but to gather many variants of the FFT in a single place. The pluralization of the word \textit{transforms} denotes the different FFT variants, and the library is from the north because I created it in my city of Montr{\'e}al, Canada (which is further north than New Zealand or Massachusetts).
+The primary contribution of this thesis is the creation and open-source publication of a warped STFT library\todo{make better}.
 
 A secondary contribution of this thesis showed that substituting variants of FFT in a recent music system \todo{PICK SOTA!} showed a simultaneous reduction of the computational footprint and accuracy of results. This indicates that the use of these variants could be a promising avenue for future research, and it is hoped that the fftn library will become an important tool in future music systems.
 
@@ -146,14 +146,18 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 \vfill
 \clearpage
 
-\section{The Fourier transform}
-\label{sec:theorystandard}
+\section{Time-frequency analysis of acoustic signals}
+\label{sec:theorytf}
 
-\qquad \textit{abbreviations:} DFT (discrete Fourier transform), DTFT (discrete-time Fourier transform), FFT (Fast Fourier transform)
+\subsection{Acoustic signals and time domain waveforms}
+
+\subsection{Frequency analysis and the spectral domain}
+
+\subsubsection{Continuous Fourier transform}
 
 \todo[inline]{theory of fourier, history, continuous-time fourier transform}
 
-\subsection{Discrete Fourier transform}
+\subsubsection{Discrete Fourier transform}
 
 \todo[inline]{digital sampling theory intro, then map ct to dt}
 
@@ -161,14 +165,31 @@ A characteristic of the standard DFT is that the output frequencies are evenly s
 
 \todo[inline]{unit circle z plane blah}
 
-\subsection{Fast Fourier transform}
+\subsubsection{Fast Fourier transform}
 
 \citet{cooleytukey} did a cool thing. Bluestein? stockham? so many
 
-\subsection{The Fourier transform in music systems}
+\subsection{Time-frequency analysis and the spectrogram}
 
-\subsubsection{Musical and psychoacoustic frequency scales}
+\subsubsection{Time-frequency uncertainty principle}
+
+\subsubsection{Gabor transform}
+
+\subsubsection{Short-time Fourier transform}
+
+\vfill
+\clearpage
+
+\section{Time-frequency analysis of music}
+\label{sec:theorymusic}
+
+\subsection{Temporal resolution and transients}
 \label{sec:freqscales}
+
+\subsection{Musical and psychoacoustic frequency scales}
+\label{sec:freqscales}
+
+\todo[inline]{Musical and psychoacoustic frequency scales}
 
 \todo[inline]{mel, bark power summation/PSD}
 
@@ -192,47 +213,7 @@ A common approach is to apply post-processing on the linear frequencies of the s
 
 Instead of post-processing the standard DFT to map to a psychoacoustic frequency scale, one option is to use a variant of the DFT which outputs the psychoacoustic frequencies directly. This may lead to significant computational savings in systems. The nonuniform DFT (NDFT) and warped DFT (WDFT) are two such possibilities.
 
-
-\subsubsection{Time-frequency analysis, spectrum, and cepstrum}
-
-spectrograms, etc.
-
-\subsubsection{Correlation and convolution}
-
-\vfill
-\clearpage
-
-\section{Variants of the Fourier transform}
-\label{sec:theoryvariant}
-
-These useful ones will be covered.
-
-\subsection{Nonuniform and warped DFT}
-
-\qquad \textit{abbreviations:} NFT (nonuniform Fourier transform), NUFFT (nonuniform FFT), NDFT (nonuniform DFT), WDFT (warped DFT), WDLDFT (warped delay line DFT)
-
-The variant of the DFT which can output arbitrarily-spaced frequencies is the nonuniform (or nonequispaced) DFT, also referred to as the NFT (nonuniform Fourier transform), NDFT (nonuniform discrete Fourier transform), and NUFFT (nonuniform Fast Fourier transform). The most recent implementation of the NUFFT is by \citet{nufft1} with source code available,\footnote{\href{https://finufft.readthedocs.io/en/latest/index.html}{https://finufft.readthedocs.io/en/latest/index.html}} which in turn derives from earlier work \cite{nufft2, nufft3}.
-
-A special case of the nonuniform DFT is the warped DFT. In the warped DFT, the uniformly-spaced DFT is applied to a signal on a warped frequency scale. Those uniformly-spaced frequencies on the warped frequency scale then correspond to nonuniformly-spaced frequencies on the original frequency scale. This implementation is known as the warped DFT (WDFT) \cite{warped1}, and it is a generalization of the nonuniform DFT \cite{nufft3}.
-
-\citet{warped2} provides for improved computational efficiency for the forward WDFT, and an iterative inverse WDFT (IIWDFT) computation scheme to approximate the inverse transform with low errors.
-
-\todo[inline]{bilinear mapping, cubic spline, invertibility}
-warping stuff here? bark erb blah blah
-
-As described by \citet{warpedcomparison} in their paper comparing different warped Fourier transform implementations, a previous approach to the warped DFT \cite{earlywarped1, earlywarped2} was to apply an allpass network (or warped delay line) to the input signal $x[n]$ to a new frequency-warped sequence $y[n]$, and then apply the standard DFT (they name the old approach the WDLDFT, or warped delay line DFT, while WDFT refers to the method based on the NDFT). The WDFT and WDLDFT filterbanks are shown in figure \ref{fig:wdfts}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[WDFT filterbank\label{fig:wdftsa}]{{\includegraphics[height=5cm]{./wdft.png} }}
-	\subfloat[WDLDFT filterbank\label{fig:wdftsb}]{{\includegraphics[height=5cm]{./wdldft.png} }}
-	\caption{Two approaches to the warped DFT}
-	\label{fig:wdfts}
-\end{figure}
-
-\citet{warped1} describe that the WDLDFT approach leads only to an approximation of the warped-frequency magnitudes, while the WDFT leads to an exact solution. Additionally, \citet{warpedcomparison} found that in their psychoacoustic audio coding experiments, the WDFT and WDLDFT both performed better than the standard DFT for coding stationary signals like bagpipes, but found that the WDFT performed better on transient attack signals like castanets due to its better time resolution. Therefore, the implementation of the WDFT in this thesis will be the version based on the NDFT \cite{warped1}, taking into account the most recently proposed implementation details \cite{warped2}.
-
-\subsubsection{Relation to the Constant-Q transform}
+\subsection{Constant-Q transform}
 
 The idea for a musically-appropriate single transform, the Constant-Q Transform, was first proposed by \citet{jbrown}. The goal was to create a transform which maintained a constant ratio of frequency to frequency resolution, for the following reasons:
 
@@ -266,35 +247,96 @@ Subsequent work by \citet{balazs, jaillet, invertiblecqt} applied formal frame t
 
 In their CQT paper, \citet{klapuricqt} reference the warped DFT from \citet{warpedold1, warpedold2} as an interesting option for a CQT, but ruled it out for lacking a stable inverse transform. Those implementations are in fact similar to those already mentioned \cite{earlywarped1, earlywarped2} in that they use the warped delay line (WDLDFT) implementation, shown previously in figure \ref{fig:wdftsb}. Therefore, \citet{warped2}'s WDFT with the low error IIWDFT inversion scheme may be a better choice as an alternative to the CQT.
 
-\subsection{Sparse and pruned DFT}
+\subsubsection{Earlier implementations}
 
-A statement on pruned FFTs from the fftw website\footnote{\href{http://www.fftw.org/pruned.html}{http://www.fftw.org/pruned.html}} recommends ``not bothering to consider a pruned 1d FFT,'' since the computational cost savings of pruning may not be worth losing the optimization of the regular FFT for the 1-dimensional case (it is a different story for 2d or higher dimension Fourier transforms, but those are not used for music analysis). This thesis also seeks to revisit this idea, to see whether sparse or pruned FFTs for 1-dimensional audio signals are worth using. In machine or deep learning systems, thousands and thousands of FFTs are computed for large amounts of audio training data, and my hypothesis is that seemingly negligible computational savings for small 1d FFTs might stack up when performing many of them.
+\subsubsection{Nonstationary Gabor transform}
 
-Hassanieh et al say that k now only has to be a little less than n, not very less - \todo{tie into fftw}
+\subsection{Warped STFT}
 
- could lead to even better results, such as the sparse or pruned FFTs which compute a $k$-point FFT in $O(k \log n)$ time where $k << n$, assuming that those $k$ frequency components are more important than the full $n$ outputs of the regular FFT.
+\subsubsection{Nonuniform and warped DFT}
+
+\qquad \textit{abbreviations:} NFT (nonuniform Fourier transform), NUFFT (nonuniform FFT), NDFT (nonuniform DFT), WDFT (warped DFT), WDLDFT (warped delay line DFT)
+
+The variant of the DFT which can output arbitrarily-spaced frequencies is the nonuniform (or nonequispaced) DFT, also referred to as the NFT (nonuniform Fourier transform), NDFT (nonuniform discrete Fourier transform), and NUFFT (nonuniform Fast Fourier transform). The most recent implementation of the NUFFT is by \citet{nufft1} with source code available,\footnote{\href{https://finufft.readthedocs.io/en/latest/index.html}{https://finufft.readthedocs.io/en/latest/index.html}} which in turn derives from earlier work \cite{nufft2, nufft3}.
+
+A special case of the nonuniform DFT is the warped DFT. In the warped DFT, the uniformly-spaced DFT is applied to a signal on a warped frequency scale. Those uniformly-spaced frequencies on the warped frequency scale then correspond to nonuniformly-spaced frequencies on the original frequency scale. This implementation is known as the warped DFT (WDFT) \cite{warped1}, and it is a generalization of the nonuniform DFT \cite{nufft3}.
+
+\citet{warped2} provides for improved computational efficiency for the forward WDFT, and an iterative inverse WDFT (IIWDFT) computation scheme to approximate the inverse transform with low errors.
+
+\todo[inline]{bilinear mapping, cubic spline, invertibility}
+warping stuff here? bark erb blah blah
+
+As described by \citet{warpedcomparison} in their paper comparing different warped Fourier transform implementations, a previous approach to the warped DFT \cite{earlywarped1, earlywarped2} was to apply an allpass network (or warped delay line) to the input signal $x[n]$ to a new frequency-warped sequence $y[n]$, and then apply the standard DFT (they name the old approach the WDLDFT, or warped delay line DFT, while WDFT refers to the method based on the NDFT). The WDFT and WDLDFT filterbanks are shown in figure \ref{fig:wdfts}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[WDFT filterbank\label{fig:wdftsa}]{{\includegraphics[height=5cm]{./wdft.png} }}
+	\subfloat[WDLDFT filterbank\label{fig:wdftsb}]{{\includegraphics[height=5cm]{./wdldft.png} }}
+	\caption{Two approaches to the warped DFT}
+	\label{fig:wdfts}
+\end{figure}
+
+\citet{warped1} describe that the WDLDFT approach leads only to an approximation of the warped-frequency magnitudes, while the WDFT leads to an exact solution. Additionally, \citet{warpedcomparison} found that in their psychoacoustic audio coding experiments, the WDFT and WDLDFT both performed better than the standard DFT for coding stationary signals like bagpipes, but found that the WDFT performed better on transient attack signals like castanets due to its better time resolution. Therefore, the implementation of the WDFT in this thesis will be the version based on the NDFT \cite{warped1}, taking into account the most recently proposed implementation details \cite{warped2}.
+
+\subsubsection{Warped STFT}
 
 \vfill
 \clearpage
 
-\section{Fourier transform libraries}
+\section{Background on machine learning}
+\label{sec:mldl}
+
+\subsection{Deep learning}
+
+\vfill
+\clearpage
+
+\section{Music information retrieval}
+\label{sec:mirusecases}
+
+\subsection{Audio beat tracking}
+
+\subsubsection{Task definition}
+
+\subsubsection{Use of the STFT}
+
+\subsubsection{Datasets and evaluation metrics}
+
+\subsubsection{Survey and state-of-the-art}
+
+\subsubsection{Model under study: DBNBeatTracker}
+
+\subsection{Music source separation}
+
+\subsubsection{Task definition}
+
+\subsubsection{Use of the STFT}
+
+\subsubsection{Datasets and evaluation metrics}
+
+\subsubsection{Survey and state-of-the-art}
+
+\subsubsection{Model under study: Open-Unmix}
+
+\vfill
+\clearpage
+
+\section{Software for the CQT and warped STFT}
 \label{sec:libraries}
 
-foo
+\subsection{CQT-NSGT library}
 
-\subsection{Existing libraries}
+\subsection{Designing and creating a warped STFT library}
 
-foo
-
-\subsection{Designing a new library}
+\subsubsection{Implementation and interface}
 
 foo
 
-\subsection{Performance optimizations}
+\subsubsection{Numerical stability of the inverse}
 
 foo
 
-\subsection{Benchmarks}
+\subsubsection{Benchmarks and performance optimizations}
 
 foo
 
@@ -306,19 +348,27 @@ foo
 
 foo
 
-\subsection{Library usage and outputs}
+\subsection{Audio beat tracking}
+
+foo. results here
+
+\subsubsection{Model modifications}
 
 foo
 
-\subsection{Memory footprint}
+\subsubsection{Training}
 
 foo
 
-\subsection{Computational footprint}
+\subsection{Music source separation}
+
+foo. results here
+
+\subsubsection{Model modifications}
 
 foo
 
-\subsection{Substitution in a real-world music system}
+\subsubsection{Training}
 
 foo
 
@@ -354,8 +404,14 @@ foo
 
 \begin{appendices}
 
-\section{Extra stuff}
-\label{appendix:rthpss}
+\section{Code availability and replicating the results}
+\label{appendix:coderesultsrepro}
+
+\section{Warped STFT library documentation}
+\label{appendix:wstftdoc}
+
+\section{Machine learning in the waveform domain}
+\label{appendix:waveformml}
 
 \end{appendices}
 
