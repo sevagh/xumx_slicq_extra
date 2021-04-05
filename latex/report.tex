@@ -153,11 +153,9 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 
 \subsection{Frequency analysis and the spectral domain}
 
-\subsubsection{Continuous Fourier transform}
+\subsubsection{Discrete Fourier transform}
 
 \todo[inline]{theory of fourier, history, continuous-time fourier transform}
-
-\subsubsection{Discrete Fourier transform}
 
 \todo[inline]{digital sampling theory intro, then map ct to dt}
 
@@ -170,6 +168,96 @@ A characteristic of the standard DFT is that the output frequencies are evenly s
 \citet{cooleytukey} did a cool thing. Bluestein? stockham? so many
 
 \subsection{Time-frequency analysis and the spectrogram}
+
+\citet{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
+\begin{flalign}
+	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
+	G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n},
+\end{flalign}
+
+where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle (which is minimized by using the Gaussian function as a window), stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' Gabor called named the time-frequency tile the \textit{logon}, or smallest possible unit of time-frequency information. Mathematically, this can be stated as:
+\[ \Delta t\Delta f \ge 1 \]
+
+$\Delta t$ and $\Delta f$ are, as defined by Gabor, ``the uncertainties inherent in the definition of the epoch $t$ and frequency $f$ of an oscillation.'' The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other. This is further illustrated in figure \ref{fig:gabortf}, which shows the tiling of the time-frequency plane, and how frequency and time resolution must be sacrificed for one another by the lower bound of the time-frequency tile area.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat{\includegraphics[height=3cm]{./gabor3.png}}
+	\hspace{0.1em}
+	\subfloat{\includegraphics[height=2.56cm]{./gabor4.png}}
+	\caption{A demonstration of the mutually exclusive formulations of time analysis and frequency analysis, and the lower bound of time-frequency resolution defined by Gabor's TF uncertainty principle \cite{gabordiagrams}}
+	\label{fig:gabortf}
+\end{figure}
+
+Gabor noted the need for variable-frequency analysis, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.'' Similarly, psychoacoustics research shows that humans have been able to beat the time-frequency uncertainty principle \cite{psycho1, psycho2}, indicating the presence of nonlinear operators in the auditory system.
+
+The STFT, or short-time Fourier transform, has been described independently from Gabor's work \cite{stftindie}, but additional research in the 1980s \cite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described in equation (2):
+\begin{flalign}
+	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)]\\
+	X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n},
+\end{flalign}
+
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes \cite{stftinvertible}, as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
+
+\citet{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.'' Similar ideas were shown in \citet{doerflerphd}'s dissertation, suggesting the use of multiple Gabor dictionaries for representing music, for the two following reasons:
+
+\begin{tight_itemize}
+	\item
+		\textit{Transients} are important musically, driving instrument identification and temporal events such as beats. As transients and broadband signals occur in the high frequency range, good time resolution in that range allows clearer identification of transient events.
+	\item
+		 Notes in the low frequency lay the harmonic basis of the song, requiring very fine frequency resolution.
+\end{tight_itemize}
+
+\citet{tfjigsaw}'s TF Jigsaw Puzzle algorithm works along these lines, establishing a multi-dictionary Gabor analysis by using two different window sizes ($R = 2$ for two dictionaries, using \citet{doerflerphd}'s terminology) for tonal and transient representation. In fact, this idea appears in most of the studied harmonic/percussive separation algorithms: the large window analysis leading to high frequency resolution for the optimal separation of pitched instruments, and the small window analysis leading to high time resolution for the optimal separation of transients.
+
+However, \citet{doerflerphd} notes that there is a downside of high redundancy (or overcompleteness) in such multi-dictionary analyses (e.g., using two STFTs is an example of high redundancy). There should be an ideal \textit{single} transform which adapts itself to the different characteristics of the signal being studied, rather than creating a new transform or dictionary for each characteristic.
+
+A useful exercise is to represent the classic glockenspiel signal with different dictionaries to gain some practical, hands-on experience with the characteristics, advantages, and disadvantages of each transform mentioned so far. All plots are generated with MATLAB and LTFAT.
+
+The glockenspiel signal is well-known and useful to demonstrate transient and tonal properties of a musical signal -- it is available in the LTFAT,\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} loaded by the \Verb#gspi# function. Figure \ref{fig:glockwaveform} shows the time-domain waveform:
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=6.5cm]{./gspi_waveform.png}
+	\caption{Glockenspiel waveform}
+	\label{fig:glockwaveform}
+\end{figure}
+
+Let's first consider the STFT. The standard \Verb#spectrogram# in MATLAB\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} is computed using the short-time Fourier transform. The number of DFT output bins is set to twice the window size, and the overlap is set to half of the window size. An STFT with 3 different window sizes is shown in figure \ref{fig:glockspecs}.
+
+\begin{figure}[ht]
+	\vspace{-1em}
+	\centering
+	\subfloat[Window size 256]{\includegraphics[height=5cm]{./glock_stft256.png}}
+	\hspace{0.35em}
+	\subfloat[Window size 1024]{\includegraphics[height=5cm]{./glock_stft1024.png}}
+	\hspace{0.35em}
+	\subfloat[Window size 4096]{\includegraphics[height=5cm]{./glock_stft4096.png}}
+	\caption{STFT-based spectrograms of the glockenspiel signal}
+	\label{fig:glockspecs}
+\end{figure}
+
+The maximum frequency is the Nyquist frequency, or half the sample rate -- in this case, it is 22050 Hz (half of 44100 Hz, the gspi sample rate). The frequency resolution of the linear STFT is fixed at $\frac{\mathit{fs}}{N}$, where $\mathit{fs}$ is the sampling frequency or sample rate, and $N$ is the number of output bins of the DFT. The time resolution of the linear STFT depends on the window size. The table \ref{table:stftparams} shows the frequency resolution, or $\Delta f$, per window size of the STFT.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|c|c|c|c| }
+	 \hline
+	  Window (samples) & Window (ms) & DFT outputs & $\Delta f$ (Hz/bin) \\
+	 \hline
+	 \hline
+	 256 & 5.8 & 512 & 86.1 \\
+	 \hline
+	 1024 & 23.2 & 2048 & 21.5  \\
+	 \hline
+	 4096 & 92.9 & 8192 & 5.4  \\
+	 \hline
+\end{tabular}
+	\caption{STFT window sizes and frequency resolution}
+	\label{table:stftparams}
+\end{table}
+
+Note that the time resolution is getting worse as the window size increases -- consider that within a window of 92.9ms, there may be several musical events occurring, such as transients or onsets, which cannot be separately distinguished, and are blurred together. However, as a tradeoff, the frequency resolution is becoming sharper -- each row of the STFT for a window of 92.9ms represents a frequency increment of 5.4Hz. Visually, we observe the time resolution of the spectrogram becoming blurrier while the frequency resolution gets sharper as the window size increases.
 
 \subsubsection{Time-frequency uncertainty principle}
 
@@ -186,12 +274,8 @@ A characteristic of the standard DFT is that the output frequencies are evenly s
 \subsection{Temporal resolution and transients}
 \label{sec:freqscales}
 
-\subsection{Musical and psychoacoustic frequency scales}
+\subsection{Frequency scales for music}
 \label{sec:freqscales}
-
-\todo[inline]{Musical and psychoacoustic frequency scales}
-
-\todo[inline]{mel, bark power summation/PSD}
 
 \todo[inline]{constant-Q and octave}
 
@@ -247,6 +331,103 @@ Subsequent work by \citet{balazs, jaillet, invertiblecqt} applied formal frame t
 
 In their CQT paper, \citet{klapuricqt} reference the warped DFT from \citet{warpedold1, warpedold2} as an interesting option for a CQT, but ruled it out for lacking a stable inverse transform. Those implementations are in fact similar to those already mentioned \cite{earlywarped1, earlywarped2} in that they use the warped delay line (WDLDFT) implementation, shown previously in figure \ref{fig:wdftsb}. Therefore, \citet{warped2}'s WDFT with the low error IIWDFT inversion scheme may be a better choice as an alternative to the CQT.
 
+Recall equation (1) for the discrete Gabor transform, which used time-shifted copies of identical Gaussian windows as the Gabor atoms for the decomposition:
+\[ g_{m,n} = g(n-\beta m)e^{-j2\pi \alpha n} \]
+
+The parameters $\beta$ and $\alpha$ control the time and frequency resolution of the transform. In the case of the nonstationary Gabor transform with resolution changing over time, the Gabor atoms consist of window functions selected from a set of functions $g_{m}$ using a fixed frequency sampling step $\alpha_{m}$:
+\[ g_{m,n} = g_{m}(n)e^{-j2\pi \alpha_{m} n} \]
+
+\citet{balazs} state that ``this is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{m}$ for each position $\beta_{m}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.'' Moreover, if we set $g_{m}(n) = g(n - \beta m)$ and fix the time and frequency constants $\beta$, $\alpha_{m} = \alpha$, we get back the classic form of the stationary discrete Gabor transform.
+
+Similarly, for the nonstationary Gabor transform with resolution changing over frequency, the Gabor atoms used are selected from a set of functions $h_{n}$ using a fixed time sampling step $\beta_{n}$:
+\[ h_{m,n} = h_{n}(n - \beta_{n}m) \]
+
+\citet{balazs} state that ``in practice we will choose each function $h_{n}$ as a well-localized band-pass function with center frequency $\alpha_{m}$.'' We get back the classic form of the stationary discrete Gabor transform by selecting functions $h_{n}(n) = g(n - \beta_{n} m)e^{-j2\pi \alpha n}$ and fix the time and frequency constants $\alpha$, $\beta_{n} = \beta$.
+
+The time-frequency lattice of the stationary and nonstationary Gabor transforms can be seen in figure \ref{fig:nsgts}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Stationary]{\includegraphics[height=4cm]{./sgt.png}}
+	\hspace{0.35em}
+	\subfloat[Nonstationary in time]{\includegraphics[height=4cm]{./nsgt_time.png}}
+	\hspace{0.35em}
+	\subfloat[Nonstationary in frequency]{\includegraphics[height=4cm]{./nsgt_freq.png}}
+	\caption{Time-frequency lattice of different Gabor transforms}
+	\label{fig:nsgts}
+\end{figure}
+
+To recap, \citet{adaptivecqt} describes the concepts presented so far as follows:
+
+\begin{quote}
+	The definition of multiple Gabor frames, which is comprehensively treated in \cite{doerflerphd}, provides Gabor frames with analysis techniques with multiple resolutions. The nonstationary Gabor frames (see \cite{balazs, jaillet} for their definition and implementation) are a further development; they fully exploit theoretical properties [...], and they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.
+\end{quote}
+
+Several important outcomes of the NSGT were the invertible CQT with a fast FFT-based implementation \cite{invertiblecqt}, and the realtime invertible CQT \cite{rtcqt}. Aside from being available in LTFAT, the official MATLAB Wavelet Toolbox contains perfectly invertible implementations of the CQT and ICQT (inverse CQT) based on the NSGT.\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} These transforms are used extensively throughout this paper, present in every MATLAB algorithm which uses the CQT. In the Python case, the NSGT library is used,\footnote{\url{https://github.com/grrrr/nsgt}} which contains both the invertible and realtime implementations \cite{invertiblecqt, rtcqt}.
+
+Finally, figure \ref{fig:nsgtglock} demonstrates the advantages of the NSGT for a musical signal -- note that the small-window STFT has sharply defined time events but blurry frequency bins, and the inverse case for the large-window STFT. Finally, the NSGT contains sharp time and frequency resolution.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[STFT with 6ms window]{\includegraphics[height=4cm]{./tf_tradeoff_balasz1.png}}
+	\hspace{0.35em}
+	\subfloat[STFT with 93ms window]{\includegraphics[height=4cm]{./tf_tradeoff_balasz2.png}}
+	\hspace{0.35em}
+	\subfloat[NSGT using window evolving between 6--93ms]{\includegraphics[height=4cm]{./tf_tradeoff_balasz3.png}}
+	\caption{Transforms of a glockenspiel signal \cite{balazs}}
+	\label{fig:nsgtglock}
+\end{figure}
+
+Next, let's consider the NSGT-CQT from the MATLAB Wavelet Toolbox function \Verb#cqt#.\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} Various plots of the CQT are shown in figure \ref{fig:glockcqts}. Note that the bins per octave parameter controls the frequency resolution -- more bins per octave gives us a finer frequency discrimination. The Gabor atoms used to create the CQT are not constant like the STFT -- they consist of a set of window functions with different center frequencies and bandwidths to maintain the constant-Q ratio. The bins-per-octave settings shown are 12, 24, and 48, which correspond to a constant-Q ratio of $2^{\frac{1}{\text{bins}}}$, or 1.059, 1.029, and 1.014 respectively. Finally, \citet{jbrown}'s desired constant pattern in the logarithmic scale is shown in the last row of plots.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[CQT spectrogram, 12 bins per octave]{\includegraphics[height=5cm]{./glock_cqt12.png}}
+	\hspace{0.35em}
+	\subfloat[CQT spectrogram, 24 bins per octave]{\includegraphics[height=5cm]{./glock_cqt24.png}}
+	\hspace{0.35em}
+	\subfloat[CQT spectrogram, 48 bins per octave]{\includegraphics[height=5cm]{./glock_cqt48.png}}
+	\vspace{0.1em}
+	\subfloat[Ratio, 12 bins per octave]{\includegraphics[height=4cm]{./glock_cqt12_ratio.png}}
+	\hspace{0.35em}
+	\subfloat[Ratio, 24 bins per octave]{\includegraphics[height=4cm]{./glock_cqt24_ratio.png}}
+	\hspace{0.35em}
+	\subfloat[Ratio, 48 bins per octave]{\includegraphics[height=4cm]{./glock_cqt48_ratio.png}}
+	\vspace{0.1em}
+	\subfloat[Gabor frame at Nyquist frequency, 12 bins per octave]{\includegraphics[height=4.5cm]{./glock_cqt12_gaborframe.png}}
+	\hspace{0.35em}
+	\subfloat[Gabor frame at Nyquist frequency, 24 bins per octave]{\includegraphics[height=4.5cm]{./glock_cqt24_gaborframe.png}}
+	\hspace{0.35em}
+	\subfloat[Gabor frame at Nyquist frequency, 48 bins per octave]{\includegraphics[height=4.5cm]{./glock_cqt48_gaborframe.png}}
+	\vspace{0.1em}
+	\subfloat[Center frequencies, 12 bins per octave]{\includegraphics[height=4.25cm]{./glock_cqt12_cf.png}}
+	\hspace{0.35em}
+	\subfloat[Center frequencies, 24 bins per octave]{\includegraphics[height=4.25cm]{./glock_cqt24_cf.png}}
+	\hspace{0.35em}
+	\subfloat[Center frequencies, 48 bins per octave]{\includegraphics[height=4.25cm]{./glock_cqt48_cf.png}}
+	\caption{CQT plots of glockenspiel signal}
+	\label{fig:glockcqts}
+\end{figure}
+
+The advantage of the CQT over the linear-frequency STFT can be seen by displaying the spectrograms side-by-side, in figure \ref{fig:cqtvstft}. Note that the CQT (regardless of bins per octave) seems to be identifying more frequency components from the glockenspiel signal, even if in the case of less bins per octave, the frequency bins are blurry. The time resolution in the CQTs is also sharp, even with high frequency resolution.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[CQT spectrogram, 12 bins per octave]{\includegraphics[height=5.25cm]{./glock_cqt12.png}}
+	\hspace{0.35em}
+	\subfloat[STFT spectrogram, window size 256]{\includegraphics[height=5.25cm]{./glock_stft256.png}}\\
+	\vspace{0.1em}
+	\subfloat[CQT spectrogram, 24 bins per octave]{\includegraphics[height=5.25cm]{./glock_cqt24.png}}
+	\hspace{0.35em}
+	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[height=5.25cm]{./glock_stft1024.png}}\\
+	\vspace{0.1em}
+	\subfloat[CQT spectrogram, 48 bins per octave]{\includegraphics[height=5.25cm]{./glock_cqt48.png}}
+	\hspace{0.35em}
+	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[height=5.25cm]{./glock_stft4096.png}}
+	\caption{CQT versus STFT}
+	\label{fig:cqtvstft}
+\end{figure}
+
 \subsubsection{Earlier implementations}
 
 \subsubsection{Nonstationary Gabor transform}
@@ -288,35 +469,155 @@ As described by \citet{warpedcomparison} in their paper comparing different warp
 
 \subsection{Deep learning}
 
+\subsection{Machine learning in the waveform domain}
+\label{sec:waveformml}
+
 \vfill
 \clearpage
 
-\section{Music information retrieval}
-\label{sec:mirusecases}
+\section{Audio beat tracking}
+\label{sec:beattrack}
 
-\subsection{Audio beat tracking}
+\subsection{Task definition}
 
-\subsubsection{Task definition}
+\textcite{ellis} formulated the task of beat tracking in music information retrieval as a two-way optimization problem. The algorithm starts with computing onset strengths, $O(t)$, for every time $t$ (discrete samples) in the input signal, also known as the onset strength envelope. Onsets refer to the start of musical notes or events (\cite{onsets}). Autocorrelation (a measure of signal self-similarity) is then applied on the onset strength envelope to find the dominant onset periodicity. Some further perceptual post-processing is done to take into account the natural human bias towards 120bpm. Finally, the most dominant periodicity is chosen as the global tempo estimate for the entire song. An assumption (and limitation) of the algorithm is that there is a single stable tempo throughout the song.
 
-\subsubsection{Use of the STFT}
+\subsection{Use of the STFT}
+
+\subsection{Datasets and evaluation metrics}
+
+Summary of MIREX beat tracking datasets\footfullcite{beatmeta}
+	\begin{enumerate}
+		\item[2006]
+			First appearance of challenge; \textit{the MCK (McKinney) dataset contains 160 30-second audio excerpts created by the MIREX team in 2006. Characterized by stable tempo, wide variety of instrumentations and musical styles. 20\% of the files have non-binary meters.}
+		\item[2009]
+			Second dataset, Chopin Mazurkas; \textit{the MAZ (mazurka) dataset contains piano recordings of 322 Chopin Mazurkas, which include tempo changes.}
+		\item[2012]
+			Third dataset; \textit{the SMC (Sound and Music Computing, University of Porto) dataset consists of 217 excerpts around 40s each, majority is difficult to track (e.g. changes in meter and tempo, bad sound quality, expressive timing). It includes romantic music, film soundtracks, blues, chanson, and solo guitar}
+	\end{enumerate}
+
+The MIREX SMC12 dataset \cite{smcdataset}, using the mir\_eval\footnote{\href{https://github.com/craffel/mir_eval}{https://github.com/craffel/mir\_eval}} library. MIREX 2019 \footnote{\href{https://www.music-ir.org/mirex/wiki/2019:MIREX2019_Results}{https://www.music-ir.org/mirex/wiki/2019:MIREX2019\_Results}} is the most recent year of the audio beat tracking challenge (2020 results are not ready yet).
+
+The summary of MIREX 2019 results on the SMC dataset is:
+
+The 4 measures that will be evaluated (F-measure, Cemgil, Goto, and McKinney P-Score) are the same as those used in MIREX, and are borrowed from the Beat Evaluation Toolbox \footnote{\href{https://code.soundsoftware.ac.uk/projects/beat-evaluation/}{https://code.soundsoftware.ac.uk/projects/beat-evaluation/}}.
+
+An additional 2 measures were added by splitting the F-measure into its constituent precision and recall (simply by copy-pasting the mir\_eval f\_measure function and returning the individual measures). This should help with a more fine-grained analysis of results.
+
+The mir\_beat\_eval.py script (in the `tests/` directory of the repository) loads the SMC dataset (which you can download here \footnote{\href{http://smc.inesctec.pt/research/data-2/}{http://smc.inesctec.pt/research/data-2/}}. The SMC dataset contains wav files and ground-truth annotations.
+
+\subsection{Survey and state-of-the-art}
+
+\subsection{Model under study: DBNBeatTracker}
+
+\textcite{mcfee} state that onset detection is a critical first stage of most beat tracking algorithms. Works by \textcite{goto}, \textcite{ellis}, and \textcite{btrack} are some examples among many of onset-based beat tracking. \textcite{onsets} provide multiple definitions for onsets, but the simplest is that of the beginning of musical events. A typical onset-based beat tracker, as described by \textcite{mcfee}, operates as follows:
+\begin{quote}
+	\vspace{-0.25em}
+	First, the audio signal is processed by an onset strength function, which measures the likelihood that a musically salient change (e.g., note onset) has occurred at each time point. The tracking algorithm then selects the beat times from among the peaks of the onset strength profile
+\end{quote}
+
+\textcite{rnnonset} used a recurrent neural network architecture to achieve state-of-the-art results in onset detection. This was first adapted by \textcite{bock1} to create the ``RNNBeatProcessor,'' so named in the open-source Python madmom library (\cite{madmom}). The network architecture is based on Bi-directional Long Short-Term Memory recurrent neural networks. This network architecture was chosen for the following reasons:
+
+\begin{tight_itemize}
+	\vspace{-0.25em}
+	\item
+		In the most basic form of feed-forward neural network, the relationship of inputs to outputs is strictly causal, i.e., inputs at the current time compute outputs at the current time.
+	\item
+		To introduce using inputs from the past to influence current outputs, which is important in beat tracking, cycles are created in the network, leading to recurrent neural networks. However, these suffer from the vanishing gradient problem, which causes inputs to decay or blow up exponentially over time.
+	\item
+		The Long Short-Term Memory (LSTM) network solves the problem of the vanishing gradient by introducing memory gates within the recurrent unit.
+	\item
+		Finally, to consider inputs from the future in the output, a Bi-directional LSTM (BLSTM) network introduces a second hidden layer which introduces the inputs to the network in a reverse temporal order.
+\end{tight_itemize}
+
+As past, present, and future inputs are all useful in a beat tracking algorithm, the BLSTM network from \textcite{rnnonset} was considered to be an appropriate choice. An additional modification was to introduce a peak picking stage for beat selection.
+
+In their next paper, \textcite{bock3} adapted the RNNBeatProcessor to introduce multiple RNN models, each of which was trained on a different musical style, and added a dynamic Bayesian network in the front-end for the beat estimation. The choice of dynamic Bayesian network was based on prior work by \textcite{whiteley}, which achieved robust results in joint tempo and beat estimation.
+
+In yet another follow-up paper, \textcite{bock2} modified the probabilistic tempo and beat sequence model of \cite{whiteley} to make it more computationally efficient (both in CPU cycles and memory) while maintaining the high accuracy of their solution in \cite{bock3}. The original joint tempo and beat model of \textcite{whiteley} is referred to as the \textit{tempo-bar model}, and it has two main deficiencies which were adjusted:
+
+\begin{tight_enumerate}
+	\vspace{-0.25em}
+	\item
+		The tempo-bar model assumes that human tempo discrimination is consistent across all tempi and use linearly-spaced tempi, while \textcite{bock2} describe that in fact humans have finer tempo resolution at lower tempos. To achieve a tempo spacing consistent with the just-noticeable-difference (JND) limits of human tempo resolution with the linearly-spaced model requires a huge number of tempi, while using a nonlinear spacing of more tempi in the low tempo range and fewer tempi in the high tempo range significantly reduces the total number of possible tempi and matches human perception better.
+	\item
+		The tempo-bar model allows tempo transitions at any possible time, while \textcite{bock2} limit their more efficient model to only allow tempo transitions on beat locations, which is consistent with tempo transitions in music.
+\end{tight_enumerate}
+
+The final algorithm for state-of-the-art beat tracking is therefore presented by \cite{bock2}, incorporating the algorithms from \cite{bock1} and \cite{bock3}, and achieving the best results in the last \textbf{M}usic \textbf{I}nformation \textbf{R}etrieval \textbf{E}valuation e\textbf{X}change audio beat tracking challenge.\footnote{\url{https://www.music-ir.org/mirex/wiki/2019:MIREX2019_Results}}
+
+
+\vfill
+\clearpage
+
+\section{Music source separation}
+\label{sec:musicsep}
+
+\subsection{Task definition}
+
+The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that while music source separation could operate on the level of instruments (e.g., saxophone, piano), for simplicity there are broader and more general categories of sources with similar characteristics that can be separated -- harmonic, percussive, and singing voice.
+
+\subsection{Use of the STFT}
+
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
+
+\begin{wrapfigure}{r}{8cm}
+	\vspace{-1.0em}
+	\includegraphics[width=8cm]{./maskdemo.png}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
+	\label{fig:masks}
+	\vspace{-1.5em}
+\end{wrapfigure}
+
+\citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
+\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
+
+The hard mask used in \cite{driedger} is of the form:
+\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
+
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third component can be extracted. Let's reformulate the hard mask formula in the harmonic/percussive case to present a concrete example:
+\[ M_{\text{harmonic}} = \frac{|\hat{S}_{\text{harmonic}}|}{|\hat{S}_{\text{percussive}}| + \epsilon} > \beta \]
+\[ M_{\text{percussive}} = \frac{|\hat{S}_{\text{percussive}}|}{|\hat{S}_{\text{harmonic}}| + \epsilon} \ge \beta \]
+
+In the median filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
+\[ M_{\text{residual}} = 1 - (M_{\text{harmonic}} + M_{\text{percussive}}) \]
+
+Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
 
 \subsubsection{Datasets and evaluation metrics}
 
-\subsubsection{Survey and state-of-the-art}
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB\footnote{\url{http://bass-db.gforge.inria.fr/peass/}} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
 
-\subsubsection{Model under study: DBNBeatTracker}
+\begin{tight_itemize}
+\item
+	\textbf{Target:} measure of desired sound in the separation. TPS (Target Perceptual Score) in PEASS, ISR (source Image to Spatial distortion Ratio) in BSS, qTarget in PEMO-Q.
+\item
+	\textbf{Interference:} measure of undesired sounds in the separation. IPS (Interference Perceptual Score) in PEASS, SIR (Signal to Interference Ratio) in BSS, qInterf in PEMO-Q.
+\item
+	\textbf{Artifacts:} measure of artifacts in the separation. APS (Artifact Perceptual Score) in PEASS, SAR (Signal to Artifacts Ratio) in SAR, qArtif in PEMO-Q.
+\item
+	\textbf{Global:} a global score for the previous three. In PEASS, this is OPS (Overall Perceptual Score). In BSS, this is SDR (Signal to Distortion Ratio). In PEMO-Q, this is qGlobal.
+\end{tight_itemize}
 
-\subsection{Music source separation}
+\citet{beassvpeass} make the recommendation to use PEASS for music separation evaluation, noting the importance of perception in music applications. They also recommend to evaluate algorithms based on their separate target, interference, and artifact scores, because the global measure of OPS (for PEASS) and SDR (for BSS) have an uncertain relation to the three constituent scores. The choice in this paper is to use the three individual metrics from the PEASS:
+\begin{tight_enumerate}
+	\item
+		\textbf{TPS} (Target Perceptual Score)
+	\item
+		\textbf{APS} (Artifact Perceptual Score)
+	\item
+		\textbf{IPS} (Interference Perceptual Score)
+\end{tight_enumerate}
 
-\subsubsection{Task definition}
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
 
-\subsubsection{Use of the STFT}
+A limited subset of MUSDB18-HQ was evaluated, or 5 total minutes of music, consisting of 4 segments of 15 seconds duration taken from 5 separate tracks. The algorithms are sample rate agnostic, so the sample rate of MUSDB18-HQ is used (44100 Hz). For simplicity, only mono audio is supported in the algorithms, and the conversion from stereo to mono is done in the Python wav segmentation script. One data set was prepared for harmonic/percussive separation evaluation (vocals omitted from the mix), and one data set for harmonic/percussive/vocal evaluation (vocals are present). The evaluation was limited to 5 minutes of music since the PEASS measure is computationally expensive.
 
-\subsubsection{Datasets and evaluation metrics}
+The songs in the MUSDB18-HQ dataset are split into train and test sets. Since the final comparison of this paper will consider a neural network model which was trained on MUSDB18, the evaluation data is taken from the test set -- if we took it from the training set, the neural network could overfit and overperform.
 
-\subsubsection{Survey and state-of-the-art}
+\subsection{Survey and state-of-the-art}
 
-\subsubsection{Model under study: Open-Unmix}
+\subsection{Model under study: Open-Unmix}
 
 \vfill
 \clearpage
@@ -409,9 +710,6 @@ foo
 
 \section{Warped STFT library documentation}
 \label{appendix:wstftdoc}
-
-\section{Machine learning in the waveform domain}
-\label{appendix:waveformml}
 
 \end{appendices}
 
