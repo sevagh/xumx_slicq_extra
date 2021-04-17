@@ -54,9 +54,9 @@
 		\item
 			Hypothesis -- ``simply swap STFT with a more musical transform in your existing neural networks or algorithms and get better results, nothing else required''
 		\item
-			Write a C library for music signal processing, performance-oriented (CPU instructions, etc.). Something related to the FFT, which I'm fascinated with
-		\item
 			Get a publishable result by beating the SOTA in something -- ideally two things! I like ISMIR and more pure-DSP focused e.g. DAFX, IEEE
+		\item
+			Write a C library for music signal processing, performance-oriented (CPU instructions, etc.). Something related to the FFT, which I'm fascinated with
 	\end{enumerate}
 \end{frame}
 
@@ -205,7 +205,40 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Thesis goal 3: cool C library related to FFT}
+	\frametitle{CQT parameters}
+	\textbf{Open question:} which parameters of CQT to test? Commonly 12-96 bins per octave (representing several octaves) are chosen.
+	CQT parameters:
+	\begin{itemize}
+		\item
+			$\text{bins\_per\_octave} \times \text{octaves}$, or $\text{total\_bins}$ -- total number of frequency components output. commonly 12, 24, 48, 84, 96 bins total. can go even higher for very fine frequency resolution
+		\item
+			Scale: octave, mel, bark, ERB (octave is the most relevant to music, and the core of the CQT)
+		\item
+			Min and max frequencies: different papers use different min and max. 80Hz, 20Hz, etc. can use piano min, 27.5
+	\end{itemize}
+	This can be the entire thesis: create a mega-benchmark on SOTA beat tracking + music source sep of different possible parameters of the CQT\\
+	Go very detailed into many possible choices of frequency scales, Q factor, minimum frequency, etc. per application. E.g. for source separation we want instruments to stand out
+\end{frame}
+
+\begin{frame}
+	\frametitle{Tentative end of thesis}
+	Entire thesis focused on the CQT as a drop-in replacement of STFT in two applications:
+	\begin{itemize}
+		\item
+			theory of the CQT, its history, leading up to the modern perfect inversion
+		\item
+			CQT parameters for different applications, frequency min/max, number of bins per octave. compute temporal resolution and frequency resolution of different configurations of CQT
+		\item
+			\textbf{Audio beat tracking} application, giant benchmark with a bunch of different configs of CQT vs. STFT
+		\item
+			\textbf{Music source separation} application, giant benchmark with a bunch of different configs of CQT vs. STFT
+	\end{itemize}
+	\textcolor{ForestGreen}{\textbf{Advantages:}} focused topic. Two strong chances for publication (beating top beat tracking and music source separation techniques). Lots of time to focus on publishing and academia (when in Rome, do as Romans do)\\
+	\textcolor{red}{\textbf{Disadvantage:}} I don't write a cool C library. But then again that's not really the goal of research, right? and I would still be happy having made a contribution of popularizing the CQT
+\end{frame}
+
+\begin{frame}
+	\frametitle{Contd: cool C library related to FFT}
 	Last point of CQT still unaddressed -- computationally expensive\\
 	\vspace{1em}
 	\textbf{but}\\
@@ -216,7 +249,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Thesis goal 3: CQT with warped STFT}
+	\frametitle{Optional thesis goal 3: CQT with warped STFT}
 	Justification for considering warped STFT as a CQT alternative:
 	\begin{itemize}
 		\item
@@ -231,7 +264,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Thesis goal 3: warped-STFT CQT}
+	\frametitle{Optional thesis goal 3: warped-STFT CQT}
 	Describe code optimizations, implementation choices, reconstruction error, interface in C, benchmarking, etc. (get my hands dirty with FFT)\\\ \\
 	Lots of papers but hard to find code in public. No good warped-STFT libraries on GitHub (that I have found yet). If mine is good, open source rep \textcolor{ForestGreen}{\textbf{A+}}\\\ \\
 	\textcolor{red}{\textbf{Difficulties:}}
@@ -246,7 +279,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Thesis goal 3: warped-STFT CQT simplified}
+	\frametitle{Optional thesis goal 3: warped-STFT CQT simplified}
 	Take constant-Q warp mapping of \footcite{cqwarp}. Check if \footcite{betterwarp} is applicable, if so use that. Use this warping in \footcite{makur2008} implementation (for which I have MATLAB source code, so I just need to transliterate it to C)\\
 	Compare above warped-CQT to real NSGT-CQT in terms of:
 	\begin{itemize}
@@ -268,12 +301,11 @@
 		\item
 			Music analysis with the STFT leads to necessary tradeoff of time and frequency resolution (due to theoretical limitations of TF analysis). However, spectrogram/STFT is widely used and ubiquitous
 		\item
-			The CQT better represents some musical properties, and can replace the STFT-spectrogram in-place in many algorithms
+			The CQT better represents some musical properties, and can replace the STFT-spectrogram in-place in many algorithms. Show the many different configurations of CQT (frequency, octave scales, etc.)
 		\item
-			Show the success of the NSGT-based (perfect inversion) CQT in \textbf{audio beat tracking} (SOTA neural network using CQT instead of STFT) and \textbf{music source separation} (improved theoretical maximum performance of spectrogram masking with CQT with BSS)\\
-			\textbf{Open question:} which parameters of CQT to test? Commonly 12-96 bins (representing several octaves) are chosen. 96 bins between 20 and 22050 Hz is close to piano-like. min and max frequency?
+			Show the success of the NSGT-based (perfect inversion) CQT in \textbf{audio beat tracking} (SOTA neural network using CQT instead of STFT) and \textbf{music source separation} (improved theoretical maximum performance of spectrogram masking with CQT with BSS), with a whole bunch of different configurations
 		\item
-			Create an open-source library implementing the warped-frequency STFT-based CQT, with the goal of being computationally faster than the NSGT-based CQT. See how it compares to the STFT and CQT in the above experiments
+			\textbf{OPTIONAL} Create an open-source library implementing the warped-frequency STFT-based CQT, with the goal of being computationally faster than the NSGT-based CQT. See how it compares to the STFT and CQT in the above experiments
 	\end{itemize}
 \end{frame}
 

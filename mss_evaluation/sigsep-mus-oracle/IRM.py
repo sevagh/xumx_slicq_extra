@@ -1,3 +1,4 @@
+import sys
 import musdb
 import museval
 import numpy as np
@@ -88,6 +89,12 @@ if __name__ == '__main__':
         default=2,
         help='exponent for the ratio Mask'
     )
+    parser.add_argument(
+        '--max-tracks',
+        type=int,
+        default=sys.maxsize,
+        help='maximum tracks'
+    )
 
     args = parser.parse_args()
 
@@ -96,5 +103,5 @@ if __name__ == '__main__':
     # initiate musdb
     mus = musdb.DB(subsets='test', is_wav=True)
 
-    for track in mus:
+    for track in mus.tracks[:args.max_tracks]:
         estimates = IRM(track, alpha=alpha, eval_dir=args.eval_dir)
