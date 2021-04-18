@@ -1,0 +1,12 @@
+[submodule "mss_evaluation/vendor/sigsep-mus-oracle"]
+	path = mss_evaluation/vendor/sigsep-mus-oracle
+	url = https://github.com/sigsep/sigsep-mus-oracle
+[submodule "mss_evaluation/vendor/sigsep-mus-db"]
+	path = mss_evaluation/vendor/sigsep-mus-db
+	url = https://github.com/sigsep/sigsep-mus-db
+[submodule "mss_evaluation/vendor/sigsep-mus-eval"]
+	path = mss_evaluation/vendor/sigsep-mus-eval
+	url = https://github.com/sigsep/sigsep-mus-eval
+[submodule "mss_evaluation/vendor/sigsep-mus-2018-analysis"]
+	path = mss_evaluation/vendor/sigsep-mus-2018-analysis
+	url = https://github.com/sigsep/sigsep-mus-2018-analysis

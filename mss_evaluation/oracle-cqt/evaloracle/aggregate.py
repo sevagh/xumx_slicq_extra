@@ -25,7 +25,6 @@ def museval2df(json_path):
         )
         df['track'] = json_path.stem
         df = df.rename(index=str, columns={"name": "target"})
-        print(df)
         return df
 
 
@@ -33,7 +32,6 @@ def aggregate(input_dirs, output_path=None):
     data = []
     for path in input_dirs:
         p = Path(path)
-        print(p.stem)
         if p.exists():
             json_paths = p.glob('**/*.json')
             for json_path in json_paths:
