@@ -1,12 +1,12 @@
 import sys
 import os
 import musdb
+import gc
 import itertools
 import museval
 import numpy as np
 import functools
 import argparse
-import multiprocessing
 from scipy.signal import stft, istft
 
 # use CQT based on nonstationary gabor transform
@@ -14,15 +14,18 @@ from nsgt import CQ_NSGT
 
 
 def stereo_nsgt(audio, nsgt):
+    print(audio.shape)
     X_chan1 = np.asarray(nsgt.forward(audio[:, 0]))
     X_chan2 = np.asarray(nsgt.forward(audio[:, 1]))
     X = np.empty((2, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex)
     X[0, :, :] = X_chan1
     X[1, :, :] = X_chan2
+    print(X.shape)
     return X
 
 
 def stereo_insgt(C, nsgt):
+    print(C.shape)
     C_chan1 = C[0, :, :]
     C_chan2 = C[1, :, :]
     inv1 = nsgt.backward(C_chan1)
@@ -30,11 +33,17 @@ def stereo_insgt(C, nsgt):
     ret_audio = np.empty((2, inv1.shape[0]), dtype=np.float32)
     ret_audio[0, :] = inv1
     ret_audio[1, :] = inv2
+    print(ret_audio.shape)
     return ret_audio.T
 
 
 class TFTransform:
     def __init__(self, ntrack, fs, nfft=2048, use_cqt=False, fmin=27.5, cqt_bins=96):
+        if use_cqt:
+            print(f'using CQT with params: {fmin=}, {cqt_bins=}')
+        else:
+            print(f'using STFT with nfft: {nfft=}')
+
         self.nsgt = None
         self.nfft = nfft
         self.N = ntrack
@@ -53,12 +62,12 @@ class TFTransform:
             return stereo_nsgt(audio, self.cq_nsgt)
 
     def backward(self, X):
-        if not self.nsgt:
+        if not self.cq_nsgt:
             print('backward stft')
             return istft(X)[1].T[:self.N, :]
         else:
             print('backward cq-nsgt')
-            return stereo_insgt(X, self.nsgt)
+            return stereo_insgt(X, self.cq_nsgt)
 
 
 def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft_nperseg=2048, use_cqt=False, fmin=27.5, cqt_bins=96):
@@ -153,7 +162,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--audio_dir',
         nargs='?',
-        help='Folder where audio results are saved'
+        help='Folder where audio results are saved',
+        default=None,
     )
 
     parser.add_argument(
@@ -210,35 +220,18 @@ if __name__ == '__main__':
     # initiate musdb
     mus = musdb.DB(subsets='test', is_wav=True)
 
-
-    if not args.use_cqt:
-        # can use multithreading for stft case
-        pool = multiprocessing.Pool(3)
-        pool.starmap(
-                ideal_mask,
-                zip(
-                    mus.tracks[:max_tracks],
-                    itertools.repeat(args.alpha),
-                    itertools.repeat(args.binary_mask),
-                    itertools.repeat(args.binary_theta),
-                    itertools.repeat(args.eval_dir),
-                    itertools.repeat(args.stft_nperseg),
-                    itertools.repeat(args.use_cqt),
-                    itertools.repeat(args.cqt_fmin),
-                    itertools.repeat(args.cqt_bins),
-                )
+    for track in mus.tracks[:max_tracks]:
+        est = ideal_mask(
+            track,
+            args.alpha,
+            args.binary_mask,
+            args.binary_theta,
+            args.eval_dir,
+            args.stft_nperseg,
+            args.use_cqt,
+            args.cqt_fmin,
+            args.cqt_bins,
         )
-    else:
-        # for the cq-nsgt case, the transform itself is multithreaded
-        for track in mus.tracks[:max_tracks]:
-            ideal_mask(
-                track,
-                args.alpha,
-                args.binary_mask,
-                args.binary_theta,
-                args.eval_dir,
-                args.stft_nperseg,
-                args.use_cqt,
-                args.cqt_fmin,
-                args.cqt_bins,
-            )
+        gc.collect()
+        if args.audio_dir:
+            mus.save_estimates(est, track, args.audio_dir)

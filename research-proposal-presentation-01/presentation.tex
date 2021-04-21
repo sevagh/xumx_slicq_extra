@@ -44,7 +44,7 @@
 	Motivating musical applications based on what I like working on:
 	\begin{enumerate}
 		\item
-			Audio beat tracking
+			Onset detection (probably prefer this to audio beat tracking)
 		\item
 			Music source separation
 	\end{enumerate}
@@ -52,56 +52,43 @@
 	What I want to do:
 	\begin{enumerate}
 		\item
-			Hypothesis -- ``simply swap STFT with a more musical transform in your existing neural networks or algorithms and get better results, nothing else required''
+			Hypothesis -- `` swap STFT with the CQT in existing neural networks for music, and get better results, due to the CQT being better-suited to representing music signals''
 		\item
-			Get a publishable result by beating the SOTA in something -- ideally two things! I like ISMIR and more pure-DSP focused e.g. DAFX, IEEE
+			Get a publishable result by beating the SOTA in something -- ISMIR (too late for 2021), DAFX, IEEE -- or just arXiv first?
 		\item
-			Write a C library for music signal processing, performance-oriented (CPU instructions, etc.). Something related to the FFT, which I'm fascinated with
+			\textbf{optional} Write an open-source library for music signal processing, performance-oriented (CPU instructions, etc.). Something related to the FFT or STFT or spectrogram, which I'm fascinated with
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Judith Brown CQT -- classic paper}
-	Classic paper by \footcite{jbrown}, creating a transform which maintained a constant ratio of frequency to frequency resolution, for the following reasons:
+	Classic paper by \footcite{jbrown}, creating a transform which maintained a constant ratio of frequency to frequency resolution:
 \begin{itemize}
 	\item
-		The harmonics of the fundamental frequency created by musical instruments have a consistent spacing in the logarithmic scale, or the \textit{constant pattern}
-	\item
-		Log-frequency spectra, demonstrating the constant pattern for harmonics, would be more useful in musical tasks than linear-frequency spectra
+		Harmonics of f0 created by musical instruments have a consistent spacing in the log scale (\textit{constant pattern})
 	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Judith Brown CQT -- example}
 	\begin{figure}[ht]
+		\vspace{-0.75em}
 		\centering
-		\subfloat[Linear-frequency DFT]{\includegraphics[height=4cm]{../latex/violindft.png}}
+		\subfloat[Linear-frequency DFT]{\includegraphics[height=3cm]{../latex/violindft.png}}
 		\hspace{0.5em}
-		\subfloat[Constant-Q transform]{\includegraphics[height=4cm]{../latex/violincqt.png}}
+		\subfloat[Constant-Q transform]{\includegraphics[height=3cm]{../latex/violincqt.png}}
 		\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$}
-\end{figure}
-
+	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Klapuri CQT -- frequency resolution}
+	\frametitle{Klapuri CQT}
 	Klapuri's CQT implementation is used in librosa, and up until recently, in MATLAB's CQT. According to \footcite{cqtklapuri}, ``the CQT is well-motivated from both musical and perceptual viewpoints'':
 	\begin{enumerate}
 		\item
-			\textbf{Frequency spacing for music:} Fundamental frequencies (F0s) of the tones in Western music are geometrically spaced: in the standard 12-tone equal temperament, for example, the F0s obey $Fk= 440Hz \times \frac{2k}{12}, k \in [−50, 40], k \text{ is an integer}$ (no ref)
+			\textbf{Frequency spacing for music:} Fundamental frequencies (F0s) of the tones in Western music are geometrically spaced
 		 \item
 			 \textbf{Frequency spacing for human psychoacoustic auditory system:} From auditory perspective, the frequency resolution of the peripheral hearing system of humans is approx constant-Q (cites B. C. J. Moore)
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Klapuri CQT -- temporal resolution}
-	\begin{enumerate}
-		\setcounter{enumi}{3}
+		 \item
+			 \textbf{Sharp transient/temporal resolution:} From perceptual audio coding (cites AAC codec from ISO/IEC), shortest transform window lengths are $\approx$ 3ms to retain high quality, whereas higher frequency resolution is required to carry out coding at low frequencies
 		\item
-			 \textbf{Sharp transient/temporal resolution:} From perceptual audio coding, we know that the shortest transform window lengths have to be of the order 3ms in order to retain high quality, whereas higher frequency resolution is required to carry out coding at low frequencies (cites AAC codec from ISO/IEC)
-		\item
-			All this is in sharp contrast with the conventional discrete Fourier transform (DFT) which has linearly spaced frequency bins and therefore cannot satisfy the varying time and frequency resolution requirements over the wide range of audible frequencies
+			Contrast with the conventional DFT which has linearly spaced frequency bins and cannot satisfy the \textbf{varying tf resolution} requirements over the wide range of audible frequencies
 	\end{enumerate}
 \end{frame}
 
@@ -157,28 +144,26 @@
 	Source separation depends on sparsity of musical sources \footcite{musicsepgood}. Having the octave scale might help distinguish musical instrument sources more strongly (e.g. think back on jbrown's violin diagram)\\
 	Transients are also important in source separation \footcite{transientsep}, and the CQT inherently contains sharp temporal/transient resolution\\
 	\vspace{1em}
-	\textbf{Audio beat tracking}\\
-	Beat tracking largely depends on onsets, and sharper transient resolution and well-defined notes on a musical scale could allow for better distinguishing of both percussive and non-percussive onsets
+	\textbf{Onset detection}\\
+	Beat tracking largely depends on onsets, and sharper transient resolution and well-defined notes on a musical scale could allow for better distinguishing of both percussive and non-percussive onsets. Clear SOTA to beat
 \end{frame}
 
+
 \begin{frame}
-	\frametitle{Thesis goal 1: use CQT in SOTA beat tracker}
-	Discussion with Sebastian B{\"o}ck:
-	\href{https://github.com/CPJKU/madmom/issues/461}{https://github.com/CPJKU/madmom/issues/461}\\\ \\
+	\frametitle{Thesis goal 1: use CQT in SOTA onset detection}
 	Experiment idea (\textcolor{red}{\textbf{UNVALIDATED}}):
 	\begin{enumerate}
 		\item
-			Download SMC beat tracking dataset used in MIREX with ground truth annotations (already done for 621)
+			This paper: \href{https://www.diva-portal.org/smash/get/diva2:1338850/FULLTEXT02}{https://www.diva-portal.org/smash/get/diva2:1338850/FULLTEXT02} tries to recreate B{\"o}ck's state of the art CNN and RNN architectures for onset detection
 		\item
-			Prepare testbench for evaluating beat trackers using MIREX measures (already done for 621)
+			Both architectures use 3 STFTs as input with different window sizes (to vary time-frequency resolution)
 		\item
-			Recreate STFT-based SOTA beat tracker of B{\"o}ck: simplified model for control results, as discussed in GitHub issues. Difficulty: medium-high. Train on SMC train data
+			\textbf{hypothesis} maybe a single CQT has enough time-frequency information as 3 mixed-window STFTs, reducing the network size. maybe the improved transient and clarity of musical notes are beneficial (in fact, they already use log-scale spectrograms (logarithmic = roughly constant-Q) to improve results)
 		\item
-			Modify above to use CQT spectrogram: Difficulty: medium-high
+			First, redo paper recreation (low effort since they documented it very well) -- i.e, get the expected 86\% and 85\% RNN and CNN onset detection F-score with the standard 3 STFT model
 		\item
-			Compare results on MIREX with SMC test set
+			Second, replace with single-CQT (or multi-CQT) architecture and see what happens
 	\end{enumerate}
-	Potential idea: simpler validation first compared to building and training a NN (takes a long time). Maybe take a traditional DSP and hueristics-based algorithm (e.g. BTrack) which uses spectrogram/STFT and see if CQT fits first.
 \end{frame}
 
 \begin{frame}
@@ -195,14 +180,37 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Thesis goal 2: use CQT in SOTA music source separation}
-	Idea: replace STFT with CQT in source separation (\textcolor{ForestGreen}{\textbf{VALIDATED!}}). Without actually working on any single model, we can focus on the top-performing oracle masks, IRM1/2 (ideal ratio mask or soft mask):\\
-	Theoretical best possible performance of source separation is the ideal ratio mask, computed from the individual sources \footcite{irm}, \footcite{sigsep2018}. Oracle masks computed from MUSDB18-HQ using \href{https://github.com/sigsep/sigsep-mus-oracle}{https://github.com/sigsep/sigsep-mus-oracle} + CQT-NSGT\\
-
-	\vspace{1em}
-
-	Promising experiments on my computer showing higher maximum possible BSS scores (in each source) using CQT with 96 frequency bins. Conclusion: ``it's possible to surpass the best possible source separation performance of STFT masking by using CQT masking instead'' -- publishable? 
+	\frametitle{Thesis goal 2: IRM-CQT for music source separation}
+	Idea: replace STFT with CQT in source separation (\textcolor{red}{\textbf{UNVALIDATED!}})\\
+	\vspace{0.5em}
+	Without actually working on any single model, we can focus on the IRM -- (oracle) ideal ratio mask, representing the theoretical  best performance of spectral masking based music source separation algorithms \footcite{irm}, \footcite{sigsep2018}, \footcite{vincent07}\\
+	\vspace{0.5em}
+	Hypothesis: ``is it possible to surpass the best possible music source separation performance based on spectral masking by using CQT masking instead of STFT?''\\
+	\vspace{0.5em}
+	Very bleeding edge research -- today, best waveform based NNs (e.g. demucs) tout that they surpassed the previous SOTA spectrogram-based models (2018-2019) by beating the IRM
 \end{frame}
+
+\begin{frame}
+	\frametitle{STFT window size for source separation}
+	\textcite{tftradeoff1}, \textcite{tftradeoff2} discuss the window size in the STFT for source separation\\
+	Large window = better frequency resolution\\\ \\
+	Small window = better time resolution\\\ \\
+	CQT is the best of both worlds due to its adaptive TF-tiling\\\ \\
+	So, source separation experiments can include:
+	\begin{enumerate}
+		\item
+			Compare IRM1,2 and IBM1,2 (ideal ratio mask, ideal binary mask, 1 = magnitude spectrogram (i.e. $|\hat{S}|^{1}$, 2 = power (i.e. $|\hat{S}|^{2}$) with different window sizes of STFT and different bins-per-octave of CQT
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music source separation -- initial results}
+	Low effort experiment -- it's actually done on my computer already. Results here\\\ \\
+	Tagline of new SOTA end-to-end waveform based models is ``surpassing ideal time-frequency mask'' (which is established using the STFT)\\\ \\
+	Could potentially be a very short (but sweet) proof that the ``ceiling'' of CQT-masking models can go higher than the previous known best time-frequency masking performance\\\  \\
+	Best part is, no need to actually create or train a CQT-based source separation algorithm -- merely show that it has a higher quality ceiling
+\end{frame}
+
 
 \begin{frame}
 	\frametitle{CQT parameters}
@@ -210,13 +218,11 @@
 	CQT parameters:
 	\begin{itemize}
 		\item
-			$\text{bins\_per\_octave} \times \text{octaves}$, or $\text{total\_bins}$ -- total number of frequency components output. commonly 12, 24, 48, 84, 96 bins total. can go even higher for very fine frequency resolution
+			$\text{bins\_per\_octave} \times \text{octaves}$, or $\text{total\_bins}$ -- total number of frequency components output. commonly 12, 24, 48, 84, 96 bins total. can go even higher for very fine frequency resolution -- 120. i haven't seen more than 120 in the wild, though
 		\item
-			Scale: octave, mel, bark, ERB (octave is the most relevant to music, and the core of the CQT)
-		\item
-			Min and max frequencies: different papers use different min and max. 80Hz, 20Hz, etc. can use piano min, 27.5
+			Min: different papers use different min and max. 80Hz, 20Hz, etc. can use piano min, 27.5? or should i experiment with this as well
 	\end{itemize}
-	This can be the entire thesis: create a mega-benchmark on SOTA beat tracking + music source sep of different possible parameters of the CQT\\
+	This can be the entire thesis: create a mega-benchmark on SOTA onset detection + music source sep of different possible parameters of the CQT\\
 	Go very detailed into many possible choices of frequency scales, Q factor, minimum frequency, etc. per application. E.g. for source separation we want instruments to stand out
 \end{frame}
 
@@ -229,12 +235,12 @@
 		\item
 			CQT parameters for different applications, frequency min/max, number of bins per octave. compute temporal resolution and frequency resolution of different configurations of CQT
 		\item
-			\textbf{Audio beat tracking} application, giant benchmark with a bunch of different configs of CQT vs. STFT
+			\textbf{Onset detection} application, giant benchmark with a bunch of different configs of CQT vs. STFT
 		\item
 			\textbf{Music source separation} application, giant benchmark with a bunch of different configs of CQT vs. STFT
 	\end{itemize}
-	\textcolor{ForestGreen}{\textbf{Advantages:}} focused topic. Two strong chances for publication (beating top beat tracking and music source separation techniques). Lots of time to focus on publishing and academia (when in Rome, do as Romans do)\\
-	\textcolor{red}{\textbf{Disadvantage:}} I don't write a cool C library. But then again that's not really the goal of research, right? and I would still be happy having made a contribution of popularizing the CQT
+	\textcolor{ForestGreen}{\textbf{Advantages:}} focused topic. Two strong chances for publication (beating top onset detection and music source separation techniques). Lots of time to focus on publishing and academia (when in Rome, do as Romans do)\\
+	\textcolor{red}{\textbf{Disadvantage:}} it's less code focused. But then again that's not really the goal of research, right? and I would still be happy having made a contribution of popularizing the CQT
 \end{frame}
 
 \begin{frame}
@@ -242,7 +248,7 @@
 	Last point of CQT still unaddressed -- computationally expensive\\
 	\vspace{1em}
 	\textbf{but}\\
-	I don't want to write my own CQT library. Would prefer to use the correct reference implementation by one of the paper \footcite{invertiblecqt}'s coauthors. The hard work in this case is demonstrating improved beat tracking and source separation results (i.e. previous goals 1 and 2), don't want to make it extra hard by needing to write the CQT myself\\
+	I don't want to write my own CQT library. Would prefer to use the correct reference implementation by one of the paper \footcite{invertiblecqt}'s coauthors. The hard work in this case is demonstrating improved onset detection and source separation results (i.e. previous goals 1 and 2), don't want to make it extra hard by needing to write the CQT myself\\
 	\vspace{1em}
 	\textbf{however}\\
 	There is the warped-frequency STFT which can possibly be used to construct a computationally cheaper CQT, built from the FFT + frequency warping operators
@@ -288,10 +294,10 @@
 		\item
 			Resulting frequency bins (since frequency warping is an approximation of the desired constant-Q, not precisely like the NSGT)
 		\item
-			Reconstruction error. Maybe it's fine for analysis but not synthesis (so not good for music sep, but good for beat tracking)
+			Reconstruction error. Maybe it's fine for analysis but not synthesis (so not good for music sep, but good for onset detection)
 	\end{itemize}
 
-	Also, include warped-CQT alongside real CQT in \textbf{audio beat tracking} and \textbf{music source separation} experiments in goals 1 and 2
+	Also, include warped-CQT alongside real CQT in \textbf{onset detection} and \textbf{music source separation} experiments in goals 1 and 2
 \end{frame}
 
 \begin{frame}
@@ -303,7 +309,7 @@
 		\item
 			The CQT better represents some musical properties, and can replace the STFT-spectrogram in-place in many algorithms. Show the many different configurations of CQT (frequency, octave scales, etc.)
 		\item
-			Show the success of the NSGT-based (perfect inversion) CQT in \textbf{audio beat tracking} (SOTA neural network using CQT instead of STFT) and \textbf{music source separation} (improved theoretical maximum performance of spectrogram masking with CQT with BSS), with a whole bunch of different configurations
+			Show the success of the NSGT-based (perfect inversion) CQT in \textbf{onset detection} (SOTA neural network using CQT instead of STFT) and \textbf{music source separation} (improved theoretical maximum performance of spectrogram masking with CQT with BSS), with a whole bunch of different configurations
 		\item
 			\textbf{OPTIONAL} Create an open-source library implementing the warped-frequency STFT-based CQT, with the goal of being computationally faster than the NSGT-based CQT. See how it compares to the STFT and CQT in the above experiments
 	\end{itemize}
