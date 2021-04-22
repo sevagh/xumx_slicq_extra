@@ -8,24 +8,22 @@ import numpy as np
 import functools
 import argparse
 from scipy.signal import stft, istft
+#from memory_profiler import profile
 
 # use CQT based on nonstationary gabor transform
 from nsgt import CQ_NSGT
 
 
 def stereo_nsgt(audio, nsgt):
-    print(audio.shape)
     X_chan1 = np.asarray(nsgt.forward(audio[:, 0]))
     X_chan2 = np.asarray(nsgt.forward(audio[:, 1]))
-    X = np.empty((2, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex)
+    X = np.empty((2, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex128)
     X[0, :, :] = X_chan1
     X[1, :, :] = X_chan2
-    print(X.shape)
     return X
 
 
 def stereo_insgt(C, nsgt):
-    print(C.shape)
     C_chan1 = C[0, :, :]
     C_chan2 = C[1, :, :]
     inv1 = nsgt.backward(C_chan1)
@@ -33,16 +31,15 @@ def stereo_insgt(C, nsgt):
     ret_audio = np.empty((2, inv1.shape[0]), dtype=np.float32)
     ret_audio[0, :] = inv1
     ret_audio[1, :] = inv2
-    print(ret_audio.shape)
     return ret_audio.T
 
 
 class TFTransform:
     def __init__(self, ntrack, fs, nfft=2048, use_cqt=False, fmin=27.5, cqt_bins=96):
-        if use_cqt:
-            print(f'using CQT with params: {fmin=}, {cqt_bins=}')
-        else:
-            print(f'using STFT with nfft: {nfft=}')
+        #if use_cqt:
+        #    print(f'using CQT with params: {fmin=}, {cqt_bins=}')
+        #else:
+        #    print(f'using STFT with nfft: {nfft=}')
 
         self.nsgt = None
         self.nfft = nfft
@@ -55,21 +52,22 @@ class TFTransform:
 
     def forward(self, audio):
         if not self.cq_nsgt:
-            print('forward stft')
+            #print('forward stft')
             return stft(audio.T, nperseg=self.nfft)[-1]
         else:
-            print('forward cq-nsgt')
+            #print('forward cq-nsgt')
             return stereo_nsgt(audio, self.cq_nsgt)
 
     def backward(self, X):
         if not self.cq_nsgt:
-            print('backward stft')
+            #print('backward stft')
             return istft(X)[1].T[:self.N, :]
         else:
-            print('backward cq-nsgt')
+            #print('backward cq-nsgt')
             return stereo_insgt(X, self.cq_nsgt)
 
 
+#@profile
 def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft_nperseg=2048, use_cqt=False, fmin=27.5, cqt_bins=96):
     """
     if theta=None:
@@ -89,13 +87,15 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
     """
 
     # small epsilon to avoid dividing by zero
-    eps = np.finfo(np.float).eps
+    eps = np.finfo(np.float32).eps
 
     # compute STFT of Mixture
     N = track.audio.shape[0]  # remember number of samples for future use
 
     tf = TFTransform(N, track.rate, stft_nperseg, use_cqt, fmin, cqt_bins)
 
+    #print('1. forward transform')
+    print('evaluating track {0}'.format(track))
     X = tf.forward(track.audio)
     (I, F, T) = X.shape
 
@@ -107,6 +107,7 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
         model = eps
 
         for name, source in track.sources.items():
+            #print('2. forward transform for item {0}'.format(name))
             # compute spectrogram of target source:
             # magnitude of STFT to the power alpha
             P[name] = np.abs(tf.forward(source.audio))**alpha
@@ -117,7 +118,7 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
     accompaniment_source = 0
     for name, source in track.sources.items():
         if binary_mask:
-            print('binary/hard mask')
+            #print('binary/hard mask')
             # compute STFT of target source
             Yj = tf.forward(source.audio)
 
@@ -126,12 +127,16 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
             Mask[np.where(Mask >= theta)] = 1
             Mask[np.where(Mask < theta)] = 0
         else:
-            print('ratio/soft mask')
+            #print('ratio/soft mask')
             # compute soft mask as the ratio between source spectrogram and total
             Mask = np.divide(np.abs(P[name]), model)
 
+        #print('3. apply mask {0}'.format(name))
+
         # multiply the mix by the mask
         Yj = np.multiply(X, Mask)
+
+        #print('4. inverse transform {0}'.format(name))
 
         # invert to time domain
         target_estimate = tf.backward(Yj)
@@ -145,12 +150,16 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
 
     estimates['accompaniment'] = accompaniment_source
 
+    print('BSS eval step')
+
     if eval_dir is not None:
         museval.eval_mus_track(
             track,
             estimates,
             output_dir=eval_dir,
         )
+
+    #print('6. done')
 
     return estimates
 

@@ -5,3 +5,5 @@ museval>=0.2.0
 nsgt
 pandas
 seaborn
+line_profiler
+memory_profiler
