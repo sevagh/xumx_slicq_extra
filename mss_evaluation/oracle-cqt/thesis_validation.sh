@@ -1,33 +1,23 @@
 #!/usr/bin/env bash
 
 exp_dir="experiment-04"
-#pybin="/home/sevagh/venvs/thesis/bin/python3"
-kprofbin="/home/sevagh/venvs/museval-optimization-2/bin/kernprof"
+pybin="/home/sevagh/venvs/thesis/bin/python3"
+kprofbin="/home/sevagh/venvs/thesis/bin/kernprof"
+
+rm -rf ${exp_dir}
 
 export MUSDB_MAX_TRACKS=1
 export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
 
-#pybin -m memory_profiler evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
-#pybin evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
-
-#time $pybin evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
-#$kprofbin -l evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
-#$pybin -m line_profiler IRM.py.lprof
+echo "timing and profiling single track sep, bss eval"
 
 # nfft = 2048
-#echo "museval bss original execution time, 1 track of musdb"
-#pybin="/home/sevagh/venvs/museval-orig/bin/python3"
-#echo "pybin: $pybin"
-#time $pybin evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048-orig/
-
-echo "museval bss optimization 2 (cupy on gpu) execution time, 1 track of musdb"
-pybin="/home/sevagh/venvs/museval-optimization-2/bin/python3"
-echo "pybin: $pybin"
-#time $kprofbin -l evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048-opt-2/
-$pybin evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048-opt-2/
+#time $kprofbin -l evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
 #$pybin -m line_profiler IRM.py.lprof
+time $pybin evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
 
 exit 0
+#$pybin evaloracle/IRM.py --alpha=1 --eval_dir ./${exp_dir}/IRM1-STFT2048/
 #$pybin evaloracle/IRM.py --alpha=2 --eval_dir ./${exp_dir}/IRM2-STFT2048/
 #$pybin evaloracle/IRM.py --binary-mask --alpha=1 --eval_dir ./${exp_dir}/IBM1-STFT2048/
 #$pybin evaloracle/IRM.py --binary-mask --alpha=2 --eval_dir ./${exp_dir}/IBM2-STFT2048/

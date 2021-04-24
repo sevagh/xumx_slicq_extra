@@ -94,8 +94,9 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
 
     tf = TFTransform(N, track.rate, stft_nperseg, use_cqt, fmin, cqt_bins)
 
-    #print('1. forward transform')
     print('evaluating track {0}'.format(track))
+
+    print('1. forward transform')
     X = tf.forward(track.audio)
     (I, F, T) = X.shape
 
@@ -106,8 +107,9 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
         # compute model as the sum of spectrograms
         model = eps
 
+        # parallelize this
         for name, source in track.sources.items():
-            #print('2. forward transform for item {0}'.format(name))
+            print('2. forward transform for item {0}'.format(name))
             # compute spectrogram of target source:
             # magnitude of STFT to the power alpha
             P[name] = np.abs(tf.forward(source.audio))**alpha
@@ -131,12 +133,12 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
             # compute soft mask as the ratio between source spectrogram and total
             Mask = np.divide(np.abs(P[name]), model)
 
-        #print('3. apply mask {0}'.format(name))
+        print('3. apply mask {0}'.format(name))
 
         # multiply the mix by the mask
         Yj = np.multiply(X, Mask)
 
-        #print('4. inverse transform {0}'.format(name))
+        print('4. inverse transform {0}'.format(name))
 
         # invert to time domain
         target_estimate = tf.backward(Yj)
@@ -150,7 +152,7 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
 
     estimates['accompaniment'] = accompaniment_source
 
-    print('BSS eval step')
+    print('5. BSS eval step')
 
     if eval_dir is not None:
         museval.eval_mus_track(

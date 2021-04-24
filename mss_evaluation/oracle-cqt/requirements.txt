@@ -1,7 +1,8 @@
 scipy
 numpy
-musdb==0.2.1
-museval>=0.2.0
+musdb
+cupy-cuda112
+git+git://github.com/sevagh/sigsep-mus-eval@feat/cupy-accel#egg=museval
 nsgt
 pandas
 seaborn
