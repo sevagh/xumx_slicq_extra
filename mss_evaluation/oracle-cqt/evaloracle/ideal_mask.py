@@ -7,14 +7,12 @@ import museval
 import numpy as np
 import functools
 import argparse
-from timeit import default_timer as timer
 import cupy
 from cupy.fft.config import get_plan_cache
 import tqdm
 
 import scipy
 from scipy.signal import stft, istft
-#from memory_profiler import profile
 
 # use CQT based on nonstationary gabor transform
 from nsgt import NSGT, OctScale, MelScale, LogScale # BarkScale
@@ -46,7 +44,6 @@ def stereo_insgt(C, nsgt):
 class TFTransform:
     def __init__(self, ntrack, fs, tf_transform):
         use_nsgt = (tf_transform.type == "nsgt")
-        print(f'using TF spectrogram with params: {tf_transform}')
 
         self.nsgt = None
         self.tf_transform = tf_transform
@@ -55,28 +52,25 @@ class TFTransform:
         if use_nsgt:
             scl = None
             if tf_transform.scale == 'octave':
-                # use nyquist as maximum frequency always
                 scl = OctScale(tf_transform.fmin, fs/2, tf_transform.bins)
-                # nsgt has a multichannel=True param which blows memory up. prefer to do it myself
+            elif tf_transform.scale == 'mel':
+                scl = MelScale(tf_transform.fmin, fs/2, tf_transform.bins)
             else:
                 raise ValueError("only 'octave' supported for now")
 
+            # nsgt has a multichannel=True param which blows memory up. prefer to do it myself
             self.nsgt = NSGT(scl, fs, self.N, real=True, matrixform=True)
 
     def forward(self, audio):
         if not self.nsgt:
-            print('stft')
             return stft(audio.T, nperseg=self.tf_transform.window)[-1].astype(np.complex64)
         else:
-            print('nsgt')
             return stereo_nsgt(audio, self.nsgt)
 
     def backward(self, X):
         if not self.nsgt:
-            print('istft')
             return istft(X)[1].T[:self.N, :].astype(np.float32)
         else:
-            print('insgt')
             return stereo_insgt(X, self.nsgt)
 
 
@@ -101,9 +95,6 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
     # small epsilon to avoid dividing by zero
     eps = np.finfo(np.float32).eps
 
-    print('evaluating track {0}'.format(track))
-
-    print('1. forward transform')
     X = tf.forward(track.audio)
 
     (I, F, T) = X.shape
@@ -119,7 +110,6 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
         for name, source in track.sources.items():
             # compute spectrogram of target source:
             # magnitude of STFT to the power alpha
-            print('2. forward transform for item {0}'.format(name))
             P[name] = np.abs(tf.forward(source.audio))**alpha
             model += P[name]
 
@@ -139,13 +129,8 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
             # compute soft mask as the ratio between source spectrogram and total
             Mask = np.divide(np.abs(P[name]), model)
 
-        print('3. apply mask {0}'.format(name))
-
         # multiply the mix by the mask
-        print(f'\tmask and transform dim: {Mask.shape}, {X.shape}')
         Yj = np.multiply(X, Mask)
-
-        print('4. inverse transform {0}'.format(name))
 
         # invert to time domain
         target_estimate = tf.backward(Yj)
@@ -158,34 +143,26 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
             accompaniment_source += target_estimate
 
     estimates['accompaniment'] = accompaniment_source
-    for ename, e_val in estimates.items():
-        print(f'{ename} {e_val.dtype}')
 
     gc.collect()
     mempool = cupy.get_default_memory_pool()
-    print('mempool pre-free: {0}'.format(mempool.used_bytes()))
 
     # cupy disable fft caching to free blocks
     fft_cache = get_plan_cache()
     fft_cache.set_size(0)
 
     mempool.free_all_blocks()
-    print('mempool post-free: {0}'.format(mempool.used_bytes()))
 
     # cupy reenable fft caching
     fft_cache.set_size(16)
     fft_cache.set_memsize(-1)
 
-    print('5. BSS eval step')
-    start = timer()
     if eval_dir is not None:
         museval.eval_mus_track(
             track,
             estimates,
             output_dir=eval_dir,
         )
-    end = timer()
-    print(f'6. done {end-start}')
 
     return estimates
 
@@ -227,29 +204,36 @@ if __name__ == '__main__':
             tf_transform = SimpleNamespace(**config)
             tfs.append(tf_transform)
 
-    mss_evaluations = itertools.product(mus.tracks[:max_tracks], tfs)
+    masks = [
+            {'power': 1, 'binary': False},
+            {'power': 2, 'binary': False},
+            {'power': 1, 'binary': True},
+            {'power': 2, 'binary': True},
+    ]
 
-    masks = {
-            'irm1': (1, False),
-            'irm2': (2, False),
-            'ibm1': (1, True),
-            'ibm2': (2, True),
-    }
+    mss_evaluations = list(itertools.product(mus.tracks[:max_tracks], tfs, masks))
 
-    for (track, tf_transform) in tqdm.tqdm(mss_evaluations):
+    for (track, tf_transform, mask) in tqdm.tqdm(mss_evaluations):
         N = track.audio.shape[0]  # remember number of samples for future use
         tf = TFTransform(N, track.rate, tf_transform)
 
-        for mask_name, mask_params in masks.items():
-            est = ideal_mask(
-                track,
-                tf,
-                mask_params[0],
-                mask_params[1],
-                0.5,
-                os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
+        # construct mask name e.g. irm1, ibm2
+        mask_name = 'i'
+        if mask['binary']:
+            mask_name += 'b'
+        else:
+            mask_name += 'r'
+        mask_name += f"m{str(mask['power'])}"
 
-            gc.collect()
+        est = ideal_mask(
+            track,
+            tf,
+            mask['power'],
+            mask['binary'],
+            0.5,
+            os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
 
-            if args.audio_dir:
-                mus.save_estimates(est, track, os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
+        gc.collect()
+
+        if args.audio_dir:
+            mus.save_estimates(est, track, os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
