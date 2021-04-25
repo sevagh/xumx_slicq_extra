@@ -1,0 +1,14 @@
+[
+  {
+    "type": "stft",
+    "name": "stft2048",
+    "window": 2048
+  },
+  {
+    "type": "nsgt",
+    "name": "nsgt_cq_96_27.5",
+    "scale": "octave",
+    "bins": 96,
+    "fmin": 27.5
+  }
+]

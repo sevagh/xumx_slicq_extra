@@ -7,17 +7,26 @@ import museval
 import numpy as np
 import functools
 import argparse
+from timeit import default_timer as timer
+import cupy
+from cupy.fft.config import get_plan_cache
+import tqdm
+
+import scipy
 from scipy.signal import stft, istft
 #from memory_profiler import profile
 
 # use CQT based on nonstationary gabor transform
-from nsgt import CQ_NSGT
+from nsgt import NSGT, OctScale, MelScale, LogScale # BarkScale
+
+import json
+from types import SimpleNamespace
 
 
 def stereo_nsgt(audio, nsgt):
     X_chan1 = np.asarray(nsgt.forward(audio[:, 0]))
     X_chan2 = np.asarray(nsgt.forward(audio[:, 1]))
-    X = np.empty((2, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex128)
+    X = np.empty((2, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex64)
     X[0, :, :] = X_chan1
     X[1, :, :] = X_chan2
     return X
@@ -35,40 +44,43 @@ def stereo_insgt(C, nsgt):
 
 
 class TFTransform:
-    def __init__(self, ntrack, fs, nfft=2048, use_cqt=False, fmin=27.5, cqt_bins=96):
-        #if use_cqt:
-        #    print(f'using CQT with params: {fmin=}, {cqt_bins=}')
-        #else:
-        #    print(f'using STFT with nfft: {nfft=}')
+    def __init__(self, ntrack, fs, tf_transform):
+        use_nsgt = (tf_transform.type == "nsgt")
+        print(f'using TF spectrogram with params: {tf_transform}')
 
         self.nsgt = None
-        self.nfft = nfft
+        self.tf_transform = tf_transform
         self.N = ntrack
-        self.cq_nsgt = None
-        if use_cqt:
-            # use nyquist as maximum frequency always
-            # nsgt has a multichannel=True param which blows memory up. prefer to do it myself
-            self.cq_nsgt = CQ_NSGT(fmin, fs/2, cqt_bins, fs, self.N, matrixform=True, multithreading=True)
+        self.nsgt = None
+        if use_nsgt:
+            scl = None
+            if tf_transform.scale == 'octave':
+                # use nyquist as maximum frequency always
+                scl = OctScale(tf_transform.fmin, fs/2, tf_transform.bins)
+                # nsgt has a multichannel=True param which blows memory up. prefer to do it myself
+            else:
+                raise ValueError("only 'octave' supported for now")
+
+            self.nsgt = NSGT(scl, fs, self.N, real=True, matrixform=True)
 
     def forward(self, audio):
-        if not self.cq_nsgt:
-            #print('forward stft')
-            return stft(audio.T, nperseg=self.nfft)[-1]
+        if not self.nsgt:
+            print('stft')
+            return stft(audio.T, nperseg=self.tf_transform.window)[-1].astype(np.complex64)
         else:
-            #print('forward cq-nsgt')
-            return stereo_nsgt(audio, self.cq_nsgt)
+            print('nsgt')
+            return stereo_nsgt(audio, self.nsgt)
 
     def backward(self, X):
-        if not self.cq_nsgt:
-            #print('backward stft')
-            return istft(X)[1].T[:self.N, :]
+        if not self.nsgt:
+            print('istft')
+            return istft(X)[1].T[:self.N, :].astype(np.float32)
         else:
-            #print('backward cq-nsgt')
-            return stereo_insgt(X, self.cq_nsgt)
+            print('insgt')
+            return stereo_insgt(X, self.nsgt)
 
 
-#@profile
-def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft_nperseg=2048, use_cqt=False, fmin=27.5, cqt_bins=96):
+def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
     """
     if theta=None:
         Ideal Ratio Mask:
@@ -89,15 +101,11 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
     # small epsilon to avoid dividing by zero
     eps = np.finfo(np.float32).eps
 
-    # compute STFT of Mixture
-    N = track.audio.shape[0]  # remember number of samples for future use
-
-    tf = TFTransform(N, track.rate, stft_nperseg, use_cqt, fmin, cqt_bins)
-
     print('evaluating track {0}'.format(track))
 
     print('1. forward transform')
     X = tf.forward(track.audio)
+
     (I, F, T) = X.shape
 
     # soft mask stuff
@@ -109,9 +117,9 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
 
         # parallelize this
         for name, source in track.sources.items():
-            print('2. forward transform for item {0}'.format(name))
             # compute spectrogram of target source:
             # magnitude of STFT to the power alpha
+            print('2. forward transform for item {0}'.format(name))
             P[name] = np.abs(tf.forward(source.audio))**alpha
             model += P[name]
 
@@ -120,7 +128,6 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
     accompaniment_source = 0
     for name, source in track.sources.items():
         if binary_mask:
-            #print('binary/hard mask')
             # compute STFT of target source
             Yj = tf.forward(source.audio)
 
@@ -129,13 +136,13 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
             Mask[np.where(Mask >= theta)] = 1
             Mask[np.where(Mask < theta)] = 0
         else:
-            #print('ratio/soft mask')
             # compute soft mask as the ratio between source spectrogram and total
             Mask = np.divide(np.abs(P[name]), model)
 
         print('3. apply mask {0}'.format(name))
 
         # multiply the mix by the mask
+        print(f'\tmask and transform dim: {Mask.shape}, {X.shape}')
         Yj = np.multiply(X, Mask)
 
         print('4. inverse transform {0}'.format(name))
@@ -151,17 +158,34 @@ def ideal_mask(track, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, stft
             accompaniment_source += target_estimate
 
     estimates['accompaniment'] = accompaniment_source
+    for ename, e_val in estimates.items():
+        print(f'{ename} {e_val.dtype}')
+
+    gc.collect()
+    mempool = cupy.get_default_memory_pool()
+    print('mempool pre-free: {0}'.format(mempool.used_bytes()))
+
+    # cupy disable fft caching to free blocks
+    fft_cache = get_plan_cache()
+    fft_cache.set_size(0)
+
+    mempool.free_all_blocks()
+    print('mempool post-free: {0}'.format(mempool.used_bytes()))
+
+    # cupy reenable fft caching
+    fft_cache.set_size(16)
+    fft_cache.set_memsize(-1)
 
     print('5. BSS eval step')
-
+    start = timer()
     if eval_dir is not None:
         museval.eval_mus_track(
             track,
             estimates,
             output_dir=eval_dir,
         )
-
-    #print('6. done')
+    end = timer()
+    print(f'6. done {end-start}')
 
     return estimates
 
@@ -182,46 +206,9 @@ if __name__ == '__main__':
         nargs='?',
         help='Folder where evaluation results are saved'
     )
-
     parser.add_argument(
-        '--alpha',
-        type=int,
-        default=2,
-        help='exponent for the ratio Mask'
-    )
-    parser.add_argument(
-        '--use-cqt',
-        action='store_true',
-        help='use NSGT-CQT instead of STFT'
-    )
-    parser.add_argument(
-        '--binary-mask',
-        action='store_true',
-        help='use binary mask instead of soft'
-    )
-    parser.add_argument(
-        '--binary-theta',
-        type=float,
-        default=0.5,
-        help='theta/separation factor for binary mask',
-    )
-    parser.add_argument(
-        '--stft-nperseg',
-        default=2048,
-        type=int,
-        help='stft nperseg'
-    )
-    parser.add_argument(
-        '--cqt-fmin',
-        default=27.5,
-        type=float,
-        help='NSGT-CQT minimum frequency'
-    )
-    parser.add_argument(
-        '--cqt-bins',
-        default=96,
-        type=int,
-        help='NSGT-CQT total bins'
+        'config_file',
+        help='json file with time-frequency (stft, cqt) evaluation configs',
     )
 
     args = parser.parse_args()
@@ -231,18 +218,38 @@ if __name__ == '__main__':
     # initiate musdb
     mus = musdb.DB(subsets='test', is_wav=True)
 
-    for track in mus.tracks[:max_tracks]:
-        est = ideal_mask(
-            track,
-            args.alpha,
-            args.binary_mask,
-            args.binary_theta,
-            args.eval_dir,
-            args.stft_nperseg,
-            args.use_cqt,
-            args.cqt_fmin,
-            args.cqt_bins,
-        )
-        gc.collect()
-        if args.audio_dir:
-            mus.save_estimates(est, track, args.audio_dir)
+    # accumulate all time-frequency configs to compare
+    tfs = []
+
+    with open(args.config_file) as jf:
+        configs = json.load(jf)
+        for config in configs:
+            tf_transform = SimpleNamespace(**config)
+            tfs.append(tf_transform)
+
+    mss_evaluations = itertools.product(mus.tracks[:max_tracks], tfs)
+
+    masks = {
+            'irm1': (1, False),
+            'irm2': (2, False),
+            'ibm1': (1, True),
+            'ibm2': (2, True),
+    }
+
+    for (track, tf_transform) in tqdm.tqdm(mss_evaluations):
+        N = track.audio.shape[0]  # remember number of samples for future use
+        tf = TFTransform(N, track.rate, tf_transform)
+
+        for mask_name, mask_params in masks.items():
+            est = ideal_mask(
+                track,
+                tf,
+                mask_params[0],
+                mask_params[1],
+                0.5,
+                os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
+
+            gc.collect()
+
+            if args.audio_dir:
+                mus.save_estimates(est, track, os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
