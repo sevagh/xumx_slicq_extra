@@ -17,6 +17,7 @@
     style=numeric,
     sorting=none,
     style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
 ]{biblatex}
 \addbibresource{citations.bib}
 \usepackage{pgfpages}
@@ -27,11 +28,28 @@
 %\setbeameroption{show notes on second screen=right}
 \setbeameroption{hide notes}
 
-\title{NSGT for music applications}
+\title{Better spectrograms for onset detection and music source separation}
 \subtitle{MA Thesis research proposal}
 \author{Sevag Hanssian}
 \institute{DDMAL, McGill}
 \setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearfield{booktitle}%
+}
 
 \begin{document}
 
@@ -52,9 +70,9 @@
 	What I want to do:
 	\begin{enumerate}
 		\item
-			Hypothesis -- ``swap STFT with the CQT in music source separation and onset detection, and get better results''
+			Hypothesis -- ``swap STFT with the CQT in music source separation and onset detection, and get better results''. In other words spectrogram stays spectrogram but the implementation detail of the spectrogram is different.
 		\item
-			Why NSGT? invertible, rectangular time-frequency matrix, which can be used to create a spectrogram, perfectly invertible, with arbitrary frequency scales. Can have a mel NSGT (for speech), or octave scale (aka CQT) for music
+			Why CQ-NSGT? perfectly invertible, rectangular time-frequency matrix, which can be used to create a spectrogram, with arbitrary frequency scales. Can use arbitrary frequency bands for the constant-Q factor, e.g. mel/bark/octave/log
 		\item
 			Get a publishable result by beating the SOTA in something -- ISMIR (too late for 2021), DAFX, IEEE -- or just arXiv first?
 	\end{enumerate}
@@ -158,15 +176,15 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Chapter 2 -- the CQT and NSGT}
-	History of CQT (jbrown, klapuri, nsgt). NSGT and how the CQT can be written as the NSGT with octave frequency scale (and how we can also use log/mel/bark/etc. arbitrary frequency scales in the general NSGT)\\\ \\
+	\frametitle{Chapter 2 -- the CQT and NSGT for varying time-frequency analysis}
+	History of CQT (jbrown, klapuri, nsgt). NSGT and how the CQT can be written as the NSGT with octave (and log/mel/bark) frequency scales\\\ \\
 	Relation to the STFT -- time axis, frequency axis, coefficient values. Dimensionality -- e.g. $N \times M$  STFT matrix $\rightarrow$ $? \times ?$ CQT matrix. Computation: describe how many FFTs are applied, how many windows/filterbank\\\ \\
 	Time-frequency properties, quantified -- e.g. ``with a 24-bin CQT, it has 1.3ms transient resolution in the frequency range f1-f2'' Relate this to music, e.g. ``percussion is known to have an attack time of 1.3ms'' or how a wide frequency range is necessary for bass guitar analysis\\
 Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bins-per-octave, or total bins. 12, 24, 48, 84, 96 are common -- can go ultra-high e.g. 120, 132, 144. compare to known pitch scales or music instrument frequencies
 \end{frame}
 
 \begin{frame}
-	\frametitle{Chapter 3 -- onset detection}
+	\frametitle{Chapter 3 -- CQT for onset detection}
 	Experiment idea (\textcolor{red}{\textbf{UNVALIDATED}}):
 	\begin{enumerate}
 		\item
@@ -183,14 +201,14 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 \end{frame}
 
 \begin{frame}
-	\frametitle{Chapter 4: CQT for music source separation}
+	\frametitle{Chapter 4 -- CQT for music source separation}
 	Idea: replace STFT with CQT in source separation\\
 	\vspace{0.5em}
 	Without actually working on any single model, we can focus on the IRM -- (oracle) ideal ratio mask, representing the theoretical  best performance of spectral masking based music source separation algorithms \footcite{irm}, \footcite{sigsep2018}, \footcite{vincent07}\\
 	\vspace{0.5em}
 	Hypothesis: ``is it possible to surpass the best possible music source separation performance based on spectral masking by using CQT masking instead of STFT?''\\
 	\vspace{0.5em}
-	Bleeding edge -- today, best waveform based NNs (e.g. demucs) tout that they surpassed the previous SOTA spectrogram-based models (2018-2019) by beating the IRM. Tagline of new SOTA end-to-end waveform based models is ``surpassing ideal time-frequency mask'' (which is established using the STFT). Could potentially be short but sweet result for the CQT without writing a whole separation algorithm
+	Bleeding edge -- today, best waveform based NNs (e.g. demucs) tout that they surpassed the previous SOTA spectrogram-based models (2018-2019) by beating the IRM. Tagline of new SOTA end-to-end waveform based models is ``surpassing ideal time-frequency mask''
 \end{frame}
 
 \begin{frame}
@@ -208,14 +226,64 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 
 \begin{frame}
 	\frametitle{Music source separation -- work done so far}
-	Low effort experiment -- it's actually done on my computer already. Results here\\\ \\
+	\begin{itemize}
+		\item
+			Forked bss eval + nsgt and modified both to use GPU (with CUDA/cupy) to speed up evaluation time (for a single track) from 3.5 minutes down to 1 -- allows for a much bigger testbench
+		\item
+			Based on sisec's evaluation + boxplot code from the SiSec 2018 paper, e.g.:\\
+			\includegraphics[height=3.5cm]{./irm_boxplot_example.png}
+		\item
+			Plan: compute IRM,IBM\{1,2\} for STFT 2048 (default) (should I mix window sizes here?) followed by various CQT configurations. Take median scores to see how they across bins, frequency scale, fmin -- each parameter. mel, 12 bins -- 144 bins, etc.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{contd}
+	custom json format for defining testcases:
+	\begin{Verbatim}[fontsize=\tiny]
+	  {
+	    "type": "stft",
+	    "name": "stft2048",
+	    "window": 2048
+	  },
+	  {
+	    "type": "nsgt",
+	    "name": "cq-96-27.5",
+	    "scale": "octave",
+	    "bins": 96,
+	    "fmin": 27.5
+	  },
+	  {
+	    "type": "nsgt",
+	    "name": "mel-120-20",
+	    "scale": "mel",
+	    "bins": 120,
+	    "fmin": 20
+	  }
+	\end{Verbatim}
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{optional} Chapter 5: warped-frequency STFT}
-	Last point of CQT still unaddressed -- computationally expensive\\
-	\vspace{1em}
-	There is the warped-frequency STFT which can possibly be used to construct a computationally cheaper CQT, built from the FFT + frequency warping operators. Justification for considering warped STFT as a CQT alternative:
+	\frametitle{Chapter 5 -- results, discussion, conclusion}
+	tl;dr thesis:
+	\begin{itemize}
+		\item
+			\textbf{Chapter 1:} Music analysis with the STFT leads to necessary tradeoff of time and frequency resolution (due to theoretical limitations of TF analysis). However, spectrogram/STFT is widely used and ubiquitous
+		\item
+			\textbf{Chapter 2:} the CQT better represents some musical properties, and can replace the STFT-spectrogram in-place in many algorithms. many configurations of CQ-NSGT (freq range, octave scales, etc.)
+		\item
+			\textbf{Chapter 3:} Show the success of the NSGT-based (perfect inversion) CQT in SOTA neural network for \textbf{onset detection}
+		\item
+			\textbf{Chapter 4:} verify whether we can surpass the theoretical maximum performance/IRM of spectrogram-based source separation with the CQT, with a whole bunch of different configurations
+		\item
+			\textbf{Chapter 5:} discuss and conclude
+	\end{itemize}
+	\textcolor{red}{\textbf{is this enough to constitute a thesis?}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\textbf{optional chapter}: warped-frequency STFT}
+	Last point of CQT still unaddressed -- computationally expensive. Alternative: warped-frequency STFT based on nonuniform FFT to construct computationally cheaper transforms with arbitrary (mel, bark, constant-q/octave) frequency scales, built from the FFT + frequency warping operators (nonuniform FFT):
 	\begin{itemize}
 		\item
 			Sharp transient resolution + nonlinear frequency resolution \footcite{warpwabnik}
@@ -229,22 +297,8 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 \end{frame}
 
 \begin{frame}
-	\frametitle{Warped-STFT CQT}
-	Lots of papers but hard to find code in public. No good warped-STFT libraries on GitHub (that I have found yet). If mine is good, open source rep \textcolor{ForestGreen}{\textbf{A+}}\\\ \\
-	\textcolor{red}{\textbf{Difficulties:}}
-	\begin{itemize}
-		\item
-			Confusing theoretical background: non-invertible formulations using warped delay lines by Karjalainen and Harma, old style
-		\item
-			Different version by Mitra, Makur based on a generalization of the nonuniform FFT (which is a complicated topic in itself) using allpass warp chains, with inversions
-		\item
-			A different lineage of warped FFT based on Gabor frames (same foundational theory behind the perfect-inversion CQT) -- but too much math for my comfort
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
 	\frametitle{Warped-STFT CQT simplified}
-	Take constant-Q warp mapping of \footcite{cqwarp}. Check if \footcite{betterwarp} is applicable, if so use that. Use this warping in \footcite{makur2008} implementation (for which I have MATLAB source code, so I just need to transliterate it to C)\\
+	Take constant-Q warp mapping of \footcite{cqwarp}. Check if \footcite{betterwarp} is applicable, if so use that. Use this warping in \footcite{makur2008} implementation (for which I have MATLAB source code, so I just need to transliterate it to C + Python). 
 	Compare above warped-CQT to real NSGT-CQT in terms of:
 	\begin{itemize}
 		\item
@@ -253,24 +307,10 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 			Resulting frequency bins (since frequency warping is an approximation of the desired constant-Q, not precisely like the NSGT)
 		\item
 			Reconstruction error. Maybe it's fine for analysis but not synthesis (so not good for music sep, but good for onset detection)
+		\item
+			Frequency scales -- similar params (bins = number of filterbank, modifying the warp coefficient = approximations of mel, bark, octave, and other f scales)
 	\end{itemize}
-
-	Also, include warped-CQT alongside real CQT in \textbf{onset detection} and \textbf{music source separation} experiments in goals 1 and 2
-\end{frame}
-
-\begin{frame}
-	\frametitle{tl;dr}
-	Sevag's thesis:
-	\begin{itemize}
-		\item
-			Music analysis with the STFT leads to necessary tradeoff of time and frequency resolution (due to theoretical limitations of TF analysis). However, spectrogram/STFT is widely used and ubiquitous
-		\item
-			The CQT better represents some musical properties, and can replace the STFT-spectrogram in-place in many algorithms. Show the many different configurations of CQT (frequency, octave scales, etc.)
-		\item
-			Show the success of the NSGT-based (perfect inversion) CQT in \textbf{onset detection} (SOTA neural network using CQT instead of STFT) and \textbf{music source separation} (improved theoretical maximum performance of spectrogram masking with CQT with BSS), with a whole bunch of different configurations
-		\item
-			\textbf{OPTIONAL} Create an open-source library implementing the warped-frequency STFT-based CQT, with the goal of being computationally faster than the NSGT-based CQT. See how it compares to the STFT and CQT in the above experiments
-	\end{itemize}
+	Might be the first warped-STFT library on GitHub (I have looked)
 \end{frame}
 
 \end{document}

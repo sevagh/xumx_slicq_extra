@@ -3,7 +3,7 @@
 exp_dir="experiment-04"
 pybin="/home/sevagh/venvs/thesis/bin/python3"
 
-#export MUSDB_MAX_TRACKS=1
+export MUSDB_MAX_TRACKS=1
 export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
 
 $pybin evaloracle/ideal_mask.py --eval_dir ./${exp_dir}/ ./config.json

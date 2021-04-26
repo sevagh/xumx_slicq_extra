@@ -6,14 +6,14 @@
   },
   {
     "type": "nsgt",
-    "name": "nsgt-cq-96-27.5",
+    "name": "cq-96-27.5",
     "scale": "octave",
     "bins": 96,
     "fmin": 27.5
   },
   {
     "type": "nsgt",
-    "name": "nsgt-mel-96-27.5",
+    "name": "mel-120-20",
     "scale": "mel",
     "bins": 120,
     "fmin": 20
