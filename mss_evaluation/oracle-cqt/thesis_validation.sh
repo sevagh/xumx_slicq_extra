@@ -6,18 +6,18 @@ pybin="/home/sevagh/venvs/thesis/bin/python3"
 #export MUSDB_TRACK_OFFSET=15
 export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
 
-$pybin evaloracle/ideal_mask.py --mono --eval_dir results-octave ./config_octave.json
-$pybin evaloracle/aggregate.py ./results-octave/* --out=results-octave/data.pandas
-$pybin evaloracle/boxplot.py ./results-octave/data.pandas ./results-octave/boxplot.pdf
+$pybin oracle_eval/ideal_mask.py --mono --eval_dir exp-octave ./config_octave.json
+$pybin oracle_eval/aggregate.py ./exp-octave/* --out=exp-octave/data.pandas
+$pybin oracle_eval/boxplot.py ./exp-octave/data.pandas ./exp-octave/boxplot.pdf
 
-$pybin evaloracle/ideal_mask.py --mono --eval_dir results-mel ./config_mel.json
-$pybin evaloracle/aggregate.py ./results-mel/* --out=results-mel/data.pandas
-$pybin evaloracle/boxplot.py ./results-mel/data.pandas ./results-mel/boxplot.pdf
+$pybin oracle_eval/ideal_mask.py --mono --eval_dir exp-mel ./config_mel.json
+$pybin oracle_eval/aggregate.py ./exp-mel/* --out=exp-mel/data.pandas
+$pybin oracle_eval/boxplot.py ./exp-mel/data.pandas ./exp-mel/boxplot.pdf
 
-$pybin evaloracle/ideal_mask.py --mono --eval_dir results-bark ./config_bark.json
-$pybin evaloracle/aggregate.py ./results-bark/* --out=results-bark/data.pandas
-$pybin evaloracle/boxplot.py ./results-bark/data.pandas ./results-bark/boxplot.pdf
+$pybin oracle_eval/ideal_mask.py --mono --eval_dir exp-bark ./config_bark.json
+$pybin oracle_eval/aggregate.py ./exp-bark/* --out=exp-bark/data.pandas
+$pybin oracle_eval/boxplot.py ./exp-bark/data.pandas ./exp-bark/boxplot.pdf
 
-$pybin evaloracle/ideal_mask.py --mono --eval_dir results-log ./config_log.json
-$pybin evaloracle/aggregate.py ./results-log/* --out=results-log/data.pandas
-$pybin evaloracle/boxplot.py ./results-log/data.pandas ./results-log/boxplot.pdf
+$pybin oracle_eval/ideal_mask.py --mono --eval_dir exp-log ./config_log.json
+$pybin oracle_eval/aggregate.py ./exp-log/* --out=exp-log/data.pandas
+$pybin oracle_eval/boxplot.py ./exp-log/data.pandas ./exp-log/boxplot.pdf
