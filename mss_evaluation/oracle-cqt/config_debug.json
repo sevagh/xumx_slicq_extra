@@ -1,6 +1,6 @@
 {
   "stft_configs": {
-    "window_sizes": [2048]
+    "window_sizes": []
   },
   "nsgt_configs": {
     "bins": [168],

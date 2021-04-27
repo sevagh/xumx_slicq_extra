@@ -26,10 +26,10 @@ mempool = cupy.get_default_memory_pool()
 
 def multichan_nsgt(audio, nsgt):
     n_chan = audio.shape[1]
-    X = np.empty((n_chan, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex64)
+    Xs = []
     for i in range(n_chan):
-        X[i, :, :] = np.asarray(nsgt.forward(audio[:, i]))
-    return X
+        Xs.append(np.asarray(nsgt.forward(audio[:, i])))
+    return np.asarray(Xs).astype(np.complex64)
 
 
 def multichan_insgt(C, nsgt):
@@ -39,7 +39,6 @@ def multichan_insgt(C, nsgt):
         C_chan = C[i, :, :]
         inv = nsgt.backward(C_chan)
         rets.append(inv)
-
     ret_audio = np.asarray(rets)
     return ret_audio.T
 
@@ -193,6 +192,11 @@ if __name__ == '__main__':
         'config_file',
         help='json file with time-frequency (stft, cqt) evaluation configs',
     )
+    parser.add_argument(
+        '--mono',
+        action='store_true',
+        help='use mono channel (faster evaluation)'
+    )
 
     args = parser.parse_args()
 
@@ -200,7 +204,7 @@ if __name__ == '__main__':
     track_offset = int(os.getenv('MUSDB_TRACK_OFFSET', 0))
 
     # initiate musdb
-    mus = musdb.DB(subsets='test', is_wav=True)
+    mus = musdb.DB(subsets='test', is_wav=True, mono=args.mono)
 
     # accumulate all time-frequency configs to compare
     tfs = []
@@ -258,4 +262,7 @@ if __name__ == '__main__':
         gc.collect()
 
         if args.audio_dir:
-            mus.save_estimates(est, track, os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
+            name = mask_name
+            if tf_transform.name != '':
+                name += f'-{tf_transform.name}'
+            mus.save_estimates(est, track, os.path.join(args.eval_dir, f'{name}'))
