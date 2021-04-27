@@ -225,7 +225,9 @@ if __name__ == '__main__':
                 config['nsgt_configs']['bins'],
                 ):
             tmp = {'type': 'nsgt', 'scale': nsgt_conf[0], 'fmin': nsgt_conf[1], 'fmax': nsgt_conf[2], 'bins': nsgt_conf[3]}
-            tmp['name'] = f'{nsgt_conf[0]}-{nsgt_conf[1]}-{nsgt_conf[3]}'
+            fmin_str = f'{nsgt_conf[1]}'
+            fmin_str = fmin_str.replace('.', '')
+            tmp['name'] = f'{nsgt_conf[0]}-{fmin_str}-{nsgt_conf[3]}'
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)
@@ -251,18 +253,19 @@ if __name__ == '__main__':
             mask_name += 'r'
         mask_name += f"m{str(mask['power'])}"
 
+        name = mask_name
+        if tf_transform.name != '':
+            name += f'-{tf_transform.name}'
+
         est = ideal_mask(
             track,
             tf,
             mask['power'],
             mask['binary'],
             0.5,
-            os.path.join(args.eval_dir, f'{mask_name}-{tf_transform.name}'))
+            os.path.join(args.eval_dir, f'{name}'))
 
         gc.collect()
 
         if args.audio_dir:
-            name = mask_name
-            if tf_transform.name != '':
-                name += f'-{tf_transform.name}'
             mus.save_estimates(est, track, os.path.join(args.eval_dir, f'{name}'))
