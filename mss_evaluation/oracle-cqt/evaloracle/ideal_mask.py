@@ -15,29 +15,32 @@ import scipy
 from scipy.signal import stft, istft
 
 # use CQT based on nonstationary gabor transform
-from nsgt import NSGT, OctScale, MelScale, LogScale # BarkScale
+from nsgt import NSGT, OctScale, MelScale, LogScale, BarkScale
 
 import json
 from types import SimpleNamespace
 
 
-def stereo_nsgt(audio, nsgt):
-    X_chan1 = np.asarray(nsgt.forward(audio[:, 0]))
-    X_chan2 = np.asarray(nsgt.forward(audio[:, 1]))
-    X = np.empty((2, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex64)
-    X[0, :, :] = X_chan1
-    X[1, :, :] = X_chan2
+mempool = cupy.get_default_memory_pool()
+
+
+def multichan_nsgt(audio, nsgt):
+    n_chan = audio.shape[1]
+    X = np.empty((n_chan, X_chan1.shape[0], X_chan1.shape[1]), dtype=np.complex64)
+    for i in range(n_chan):
+        X[i, :, :] = np.asarray(nsgt.forward(audio[:, i]))
     return X
 
 
-def stereo_insgt(C, nsgt):
-    C_chan1 = C[0, :, :]
-    C_chan2 = C[1, :, :]
-    inv1 = nsgt.backward(C_chan1)
-    inv2 = nsgt.backward(C_chan2)
-    ret_audio = np.empty((2, inv1.shape[0]), dtype=np.float32)
-    ret_audio[0, :] = inv1
-    ret_audio[1, :] = inv2
+def multichan_insgt(C, nsgt):
+    n_chan = C.shape[0]
+    rets = []
+    for i in range(n_chan):
+        C_chan = C[i, :, :]
+        inv = nsgt.backward(C_chan)
+        rets.append(inv)
+
+    ret_audio = np.asarray(rets)
     return ret_audio.T
 
 
@@ -51,12 +54,16 @@ class TFTransform:
         self.nsgt = None
         if use_nsgt:
             scl = None
-            if tf_transform.scale == 'octave':
-                scl = OctScale(tf_transform.fmin, fs/2, tf_transform.bins)
+            if tf_transform.scale == 'oct':
+                scl = OctScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
             elif tf_transform.scale == 'mel':
-                scl = MelScale(tf_transform.fmin, fs/2, tf_transform.bins)
+                scl = MelScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
+            elif tf_transform.scale == 'bark':
+                scl = BarkScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
+            elif tf_transform.scale == 'log':
+                scl = LogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
             else:
-                raise ValueError("only 'octave' supported for now")
+                raise ValueError(f"unsupported scale {tf_transform.scale}")
 
             # nsgt has a multichannel=True param which blows memory up. prefer to do it myself
             self.nsgt = NSGT(scl, fs, self.N, real=True, matrixform=True)
@@ -65,13 +72,13 @@ class TFTransform:
         if not self.nsgt:
             return stft(audio.T, nperseg=self.tf_transform.window)[-1].astype(np.complex64)
         else:
-            return stereo_nsgt(audio, self.nsgt)
+            return multichan_nsgt(audio, self.nsgt)
 
     def backward(self, X):
         if not self.nsgt:
             return istft(X)[1].T[:self.N, :].astype(np.float32)
         else:
-            return stereo_insgt(X, self.nsgt)
+            return multichan_insgt(X, self.nsgt)
 
 
 def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
@@ -145,7 +152,6 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
     estimates['accompaniment'] = accompaniment_source
 
     gc.collect()
-    mempool = cupy.get_default_memory_pool()
 
     # cupy disable fft caching to free blocks
     fft_cache = get_plan_cache()
@@ -191,6 +197,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     max_tracks = int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize))
+    track_offset = int(os.getenv('MUSDB_TRACK_OFFSET', 0))
 
     # initiate musdb
     mus = musdb.DB(subsets='test', is_wav=True)
@@ -199,9 +206,24 @@ if __name__ == '__main__':
     tfs = []
 
     with open(args.config_file) as jf:
-        configs = json.load(jf)
-        for config in configs:
-            tf_transform = SimpleNamespace(**config)
+        config = json.load(jf)
+        tmp = None
+        for stft_win in config['stft_configs']['window_sizes']:
+            tmp = {'type': 'stft', 'window': stft_win}
+            tmp['name'] = '' # blank name for control config
+
+            tf_transform = SimpleNamespace(**tmp)
+            tfs.append(tf_transform)
+        for nsgt_conf in itertools.product(
+                config['nsgt_configs']['scale'],
+                config['nsgt_configs']['fmin'],
+                config['nsgt_configs']['fmax'],
+                config['nsgt_configs']['bins'],
+                ):
+            tmp = {'type': 'nsgt', 'scale': nsgt_conf[0], 'fmin': nsgt_conf[1], 'fmax': nsgt_conf[2], 'bins': nsgt_conf[3]}
+            tmp['name'] = f'{nsgt_conf[0]}-{nsgt_conf[1]}-{nsgt_conf[3]}'
+
+            tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)
 
     masks = [
@@ -211,7 +233,7 @@ if __name__ == '__main__':
             {'power': 2, 'binary': True},
     ]
 
-    mss_evaluations = list(itertools.product(mus.tracks[:max_tracks], tfs, masks))
+    mss_evaluations = list(itertools.product(mus.tracks[track_offset:max_tracks], tfs, masks))
 
     for (track, tf_transform, mask) in tqdm.tqdm(mss_evaluations):
         N = track.audio.shape[0]  # remember number of samples for future use
