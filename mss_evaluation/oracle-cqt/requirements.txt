@@ -3,6 +3,7 @@ numpy
 cupy-cuda112
 git+git://github.com/sevagh/sigsep-mus-eval@feat/cupy-accel#egg=museval
 git+git://github.com/sevagh/nsgt#egg=nsgt
+librosa
 nsgt
 pandas
 seaborn
