@@ -62,19 +62,25 @@
 	Motivating musical applications based on what I like working on:
 	\begin{enumerate}
 		\item
-			Onset detection (how it relates to the core of beat tracking)
+			Onset detection (actually, beat tracking -- but onset detection is more relevant to time-frequency analysis vs. beat tracking frontend)
 		\item
 			Music source separation
 	\end{enumerate}
-
 	What I want to do:
 	\begin{enumerate}
 		\item
-			Hypothesis -- ``swap STFT with the CQT in music source separation and onset detection, and get better results''. In other words spectrogram stays spectrogram but the implementation detail of the spectrogram is different.
+			Hypothesis -- ``swap STFT-based spectrogram with a better one in music source separation and onset detection, and get better results''
 		\item
-			Why CQ-NSGT? perfectly invertible, rectangular time-frequency matrix, which can be used to create a spectrogram, with arbitrary frequency scales. Can use arbitrary frequency bands for the constant-Q factor, e.g. mel/bark/octave/log
+			Why NSGT? perfectly invertible, rectangular time-frequency matrix, which can be used to create a spectrogram, with arbitrary frequency scales. Can use arbitrary frequency bands e.g. mel/bark/octave/log (octave NSGT == CQT)
 		\item
-			Get a publishable result by beating the SOTA in something -- ISMIR (too late for 2021), DAFX, IEEE -- or just arXiv first?
+			Get a publishable result by beating the SOTA in something
+	\end{enumerate}
+	Skills I want to gain or exercise:
+	\begin{enumerate}
+		\item
+			Performance computing (Python, C, CUDA, GPU, etc.)
+		\item
+			Machine/deep learning
 	\end{enumerate}
 \end{frame}
 
@@ -180,7 +186,7 @@
 	History of CQT (jbrown, klapuri, nsgt). NSGT and how the CQT can be written as the NSGT with octave (and log/mel/bark) frequency scales\\\ \\
 	Relation to the STFT -- time axis, frequency axis, coefficient values. Dimensionality -- e.g. $N \times M$  STFT matrix $\rightarrow$ $? \times ?$ CQT matrix. Computation: describe how many FFTs are applied, how many windows/filterbank\\\ \\
 	Time-frequency properties, quantified -- e.g. ``with a 24-bin CQT, it has 1.3ms transient resolution in the frequency range f1-f2'' Relate this to music, e.g. ``percussion is known to have an attack time of 1.3ms'' or how a wide frequency range is necessary for bass guitar analysis\\
-Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bins-per-octave, or total bins. 12, 24, 48, 84, 96 are common -- can go ultra-high e.g. 120, 132, 144. compare to known pitch scales or music instrument frequencies
+Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 Bins: bins-per-octave, or total bins. 12, 24, 48, 96 are shown in paper -- can go higher e.g. 120, 168. compare to known pitch scales or music instrument frequencies
 \end{frame}
 
 \begin{frame}
@@ -201,14 +207,60 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 \end{frame}
 
 \begin{frame}
+	\frametitle{Onset detection -- ML skills}
+	\begin{itemize}
+		\item
+			Nestor has been giving Junhao good tips on exactly/100\% reproducible ML research
+		\item
+			E.g. random number seed, batches, epochs, learning rate, etc. all committed to git repo
+		\item
+			Onset detection = my chance to apply the same rigor
+		\item
+			Generate 100\% reproducible variants of:
+			\begin{enumerate}
+				\item
+					Reference RNN/CNN of B{\"o}ck
+				\item
+					CQT variants (mel, octave, bark, whatever)
+			\end{enumerate}
+		\item
+			Compare things like error, accuracy, learning convergence, size of network, etc.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
 	\frametitle{Chapter 4 -- CQT for music source separation}
-	Idea: replace STFT with CQT in source separation\\
+	Idea: replace STFT with CQT in source separation (\textcolor{ForestGreen}{\textbf{VALIDATED}})\\
 	\vspace{0.5em}
 	Without actually working on any single model, we can focus on the IRM -- (oracle) ideal ratio mask, representing the theoretical  best performance of spectral masking based music source separation algorithms \footcite{irm}, \footcite{sigsep2018}, \footcite{vincent07}\\
 	\vspace{0.5em}
 	Hypothesis: ``is it possible to surpass the best possible music source separation performance based on spectral masking by using CQT masking instead of STFT?''\\
 	\vspace{0.5em}
 	Bleeding edge -- today, best waveform based NNs (e.g. demucs) tout that they surpassed the previous SOTA spectrogram-based models (2018-2019) by beating the IRM. Tagline of new SOTA end-to-end waveform based models is ``surpassing ideal time-frequency mask''
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music sep -- computational skills}
+	\begin{itemize}
+		\item
+			I have forked nsgt and SigSep mus-eval code to apply CUDA with cupy wherever possible (did some line-by-line profiling to find code hotspots, typically in the fft/ifft routines -- unsurprising)
+		\item
+			MUSDB18-HQ test set has 51 tracks
+		\item
+			Got computation time per track of MUSDB18-HQ down from 3 minutes 20 seconds, to under 30 seconds with the following tweaks:
+			\begin{enumerate}
+				\item
+					CUDA/cupy-accelerated NSGT
+				\item
+					CUDA/cupy-accelerated BSS metrics
+				\item
+					Mono-channel testbench, not stereo (not a big impact on results, halves computation time)
+				\item
+					All of this necessary to support $51 \text{ tracks} \times [(6 \text{ bins} \times 5 \text{ fmin} \times 4 \text{ fscales} \text{ nsgt configs}) + 1 \text{ baseline stft config}] \times 4 \text{ mask variants}$ -- still takes days on my computer, imagine how bad it was before
+				\item
+					All of this worth discussing in the same chapter? ``Chapter 4.3 performance optimizations necessary to run giant testbench'', cite cupy etc.
+			\end{enumerate}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -241,25 +293,30 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 	\frametitle{contd}
 	custom json format for defining testcases:
 	\begin{Verbatim}[fontsize=\tiny]
-	  {
-	    "type": "stft",
-	    "name": "stft2048",
-	    "window": 2048
+	sevagh:oracle-cqt $ cat config_octave.json
+	{
+	  "stft_configs": {
+	    "window_sizes": [2048]
 	  },
-	  {
-	    "type": "nsgt",
-	    "name": "cq-96-27.5",
-	    "scale": "octave",
-	    "bins": 96,
-	    "fmin": 27.5
-	  },
-	  {
-	    "type": "nsgt",
-	    "name": "mel-120-20",
-	    "scale": "mel",
-	    "bins": 120,
-	    "fmin": 20
+	  "nsgt_configs": {
+	    "bins": [12, 24, 48, 96, 120, 168],
+	    "fmin": [20, 27.5, 32.7, 57, 80],
+	    "fmax": [22050],
+	    "scale": ["oct"]
 	  }
+	}
+	sevagh:oracle-cqt $ cat config_mel.json
+	{
+	  "stft_configs": {
+	    "window_sizes": [2048]
+	  },
+	  "nsgt_configs": {
+	    "bins": [12, 24, 48, 96, 120, 168],
+	    "fmin": [20, 27.5, 32.7, 57, 80],
+	    "fmax": [22050],
+	    "scale": ["mel"]
+	  }
+	}
 	\end{Verbatim}
 \end{frame}
 
@@ -274,7 +331,7 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 		\item
 			\textbf{Chapter 3:} Show the success of the NSGT-based (perfect inversion) CQT in SOTA neural network for \textbf{onset detection}
 		\item
-			\textbf{Chapter 4:} verify whether we can surpass the theoretical maximum performance/IRM of spectrogram-based source separation with the CQT, with a whole bunch of different configurations
+			\textbf{Chapter 4:} see whether we can surpass the theoretical maximum performance/IRM of spectrogram-based \textbf{music source separation} with the CQT (many configs)
 		\item
 			\textbf{Chapter 5:} discuss and conclude
 	\end{itemize}
@@ -282,35 +339,26 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.5 Bins: bin
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{optional chapter}: warped-frequency STFT}
-	Last point of CQT still unaddressed -- computationally expensive. Alternative: warped-frequency STFT based on nonuniform FFT to construct computationally cheaper transforms with arbitrary (mel, bark, constant-q/octave) frequency scales, built from the FFT + frequency warping operators (nonuniform FFT):
+	\frametitle{\textbf{Publish idea 1}: Surpassing music source separation ideal masking with NSGT}
 	\begin{itemize}
 		\item
-			Sharp transient resolution + nonlinear frequency resolution \footcite{warpwabnik}
+			I have been using open-source code of SigSep, aka Antoine Liutkus and Fabian-Robert St{\"o}ter
 		\item
-			Low-error reconstructions proposed by \footcite{makur2008} (who gave me source code)
+			Produce minimal github repo showing proof that it works and surpasses the STFT with a smaller dimension transform
 		\item
-			Bark/ERB warping is known\footcite{barkerb}, better approximations proposed in \footcite{betterwarp}
+			Short and sweet result, 100\% reproducible, analytic (not machine learning)
 		\item
-			Constant-Q frequency warping has been described \footcite{cqwarp}
+			I can write a short, 2-column arXiv paper for the CQT ratio mask and request them to review it
+		\item
+			Embed this directly as a chapter in the thesis? appendix? or rewrite the same material in a more verbose thesis/chapter style?
+		\item
+			arXiv + plan for a real conference/journal to submit to?
 	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Warped-STFT CQT simplified}
-	Take constant-Q warp mapping of \footcite{cqwarp}. Check if \footcite{betterwarp} is applicable, if so use that. Use this warping in \footcite{makur2008} implementation (for which I have MATLAB source code, so I just need to transliterate it to C + Python). 
-	Compare above warped-CQT to real NSGT-CQT in terms of:
-	\begin{itemize}
-		\item
-			Computational cost
-		\item
-			Resulting frequency bins (since frequency warping is an approximation of the desired constant-Q, not precisely like the NSGT)
-		\item
-			Reconstruction error. Maybe it's fine for analysis but not synthesis (so not good for music sep, but good for onset detection)
-		\item
-			Frequency scales -- similar params (bins = number of filterbank, modifying the warp coefficient = approximations of mel, bark, octave, and other f scales)
-	\end{itemize}
-	Might be the first warped-STFT library on GitHub (I have looked)
+	\frametitle{\textbf{Publish idea 2}: New SOTA onset detector}
+	Too soon to tell -- TBD after initial experiments
 \end{frame}
 
 \end{document}
