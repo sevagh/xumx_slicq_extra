@@ -2,7 +2,6 @@
 copied from https://github.com/sigsep/sigsep-mus-2018-analysis/blob/master/aggregate.py
 '''
 from pathlib import Path
-from pandas.io.json import json_normalize
 import pandas as pd
 import json
 import argparse
@@ -11,7 +10,7 @@ import argparse
 def museval2df(json_path):
     with open(json_path) as json_file:
         json_string = json.loads(json_file.read())
-        df = json_normalize(
+        df = pd.json_normalize(
             json_string['targets'],
             ['frames'],
             ['name']
