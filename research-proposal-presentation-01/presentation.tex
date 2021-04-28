@@ -139,7 +139,7 @@
 	\item
 		 Notes in the low frequency lay the harmonic basis of the song, requiring very fine frequency resolution.
 \end{itemize}
-	This leads to a single transform, the CQT based on the NSGT -- perfect reconstruction using frame theory: \footcite{balazs}, \footcite{invertiblecqt}, now used in MATLAB (not librosa yet)
+	Leads to a single transform, CQT based on the NSGT -- perfect reconstruction using frame theory\footcite{balazs, invertiblecqt}, now used in MATLAB wavelet toolbox
 \end{frame}
 
 \begin{frame}
@@ -214,7 +214,7 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 		\item
 			E.g. random number seed, batches, epochs, learning rate, etc. all committed to git repo
 		\item
-			Onset detection = my chance to apply the same rigor
+			Onset detection = my chance to apply the same rigor, and also learn more about deep learning best practises
 		\item
 			Generate 100\% reproducible variants of:
 			\begin{enumerate}
@@ -339,7 +339,8 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{Publish idea 1}: Surpassing music source separation ideal masking with NSGT}
+	\frametitle{Publishing}
+	\textbf{1. Surpassing music source separation ideal masking with NSGT}
 	\begin{itemize}
 		\item
 			I have been using open-source code of SigSep, aka Antoine Liutkus and Fabian-Robert St{\"o}ter
@@ -354,11 +355,29 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 		\item
 			arXiv + plan for a real conference/journal to submit to?
 	\end{itemize}
+	\textbf{2. SOTA onset detection with CQT}
+	Too soon to tell -- TBD after initial experiments
 \end{frame}
 
 \begin{frame}
-	\frametitle{\textbf{Publish idea 2}: New SOTA onset detector}
-	Too soon to tell -- TBD after initial experiments
+	\frametitle{Questions}
+	\begin{itemize}
+		\item
+			Copying large parts of past works and reports wholesale? Is that self/auto-plagiarism? Should I always rephrase/rewrite, even if it's my own work
+		\item
+			GPS grad progress report:\\
+			\begin{quote}
+			For a first report, students complete the \textbf{Objectives} box only.
+			\end{quote}
+			Objectives:
+			\begin{enumerate}
+				\item
+					Prepare music separation ideal mask chapter of thesis (full results, metrics plotted per CQT parameter e.g. by bin size, by fmin) (\textbf{chapter 4})
+				\item
+					Start preparing Onset detection experiments -- recreate baseline F-scores with fully reproducible training + evaluation (preparing for CQT substitution) (\textbf{chapter 3})
+			\end{enumerate}
+			After success of these two objectives (ch 3, 4), I work add 1 and 2 (theoretical intro) and 5 (conclusion/dicussion) between summer and fall -- finish up early?
+	\end{itemize}
 \end{frame}
 
 \end{document}
