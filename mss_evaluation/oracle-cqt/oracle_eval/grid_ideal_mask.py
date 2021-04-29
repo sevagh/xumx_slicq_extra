@@ -65,7 +65,6 @@ def print_scores_ndarray(scores):
     return out
 
 
-
 def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=False, theta=0.5):
     N = track.audio.shape[0]
 
@@ -168,18 +167,6 @@ if __name__ == '__main__':
         action='store_true',
         help='use mono channel (faster evaluation)'
     )
-    parser.add_argument(
-        '--print-every-n',
-        type=int,
-        default=10,
-        help='print leaderboard this often'
-    )
-    parser.add_argument(
-        '--chunk-duration',
-        type=float,
-        default=10.0,
-        help='duration of each chunk in seconds'
-    )
 
     args = parser.parse_args()
 
@@ -201,17 +188,8 @@ if __name__ == '__main__':
     scores = defaultdict(list)
     n_iter = 0
 
-    curr_chunk = 0
-
-    for track in itertools.cycle(mus.tracks[track_offset:max_tracks]):
-        print(f'evaluating track {track.name}, chunk {curr_chunk}-{curr_chunk+args.chunk_duration} s')
-        track.chunk_duration = args.chunk_duration
-        track.chunk_start = curr_chunk
-
-        # do 1 eval run on first chunk_duration of each track 
-        # then for the next chunk_duration, etc.
-        # over time we slowly converge toward having evaluated every single track
-
+    for track in mus.tracks[track_offset:max_tracks]:
+        print(f'evaluating track {track.name}')
         for (scale, fmin, bin_) in itertools.product(scales, fmins, bins):
             print(f'evaluating nsgt {scale} {fmin} {bin_}')
             # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1)
@@ -220,13 +198,11 @@ if __name__ == '__main__':
 
             n_iter += 1
 
-            if n_iter % 10 == 0:
+            # every full iteration over bins, print configs
+            if n_iter % len(bins) == 0:
                 print('top 5 tf configs so far, median score (all targets x metrics)')
 
                 for (tf_conf, scrs) in sorted(scores.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
-                    # take median across all chunks
+                    # take median across all tracks
                     med_scrs = np.median(scrs, axis=0)
                     print(f'\t{tf_conf}:\n{print_scores_ndarray(med_scrs)}')
-
-        # move chunk_duration up
-        curr_chunk += args.chunk_duration

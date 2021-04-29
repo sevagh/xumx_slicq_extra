@@ -12,4 +12,4 @@ export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
 #$pybin oracle_eval/ideal_mask.py --mono --eval_dir exp-log ./config_log.json
 
 #$pybin oracle_eval/grid_ideal_mask.py --mono
-$pybin oracle_eval/grid_ideal_mask.py --mono --print-every-n=1
+$pybin oracle_eval/grid_ideal_mask.py --mono
