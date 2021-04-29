@@ -102,7 +102,7 @@ def describe_tf(track, tf):
     print(f'track dtype, dimensions: {track.audio.dtype}, {track.audio.shape}')
     print('track duration: {0:.2f} min'.format(len(track.audio)/track.rate/60.0))
     X = tf.forward(track.audio)
-    print(f'tf transform dtype, dimensions: {X.dtype}, {X.shape}')
+    print(f'tf transform dtype, dimensions, size: {X.dtype}, {X.shape}, {X.size}')
 
     gc.collect()
 
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    max_tracks = 1
+    max_tracks = 2
     track_offset = 0
 
     # initiate musdb

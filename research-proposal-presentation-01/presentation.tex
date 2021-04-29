@@ -191,18 +191,16 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 
 \begin{frame}
 	\frametitle{Chapter 3 -- CQT for onset detection}
-	Experiment idea (\textcolor{red}{\textbf{UNVALIDATED}}):
+	Experiment idea (\textcolor{red}{\textbf{UNVALIDATED}}) - but there is precedent\footcite{beatnsgt}:
 	\begin{enumerate}
 		\item
-			This paper: \href{https://www.diva-portal.org/smash/get/diva2:1338850/FULLTEXT02}{https://www.diva-portal.org/smash/get/diva2:1338850/FULLTEXT02} tries to recreate B{\"o}ck's state of the art CNN and RNN architectures for onset detection
+			This paper: \href{https://www.diva-portal.org/smash/get/diva2:1338850/FULLTEXT02}{https://www.diva-portal.org/smash/get/diva2:1338850/FULLTEXT02} reproduces B{\"o}ck's SOTA CNN and RNN architectures for onset detection
 		\item
 			Both architectures use 3 STFTs as input with different window sizes (to vary time-frequency resolution)
 		\item
-			\textbf{hypothesis} maybe a single CQT has enough time-frequency information as 3 mixed-window STFTs, reducing the network size. maybe the improved transient and clarity of musical notes are beneficial (in fact, they already use log-scale spectrograms (logarithmic = roughly constant-Q) to improve results)
+			\textbf{hypothesis} single CQT has enough time-frequency information as 3 mixed-window STFTs, reducing the network size. maybe the improved transient and clarity of musical notes are beneficial (in fact, they already use log-scale spectrograms (logarithmic = constant-Q/octave) to improve results)
 		\item
-			First, redo paper recreation (low effort since they documented it very well) -- i.e, get the expected 86\% and 85\% RNN and CNN onset detection F-score with the standard 3 STFT model
-		\item
-			Second, replace with single-CQT (or multi-CQT) architecture and see what happens
+			First, redo paper recreation -- i.e, get the expected 86\% and 85\% RNN and CNN onset detection F-score with the standard 3 STFT model. Then, replace with single-CQT (or multi-CQT) architecture and see what happens
 	\end{enumerate}
 \end{frame}
 
@@ -250,13 +248,13 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 			Got computation time per track of MUSDB18-HQ down from 3 minutes 20 seconds, to under 30 seconds with the following tweaks:
 			\begin{enumerate}
 				\item
+					float32/complex64 instead of 64/128
+				\item
 					CUDA/cupy-accelerated NSGT
 				\item
 					CUDA/cupy-accelerated BSS metrics
 				\item
-					Mono-channel testbench, not stereo (not a big impact on results, halves computation time)
-				\item
-					All of this necessary to support $51 \text{ tracks} \times [(6 \text{ bins} \times 5 \text{ fmin} \times 4 \text{ fscales} \text{ nsgt configs}) + 1 \text{ baseline stft config}] \times 4 \text{ mask variants}$ -- still takes days on my computer, imagine how bad it was before
+					Mono-channel testbench, not stereo (minor impact on results, halves computation time)
 				\item
 					All of this worth discussing in the same chapter? ``Chapter 4.3 performance optimizations necessary to run giant testbench'', cite cupy etc.
 			\end{enumerate}
@@ -277,20 +275,20 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 \end{frame}
 
 \begin{frame}
-	\frametitle{Music source separation -- work done so far}
+	\frametitle{Music source separation -- example evaluation}
 	\begin{itemize}
 		\item
-			Forked bss eval + nsgt and modified both to use GPU (with CUDA/cupy) to speed up evaluation time (for a single track) from 3.5 minutes down to 1 -- allows for a much bigger testbench
+			Forked bss eval + nsgt and modified both to use GPU (with CUDA/cupy) to speed up evaluation time (for a single track) from 3.5 minutes down to 0.5 s -- allows for a much bigger testbench
 		\item
 			Based on sisec's evaluation + boxplot code from the SiSec 2018 paper, e.g.:\\
 			\includegraphics[height=3.5cm]{./irm_boxplot_example.png}
 		\item
-			Plan: compute IRM,IBM\{1,2\} for STFT 2048 (default) (should I mix window sizes here?) followed by various CQT configurations. Take median scores to see how they across bins, frequency scale, fmin -- each parameter. mel, 12 bins -- 144 bins, etc.
+			Plan: compute IRM,IBM\{1,2\} for STFT 2048 (default) (should I mix window sizes here?) followed by optimal NSGT configurations -- take median scores to see how they across bins, frequency scale, fmin
 	\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{contd}
+	\frametitle{Option 1 (outdated) -- manually defined parameters}
 	custom json format for defining testcases:
 	\begin{Verbatim}[fontsize=\tiny]
 	sevagh:oracle-cqt $ cat config_octave.json
@@ -318,6 +316,24 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 	  }
 	}
 	\end{Verbatim}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Option 2 -- grid search for optimal NSGT parameters}
+	\begin{itemize}
+		\item
+			Define frequency scales as choice of octave (aka log2), mel, bark
+		\item
+			Define bins as integers between 12 and 200
+		\item
+			Define fmin between 20hz (psychoacoustic low limit) and maybe 100hz? (gotta stop somewhere). jumps in, cents? 0.1 hz?
+		\item
+			Fmax is fixed at 22050 (for performance and nyquist reasons)
+		\item
+			Metric to minimize is actually 16 metrics - vocal/drum/other/accompaniment SDR/SAR/SIR/ISR (same as sisec)
+		\item
+			sklearn GridSearchCV
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
