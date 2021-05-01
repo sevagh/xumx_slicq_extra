@@ -16,7 +16,7 @@ import scipy
 from scipy.signal import stft, istft
 
 # use CQT based on nonstationary gabor transform
-from nsgt import NSGT, OctScale, MelScale, LogScale, BarkScale
+from nsgt import NSGT, OctScale, MelScale, LogScale, BarkScale, VQLogScale
 
 import json
 from types import SimpleNamespace
@@ -62,17 +62,21 @@ class TFTransform:
                 scl = BarkScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
             elif tf_transform.scale == 'log':
                 scl = LogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
+            elif tf_transform.scale == 'vqlog':
+                #vq_bins = [12, 24, 48, 96, 128]
+                scl = VQLogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
             else:
                 raise ValueError(f"unsupported scale {tf_transform.scale}")
 
             print(f'\tscale: {tf_transform.scale}')
             print(f'\tfmin: {tf_transform.fmin}')
-            print('\tconstant-Q: {0:.2f} Hz'.format(scl.Q()))
+            print(f'\tvariable Q: {np.unique(scl.Q())} Hz')
+            #print('\tconstant-Q: {0:.2f} Hz'.format(scl.Q()))
             print(f'\tbins: {tf_transform.bins}')
             pitches, _ = scl()
             print(f'\ttotal frequencies: {len(pitches)}')
             print(f'\tpitches')
-            for octave_idx in range(12, len(pitches), 12):
+            for octave_idx in range(12, min(len(pitches), 24), 12):
                 octave_pitches = pitches[octave_idx-12:octave_idx]
 
                 print('\t\t')
@@ -130,7 +134,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    max_tracks = 2
+    max_tracks = 1
     track_offset = 0
 
     # initiate musdb
@@ -141,31 +145,38 @@ if __name__ == '__main__':
 
     with open(args.config_file) as jf:
         config = json.load(jf)
-        tmp = None
-        for stft_win in config['stft_configs']['window_sizes']:
-            tmp = {'type': 'stft', 'window': stft_win}
-            tmp['name'] = '' # blank name for control config
+        for track in mus.tracks[track_offset:max_tracks]:
+            tmp = None
+            for stft_win in config['stft_configs']['window_sizes']:
+                tmp = {'type': 'stft', 'window': stft_win}
+                tmp['name'] = f'stft-{stft_win}' # blank name for control config
 
-            tf_transform = SimpleNamespace(**tmp)
-            tfs.append(tf_transform)
-        for nsgt_conf in itertools.product(
-                config['nsgt_configs']['scale'],
-                config['nsgt_configs']['fmin'],
-                config['nsgt_configs']['fmax'],
-                config['nsgt_configs']['bins'],
-                ):
-            tmp = {'type': 'nsgt', 'scale': nsgt_conf[0], 'fmin': nsgt_conf[1], 'fmax': nsgt_conf[2], 'bins': nsgt_conf[3]}
-            fmin_str = f'{nsgt_conf[1]}'
-            fmin_str = fmin_str.replace('.', '')
-            tmp['name'] = f'{nsgt_conf[0]}-{fmin_str}-{nsgt_conf[3]}'
-
-            tf_transform = SimpleNamespace(**tmp)
-
-            for track in mus.tracks[track_offset:max_tracks]:
+                tf_transform = SimpleNamespace(**tmp)
                 print(tmp)
 
                 N = track.audio.shape[0]  # remember number of samples for future use
                 tf = TFTransform(N, track.rate, tf_transform)
 
                 describe_tf(track, tf)
+                print()
+                gc.collect()
+            for nsgt_conf in itertools.product(
+                    config['nsgt_configs']['scale'],
+                    config['nsgt_configs']['fmin'],
+                    config['nsgt_configs']['fmax'],
+                    config['nsgt_configs']['bins'],
+                    ):
+                tmp = {'type': 'nsgt', 'scale': nsgt_conf[0], 'fmin': nsgt_conf[1], 'fmax': nsgt_conf[2], 'bins': nsgt_conf[3]}
+                fmin_str = f'{nsgt_conf[1]}'
+                fmin_str = fmin_str.replace('.', '')
+                tmp['name'] = f'{nsgt_conf[0]}-{fmin_str}-{nsgt_conf[3]}'
+
+                tf_transform = SimpleNamespace(**tmp)
+                print(tmp)
+
+                N = track.audio.shape[0]  # remember number of samples for future use
+                tf = TFTransform(N, track.rate, tf_transform)
+
+                describe_tf(track, tf)
+                print()
                 gc.collect()

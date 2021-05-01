@@ -6,6 +6,7 @@ import itertools
 import museval
 import numpy as np
 import random
+import librosa
 import functools
 import argparse
 import seaborn as sns
@@ -23,7 +24,7 @@ import scipy
 from scipy.signal import stft, istft
 
 # use CQT based on nonstationary gabor transform
-from nsgt import NSGT, OctScale, MelScale, LogScale, BarkScale
+from nsgt import NSGT, OctScale, MelScale, LogScale, VQLogScale, BarkScale
 
 import json
 from types import SimpleNamespace
@@ -84,7 +85,7 @@ def print_scores_csv(scores):
     return out
 
 
-def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=False, theta=0.5, control=False):
+def ideal_mask(track, scale='log', fmin='20.0', bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False):
     N = track.audio.shape[0]
 
     scl = None
@@ -94,8 +95,20 @@ def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=
         scl = BarkScale(fmin, 22050, bins)
     elif scale == 'log':
         scl = LogScale(fmin, 22050, bins)
+    elif scale == 'vqlog':
+        scl = VQLogScale(fmin, 22050, bins, gamma=gamma)
     else:
         raise ValueError(f"unsupported scale {scale}")
+
+    #if not control:
+    #    pitches, Q = scl()
+    #    print(f'\ttotal frequencies: {len(pitches)}')
+    #    print(f'\tpitches')
+    #    for octave_idx in range(12, max(len(pitches), 24), 12):
+    #        octave_pitches = pitches[octave_idx-12:octave_idx]
+    #        print('\t\t')
+    #        [print('{0:.2f},{1}\t'.format(p, librosa.hz_to_note(p)), end='') for p in octave_pitches]
+    #    print(f'{Q=}')
 
     nsgt = NSGT(scl, track.rate, N, real=True, matrixform=True)
 
@@ -223,20 +236,26 @@ if __name__ == '__main__':
     # exhaustive search over nsgt parameters
     #scales = ['log', 'mel', 'bark']
     #scales = ['mel', 'bark']
-    scales = ['mel'] # mel scale has lower dimensionality and gives best vocal SDR, top choice
+    #scales = ['mel'] # mel scale has lower dimensionality and gives best vocal SDR, top choice
+    #scales = ['vqlog']#, 'log', 'mel', 'bark']
+    scales = ['vqlog', 'mel']
 
     # start with jumps of 64 bins - go finer granularity after finding some plausible performant ranges
     #bins = list(np.arange(12, 333, 64))
     #bins = list(np.arange(204, 333, 32))
     #bins = list(np.arange(204, 301, 12))
     #bins = list(np.arange(216, 301, 6))
-    bins = list(np.arange(220, 253, 1))
+    #bins = list(np.arange(12, 97, 12))
+    #bins = list(np.arange(12, 333, 12))
+    bins = [180, 234]
 
     # start with jumps of 5hz - go finer granularity after
     #start with 20hz, psychoacoustic minimum - refine after
-    #fmins = [20.0]
-    #fmins = list(np.arange(15,35,2.5))
-    fmins = list(np.arange(19,31,0.1))
+    #fmins = list(np.arange(15.0, 55.0, 1.0))
+    fmins = [20.0, 27.5]
+
+    #gammas = list(np.arange(15.0, 25.0, 5.0))
+    gammas = [90.0]
 
     scores = defaultdict(list)
     scores_per_coef = defaultdict(list)
@@ -261,21 +280,22 @@ if __name__ == '__main__':
         scores_per_coef[tf].append(score/transform.size)
         coef_count[tf].append(transform.size)
 
-        for (scale, fmin, bin_) in itertools.product(scales, fmins, bins):
-            print(f'evaluating nsgt {scale} {fmin} {bin_}')
+        for (scale, fmin, bin_, gamma) in itertools.product(scales, fmins, bins, gammas):
+            print(f'evaluating nsgt {scale} {fmin} {bin_} {gamma}')
             # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1)
-            score, transform = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, alpha=1, binary_mask=False, control=False)
-            scores[(scale, bin_, fmin)].append(score)
-            scores_per_coef[(scale, bin_, fmin)].append(score/transform.size)
-            coef_count[(scale, bin_, fmin)].append(transform.size)
+            score, transform = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, gamma=gamma, alpha=1, binary_mask=False, control=False)
+            scores[(scale, bin_, fmin, gamma)].append(score)
+            scores_per_coef[(scale, bin_, fmin, gamma)].append(score/transform.size)
+            coef_count[(scale, bin_, fmin, gamma)].append(transform.size)
 
             n_iter += 1
 
             # every full iteration over bins, print configs
-            if n_iter % len(bins) == 0:
-                print('top 5 tf configs so far, median score/coefficient count (all targets x metrics)')
+            if n_iter % 10 == 0:
+                print('top 10 tf configs so far, median score/coefficient count (all targets x metrics)')
 
-                for (tf_conf, scrs) in sorted(scores_per_coef.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
+                #for (tf_conf, scrs) in sorted(scores_per_coef.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
+                for (tf_conf, scrs) in sorted(scores.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
                     # take median across all tracks
                     med_scrs = np.median(scores[tf_conf], axis=0) # take median across all tracks
                     print(f'\t{tf_conf}:\n{print_scores_ndarray(med_scrs)}')
@@ -303,25 +323,25 @@ if __name__ == '__main__':
     df = pd.read_csv(StringIO(all_csv), index_col=0)
 
     # don't include the coefficient measures in the coloring
-    #mask = (df == df) & ((df.columns == 'bss_per_coef') | (df.columns == 'coef_size'))
+    mask = (df == df) & ((df.columns == 'bss_per_coef') | (df.columns == 'coef_size'))
 
-    #sns.heatmap(
-    #    df,
-    #    annot=True,
-    #    cbar=False,
-    #    cmap=cmap,
-    #    fmt=".2f",
-    #    ax=ax)
+    sns.heatmap(
+        df,
+        annot=True,
+        cbar=False,
+        cmap=cmap,
+        fmt=".2f",
+        ax=ax)
 
-    #sns.heatmap(
-    #    df,
-    #    annot=True,
-    #    cbar=False,
-    #    cmap=cmap,
-    #    fmt=".2f",
-    #    ax=ax,
-    #    mask=mask,
-    #)
-    #plt.show()
+    sns.heatmap(
+        df,
+        annot=True,
+        cbar=False,
+        cmap=cmap,
+        fmt=".2f",
+        ax=ax,
+        mask=mask,
+    )
+    plt.show()
 
     print(all_csv)

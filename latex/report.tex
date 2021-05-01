@@ -78,7 +78,7 @@
 \vspace{3.5em}
 
 \begin{abstract}
-	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Two tasks where such models have recently achieved success are audio beat tracking and music source separation. The Constant-Q Transform (CQT) and the warped STFT are alternative time-frequency representations that may be more suitable for music than the STFT. In this thesis, first the STFT, CQT, and warped STFT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with the CQT and warped STFT in two modern deep learning models for the audio beat tracking and music source separation tasks respectively, showing significant improvements in the results.
+	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Examples of music information retrieval (MIR) tasks where such models have achieved success are onset detection, beat tracking, and music source separation. Despite its ubiquity, the STFT has a fixed and bounded time-frequency resolution, such that one must sacrifice time for frequency resolution (or vice versa) by changing the window size. The Nonstationary Gabor Transform (NSGT) is an adaptive time-frequency transform which can vary its time-frequency resolution to better represent music signals. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with different configurations of the NSGT in deep learning models for onset detection, beat tracking, and music source separation respectively, showing significant improvements in the results.
 \end{abstract}
 
 \vfill
@@ -103,7 +103,7 @@
 
 The DFT and FFT \cite{cooleytukey} are important \cite{dftimportant}. \todo{more stuff here}. Despite its importance, the DFT has some deficiencies in real-world music applications.
 
-First, the human auditory system has a nonlinear frequency resolution, with finer frequency discrimation at low frequencies \todo{cite this}, but the DFT outputs linearly-spaced frequencies.
+First, the human auditory system has a nonlinear frequency resolution, with finer frequency discrimination at low frequencies \todo{cite this}, but the DFT outputs linearly-spaced frequencies.
 
 Second, real-world signals are typically sparse, with most of their energy concentrated in few frequency components \cite{sparseintro}, yet the DFT outputs values for many frequencies, most of which are discarded.
 
@@ -146,7 +146,7 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 \vfill
 \clearpage
 
-\section{Time-frequency analysis of acoustic signals}
+\section{Short-time Fourier transform}
 \label{sec:theorytf}
 
 \subsection{Acoustic signals and time domain waveforms}
@@ -268,7 +268,7 @@ Note that the time resolution is getting worse as the window size increases -- c
 \vfill
 \clearpage
 
-\section{Time-frequency analysis of music}
+\section{Nonstationary Gabor transform}
 \label{sec:theorymusic}
 
 \subsection{Temporal resolution and transients}
@@ -432,50 +432,10 @@ The advantage of the CQT over the linear-frequency STFT can be seen by displayin
 
 \subsubsection{Nonstationary Gabor transform}
 
-\subsection{Warped STFT}
-
-\subsubsection{Nonuniform and warped DFT}
-
-\qquad \textit{abbreviations:} NFT (nonuniform Fourier transform), NUFFT (nonuniform FFT), NDFT (nonuniform DFT), WDFT (warped DFT), WDLDFT (warped delay line DFT)
-
-The variant of the DFT which can output arbitrarily-spaced frequencies is the nonuniform (or nonequispaced) DFT, also referred to as the NFT (nonuniform Fourier transform), NDFT (nonuniform discrete Fourier transform), and NUFFT (nonuniform Fast Fourier transform). The most recent implementation of the NUFFT is by \citet{nufft1} with source code available,\footnote{\href{https://finufft.readthedocs.io/en/latest/index.html}{https://finufft.readthedocs.io/en/latest/index.html}} which in turn derives from earlier work \cite{nufft2, nufft3}.
-
-A special case of the nonuniform DFT is the warped DFT. In the warped DFT, the uniformly-spaced DFT is applied to a signal on a warped frequency scale. Those uniformly-spaced frequencies on the warped frequency scale then correspond to nonuniformly-spaced frequencies on the original frequency scale. This implementation is known as the warped DFT (WDFT) \cite{warped1}, and it is a generalization of the nonuniform DFT \cite{nufft3}.
-
-\citet{warped2} provides for improved computational efficiency for the forward WDFT, and an iterative inverse WDFT (IIWDFT) computation scheme to approximate the inverse transform with low errors.
-
-\todo[inline]{bilinear mapping, cubic spline, invertibility}
-warping stuff here? bark erb blah blah
-
-As described by \citet{warpedcomparison} in their paper comparing different warped Fourier transform implementations, a previous approach to the warped DFT \cite{earlywarped1, earlywarped2} was to apply an allpass network (or warped delay line) to the input signal $x[n]$ to a new frequency-warped sequence $y[n]$, and then apply the standard DFT (they name the old approach the WDLDFT, or warped delay line DFT, while WDFT refers to the method based on the NDFT). The WDFT and WDLDFT filterbanks are shown in figure \ref{fig:wdfts}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[WDFT filterbank\label{fig:wdftsa}]{{\includegraphics[height=5cm]{./wdft.png} }}
-	\subfloat[WDLDFT filterbank\label{fig:wdftsb}]{{\includegraphics[height=5cm]{./wdldft.png} }}
-	\caption{Two approaches to the warped DFT}
-	\label{fig:wdfts}
-\end{figure}
-
-\citet{warped1} describe that the WDLDFT approach leads only to an approximation of the warped-frequency magnitudes, while the WDFT leads to an exact solution. Additionally, \citet{warpedcomparison} found that in their psychoacoustic audio coding experiments, the WDFT and WDLDFT both performed better than the standard DFT for coding stationary signals like bagpipes, but found that the WDFT performed better on transient attack signals like castanets due to its better time resolution. Therefore, the implementation of the WDFT in this thesis will be the version based on the NDFT \cite{warped1}, taking into account the most recently proposed implementation details \cite{warped2}.
-
-\subsubsection{Warped STFT}
-
 \vfill
 \clearpage
 
-\section{Background on machine learning}
-\label{sec:mldl}
-
-\subsection{Deep learning}
-
-\subsection{Machine learning in the waveform domain}
-\label{sec:waveformml}
-
-\vfill
-\clearpage
-
-\section{Audio beat tracking}
+\section{Onset detection and beat tracking}
 \label{sec:beattrack}
 
 \subsection{Task definition}
@@ -553,13 +513,11 @@ The final algorithm for state-of-the-art beat tracking is therefore presented by
 \section{Music source separation}
 \label{sec:musicsep}
 
-\subsection{Task definition}
+\subsection{Task definition and survey}
 
-The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that while music source separation could operate on the level of instruments (e.g., saxophone, piano), for simplicity there are broader and more general categories of sources with similar characteristics that can be separated -- harmonic, percussive, and singing voice.
+The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that music source separation could operate on the level of instruments, or for broader categories of sources, grouped into harmonic, percussive, and singing voice.
 
-\subsection{Use of the STFT}
-
-Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources. The median filtering algorithms of \citet{fitzgerald1, fitzgerald2, driedger} all use time-frequency masking.
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.
 
 \begin{wrapfigure}{r}{8cm}
 	\vspace{-1.0em}
@@ -572,106 +530,74 @@ Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indica
 \citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
 \[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
 
-The hard mask used in \cite{driedger} is of the form:
-\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
-
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third component can be extracted. Let's reformulate the hard mask formula in the harmonic/percussive case to present a concrete example:
-\[ M_{\text{harmonic}} = \frac{|\hat{S}_{\text{harmonic}}|}{|\hat{S}_{\text{percussive}}| + \epsilon} > \beta \]
-\[ M_{\text{percussive}} = \frac{|\hat{S}_{\text{percussive}}|}{|\hat{S}_{\text{harmonic}}| + \epsilon} \ge \beta \]
-
-In the median filtering algorithms, the harmonic and percussive spectrogram estimates are the output of the median filtering step. By setting $\beta > 1$, we are stating that the harmonic and percussive estimates must be at least $\beta$ different from each other -- this gives us the capability to extract a third component, called the residual:
-\[ M_{\text{residual}} = 1 - (M_{\text{harmonic}} + M_{\text{percussive}}) \]
-
 Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
 
-\subsubsection{Datasets and evaluation metrics}
+Most recently, the SigSep\footnote{\url{https://sigsep.github.io/}} community has been running the Signal Separation Evaluation Campaign (SISEC), which sets the tone for the modern state-of-the-art models. SiSec uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality, or BSSv4 variant.
 
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. The authors of BSS released an improved version that matches better with subjective human evaluations, which they called the PEASS (Perceptual Evaluation methods for Audio Source Separation) Toolkit \cite{peass}, based on PEMO-Q \cite{pemoq}. The PEASS Toolkit for MATLAB\footnote{\url{http://bass-db.gforge.inria.fr/peass/}} conveniently includes all 3 measures: PEASS, PEMO-Q, and BSS. Each of these consist of 4 metrics:
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research.
 
-\begin{tight_itemize}
-\item
-	\textbf{Target:} measure of desired sound in the separation. TPS (Target Perceptual Score) in PEASS, ISR (source Image to Spatial distortion Ratio) in BSS, qTarget in PEMO-Q.
-\item
-	\textbf{Interference:} measure of undesired sounds in the separation. IPS (Interference Perceptual Score) in PEASS, SIR (Signal to Interference Ratio) in BSS, qInterf in PEMO-Q.
-\item
-	\textbf{Artifacts:} measure of artifacts in the separation. APS (Artifact Perceptual Score) in PEASS, SAR (Signal to Artifacts Ratio) in SAR, qArtif in PEMO-Q.
-\item
-	\textbf{Global:} a global score for the previous three. In PEASS, this is OPS (Overall Perceptual Score). In BSS, this is SDR (Signal to Distortion Ratio). In PEMO-Q, this is qGlobal.
-\end{tight_itemize}
+In modern music source separation, the stems of MUSDB18 have determined the four most common sources to separate -- drums, bass, vocals, and other. SigSep's own network, Open-Unmix, is trained only on MUSDB18, and produces near-state-of-the-art results. The absolute state-of-the-art crown is jointly held by Conv-Tasnet and Demucs, both of which surpass Open-Unmix. Both models operate directly on the waveform domain, which indicates that they could surpass the maximum possible poerformance of time-frequency masking approaches, as is done in speech separation. However, in practise they are still below the limits of masking-based approaches.
 
-\citet{beassvpeass} make the recommendation to use PEASS for music separation evaluation, noting the importance of perception in music applications. They also recommend to evaluate algorithms based on their separate target, interference, and artifact scores, because the global measure of OPS (for PEASS) and SDR (for BSS) have an uncertain relation to the three constituent scores. The choice in this paper is to use the three individual metrics from the PEASS:
-\begin{tight_enumerate}
-	\item
-		\textbf{TPS} (Target Perceptual Score)
-	\item
-		\textbf{APS} (Artifact Perceptual Score)
-	\item
-		\textbf{IPS} (Interference Perceptual Score)
-\end{tight_enumerate}
+\subsection{Performance optimizations for testbench}
 
-The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. 
+\subsection{Surpassing the ideal STFT mask}
 
-A limited subset of MUSDB18-HQ was evaluated, or 5 total minutes of music, consisting of 4 segments of 15 seconds duration taken from 5 separate tracks. The algorithms are sample rate agnostic, so the sample rate of MUSDB18-HQ is used (44100 Hz). For simplicity, only mono audio is supported in the algorithms, and the conversion from stereo to mono is done in the Python wav segmentation script. One data set was prepared for harmonic/percussive separation evaluation (vocals omitted from the mix), and one data set for harmonic/percussive/vocal evaluation (vocals are present). The evaluation was limited to 5 minutes of music since the PEASS measure is computationally expensive.
+The first experiment to run is to discover which configuration of the NSGT has the potential to surpass the maximum performance of time-frequency masking using the spectrogram.
 
-The songs in the MUSDB18-HQ dataset are split into train and test sets. Since the final comparison of this paper will consider a neural network model which was trained on MUSDB18, the evaluation data is taken from the test set -- if we took it from the training set, the neural network could overfit and overperform.
+Given ground truth data, such as what is available in MUSDB18, we have available to us the individually recorded sources for each track. From this, we can compute the ideal or oracle masks.
 
-\subsection{Survey and state-of-the-art}
+\begin{flalign}
+	\nonumber \text{given: } & x_{\text{drums}}, x_{\text{vocals}}, x_{\text{bass}}, x_{\text{other}}\\
+	\nonumber & x_{\text{mix}} = \sum{x}\\
+	\nonumber & \hat{X} = \text{STFT}(x), \text{complex-valued}\\
+	\nonumber & |\hat{X}|^{\alpha} = \text{magnitude STFT of } x \text{ raised to } \alpha \text{ power, real-valued}\\
+	\nonumber & \text{Mask}_{\text{source}} = \frac{|\hat{X}|_{\text{source}}^{\alpha}}{\sum{|\hat{X}|^{\alpha}}}\\
+	\nonumber & \hat{Y}_{\text{source}} = \text{Mask}_{\text{source}} * \hat{X}_{\text{mix}}\\
+	\nonumber & y = \text{ISTFT}(\hat{Y})\\
+	\nonumber & y = \text{ideal estimate of } x
+\end{flalign}
 
-\subsection{Model under study: Open-Unmix}
+Finally, using these pairs of $x, y$, we can get the maximum possible BSS metrics of any algorithm or model based on time-frequency masking.
 
-\vfill
-\clearpage
+A testbench was designed to select 5 random tracks from MUSDB18-HQ at a time and evaluate a range of NSGT parameters. In each iteration of the testbench, the range of parameters was made narrower to only include the top-scoring configurations, and the step size between each parameter was reduced to perform a more precise search. An exhaustive search on the entire space of NSGT configs would be unfeasible, considering that even with optimizations from cupy, it takes over 30 seconds to evaluate the BSS scores of an ideal mask for single track and NSGT configuration. Table \ref{table:nsgtparamsirm} contains the iterations of testing run along with the parameter ranges.
 
-\section{Software for the CQT and warped STFT}
-\label{sec:libraries}
+The  first 3 iterations were run using a fixed starting frequency of 20.0Hz, the lower limit of the human hearing range. The maximum frequency is always chosen as 22050 (or 44100/2), the Nyquist rate of MUSDB18-HQ, for performance benefits. Finally, in the final iteration, values near 20 Hz were considered.
 
-\subsection{CQT-NSGT library}
+The vocal SDR and median score (across all targets and metrics) per coefficient of the transform was considered to rank the algorithms. For example, the octave and Bark scales are consistently using more transform coefficients than the Mel scale, with lower performance, so they were eventually eliminated.
 
-\subsection{Designing and creating a warped STFT library}
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|c|c|c|c| }
+	 \hline
+	  Iteration & Scales & Bins & Bin step & Fmin & Fmin step \\
+	 \hline
+	 \hline
+	 1 & Bark, Mel, Oct & 12-333 & 64 & 20 & 0 \\
+	 \hline
+	 2 & Bark, Mel & 204-333 & 32 & 20 & 0 \\
+	 \hline
+	 3 & Bark, Mel & 204-301 & 12 & 20 & 0 \\
+	 \hline
+	 4 & Mel & 216-301 & 6 & 15-35 & 2.5 \\
+	 \hline
+	 \textbf{Winner} & Mel & 234 & 0 & 27.5 & 0 \\
+	 \hline
+\end{tabular}
+	\caption{NSGT parameter ranges evaluated}
+	\label{table:nsgtparamsirm}
+\end{table}
 
-\subsubsection{Implementation and interface}
+Several plots of the intermediate results are shown in figure \ref{fig:melnsgt}. An interesting phenomenon is that two NSGTs with almost-identical combinations of parameters can lead to a drastic drop in performance. Some examples of these are shown in table \ref{table:poorconfigs}. However, one can see that, ignoring anomalies, the best performers are in the region of 230--250 bins, using the Mel scale, and a starting frequency between 25-30 Hz. Also, these have the best BSS-score-per-coefficient value after the STFT, as the aforementioned octave and Bark scales produce larger matrices (which are more expensive to store and perform computations on).
 
-foo
+The results led to the best NSGT selected as the Mel-frequency NSGT using 234 frequency bins and a starting frequency of 27.5 Hz. Further refinement would have been possible, such as reducing the bin step to 1 bin, or the frequency step to 0.1 Hz, but as mentioned, the resulting testbenches would be infeasible to run due to the large number of configurations. Moreover, the value of 27.5 Hz is coincidental with the lowest frequency on a standard piano, providing additional musical justification for its use.
 
-\subsubsection{Numerical stability of the inverse}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=16cm]{./mel_nsgt_params.png}
+	\caption{SDR scores of evaluated NSGT configurations}
+	\label{fig:melnsgt}
+\end{figure}
 
-foo
-
-\subsubsection{Benchmarks and performance optimizations}
-
-foo
-
-\vfill
-\clearpage
-
-\section{Results}
-\label{sec:results}
-
-foo
-
-\subsection{Audio beat tracking}
-
-foo. results here
-
-\subsubsection{Model modifications}
-
-foo
-
-\subsubsection{Training}
-
-foo
-
-\subsection{Music source separation}
-
-foo. results here
-
-\subsubsection{Model modifications}
-
-foo
-
-\subsubsection{Training}
-
-foo
 
 \vfill
 \clearpage
@@ -707,9 +633,6 @@ foo
 
 \section{Code availability and replicating the results}
 \label{appendix:coderesultsrepro}
-
-\section{Warped STFT library documentation}
-\label{appendix:wstftdoc}
 
 \end{appendices}
 
