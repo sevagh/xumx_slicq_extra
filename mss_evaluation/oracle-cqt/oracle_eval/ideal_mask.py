@@ -213,7 +213,7 @@ if __name__ == '__main__':
         tmp = None
         for stft_win in config['stft_configs']['window_sizes']:
             tmp = {'type': 'stft', 'window': stft_win}
-            tmp['name'] = '' # blank name for control config
+            tmp['name'] = f'{stft_win}'
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)

@@ -230,13 +230,13 @@ if __name__ == '__main__':
     #bins = list(np.arange(204, 333, 32))
     #bins = list(np.arange(204, 301, 12))
     #bins = list(np.arange(216, 301, 6))
-    bins = list(np.arange(220, 261, 1))
+    bins = list(np.arange(220, 253, 1))
 
     # start with jumps of 5hz - go finer granularity after
     #start with 20hz, psychoacoustic minimum - refine after
     #fmins = [20.0]
     #fmins = list(np.arange(15,35,2.5))
-    fmins = list(np.arange(24,33,1.0))
+    fmins = list(np.arange(19,31,0.1))
 
     scores = defaultdict(list)
     scores_per_coef = defaultdict(list)

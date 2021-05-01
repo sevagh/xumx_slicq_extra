@@ -12,7 +12,7 @@ import sys
 import gc
 import itertools
 
-controls = ['ibm1', 'ibm2', 'irm1', 'irm2'] 
+controls = ['ibm1-2048', 'ibm2-2048', 'irm1-2048', 'irm2-2048'] 
 
 
 def save_boxplot(pandas_in, pdf_out, single=False):
