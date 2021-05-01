@@ -5,12 +5,19 @@ import gc
 import itertools
 import museval
 import numpy as np
+import random
 import functools
 import argparse
+import seaborn as sns
+import pandas as pd
+from io import StringIO
 import cupy
 from cupy.fft.config import get_plan_cache
 import tqdm
 from collections import defaultdict
+
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 
 import scipy
 from scipy.signal import stft, istft
@@ -65,7 +72,19 @@ def print_scores_ndarray(scores):
     return out
 
 
-def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=False, theta=0.5):
+def print_scores_csv(scores):
+    targets = ['drums', 'bass', 'other', 'vocals', 'accompaniment']
+    metrics = ['SDR', 'SIR', 'ISR', 'SAR']
+
+    out = ""
+    for idx, score in np.ndenumerate(scores):
+        target = targets[idx[0]]
+        metric = targets[idx[1]]
+        out += "{:.3f},".format(score)
+    return out
+
+
+def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=False, theta=0.5, control=False):
     N = track.audio.shape[0]
 
     scl = None
@@ -83,7 +102,10 @@ def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=
     # small epsilon to avoid dividing by zero
     eps = np.finfo(np.float32).eps
 
-    X = multichan_nsgt(track.audio, nsgt)
+    if control:
+        X = stft(track.audio.T, nperseg=2048)[-1].astype(np.complex64)
+    else:
+        X = multichan_nsgt(track.audio, nsgt)
 
     (I, F, T) = X.shape
 
@@ -98,7 +120,10 @@ def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=
         for name, source in track.sources.items():
             # compute spectrogram of target source:
             # magnitude of STFT to the power alpha
-            P[name] = np.abs(multichan_nsgt(source.audio, nsgt))**alpha
+            if control:
+                P[name] = np.abs(stft(source.audio.T, nperseg=2048)[-1].astype(np.complex64))**alpha
+            else:
+                P[name] = np.abs(multichan_nsgt(source.audio, nsgt))**alpha
             model += P[name]
 
     # now performs separation
@@ -107,7 +132,10 @@ def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=
     for name, source in track.sources.items():
         if binary_mask:
             # compute STFT of target source
-            Yj = multichan_nsgt(source.audio, nsgt)
+            if control:
+                Yj = stft(source.audio.T, nperseg=2048)[-1].astype(np.complex64)
+            else:
+                Yj = multichan_nsgt(source.audio, nsgt)
 
             # Create Binary Mask
             Mask = np.divide(np.abs(Yj)**alpha, (eps + np.abs(X)**alpha))
@@ -121,7 +149,10 @@ def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=
         Yj = np.multiply(X, Mask)
 
         # invert to time domain
-        target_estimate = multichan_insgt(Yj, nsgt)
+        if control:
+            target_estimate = istft(Yj)[1].T[:N, :].astype(np.float32)
+        else:
+            target_estimate = multichan_insgt(Yj, nsgt)
 
         # set this as the source estimate
         estimates[name] = target_estimate
@@ -155,7 +186,7 @@ def ideal_mask(track, scale='log', fmin='20.0', bins='12', alpha=2, binary_mask=
             agg = np.nanmedian([np.float32(f['metrics'][metric]) for f in t['frames']])
             scores[target_idx, metric_idx] = agg
 
-    return scores
+    return scores, X
 
 
 if __name__ == '__main__':
@@ -167,42 +198,130 @@ if __name__ == '__main__':
         action='store_true',
         help='use mono channel (faster evaluation)'
     )
+    parser.add_argument(
+        '--n-random-tracks',
+        type=int,
+        default=None,
+        help='use N random tracks instead of MUSDB_MAX_TRACKS'
+    )
 
+    #random.seed(42)
     args = parser.parse_args()
 
     max_tracks = int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize))
-    track_offset = int(os.getenv('MUSDB_TRACK_OFFSET', 0))
 
     # initiate musdb
     mus = musdb.DB(subsets='test', is_wav=True, mono=args.mono)
+    tracks = None
+    if args.n_random_tracks:
+        print(f'using {args.n_random_tracks} random tracks')
+        tracks = random.sample(mus.tracks, args.n_random_tracks)
+    else:
+        print(f'using tracks 0-MUSDB_MAX_TRACKS')
+        tracks = mus.tracks[:max_tracks]
 
     # exhaustive search over nsgt parameters
-    scales = ['log', 'mel', 'bark']
+    #scales = ['log', 'mel', 'bark']
+    #scales = ['mel', 'bark']
+    scales = ['mel'] # mel scale has lower dimensionality and gives best vocal SDR, top choice
 
-    # start with jumps of 12
-    bins = list(np.arange(12, 193, 12))
+    # start with jumps of 64 bins - go finer granularity after finding some plausible performant ranges
+    #bins = list(np.arange(12, 333, 64))
+    #bins = list(np.arange(204, 333, 32))
+    #bins = list(np.arange(204, 301, 12))
+    #bins = list(np.arange(216, 301, 6))
+    bins = list(np.arange(220, 261, 1))
 
-    # start with jumps of 10
-    fmins = list(np.arange(20,101,10))
+    # start with jumps of 5hz - go finer granularity after
+    #start with 20hz, psychoacoustic minimum - refine after
+    #fmins = [20.0]
+    #fmins = list(np.arange(15,35,2.5))
+    fmins = list(np.arange(24,33,1.0))
 
     scores = defaultdict(list)
+    scores_per_coef = defaultdict(list)
+    coef_count = defaultdict(list)
     n_iter = 0
 
-    for track in mus.tracks[track_offset:max_tracks]:
+    targets = ['drums', 'bass', 'other', 'vocals', 'accompaniment']
+    metrics = ['SDR', 'SIR', 'ISR', 'SAR']
+    header = 'tf_config,'
+    for p in itertools.product(targets, metrics):
+        header += '.'.join(p) + ','
+    header += 'bss_per_coef,coef_size'
+
+    for track in tracks:
         print(f'evaluating track {track.name}')
+
+        print(f'first evaluating control, stft 2048')
+        # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1) - control, stft 2048
+        score, transform = ideal_mask(track, scale='mel', fmin=20, bins=12, alpha=1, binary_mask=False, control=True)
+        tf = ('stft', '2048')
+        scores[tf].append(score)
+        scores_per_coef[tf].append(score/transform.size)
+        coef_count[tf].append(transform.size)
+
         for (scale, fmin, bin_) in itertools.product(scales, fmins, bins):
             print(f'evaluating nsgt {scale} {fmin} {bin_}')
             # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1)
-            score = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, alpha=1, binary_mask=False)
+            score, transform = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, alpha=1, binary_mask=False, control=False)
             scores[(scale, bin_, fmin)].append(score)
+            scores_per_coef[(scale, bin_, fmin)].append(score/transform.size)
+            coef_count[(scale, bin_, fmin)].append(transform.size)
 
             n_iter += 1
 
             # every full iteration over bins, print configs
             if n_iter % len(bins) == 0:
-                print('top 5 tf configs so far, median score (all targets x metrics)')
+                print('top 5 tf configs so far, median score/coefficient count (all targets x metrics)')
 
-                for (tf_conf, scrs) in sorted(scores.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
+                for (tf_conf, scrs) in sorted(scores_per_coef.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
                     # take median across all tracks
-                    med_scrs = np.median(scrs, axis=0)
+                    med_scrs = np.median(scores[tf_conf], axis=0) # take median across all tracks
                     print(f'\t{tf_conf}:\n{print_scores_ndarray(med_scrs)}')
+
+    print('\nCSV: all tf configs, sorted by desc median score/coef count (all targets x metrics)\n')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title('NSGT configs, MUSDB18-HQ BSS metrics')
+
+    cmap = LinearSegmentedColormap.from_list(
+        name="custom",
+        colors=["red", "orange", "yellow", "chartreuse", "green"],
+    )
+
+    all_csv = header
+    for (tf_conf, scrs) in sorted(scores_per_coef.items(), key=lambda item: np.median(item[1]), reverse=True):
+        med_scrs = np.median(scores[tf_conf], axis=0) # take median across all tracks
+
+        med_scr_per_coef = np.median(scrs) # take median across all tracks
+        med_coef_size = np.median(coef_count[tf_conf])
+        tf_conf_name = '-'.join([str(t) for t in tf_conf])
+        all_csv += f"\n{tf_conf_name},{print_scores_csv(med_scrs)[:-1]},{med_scr_per_coef},{med_coef_size}"
+
+    df = pd.read_csv(StringIO(all_csv), index_col=0)
+
+    # don't include the coefficient measures in the coloring
+    #mask = (df == df) & ((df.columns == 'bss_per_coef') | (df.columns == 'coef_size'))
+
+    #sns.heatmap(
+    #    df,
+    #    annot=True,
+    #    cbar=False,
+    #    cmap=cmap,
+    #    fmt=".2f",
+    #    ax=ax)
+
+    #sns.heatmap(
+    #    df,
+    #    annot=True,
+    #    cbar=False,
+    #    cmap=cmap,
+    #    fmt=".2f",
+    #    ax=ax,
+    #    mask=mask,
+    #)
+    #plt.show()
+
+    print(all_csv)

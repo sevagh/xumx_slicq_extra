@@ -15,7 +15,7 @@ import itertools
 controls = ['ibm1', 'ibm2', 'irm1', 'irm2'] 
 
 
-def save_boxplot(pandas_in, pdf_out):
+def save_boxplot(pandas_in, pdf_out, single=False):
     metrics = ['metrics.SDR', 'metrics.SIR', 'metrics.SAR', 'metrics.ISR']
     targets = ['vocals', 'accompaniment', 'drums', 'bass', 'other']
 
@@ -69,32 +69,64 @@ def save_boxplot(pandas_in, pdf_out):
     })
     plt.rcParams.update(params)
 
-    with PdfPages(pdf_out) as pdf:
-        for (target, metric) in itertools.product(targets, metrics):
-            g = seaborn.boxplot(
-                x="score",
-                y="method",
-                hue="control",
-                data=df.loc[(df['target'] == target) & (df['metric'] == metric)],
-                orient='h',
-                order=methods_by_sdr[::-1],
-                hue_order=[True, False],
-                showfliers=False,
-                notch=True,
-            )
-            g.legend_.remove()
-            g.figure.suptitle(f'{target} - {metric}')
-            g.figure.set_size_inches(8.5,11)
-            g.figure.tight_layout()
-            g.figure.savefig(
-                pdf,
-                format='pdf',
-                bbox_inches='tight',
-                dpi=300,
-            )
-            del g
-            gc.collect()
-            plt.clf()
+    if single:
+        with PdfPages(pdf_out) as pdf:
+            for (target, metric) in itertools.product(targets, metrics):
+                g = seaborn.boxplot(
+                    x="score",
+                    y="method",
+                    hue="control",
+                    data=df.loc[(df['target'] == target) & (df['metric'] == metric)],
+                    orient='h',
+                    order=methods_by_sdr[::-1],
+                    hue_order=[True, False],
+                    showfliers=False,
+                    notch=True,
+                )
+                g.legend_.remove()
+                g.figure.suptitle(f'{target} - {metric}')
+                g.figure.set_size_inches(8.5,11)
+                g.figure.tight_layout()
+                g.figure.savefig(
+                    pdf,
+                    format='pdf',
+                    bbox_inches='tight',
+                    dpi=300,
+                )
+                del g
+                gc.collect()
+                plt.clf()
+    else:
+        g = seaborn.FacetGrid(
+            df,
+            row="target",
+            col="metric",
+            row_order=targets,
+            col_order=metrics,
+            size=6,
+            sharex=False,
+            aspect=0.7
+        )
+        g = (g.map(
+            seaborn.boxplot,
+            "score",
+            "method",
+            orient='h',
+            order=methods_by_sdr[::-1],
+            hue_order=[True, False],
+            showfliers=False,
+            notch=True
+        ))
+        plt.setp(g.fig.texts, text="")
+        g.set_titles(col_template="{col_name}", row_template="{row_name}")
+
+        g.fig.tight_layout()
+        plt.subplots_adjust(hspace=0.2, wspace=0.1)
+        g.fig.savefig(
+            pdf_out,
+            bbox_inches='tight',
+            dpi=300
+        )
 
 
 if __name__ == '__main__':
@@ -108,6 +140,11 @@ if __name__ == '__main__':
         'pdf_out',
         type=str,
         help='path to output pdf file',
+    )
+    parser.add_argument(
+        '--single',
+        action='store_true',
+        help='single boxplot per page'
     )
 
     args = parser.parse_args()

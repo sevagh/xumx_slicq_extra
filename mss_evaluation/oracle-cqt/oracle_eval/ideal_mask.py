@@ -201,7 +201,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     max_tracks = int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize))
-    track_offset = int(os.getenv('MUSDB_TRACK_OFFSET', 0))
 
     # initiate musdb
     mus = musdb.DB(subsets='test', is_wav=True, mono=args.mono)
@@ -239,7 +238,7 @@ if __name__ == '__main__':
             {'power': 2, 'binary': True},
     ]
 
-    mss_evaluations = list(itertools.product(mus.tracks[track_offset:max_tracks], tfs, masks))
+    mss_evaluations = list(itertools.product(mus.tracks[:max_tracks], tfs, masks))
 
     for (track, tf_transform, mask) in tqdm.tqdm(mss_evaluations):
         N = track.audio.shape[0]  # remember number of samples for future use
