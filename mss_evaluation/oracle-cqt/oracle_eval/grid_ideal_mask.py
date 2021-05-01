@@ -9,16 +9,12 @@ import random
 import librosa
 import functools
 import argparse
-import seaborn as sns
 import pandas as pd
 from io import StringIO
 import cupy
 from cupy.fft.config import get_plan_cache
 import tqdm
 from collections import defaultdict
-
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
 
 import scipy
 from scipy.signal import stft, istft
@@ -85,7 +81,7 @@ def print_scores_csv(scores):
     return out
 
 
-def ideal_mask(track, scale='log', fmin='20.0', bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False):
+def ideal_mask(track, scale='cqlog', fmin='20.0', bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False):
     N = track.audio.shape[0]
 
     scl = None
@@ -93,7 +89,7 @@ def ideal_mask(track, scale='log', fmin='20.0', bins=12, gamma=25, alpha=2, bina
         scl = MelScale(fmin, 22050, bins)
     elif scale == 'bark':
         scl = BarkScale(fmin, 22050, bins)
-    elif scale == 'log':
+    elif scale == 'cqlog':
         scl = LogScale(fmin, 22050, bins)
     elif scale == 'vqlog':
         scl = VQLogScale(fmin, 22050, bins, gamma=gamma)
@@ -233,32 +229,16 @@ if __name__ == '__main__':
         print(f'using tracks 0-MUSDB_MAX_TRACKS')
         tracks = mus.tracks[:max_tracks]
 
-    # exhaustive search over nsgt parameters
-    #scales = ['log', 'mel', 'bark']
-    #scales = ['mel', 'bark']
-    #scales = ['mel'] # mel scale has lower dimensionality and gives best vocal SDR, top choice
-    #scales = ['vqlog']#, 'log', 'mel', 'bark']
-    scales = ['vqlog', 'mel']
+    # exhaustive search over all nsgt parameters
+    scales = ['vqlog', 'cqlog', 'mel', 'bark']
 
-    # start with jumps of 64 bins - go finer granularity after finding some plausible performant ranges
-    #bins = list(np.arange(12, 333, 64))
-    #bins = list(np.arange(204, 333, 32))
-    #bins = list(np.arange(204, 301, 12))
-    #bins = list(np.arange(216, 301, 6))
-    #bins = list(np.arange(12, 97, 12))
-    #bins = list(np.arange(12, 333, 12))
-    bins = [180, 234]
+    bins = list(np.arange(12, 333, 12))
 
-    # start with jumps of 5hz - go finer granularity after
-    #start with 20hz, psychoacoustic minimum - refine after
-    #fmins = list(np.arange(15.0, 55.0, 1.0))
-    fmins = [20.0, 27.5]
+    fmins = list(np.arange(15.0, 55.0, 5.0))
 
-    #gammas = list(np.arange(15.0, 25.0, 5.0))
-    gammas = [90.0]
+    gammas = list(np.arange(0.0, 100.0, 5.0))
 
     scores = defaultdict(list)
-    scores_per_coef = defaultdict(list)
     coef_count = defaultdict(list)
     n_iter = 0
 
@@ -277,24 +257,30 @@ if __name__ == '__main__':
         score, transform = ideal_mask(track, scale='mel', fmin=20, bins=12, alpha=1, binary_mask=False, control=True)
         tf = ('stft', '2048')
         scores[tf].append(score)
-        scores_per_coef[tf].append(score/transform.size)
         coef_count[tf].append(transform.size)
 
-        for (scale, fmin, bin_, gamma) in itertools.product(scales, fmins, bins, gammas):
-            print(f'evaluating nsgt {scale} {fmin} {bin_} {gamma}')
-            # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1)
-            score, transform = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, gamma=gamma, alpha=1, binary_mask=False, control=False)
-            scores[(scale, bin_, fmin, gamma)].append(score)
-            scores_per_coef[(scale, bin_, fmin, gamma)].append(score/transform.size)
-            coef_count[(scale, bin_, fmin, gamma)].append(transform.size)
+        for (scale, fmin, bin_) in itertools.product(scales, fmins, bins):
+            if scale == 'vqlog':
+                # iterate over variable-q gamma factors separately
+                for gamma in gammas:
+                    print(f'evaluating variable-q nsgt {scale} {fmin} {bin_} {gamma}')
+                    # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1)
+                    score, transform = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, gamma=gamma, alpha=1, binary_mask=False, control=False)
+                    scores[(scale, bin_, fmin, gamma)].append(score)
+                    coef_count[(scale, bin_, fmin, gamma)].append(transform.size)
+                    n_iter += 1
+            else:
+                print(f'evaluating nsgt {scale} {fmin} {bin_}')
+                # use IRM1, ideal ratio mask with magnitude spectrogram (1 = |S|^1)
+                score, transform = ideal_mask(track, scale=scale, fmin=fmin, bins=bin_, gamma=gamma, alpha=1, binary_mask=False, control=False)
+                scores[(scale, bin_, fmin, gamma)].append(score)
+                coef_count[(scale, bin_, fmin, gamma)].append(transform.size)
+                n_iter += 1
 
-            n_iter += 1
-
-            # every full iteration over bins, print configs
+            # every 10 iterations, print leaderboard
             if n_iter % 10 == 0:
-                print('top 10 tf configs so far, median score/coefficient count (all targets x metrics)')
+                print('top 5 tf configs so far, median score/coefficient count (all targets x metrics)')
 
-                #for (tf_conf, scrs) in sorted(scores_per_coef.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
                 for (tf_conf, scrs) in sorted(scores.items(), key=lambda item: np.median(item[1]), reverse=True)[:5]:
                     # take median across all tracks
                     med_scrs = np.median(scores[tf_conf], axis=0) # take median across all tracks
@@ -302,46 +288,18 @@ if __name__ == '__main__':
 
     print('\nCSV: all tf configs, sorted by desc median score/coef count (all targets x metrics)\n')
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_title('NSGT configs, MUSDB18-HQ BSS metrics')
-
-    cmap = LinearSegmentedColormap.from_list(
-        name="custom",
-        colors=["red", "orange", "yellow", "chartreuse", "green"],
-    )
-
     all_csv = header
-    for (tf_conf, scrs) in sorted(scores_per_coef.items(), key=lambda item: np.median(item[1]), reverse=True):
+    for (tf_conf, scrs) in sorted(scores.items(), key=lambda item: np.median(item[1]), reverse=True):
         med_scrs = np.median(scores[tf_conf], axis=0) # take median across all tracks
 
-        med_scr_per_coef = np.median(scrs) # take median across all tracks
         med_coef_size = np.median(coef_count[tf_conf])
+        med_scr_per_coef = np.median(scrs)/med_coef_size # take median across all tracks
+
+        med_coef_size_int = int(med_coef_size)
+
         tf_conf_name = '-'.join([str(t) for t in tf_conf])
-        all_csv += f"\n{tf_conf_name},{print_scores_csv(med_scrs)[:-1]},{med_scr_per_coef},{med_coef_size}"
+        all_csv += f"\n{tf_conf_name},{print_scores_csv(med_scrs)[:-1]},{med_coef_size_int},{med_scr_per_coef}"
 
     df = pd.read_csv(StringIO(all_csv), index_col=0)
-
-    # don't include the coefficient measures in the coloring
-    mask = (df == df) & ((df.columns == 'bss_per_coef') | (df.columns == 'coef_size'))
-
-    sns.heatmap(
-        df,
-        annot=True,
-        cbar=False,
-        cmap=cmap,
-        fmt=".2f",
-        ax=ax)
-
-    sns.heatmap(
-        df,
-        annot=True,
-        cbar=False,
-        cmap=cmap,
-        fmt=".2f",
-        ax=ax,
-        mask=mask,
-    )
-    plt.show()
 
     print(all_csv)
