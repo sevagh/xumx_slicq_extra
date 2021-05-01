@@ -226,7 +226,7 @@ if __name__ == '__main__':
             tmp = {'type': 'nsgt', 'scale': nsgt_conf[0], 'fmin': nsgt_conf[1], 'fmax': nsgt_conf[2], 'bins': nsgt_conf[3]}
             fmin_str = f'{nsgt_conf[1]}'
             fmin_str = fmin_str.replace('.', '')
-            tmp['name'] = f'{nsgt_conf[0]}-{fmin_str}-{nsgt_conf[3]}'
+            tmp['name'] = f'{nsgt_conf[0]}-{nsgt_conf[3]}-{fmin_str}'
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)

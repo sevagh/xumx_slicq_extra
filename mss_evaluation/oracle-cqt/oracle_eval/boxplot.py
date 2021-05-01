@@ -111,6 +111,7 @@ def save_boxplot(pandas_in, pdf_out, single=False):
             seaborn.boxplot,
             "score",
             "method",
+            "control",
             orient='h',
             order=methods_by_sdr[::-1],
             hue_order=[True, False],
@@ -148,4 +149,4 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    save_boxplot(args.pandas_in, args.pdf_out)
+    save_boxplot(args.pandas_in, args.pdf_out, args.single)
