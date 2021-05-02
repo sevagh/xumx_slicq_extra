@@ -54,10 +54,8 @@ def multichan_insgt(C, nsgt):
 
 
 class TrackEvaluator:
-    def __init__(self, tracks, rate, min_N):
+    def __init__(self, tracks):
         self.tracks = tracks
-        self.min_N = min_N
-        self.rate = rate
 
     def eval_control(self):
         return self.ideal_mask(alpha=1, binary_mask=False, control=True)
@@ -78,8 +76,6 @@ class TrackEvaluator:
         bins = int(bins)
         med_sdrs = []
 
-        N = self.min_N
-
         scl = None
         if scale == 'mel':
             scl = MelScale(fmin, 22050, bins)
@@ -92,12 +88,11 @@ class TrackEvaluator:
         else:
             raise ValueError(f"unsupported scale {scale}")
 
-        nsgt = NSGT(scl, self.rate, N, real=True, matrixform=True)
-
         for track in self.tracks:
-            # even nsgt size to save some time
-            track.chunk_start = 0
-            track.chunk_duration = round(self.min_N/track.rate)
+            #print(f'track: {track.name}')
+            N = track.audio.shape[0]
+
+            nsgt = NSGT(scl, track.rate, N, real=True, matrixform=True)
 
             # small epsilon to avoid dividing by zero
             eps = np.finfo(np.float32).eps
@@ -188,29 +183,31 @@ class TrackEvaluator:
                     agg = np.nanmedian([np.float32(f['metrics'][metric]) for f in t['frames']])
                     scores[target_idx, metric_idx] = agg
 
-            med_sdrs.append(np.median(scores))
+            median_sdr = np.median(scores)
+            #print(f'{median_sdr=}')
+            med_sdrs.append(median_sdr)
 
         return np.median(med_sdrs)
 
 
-def optimize(f, bounds, logdir, name, n_iter, n_random):
-    logpath = os.path.join(args.logdir, f"./{name}_logs.json")
-
+def optimize(f, bounds, name, n_iter, n_random, logdir=None):
     optimizer = BayesianOptimization(
         f=f,
         pbounds=bounds,
         verbose=2,
         random_state=1,
     )
-    try:
-        load_logs(optimizer, logs=[logpath])
-        print('loaded previous log')
-    except FileNotFoundError:
-        print('no log found, re-optimizing')
-        pass
+    if logdir:
+        logpath = os.path.join(logdir, f"./{name}_logs.json")
+        try:
+            load_logs(optimizer, logs=[logpath])
+            print('loaded previous log')
+        except FileNotFoundError:
+            print('no log found, re-optimizing')
+            pass
 
-    logger = JSONLogger(path=logpath)
-    optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
+        logger = JSONLogger(path=logpath)
+        optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
 
     print(f'optimizing {name} scale')
     optimizer.maximize(
@@ -254,7 +251,9 @@ if __name__ == '__main__':
         help='bayesian optimization random iterations',
     )
     parser.add_argument(
-        'logdir',
+        '--logdir',
+        default=None,
+        type=str,
         help='directory to store optimization logs',
     )
 
@@ -275,8 +274,7 @@ if __name__ == '__main__':
         print(f'using tracks 0-{max_tracks} from MUSDB18-HQ test set')
         tracks = mus.tracks[:max_tracks]
 
-    min_N = min([track.audio.shape[0] for track in tracks])
-    t = TrackEvaluator(tracks, tracks[0].rate, 8843231)
+    t = TrackEvaluator(tracks)
 
     bins = (12,348)
     fmins = (15.0,60.0)
@@ -293,7 +291,9 @@ if __name__ == '__main__':
         'fmin': fmins
     }
 
-    optimize(t.eval_vqlog, pbounds_vqlog, args.logdir, "vqlog", args.optimization_iter, args.optimization_random)
-    optimize(t.eval_cqlog, pbounds_other, args.logdir, "cqlog", args.optimization_iter, args.optimization_random)
-    optimize(t.eval_mel, pbounds_other, args.logdir, "mel", args.optimization_iter, args.optimization_random)
-    optimize(t.eval_bark, pbounds_other, args.logdir, "bark", args.optimization_iter, args.optimization_random)
+    #t.eval_control()
+
+    optimize(t.eval_vqlog, pbounds_vqlog, "vqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir)
+    optimize(t.eval_cqlog, pbounds_other, "cqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir)
+    optimize(t.eval_mel, pbounds_other, "mel", args.optimization_iter, args.optimization_random, logdir=args.logdir)
+    optimize(t.eval_bark, pbounds_other, "bark", args.optimization_iter, args.optimization_random, logdir=args.logdir)
