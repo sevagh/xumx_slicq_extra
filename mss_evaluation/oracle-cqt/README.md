@@ -1,21 +1,13 @@
-# Oracle Source Separation Methods
+# Oracle + CQT
 
-## Installation
 
-Install `pipenv` using `pip install pipenv`. Then run
+|Transform | Scale | Fmin (Hz) | Bins | Offset (Hz) | Drum SDR | Bass SDR | Vocals SDR | Other SDR |
+|----------|-------|---|------|-------------|----------|----------|------------|-----------|
+| STFT     | Linear | 1/df | 2048 | 0 | 5.907 |  4.156 | 4.753 | 10.249 |
+| VQ-NSGT  | Variable-Q | 20 | 12 | 25 |  5.435 |  4.251 | 3.659 | 7.963 |
+| CQ-NSGT  | Constant-Q | 20 | 12 | 0 | -114.455 | -69.013 | -110.899 |  -111.531 |
 
-```
-pipenv install
-```
+vqlog-12-20.0-0.0	0	12		-5.184	-80.031	-26.188			-28.068	-27.219			-68.792	-27.584		4.791	-69.293	-40.925		-4.838	-58.25	-40.926	-9.48E-07	45647399
 
-in the source folder to install all python requirements. Alternatively you can use `pip install -r requirements.txt` to install the requirements using `pip` instead of `pipenv`.
+stft-2048	0	0		8.904	9.999	7.581		6.674	6.479	3.509		5.018	8.304	4.704		18.572	14.766	11.882		17.66	23.657	16.646	1.02E-06	9064587.5
 
-## Usage
-
-Each Oracle method comes with its a command line argument parser. To run one of the method just numerically
-
-```
-python METHOD_NAME.py --eval_dir ./Evaluation_Dir --audio_dir ./Audio_Dir
-```
-
-you can omit either `--eval_dir` or `audio_dir` (or both) to not write out the audio_files to disk or do not do the evaluation.
