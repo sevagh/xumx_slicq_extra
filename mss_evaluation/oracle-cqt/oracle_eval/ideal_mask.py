@@ -15,7 +15,7 @@ import scipy
 from scipy.signal import stft, istft
 
 # use CQT based on nonstationary gabor transform
-from nsgt import NSGT, OctScale, MelScale, LogScale, BarkScale
+from nsgt import NSGT, MelScale, LogScale, BarkScale, VQLogScale
 
 import json
 from types import SimpleNamespace
@@ -53,14 +53,14 @@ class TFTransform:
         self.nsgt = None
         if use_nsgt:
             scl = None
-            if tf_transform.scale == 'oct':
-                scl = OctScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            elif tf_transform.scale == 'mel':
+            if tf_transform.scale == 'mel':
                 scl = MelScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
             elif tf_transform.scale == 'bark':
                 scl = BarkScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            elif tf_transform.scale == 'log':
+            elif tf_transform.scale == 'cqlog':
                 scl = LogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
+            elif tf_transform.scale == 'vqlog':
+                scl = VQLogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins, gamma=tf_transform.gamma)
             else:
                 raise ValueError(f"unsupported scale {tf_transform.scale}")
 
@@ -213,20 +213,18 @@ if __name__ == '__main__':
         tmp = None
         for stft_win in config['stft_configs']['window_sizes']:
             tmp = {'type': 'stft', 'window': stft_win}
-            tmp['name'] = f'{stft_win}'
+            tmp['name'] = f's{str(stft_win)[0]}' # use first digit of window size
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)
-        for nsgt_conf in itertools.product(
-                config['nsgt_configs']['scale'],
-                config['nsgt_configs']['fmin'],
-                config['nsgt_configs']['fmax'],
-                config['nsgt_configs']['bins'],
-                ):
-            tmp = {'type': 'nsgt', 'scale': nsgt_conf[0], 'fmin': nsgt_conf[1], 'fmax': nsgt_conf[2], 'bins': nsgt_conf[3]}
-            fmin_str = f'{nsgt_conf[1]}'
+        for nsgt_conf in config['nsgt_configs']:
+            tmp = {'type': 'nsgt', 'scale': nsgt_conf['scale'], 'fmin': nsgt_conf['fmin'], 'fmax': 22050, 'bins': nsgt_conf['bins']}
+            fmin_str = f"{nsgt_conf['fmin']}"
             fmin_str = fmin_str.replace('.', '')
-            tmp['name'] = f'{nsgt_conf[0]}-{nsgt_conf[3]}-{fmin_str}'
+            tmp['name'] = f"{nsgt_conf['scale']}"
+
+            if nsgt_conf.get('gamma', None):
+                tmp['gamma'] = nsgt_conf['gamma']
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)

@@ -21,82 +21,10 @@ from nsgt import NSGT, OctScale, MelScale, LogScale, BarkScale, VQLogScale
 import json
 from types import SimpleNamespace
 
+from .ideal_mask import multichan_nsgt, multichan_insgt, TFTransform
+
 
 mempool = cupy.get_default_memory_pool()
-
-
-def multichan_nsgt(audio, nsgt):
-    n_chan = audio.shape[1]
-    Xs = []
-    for i in range(n_chan):
-        Xs.append(np.asarray(nsgt.forward(audio[:, i])))
-    return np.asarray(Xs).astype(np.complex64)
-
-
-def multichan_insgt(C, nsgt):
-    n_chan = C.shape[0]
-    rets = []
-    for i in range(n_chan):
-        C_chan = C[i, :, :]
-        inv = nsgt.backward(C_chan)
-        rets.append(inv)
-    ret_audio = np.asarray(rets)
-    return ret_audio.T
-
-
-class TFTransform:
-    def __init__(self, ntrack, fs, tf_transform):
-        use_nsgt = (tf_transform.type == "nsgt")
-
-        self.nsgt = None
-        self.tf_transform = tf_transform
-        self.N = ntrack
-        self.nsgt = None
-        if use_nsgt:
-            scl = None
-            if tf_transform.scale == 'oct':
-                scl = OctScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            elif tf_transform.scale == 'mel':
-                scl = MelScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            elif tf_transform.scale == 'bark':
-                scl = BarkScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            elif tf_transform.scale == 'log':
-                scl = LogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            elif tf_transform.scale == 'vqlog':
-                #vq_bins = [12, 24, 48, 96, 128]
-                scl = VQLogScale(tf_transform.fmin, tf_transform.fmax, tf_transform.bins)
-            else:
-                raise ValueError(f"unsupported scale {tf_transform.scale}")
-
-            print(f'\tscale: {tf_transform.scale}')
-            print(f'\tfmin: {tf_transform.fmin}')
-            print(f'\tvariable Q: {np.unique(scl.Q())} Hz')
-            #print('\tconstant-Q: {0:.2f} Hz'.format(scl.Q()))
-            print(f'\tbins: {tf_transform.bins}')
-            pitches, _ = scl()
-            print(f'\ttotal frequencies: {len(pitches)}')
-            print(f'\tpitches')
-            for octave_idx in range(12, min(len(pitches), 24), 12):
-                octave_pitches = pitches[octave_idx-12:octave_idx]
-
-                print('\t\t')
-                [print('{0:.2f},{1}\t'.format(p, librosa.hz_to_note(p)), end='') for p in octave_pitches]
-            print()
-
-            # nsgt has a multichannel=True param which blows memory up. prefer to do it myself
-            self.nsgt = NSGT(scl, fs, self.N, real=True, matrixform=True)
-
-    def forward(self, audio):
-        if not self.nsgt:
-            return stft(audio.T, nperseg=self.tf_transform.window)[-1].astype(np.complex64)
-        else:
-            return multichan_nsgt(audio, self.nsgt)
-
-    def backward(self, X):
-        if not self.nsgt:
-            return istft(X)[1].T[:self.N, :].astype(np.float32)
-        else:
-            return multichan_insgt(X, self.nsgt)
 
 
 def describe_tf(track, tf):
@@ -125,7 +53,7 @@ def describe_tf(track, tf):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Evaluate Ideal Ratio Mask'
+        description='describe tf configs'
     )
     parser.add_argument(
         'config_file',
