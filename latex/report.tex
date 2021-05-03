@@ -101,7 +101,21 @@
 
 \subsection{Motivation}
 
+The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the pressure wave. Another way to characterize acoustic signals is by their frequency components. The Fourier transform decomposes time-domain signals into their constituent frequency components, by means of a sum of sinusoids that oscillate infinitely in time -- in other words, the Fourier transform gives us knowledge of which frequencies are present in a signal, but not how they vary with time. However, many important signals such as speech and music contain frequency components that evolve with time, such as the basic melody.
+
+For this class of signal, joint time-frequency analysis is an important tool. Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and performing a Fourier analysis of each windowed section. This is also referred to as the short-time Fourier transform (STFT), and the output of the STFT is visually represented as a spectrogram. Since time and frequency are Fourier duals of each other, time-frequency analysis is subject to the Heisenberg uncertainty principal \todo{cite me}. This means that when performing time-frequency analysis, one cannot be arbitrarily precise in both time and frequency, and must trade one for the other by varying the duration of the STFT window duration.
+
+Musical signals have characteristics that lead to conflicting requirements in the spectrogram. In the low frequency region, music needs to be analyzed with a high frequency resolution STFT -- notes in the low frequencies lay the harmonic basis of a song, and this is also reflected by the psychoacoustic system and cochlea, which can separate low frequencies more finely than high frequencies. Conversely, in the high frequency, music needs to be analyzed with a high time resolution STFT -- transients and broadband sounds which are useful for timbre identification and rhythm among others, have a very quick attack and decay.
+
+The Constant-Q transform (CQT), first proposed by \textcite{jbrown} and refined by \textcite{klapuricqt}, is a time-frequency transform obtained by varying the window size by frequency region, designed for musical signals. Recent work by \textcite{balazs} resulted in the creation of time-frequency transforms with perfect inversions and arbitrary frequency spacing, called the Nonstationary Gabor transform (NSGT). The NSGT is flexible and can be used to create a CQT (also called the CQ-NSGT), or other such as the Mel or Bark psychoacoustic scales.
+
+Most recently, deep learning solutions for music information tasks have achieved state-of-the-art results, such as Bock's onset detection and beat tracking algorithms, and Open-Unmix for music source separation, based on the spectrogram. On the other hand, direct waveform models are achieving success, bypassing the difficulty of choosing an optimal TFR/latent space representation with the STFT window size.
+
+The motivation for this thesis is to replace the STFT-based spectrogram with different configurations of the NSGT in deep learning solutions in two problem spaces -- in onset detection and beat tracking, and in music source separation.
+
 \subsection{Thesis objective}
+
+The main objective of this thesis is to demonstrate the viability of swapping the STFT with NSGT in spectrogram-based algorithms or machine learning models for MIR. My hypothesis is that by choosing the appropriate parameters for the NSGT to suit the specific task, one can achieve better performance than using the standard STFT. This could also represent a way to retrofit or improve previous state-of-the-art models without significantly changing the model architecture, and surpassing the trend of new end-to-end waveform models such as Demucs.
 
 \subsection{Related work}
 
