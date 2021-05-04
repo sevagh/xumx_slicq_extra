@@ -127,9 +127,9 @@ def save_boxplot(pandas_in, pdf_out, single=False):
         g.set_titles(col_template="{col_name}", row_template="{row_name}")
 
         g.fig.tight_layout()
-        plt.subplots_adjust(hspace=0.2, wspace=0.1)
+        plt.subplots_adjust(hspace=0.2, wspace=0.3)
         #plt.subplots_adjust(hspace=0.15, wspace=0.05)
-        g.fig.set_size_inches(10,18)
+        g.fig.set_size_inches(12,18)
         g.fig.savefig(
             pdf_out,
             bbox_inches='tight',
