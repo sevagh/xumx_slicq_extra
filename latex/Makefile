@@ -1,14 +1,11 @@
 report:
-	latexmk report.tex
-
-report-dev:
-	latexmk -pvc report
+	latexmk -pvc report.tex
 
 proposal:
-	latexmk proposal.tex
+	latexmk -pvc proposal.tex
 
-proposal-dev:
-	latexmk -pvc proposal
+presentation:
+	latexmk -pvc presentation.tex
 
 clean:
 	latexmk -C

@@ -7,6 +7,7 @@
 \usepackage[titletoc,title]{appendix}
 \usepackage{amssymb}
 \usepackage{makecell}
+\usepackage{pdfpages}
 \usepackage{wrapfig}
 \usepackage{verbatim}
 \usepackage{listings}
@@ -101,13 +102,13 @@
 
 \subsection{Motivation}
 
-The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the pressure wave. Another way to characterize acoustic signals is by their frequency components. The Fourier transform decomposes time-domain signals into their constituent frequency components, by means of a sum of sinusoids that oscillate infinitely in time -- in other words, the Fourier transform gives us knowledge of which frequencies are present in a signal, but with no time information. However, many important signals such as speech and music contain frequency components that evolve with time, such as the basic melody.
+The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the pressure wave. Another way to characterize acoustic signals is by their frequency components. The Fourier transform decomposes time-domain signals into their constituent frequency components, by means of a sum of sinusoids that oscillate infinitely in time -- in other words, the Fourier transform gives us knowledge of which frequencies are present in a signal, with no temporal information. However, many important signals such as speech and music contain frequency components that evolve with time, such as the basic melody.
 
-For this class of signal, joint time-frequency analysis is an important tool. Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and performing a Fourier analysis of each windowed section. This is also referred to as the short-time Fourier transform (STFT), and the output of the STFT is visually represented as a spectrogram. Since time and frequency are Fourier duals of each other, time-frequency analysis is subject to the Heisenberg uncertainty principal \todo{cite me}. This means that when performing time-frequency analysis, one cannot be arbitrarily precise in both time and frequency, and must trade one for the other by varying the duration of the STFT window duration.
+For this class of signal, joint time-frequency analysis is an important tool. Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and performing a Fourier analysis of each windowed section. This is also referred to as the short-time Fourier transform (STFT), and the output of the STFT is visually represented as a spectrogram. Since time and frequency are Fourier duals of each other, time-frequency analysis is subject to the Heisenberg uncertainty principal \todo{cite me}. This means that when performing time-frequency analysis, one cannot be arbitrarily precise in both time and frequency, and must trade one for the other by varying the duration of the STFT window.
 
-Musical signals have characteristics that lead to conflicting requirements in the spectrogram. In the low frequency region, music needs to be analyzed with a high frequency resolution STFT -- notes in the low frequencies lay the harmonic basis of a song, and this is also reflected by the psychoacoustic system and cochlea, which can separate low frequencies more finely than high frequencies. Conversely, in the high frequency, music needs to be analyzed with a high time resolution STFT -- transients and broadband sounds which are useful for timbre identification and rhythm among others, have a very quick attack and decay.
+Musical signals have characteristics that lead to conflicting requirements in the STFT. In the low frequency region, music needs to be analyzed with long-duration windows for a high, or fine, frequency resolution -- notes in the low frequencies lay the harmonic basis of a song, and this is also reflected by the psychoacoustic system and cochlea, which can separate low frequencies more finely than high frequencies. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows.
 
-The Constant-Q transform (CQT), first proposed by \textcite{jbrown} and refined by \textcite{klapuricqt}, is a time-frequency transform obtained by varying the window size by frequency region, designed for musical signals. Recent work by \textcite{balazs} resulted in the creation of time-frequency transforms with perfect inversions and arbitrary frequency spacing, called the Nonstationary Gabor transform (NSGT). The NSGT is flexible and can be used to create a CQT (also called the CQ-NSGT), or other such as the Mel or Bark psychoacoustic scales.
+The Constant-Q transform (CQT), first proposed by \textcite{jbrown} and refined by \textcite{klapuricqt}, is a time-frequency transform obtained by varying the window size by frequency region, designed for musical signals by operating on a log frequency scale. Recent work by \textcite{balazs} resulted in the creation of time-frequency transforms with perfect inversions and arbitrary frequency scales, called the Nonstationary Gabor transform (NSGT). The NSGT is flexible and can be used to analyze signals with a logarithmic or Western pitch scale (i.e., the CQT or CQ-NSGT), or other useful frequency scales such as the Mel and Bark psychoacoustic scales.
 
 Most recently, deep learning solutions for music information tasks have achieved state-of-the-art results, such as Bock's onset detection and beat tracking algorithms, and Open-Unmix for music source separation, based on the spectrogram. On the other hand, direct waveform models are achieving success, bypassing the difficulty of choosing an optimal TFR/latent space representation with the STFT window size.
 
@@ -153,6 +154,14 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 
 \todo[inline]{whats the output, what does it mean, how does it relate to the FFT coefficients, time-frequency matrix}
 
+\subsection{Common frequency scales and examples}
+
+\subsubsection{Constant-Q transform with the log scale}
+
+\subsubsection{Variable-Q transform}
+
+\subsubsection{Mel and Bark}
+
 \vfill
 \clearpage
 
@@ -190,15 +199,7 @@ The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 data
 
 In modern music source separation, the stems of MUSDB18 have determined the four most common sources to separate -- drums, bass, vocals, and other. SigSep's own network, Open-Unmix, is trained only on MUSDB18, and produces near-state-of-the-art results. The absolute state-of-the-art crown is jointly held by Conv-Tasnet and Demucs, both of which surpass Open-Unmix. Both models operate directly on the waveform domain, which indicates that they could surpass the maximum possible poerformance of time-frequency masking approaches, as is done in speech separation. However, in practise they are still below the limits of masking-based approaches.
 
-\subsection{NSGTs for music source separation}
-
-\subsubsection{Constant-Q transform}
-
-\subsubsection{ERB and the Variable-Q transform}
-
-\subsubsection{Mel and Bark NSGT}
-
-\subsection{Surpassing the ideal oracle mask}
+\subsection{Surpassing the STFT ideal oracle mask}
 
 The first experiment to run is to discover which configuration of the NSGT has the potential to surpass the maximum performance of time-frequency masking using the spectrogram. Given ground truth data, such as what is available in MUSDB18, we have available to us the individually recorded sources for each track. From this, we can compute the ideal or oracle masks::
 
@@ -217,55 +218,75 @@ Finally, using these pairs of $x, y$, we can get the maximum possible BSS metric
 
 Approaching or surpassing the ideal mask performance is a common benchmark in source separation literature. \todo{weak} Demucs talks about it but doesn't achieve it.
 
+\subsubsection{BSS and NSGT performance optimizations}
 
 \subsubsection{Evaluated NSGT parameters}
 
-A testbench was designed to select 5 random tracks from MUSDB18-HQ at a time and evaluate a range of NSGT parameters. The same 5 random tracks are re-used by explicitly setting the Python RNG seed to a fixed integer. This way repeated experiments would be using the same tracks, creating a consistent evaluation. The tracks are split into the first 12 10 second chunks (representing 2 minutes of music), and the bottom half of the configurations in median SDR score are pruned after each chunk to reduce the solution space of the parameter search.
+The space of possible NSGT parameters is large. First, there are multiple frequency scales to choose from -- the log (or octave) scale is the case of the CQT, but the NSGT can also use the Mel and Bark psychoacoustic scales. For the frequency bins, the original CQT papers \cite{klapuricqt, invertiblecqt} use multiples of 12 bins or pitches per octave (based on the 12-tone pitch scale), and use one or many octaves, leading to CQTs with 12-96 frequency bins in steps of 12. When using the Mel or Bark scales however, there is no need to continue with the 12-tone pitch per octave strategy, since we are already departing from music theory. Also, bins above 96 are not described in the literature, but without a good justification. Therefore, the range of bins evaluated are integers between 12-348, not just multiples of 12.
 
-Table \ref{table:nsgtparamsirm} contains the parameter ranges of the evaluated NSGT configs and the rationale for their selection. The maximum frequency was fixed to 22050 (or 44100/2), the Nyquist frequency of MUSDB18-HQ. The median score across all targets' SDR metric was considered to rank the configurations, and low performers (bottom 100) were periodically pruned during the testbench to reduce runtime.
+The minimum and maximum frequencies of the scales are also configurable. To eliminate one parameter from the evaluation, the maximum frequency was fixed at 22050 Hz, or the Nyquist rate, half of the sampling rate of 44.1 kHz in MUSDB18-HQ. The minimum frequency is varied between 15-60 Hz (below the 20 Hz limit of human hearing\todo{citeme}, up to 60 Hz to include the value of 57 Hz used in \cite{klapuricqt}). Finally, the variable-Q log scale introduces the additional parameter of $\gamma$ for the frequency offset, which is varied between 0-100 Hz.
+
+The BSS evaluation is computationally expensive -- for an average track in MUSDB18-HQ, it takes 30 seconds to compute all of the BSS metrics, even after the significant performance optimizations described previously. For a more fair evaluation, 3 separate randomly-selected tracks from the MUSDB18-HQ test set are considered (with a fixed random seed for consistency). We would prefer to find an NSGT configuration that performs best across multiple tracks, and not overfit to one particular song. For 3 songs, the BSS evaluation of the ideal magnitude ratio mask for a single configuration of NSGT therefore takes 1.5 minutes. Although there are 4 possible types of oracle mask based on spectrograms (ideal magnitude binary mask, ideal power binary mask, ideal magnitude ratio mask, ideal power ratio mask), for the optimization process the most common case of ideal ratio magnitude mask is used.
+
+With all of this information in mind, an exhaustive grid search across all NSGT configurations is not feasible. The Bayesian optimization technique \cite{bayesian} was selected, as it is ``an approach to optimizing objective functions that take a long time (minutes or hours) to evaluate'' and ``best-suited for optimization over continuous domains of less than 20 dimensions.'' The open-source Python library \textit{BayesianOptimization}\footnote{\href{https://github.com/fmfn/BayesianOptimization}{https://github.com/fmfn/BayesianOptimization}} was used in the testbench implementation.
+
+The Bayesian optimization process considers a black-box function (that being optimized) which takes varying input parameters and outputs a single scalar value. The function was designed to accept the configuration of the NSGT as an input, and return a single scalar value representing the median SDR score with the ideal magnitude ratio mask across all 4 MUSDB18-HQ targets (drums, vocals, bass, other) and across the 3 tracks. A different value can be returned to target different aspects of source separation performance -- for example, one could optimize on the SAR if their primary goal is to reduce artifacts. However, SDR is the most commonly used single-value metric to demonstrate overall source separation effectiveness in literature.
+
+The Bayesian optimization process can additionally perform some random parameter selections in the beginning, to help improve the subsequent iterative optimization. Table \ref{table:nsgtparamsirm} contains the parameter ranges of the evaluated NSGT configs and the number of Bayesian optimization iterations. Table \ref{table:nsgtbayesresults} shows the best configurations selected by the optimization process, compared to the control ideal ratio magnitude mask performance of the STFT with a window size of 2048.
 
 \begin{table}[ht]
 	\centering
 \begin{tabular}{ |l|l|l|c|c|c| }
 	 \hline
-	  Parameter & Values & Rationale \\
+	  Scale & Parameters & Random iter & Optimization iter \\
 	 \hline
 	 \hline
-	 Scale & CQ-Log, VQ-Log, Bark, Mel & dabest \\
+	 VQ-Log & 12-348 bins, 15-60 Hz fmin, 0-100 Hz $\gamma$ & 20 & 180 \\
 	 \hline
-	 Bins & 12-348, steps of 12 & \makecell[l] { Constant-Q transform is based on the \\ 12-tone pitch scale and bins \\ are commonly given in multiples of 12 } \\
+	 CQ-Log & 12-348 bins, 15-60 Hz fmin & 20 & 180 \\
 	 \hline
-	 Fmin & 15-60 Hz, steps of 0.1 Hz & \makecell[l] { Starting frequency band, from slightly below \\ the psychoacoustic limit of 20Hz \\ and extending to 60Hz to include 32.7, 57Hz } \\
+	 Mel & 12-348 bins, 15-60 Hz fmin & 20 & 180 \\
 	 \hline
-	 Gamma & 0-100 Hz, steps of 1 Hz & \makecell[l] { \textbf{VQ-Log only}\\Pick low values in a neighborhood \\ near 25 Hz cite suggestion } \\
+	 Bark & 12-348 bins, 15-60 Hz fmin & 20 & 180 \\
 	 \hline
 \end{tabular}
-	\caption{NSGT parameter ranges evaluated}
+	\caption{NSGT parameter ranges evaluated by Bayesian optimization}
 	\label{table:nsgtparamsirm}
 \end{table}
 
-Note that although the variable-Q transform (VQT) using the VQ-Log scale dramatically improves on the performance of the CQ-Log scale, the Bark and Mel scales outperform both. Several plots of the intermediate results are shown in figure \ref{fig:melnsgt}. One can observe that, ignoring anomalies, the best performers are in the region of 230--250 bins, using the Mel scale, and a starting frequency between 25-30 Hz.
-
-The results led to the best NSGT selected as the Mel-frequency NSGT using 234 frequency bins and a starting frequency of 27.5 Hz. Further refinement would have been possible, such as reducing the bin step to 1 bin, or the frequency step to 0.1 Hz, but as mentioned, the resulting testbenches would be infeasible to run due to the large number of configurations. Moreover, the value of 27.5 Hz is coincidental with the lowest frequency on a standard piano, providing additional musical justification for its use.
-
-\begin{figure}[ht]
+\begin{table}[ht]
 	\centering
-	\includegraphics[width=16cm]{./mel_nsgt_params.png}
-	\caption{SDR scores of evaluated NSGT configurations}
-	\label{fig:melnsgt}
-\end{figure}
+\begin{tabular}{ |l|l|l|c|c|c| }
+	 \hline
+	  Transform & Parameters & IRM1 SDR \\
+	 \hline
+	 \hline
+	 STFT (control) & window = 2048 & 180 \\
+	 \hline
+	 NSGT, CQ-Log & 138 bins, 47.3 Hz fmin & 7.2 \\
+	 \hline
+	 NSGT, VQ-Log & 134 bins, 47.3 Hz fmin, 1.7 Hz gamma & 7.2 \\
+	 \hline
+	 NSGT, Mel & 263 bins, 24.9 Hz fmin & 7.44 \\
+	 \hline
+	 NSGT, Bark & 239 bins, 30.1 Hz fmin & 7.45 \\
+	 \hline
+\end{tabular}
+	\caption{Best NSGT configurations selected by Bayesian optimization}
+	\label{table:nsgtbayesresults}
+\end{table}
 
-\subsubsection{BSS performance optimizations}
+\subsubsection{NSGT oracle mask results}
 
-\subsubsection{NSGT ideal mask results}
+\includepdf[pages=-,pagecommand={},width=\textwidth]{oracle_boxplot.pdf}
 
-\subsection{Advancing the state-of-the-art with the NSGT}
+\subsection{Open-Unmix-NSGT}
 
 \todo[inline]{better hope umx shines here}
 
-\subsubsection{Adapting Open-Unmix to use the NSGT}
+\subsubsection{Open-Unmix}
 
-\subsubsection{Network size and training}
+\subsubsection{NSGT adaptation}
 
 \subsubsection{Results}
 

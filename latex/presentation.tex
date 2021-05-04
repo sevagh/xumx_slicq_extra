@@ -49,6 +49,7 @@
   \clearfield{doi}%
   \clearfield{journal}%
   \clearfield{booktitle}%
+  \clearfield{isbn}%
 }
 
 \begin{document}
@@ -103,7 +104,7 @@
 
 \begin{frame}
 	\frametitle{Klapuri CQT}
-	Klapuri's CQT implementation is used in librosa, and up until recently, in MATLAB's CQT. According to \footcite{cqtklapuri}, ``the CQT is well-motivated from both musical and perceptual viewpoints'':
+	Klapuri's CQT implementation is used in librosa, and up until recently, in MATLAB's CQT. According to \footcite{klapuricqt}, ``the CQT is well-motivated from both musical and perceptual viewpoints'':
 	\begin{enumerate}
 		\item
 			\textbf{Frequency spacing for music:} Fundamental frequencies (F0s) of the tones in Western music are geometrically spaced
@@ -118,7 +119,7 @@
 
 \begin{frame}
 	\frametitle{Problems so far}
-	Why is the CQT not popular and used everywhere in place of the STFT? According to \footcite{cqtklapuri}:
+	Why is the CQT not popular and used everywhere in place of the STFT? According to \footcite{klapuricqt}:
 	\begin{itemize}
 		\item
 			Computational efficiency - CQT is expensive (jbrown, jbrown + msp paper, followed by klapuri)
@@ -156,7 +157,7 @@
 		\item
 			Perfect inversion solved by NSGT \footcite{invertiblecqt}. Python library: \href{https://github.com/grrrr/nsgt}{https://github.com/grrrr/nsgt}
 		\item
-			Make it look like an STFT in a rectangular matrix: both contemporary methods do this \footcite{cqtklapuri}, \footcite{invertiblecqt}
+			Make it look like an STFT in a rectangular matrix: both contemporary methods do this \footcite{klapuricqt}, \footcite{invertiblecqt}
 		\item
 			Still computationally more expensive than the STFT
 	\end{enumerate}
@@ -172,9 +173,9 @@
 	Beat tracking largely depends on onsets, and sharper transient resolution and well-defined notes on a musical scale could allow for better distinguishing of both percussive and non-percussive onsets. Clear SOTA to beat
 \end{frame}
 
-
 \begin{frame}
-	\frametitle{Chapter 1 -- time-frequency analysis of music signals and the STFT}
+	\frametitle{Chapter 2 -- Short-time Fourier Transform}
+	(\textbf{Chapter 1 - intro, motivation, etc.})
 	Intro to discrete-time audio signals, sample rate, Fourier transform, frequency/spectral analysis\\\ \\
 	Gabor time-frequency uncertainty principal (and how we have to trade off time vs. frequency in the spectrogram), Gabor transform i.e. the first published use of the STFT, origins of the windowed FFT aka STFT (independently discovered but now merged in a unified theory)\\\ \\
 	Common STFT operations or post-processing -- magnitude spectrograms, power spectrograms, mel spectrograms, log spectrograms, mfcc\\\ \\
@@ -182,7 +183,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Chapter 2 -- the CQT and NSGT for varying time-frequency analysis}
+	\frametitle{Chapter 2 -- Nonstationary Gabor Transform}
 	History of CQT (jbrown, klapuri, nsgt). NSGT and how the CQT can be written as the NSGT with octave (and log/mel/bark) frequency scales\\\ \\
 	Relation to the STFT -- time axis, frequency axis, coefficient values. Dimensionality -- e.g. $N \times M$  STFT matrix $\rightarrow$ $? \times ?$ CQT matrix. Computation: describe how many FFTs are applied, how many windows/filterbank\\\ \\
 	Time-frequency properties, quantified -- e.g. ``with a 24-bin CQT, it has 1.3ms transient resolution in the frequency range f1-f2'' Relate this to music, e.g. ``percussion is known to have an attack time of 1.3ms'' or how a wide frequency range is necessary for bass guitar analysis\\
@@ -190,7 +191,40 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 \end{frame}
 
 \begin{frame}
-	\frametitle{Chapter 3 -- CQT for onset detection}
+	\frametitle{Chapter 4 -- NSGT for music source separation}
+	Idea: replace STFT with NSGT in source separation (\textcolor{ForestGreen}{\textbf{VALIDATED}})\\
+	Hypothesis: music source separation depends on transform sparsity of instruments \footcite{musicsepgood}. The NSGT, by representing music signals better, may lead to a higher quality separation
+	\vspace{0.5em}
+	We can first focus on the IRM -- (oracle) ideal ratio mask, representing the theoretical  best performance of spectral masking based music source separation algorithms \footcite{irm}, \footcite{sisec2018}, \footcite{vincent07}\\
+	\vspace{0.5em}
+	Experiments:
+	\begin{enumerate}
+		\item
+			Beat the STFT ideal mask performance with NSGT (shows theoretical max performance, but not an actual working separation system yet) -- search for the best config
+		\item
+			Adapt Open-Unmix (recent modern SOTA spectrogram-based separation network) to use NSGT (aka UMX-NSGT) and beat Demucs (waveform-based model which beats Open-Unmix)
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music source separation objective evaluation}
+	Evaluations not based on human subjective analysis:
+	\begin{itemize}
+		\item
+			Industry standard is BSS \footcite{bss} used in SiSec 2018 campaign for music source separation \footcite{sisec2018}. BSS is used for recently published top source separation models -- even in bleeding-edge waveform-based end-to-end neural waveform models: \href{https://github.com/facebookresearch/demucs}{https://github.com/facebookresearch/demucs}
+		\item
+			Industry standard dataset is MUSDB18 and MUSDB18-HQ \footcite{musdb18, musdb18-hq}
+		\item
+			Used both in 622 so I'm equipped to evaluate
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music source separation -- work done so far}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Chapter 4 -- NSGT for onset detection and/or beat tracking}
 	Experiment idea (\textcolor{red}{\textbf{UNVALIDATED}}) - but there is precedent\footcite{beatnsgt}:
 	\begin{enumerate}
 		\item
@@ -202,138 +236,7 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 		\item
 			First, redo paper recreation -- i.e, get the expected 86\% and 85\% RNN and CNN onset detection F-score with the standard 3 STFT model. Then, replace with single-CQT (or multi-CQT) architecture and see what happens
 	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Onset detection -- ML skills}
-	\begin{itemize}
-		\item
-			Nestor has been giving Junhao good tips on exactly/100\% reproducible ML research
-		\item
-			E.g. random number seed, batches, epochs, learning rate, etc. all committed to git repo
-		\item
-			Onset detection = my chance to apply the same rigor, and also learn more about deep learning best practises
-		\item
-			Generate 100\% reproducible variants of:
-			\begin{enumerate}
-				\item
-					Reference RNN/CNN of B{\"o}ck
-				\item
-					CQT variants (mel, octave, bark, whatever)
-			\end{enumerate}
-		\item
-			Compare things like error, accuracy, learning convergence, size of network, etc.
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Chapter 4 -- CQT for music source separation}
-	Idea: replace STFT with CQT in source separation (\textcolor{ForestGreen}{\textbf{VALIDATED}})\\
-	\vspace{0.5em}
-	Without actually working on any single model, we can focus on the IRM -- (oracle) ideal ratio mask, representing the theoretical  best performance of spectral masking based music source separation algorithms \footcite{irm}, \footcite{sigsep2018}, \footcite{vincent07}\\
-	\vspace{0.5em}
-	Hypothesis: ``is it possible to surpass the best possible music source separation performance based on spectral masking by using CQT masking instead of STFT?''\\
-	\vspace{0.5em}
-	Bleeding edge -- today, best waveform based NNs (e.g. demucs) tout that they surpassed the previous SOTA spectrogram-based models (2018-2019) by beating the IRM. Tagline of new SOTA end-to-end waveform based models is ``surpassing ideal time-frequency mask''
-\end{frame}
-
-\begin{frame}
-	\frametitle{Music sep -- computational skills}
-	\begin{itemize}
-		\item
-			I have forked nsgt and SigSep mus-eval code to apply CUDA with cupy wherever possible (did some line-by-line profiling to find code hotspots, typically in the fft/ifft routines -- unsurprising)
-		\item
-			MUSDB18-HQ test set has 51 tracks
-		\item
-			Got computation time per track of MUSDB18-HQ down from 3 minutes 20 seconds, to under 30 seconds with the following tweaks:
-			\begin{enumerate}
-				\item
-					float32/complex64 instead of 64/128
-				\item
-					CUDA/cupy-accelerated NSGT
-				\item
-					CUDA/cupy-accelerated BSS metrics
-				\item
-					Mono-channel testbench, not stereo (minor impact on results, halves computation time)
-				\item
-					All of this worth discussing in the same chapter? ``Chapter 4.3 performance optimizations necessary to run giant testbench'', cite cupy etc.
-			\end{enumerate}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Music source separation objective evaluation}
-	Evaluations not based on human subjective analysis:
-	\begin{itemize}
-		\item
-			Industry standard is BSS \footcite{bss} used in SiSec 2018 campaign for music source separation \footcite{sigsep2018}. BSS is used for recently published top source separation models -- even in bleeding-edge waveform-based end-to-end neural waveform models: \href{https://github.com/facebookresearch/demucs}{https://github.com/facebookresearch/demucs}
-		\item
-			Industry standard dataset is MUSDB18 and MUSDB18-HQ \footcite{musdb18, musdb18-hq}
-		\item
-			Used both in 622 so I'm equipped to evaluate
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Music source separation -- example evaluation}
-	\begin{itemize}
-		\item
-			Forked bss eval + nsgt and modified both to use GPU (with CUDA/cupy) to speed up evaluation time (for a single track) from 3.5 minutes down to 0.5 s -- allows for a much bigger testbench
-		\item
-			Based on sisec's evaluation + boxplot code from the SiSec 2018 paper, e.g.:\\
-			\includegraphics[height=3.5cm]{./irm_boxplot_example.png}
-		\item
-			Plan: compute IRM,IBM\{1,2\} for STFT 2048 (default) (should I mix window sizes here?) followed by optimal NSGT configurations -- take median scores to see how they across bins, frequency scale, fmin
-	\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-	\frametitle{Option 1 (outdated) -- manually defined parameters}
-	custom json format for defining testcases:
-	\begin{Verbatim}[fontsize=\tiny]
-	sevagh:oracle-cqt $ cat config_octave.json
-	{
-	  "stft_configs": {
-	    "window_sizes": [2048]
-	  },
-	  "nsgt_configs": {
-	    "bins": [12, 24, 48, 96, 120, 168],
-	    "fmin": [20, 27.5, 32.7, 57, 80],
-	    "fmax": [22050],
-	    "scale": ["oct"]
-	  }
-	}
-	sevagh:oracle-cqt $ cat config_mel.json
-	{
-	  "stft_configs": {
-	    "window_sizes": [2048]
-	  },
-	  "nsgt_configs": {
-	    "bins": [12, 24, 48, 96, 120, 168],
-	    "fmin": [20, 27.5, 32.7, 57, 80],
-	    "fmax": [22050],
-	    "scale": ["mel"]
-	  }
-	}
-	\end{Verbatim}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Option 2 -- grid search for optimal NSGT parameters}
-	\begin{itemize}
-		\item
-			Define frequency scales as choice of octave (aka log2), mel, bark
-		\item
-			Define bins as integers between 12 and 200
-		\item
-			Define fmin between 20hz (psychoacoustic low limit) and maybe 100hz? (gotta stop somewhere). jumps in, cents? 0.1 hz?
-		\item
-			Fmax is fixed at 22050 (for performance and nyquist reasons)
-		\item
-			Metric to minimize is actually 16 metrics - vocal/drum/other/accompaniment SDR/SAR/SIR/ISR (same as sisec)
-		\item
-			sklearn GridSearchCV
-	\end{itemize}
+	B{\"o}ck's beat/onset algorithms are very similar - why not both?
 \end{frame}
 
 \begin{frame}
@@ -341,17 +244,18 @@ Params: Frequency scales: octave, mel, bark, log. Fmin: 20, 27.5, 32.7, 57, 80 B
 	tl;dr thesis:
 	\begin{itemize}
 		\item
-			\textbf{Chapter 1:} Music analysis with the STFT leads to necessary tradeoff of time and frequency resolution (due to theoretical limitations of TF analysis). However, spectrogram/STFT is widely used and ubiquitous
+			\textbf{Chapter 1:} introduction, motivation, previous work, objectives, etc.
 		\item
-			\textbf{Chapter 2:} the CQT better represents some musical properties, and can replace the STFT-spectrogram in-place in many algorithms. many configurations of CQ-NSGT (freq range, octave scales, etc.)
+			\textbf{Chapter 2:} STFT theory. DFT, FFT, Music analysis with the STFT leads to necessary tradeoff of time and frequency resolution (due to theoretical limitations of TF analysis). However, spectrogram/STFT is widely used and ubiquitous
 		\item
-			\textbf{Chapter 3:} Show the success of the NSGT-based (perfect inversion) CQT in SOTA neural network for \textbf{onset detection}
+			\textbf{Chapter 2:} NSGT theory. NSGT better represents time-varying frequency content of music, and can replace the STFT-spectrogram in-place in many algorithms. many configurations of NSGT (freq range, octave scales, etc.) implementation details, comparison of output coefficients, dimensionality, etc. with STFT
 		\item
-			\textbf{Chapter 4:} see whether we can surpass the theoretical maximum performance/IRM of spectrogram-based \textbf{music source separation} with the CQT (many configs)
+			\textbf{Chapter 3:} Demonstrate the success of the NSGT in the ideal oracle mask for source separation (indicating a higher maximum performance), and use NSGT inside Open-Unmix to see if it can regain the SDR crown
+		\item
+			\textbf{Chapter 4:} Demonstrate the success of the NSGT in B{\"o}ck's SOTA neural networks for onset detection and beat tracking
 		\item
 			\textbf{Chapter 5:} discuss and conclude
 	\end{itemize}
-	\textcolor{red}{\textbf{is this enough to constitute a thesis?}}
 \end{frame}
 
 \begin{frame}

@@ -12,15 +12,20 @@ import sys
 import gc
 import itertools
 
-controls = ['ibm1-s1', 'ibm2-s1', 'irm1-s1', 'irm2-s1', 'ibm1-s2', 'ibm2-s2', 'irm1-s2', 'irm2-s2', 'ibm1-s4', 'ibm2-s4', 'irm1-s4', 'irm2-s4'] 
+controls = ['ibm1', 'ibm2', 'irm1', 'irm2'] 
 
 
 def save_boxplot(pandas_in, pdf_out, single=False):
-    metrics = ['metrics.SDR', 'metrics.SIR', 'metrics.SAR', 'metrics.ISR']
+    metrics = ['SDR', 'SIR', 'SAR', 'ISR']
     targets = ['vocals', 'accompaniment', 'drums', 'bass', 'other']
 
     df = pandas.read_pickle(pandas_in)
     df['control'] = df.method.isin(controls)
+
+    df.replace('metrics.SDR', value='SDR', inplace=True)
+    df.replace('metrics.SAR', value='SAR', inplace=True)
+    df.replace('metrics.SIR', value='SIR', inplace=True)
+    df.replace('metrics.ISR', value='ISR', inplace=True)
 
     # aggregate methods by mean using median by track
     df = df.groupby(
@@ -29,7 +34,7 @@ def save_boxplot(pandas_in, pdf_out, single=False):
 
     # Get sorting keys (sorted by median of SDR:vocals)
     df_sort_by = df[
-        (df.metric == "metrics.SDR") &
+        (df.metric == "SDR") &
         (df.target == "vocals")
     ]
 
@@ -123,6 +128,8 @@ def save_boxplot(pandas_in, pdf_out, single=False):
 
         g.fig.tight_layout()
         plt.subplots_adjust(hspace=0.2, wspace=0.1)
+        #plt.subplots_adjust(hspace=0.15, wspace=0.05)
+        g.fig.set_size_inches(10,18)
         g.fig.savefig(
             pdf_out,
             bbox_inches='tight',
