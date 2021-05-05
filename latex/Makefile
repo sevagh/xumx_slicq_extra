@@ -4,8 +4,8 @@ report:
 proposal:
 	latexmk -pvc proposal.tex
 
-presentation:
-	latexmk -pvc presentation.tex
+presentation01:
+	latexmk -pvc presentation01.tex
 
 clean:
 	latexmk -C

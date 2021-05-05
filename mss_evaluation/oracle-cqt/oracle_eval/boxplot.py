@@ -32,6 +32,14 @@ def save_boxplot(pandas_in, pdf_out, single=False):
         ['method', 'track', 'target', 'metric']
     ).median().reset_index()
 
+    pandas.set_option('display.max_colwidth', None)
+    pandas.set_option('display.max_columns', None)  
+    pandas.set_option('display.max_rows', None)  
+
+    print(df.groupby(
+        ['method', 'target', 'metric']
+    ).median('time'))
+
     # Get sorting keys (sorted by median of SDR:vocals)
     df_sort_by = df[
         (df.metric == "SDR") &
@@ -133,7 +141,7 @@ def save_boxplot(pandas_in, pdf_out, single=False):
         g.fig.savefig(
             pdf_out,
             bbox_inches='tight',
-            dpi=300
+            dpi=400
         )
 
 

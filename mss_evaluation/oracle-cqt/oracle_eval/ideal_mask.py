@@ -69,13 +69,13 @@ class TFTransform:
 
     def forward(self, audio):
         if not self.nsgt:
-            return stft(audio.T, nperseg=self.tf_transform.window)[-1].astype(np.complex64)
+            return stft(audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64)
         else:
             return multichan_nsgt(audio, self.nsgt)
 
     def backward(self, X):
         if not self.nsgt:
-            return istft(X)[1].T[:self.N, :].astype(np.float32)
+            return istft(X, nperseg=4096, noverlap=1024)[1].T[:self.N, :].astype(np.float32)
         else:
             return multichan_insgt(X, self.nsgt)
 
@@ -213,21 +213,22 @@ if __name__ == '__main__':
         tmp = None
         for stft_win in config['stft_configs']['window_sizes']:
             tmp = {'type': 'stft', 'window': stft_win}
-            tmp['name'] = f's{str(stft_win)[0]}' # use first digit of window size
+            #tmp['name'] = f's{str(stft_win)[0]}' # use first digit of window size
+            tmp['name'] = ''
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)
-        for nsgt_conf in config['nsgt_configs']:
-            tmp = {'type': 'nsgt', 'scale': nsgt_conf['scale'], 'fmin': nsgt_conf['fmin'], 'fmax': 22050, 'bins': nsgt_conf['bins']}
-            fmin_str = f"{nsgt_conf['fmin']}"
-            fmin_str = fmin_str.replace('.', '')
-            tmp['name'] = f"{nsgt_conf['scale']}"
+        #for nsgt_conf in config['nsgt_configs']:
+        #    tmp = {'type': 'nsgt', 'scale': nsgt_conf['scale'], 'fmin': nsgt_conf['fmin'], 'fmax': 22050, 'bins': nsgt_conf['bins']}
+        #    fmin_str = f"{nsgt_conf['fmin']}"
+        #    fmin_str = fmin_str.replace('.', '')
+        #    tmp['name'] = f"{nsgt_conf['scale']}"
 
-            if nsgt_conf.get('gamma', None):
-                tmp['gamma'] = nsgt_conf['gamma']
+        #    if nsgt_conf.get('gamma', None):
+        #        tmp['gamma'] = nsgt_conf['gamma']
 
-            tf_transform = SimpleNamespace(**tmp)
-            tfs.append(tf_transform)
+        #    tf_transform = SimpleNamespace(**tmp)
+        #    tfs.append(tf_transform)
 
     masks = [
             {'power': 1, 'binary': False},

@@ -98,7 +98,7 @@ class TrackEvaluator:
             eps = np.finfo(np.float32).eps
 
             if control:
-                X = stft(track.audio.T, nperseg=2048)[-1].astype(np.complex64)
+                X = stft(track.audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64)
             else:
                 X = multichan_nsgt(track.audio, nsgt)
 
@@ -116,7 +116,7 @@ class TrackEvaluator:
                     # compute spectrogram of target source:
                     # magnitude of STFT to the power alpha
                     if control:
-                        P[name] = np.abs(stft(source.audio.T, nperseg=2048)[-1].astype(np.complex64))**alpha
+                        P[name] = np.abs(stft(source.audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64))**alpha
                     else:
                         P[name] = np.abs(multichan_nsgt(source.audio, nsgt))**alpha
                     model += P[name]
@@ -128,7 +128,7 @@ class TrackEvaluator:
                 if binary_mask:
                     # compute STFT of target source
                     if control:
-                        Yj = stft(source.audio.T, nperseg=2048)[-1].astype(np.complex64)
+                        Yj = stft(source.audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64)
                     else:
                         Yj = multichan_nsgt(source.audio, nsgt)
 
@@ -145,7 +145,7 @@ class TrackEvaluator:
 
                 # invert to time domain
                 if control:
-                    target_estimate = istft(Yj)[1].T[:N, :].astype(np.float32)
+                    target_estimate = istft(Yj, nperseg=4096, noverlap=1024)[1].T[:N, :].astype(np.float32)
                 else:
                     target_estimate = multichan_insgt(Yj, nsgt)
 
@@ -227,6 +227,11 @@ if __name__ == '__main__':
         help='use mono channel (faster evaluation)'
     )
     parser.add_argument(
+        '--control',
+        action='store_true',
+        help='evaluate control (stft 2048)'
+    )
+    parser.add_argument(
         '--n-random-tracks',
         type=int,
         default=None,
@@ -291,7 +296,10 @@ if __name__ == '__main__':
         'fmin': fmins
     }
 
-    #t.eval_control()
+    if args.control:
+        print('evaluating control stft')
+        print(t.eval_control())
+        sys.exit(0)
 
     optimize(t.eval_vqlog, pbounds_vqlog, "vqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir)
     optimize(t.eval_cqlog, pbounds_other, "cqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir)

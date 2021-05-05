@@ -165,18 +165,14 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 \vfill
 \clearpage
 
-\section{Onset detection and beat tracking}
-\label{sec:beattrack}
-
-\vfill
-\clearpage
-
 \section{Music source separation}
 \label{sec:musicsep}
 
 \subsection{Task definition and survey}
 
 The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that music source separation could operate on the level of instruments, or for broader categories of sources, grouped into harmonic, percussive, and singing voice.
+
+\todo[inline]{incorporate my sparsity hypothesis/justification for nsgt}
 
 Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.
 
@@ -201,7 +197,9 @@ In modern music source separation, the stems of MUSDB18 have determined the four
 
 \subsection{Surpassing the STFT ideal oracle mask}
 
-The first experiment to run is to discover which configuration of the NSGT has the potential to surpass the maximum performance of time-frequency masking using the spectrogram. Given ground truth data, such as what is available in MUSDB18, we have available to us the individually recorded sources for each track. From this, we can compute the ideal or oracle masks::
+The first experiment to run is to discover which configuration of the NSGT has the potential to surpass the maximum performance of time-frequency masking using the STFT spectrogram. This should indicate whether substituting the NSGT in Open-Unmix is worthwhile.
+
+Given ground truth data, such as what is available in MUSDB18, we have available to us the individually recorded sources for each track. From this, we can compute the ideal or oracle masks::
 
 \begin{flalign}
 	\nonumber \text{given: } & x_{\text{drums}}, x_{\text{vocals}}, x_{\text{bass}}, x_{\text{other}}\\
@@ -218,21 +216,21 @@ Finally, using these pairs of $x, y$, we can get the maximum possible BSS metric
 
 Approaching or surpassing the ideal mask performance is a common benchmark in source separation literature. \todo{weak} Demucs talks about it but doesn't achieve it.
 
-\subsubsection{BSS and NSGT performance optimizations}
-
-\subsubsection{Evaluated NSGT parameters}
-
 The space of possible NSGT parameters is large. First, there are multiple frequency scales to choose from -- the log (or octave) scale is the case of the CQT, but the NSGT can also use the Mel and Bark psychoacoustic scales. For the frequency bins, the original CQT papers \cite{klapuricqt, invertiblecqt} use multiples of 12 bins or pitches per octave (based on the 12-tone pitch scale), and use one or many octaves, leading to CQTs with 12-96 frequency bins in steps of 12. When using the Mel or Bark scales however, there is no need to continue with the 12-tone pitch per octave strategy, since we are already departing from music theory. Also, bins above 96 are not described in the literature, but without a good justification. Therefore, the range of bins evaluated are integers between 12-348, not just multiples of 12.
 
 The minimum and maximum frequencies of the scales are also configurable. To eliminate one parameter from the evaluation, the maximum frequency was fixed at 22050 Hz, or the Nyquist rate, half of the sampling rate of 44.1 kHz in MUSDB18-HQ. The minimum frequency is varied between 15-60 Hz (below the 20 Hz limit of human hearing\todo{citeme}, up to 60 Hz to include the value of 57 Hz used in \cite{klapuricqt}). Finally, the variable-Q log scale introduces the additional parameter of $\gamma$ for the frequency offset, which is varied between 0-100 Hz.
 
-The BSS evaluation is computationally expensive -- for an average track in MUSDB18-HQ, it takes 30 seconds to compute all of the BSS metrics, even after the significant performance optimizations described previously. For a more fair evaluation, 3 separate randomly-selected tracks from the MUSDB18-HQ test set are considered (with a fixed random seed for consistency). We would prefer to find an NSGT configuration that performs best across multiple tracks, and not overfit to one particular song. For 3 songs, the BSS evaluation of the ideal magnitude ratio mask for a single configuration of NSGT therefore takes 1.5 minutes. Although there are 4 possible types of oracle mask based on spectrograms (ideal magnitude binary mask, ideal power binary mask, ideal magnitude ratio mask, ideal power ratio mask), for the optimization process the most common case of ideal ratio magnitude mask is used.
+The BSS evaluation is computationally expensive -- for an average track in MUSDB18-HQ, it takes 30 seconds to compute all of the BSS metrics, even after the significant performance optimizations described previously.
+
+\todo[inline]{describe optimizations here - small-ish section nbd - cupy replacing scipy, and that's that}
+
+For a more fair evaluation, 3 separate randomly-selected tracks from the MUSDB18-HQ test set are considered (with a fixed random seed for consistency). We would prefer to find an NSGT configuration that performs best across multiple tracks, and not overfit to one particular song. For 3 songs, the BSS evaluation of the ideal magnitude ratio mask for a single configuration of NSGT therefore takes 1.5 minutes. Although there are 4 possible types of oracle mask based on spectrograms (ideal magnitude binary mask, ideal power binary mask, ideal magnitude ratio mask, ideal power ratio mask), for the optimization process the most common case of ideal ratio magnitude mask is used.
 
 With all of this information in mind, an exhaustive grid search across all NSGT configurations is not feasible. The Bayesian optimization technique \cite{bayesian} was selected, as it is ``an approach to optimizing objective functions that take a long time (minutes or hours) to evaluate'' and ``best-suited for optimization over continuous domains of less than 20 dimensions.'' The open-source Python library \textit{BayesianOptimization}\footnote{\href{https://github.com/fmfn/BayesianOptimization}{https://github.com/fmfn/BayesianOptimization}} was used in the testbench implementation.
 
 The Bayesian optimization process considers a black-box function (that being optimized) which takes varying input parameters and outputs a single scalar value. The function was designed to accept the configuration of the NSGT as an input, and return a single scalar value representing the median SDR score with the ideal magnitude ratio mask across all 4 MUSDB18-HQ targets (drums, vocals, bass, other) and across the 3 tracks. A different value can be returned to target different aspects of source separation performance -- for example, one could optimize on the SAR if their primary goal is to reduce artifacts. However, SDR is the most commonly used single-value metric to demonstrate overall source separation effectiveness in literature.
 
-The Bayesian optimization process can additionally perform some random parameter selections in the beginning, to help improve the subsequent iterative optimization. Table \ref{table:nsgtparamsirm} contains the parameter ranges of the evaluated NSGT configs and the number of Bayesian optimization iterations. Table \ref{table:nsgtbayesresults} shows the best configurations selected by the optimization process, compared to the control ideal ratio magnitude mask performance of the STFT with a window size of 2048.
+The Bayesian optimization process can additionally perform some random parameter selections in the beginning, to help improve the subsequent iterative optimization. Table \ref{table:nsgtparamsirm} contains the parameter ranges of the evaluated NSGT configs and the number of Bayesian optimization iterations. Table \ref{table:nsgtbayesresults} shows the best configurations selected by the optimization process, compared to the control ideal ratio magnitude mask performance of the STFT with the default Open-Unmix settings of window size = 4096 and overlap = 1024 \cite{umx}.
 
 \begin{table}[ht]
 	\centering
@@ -258,14 +256,14 @@ The Bayesian optimization process can additionally perform some random parameter
 	\centering
 \begin{tabular}{ |l|l|l|c|c|c| }
 	 \hline
-	  Transform & Parameters & IRM1 SDR \\
+	  Transform & Parameters & Median SDR \\
 	 \hline
 	 \hline
-	 STFT (control) & window = 2048 & 180 \\
+	 STFT (control) & window = 4096, overlap = 1024 & 6.65 \\
 	 \hline
-	 NSGT, CQ-Log & 138 bins, 47.3 Hz fmin & 7.2 \\
+	 NSGT, CQ-Log & 138 bins, 47.3 Hz fmin & 7.20 \\
 	 \hline
-	 NSGT, VQ-Log & 134 bins, 47.3 Hz fmin, 1.7 Hz gamma & 7.2 \\
+	 NSGT, VQ-Log & 134 bins, 47.3 Hz fmin, 1.7 Hz gamma & 7.20 \\
 	 \hline
 	 NSGT, Mel & 263 bins, 24.9 Hz fmin & 7.44 \\
 	 \hline
@@ -276,25 +274,30 @@ The Bayesian optimization process can additionally perform some random parameter
 	\label{table:nsgtbayesresults}
 \end{table}
 
-\subsubsection{NSGT oracle mask results}
+Finally, a full evaluation was done on all 50 tracks of the MUSDB18-HQ test set. The output is a box plot, in the same style as the SiSec 2018 campaign using the same evaluation code.\footnote{\href{https://github.com/sigsep/sigsep-mus-2018-analysis}{https://github.com/sigsep/sigsep-mus-2018-analysis}} The resulting box plots can be seen in figure \ref{fig:nsgtboxplots}.
 
 \begin{figure}[ht]
 	\centering
-%\includepdf[pages=-,pagecommand={},width=\textwidth]{oracle_boxplot.pdf}
 \makebox[\textwidth]{\includegraphics[width=15cm]{./oracle_boxplot.pdf}}
 \caption{Music separation results for NSGT oracle masks}
 \label{fig:nsgtboxplots}
 \end{figure}
 
+Considering again the IRM1 (for simplicity), the best performing NSGT configuration with the Bark scale, 239 bins, and a starting frequency of 30.1 Hz achieves median SDR scores of 10.42, 9.29, 8.06, and 8.21 in vocals, drums, bass, and other respectively. The control scores computed with an STFT using the UMX default settings of window size 4096 and overlap 1024 achieves median SDR scores of 8.62, 7.07, 6.68, and 6.87 in vocals, drums, bass, and other respectively.
+
+To sum up, using the best selected Bark-scale NSGT discovered by 200 iterations of Bayesian optimization achieved improvements of \textbf{+1.3-2.2} points in median SDR score over the STFT. However, recall that this is simply the maximum possible performance of spectral masking with the NSGT, assuming that the system can produce a perfect estimate of the sources.
+
+The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, and check how much of the theoretical SDR improvements occur in the actual separation model, trained only on MUSDB18-HQ. The goal is to try to surpass Conv-Tasnet and Demucs with the UMX-NSGT variant.
+
 \subsection{Open-Unmix-NSGT}
 
 \todo[inline]{better hope umx shines here}
 
-\subsubsection{Open-Unmix}
+\vfill
+\clearpage
 
-\subsubsection{NSGT adaptation}
-
-\subsubsection{Results}
+\section{Onset detection and beat tracking}
+\label{sec:beattrack}
 
 \vfill
 \clearpage

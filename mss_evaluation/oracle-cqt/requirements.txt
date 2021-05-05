@@ -1,6 +1,6 @@
 scipy
 numpy
-cupy-cuda112
+cupy-cuda113
 git+git://github.com/sevagh/sigsep-mus-eval@feat/cupy-accel#egg=museval
 git+git://github.com/sevagh/nsgt#egg=nsgt
 librosa
