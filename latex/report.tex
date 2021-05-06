@@ -79,7 +79,7 @@
 \vspace{3.5em}
 
 \begin{abstract}
-	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Examples of music information retrieval (MIR) tasks where such models have achieved success are onset detection, beat tracking, and music source separation. Despite its ubiquity, the STFT has a fixed and bounded time-frequency resolution, such that one must sacrifice time for frequency resolution (or vice versa) by changing the window size. The Nonstationary Gabor Transform (NSGT) is an adaptive time-frequency transform which can vary its time-frequency resolution to better represent music signals. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with different configurations of the NSGT in deep learning models for onset detection, beat tracking, and music source separation respectively, showing significant improvements in the results.
+	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Examples of music information retrieval (MIR) tasks where such models have achieved success are onset detection and music source separation. Despite its ubiquity, the STFT has a fixed and bounded time-frequency resolution, such that one must sacrifice time for frequency resolution (or vice versa) by changing the window size. The Nonstationary Gabor Transform (NSGT) is an adaptive time-frequency transform which can vary its time-frequency resolution to better represent music signals. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with different configurations of the NSGT in deep learning models for onset detection and music source separation respectively, showing significant improvements in the results.
 \end{abstract}
 
 \vfill
@@ -100,31 +100,71 @@
 \section{Introduction}
 \label{sec:intro}
 
+The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the sound pressure wave \todo{cite something}. Another way to characterize acoustic signals is by their frequency components. The Fourier transform decomposes time-domain signals into their constituent frequency components, by means of a sum of infinite sinusoids -- in other words, the Fourier transform gives us knowledge of which frequencies are present in a signal, but no time information. However, many important signals such as speech and music contain frequency components that evolve with time, such as the basic melody.
+
+For this class of signal, joint time-frequency analysis is an important tool. Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and performing a Fourier analysis of each windowed section. This is also referred to as the short-time Fourier transform (STFT) or spectrogram \todo{cite textbook}. The STFT is subject to a fixed and bounded time-frequency resolution, such that one cannot be arbitrarily precise in both time and frequency, and must trade them off by varying the duration of the STFT window.
+
 \subsection{Motivation}
 
-The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the pressure wave. Another way to characterize acoustic signals is by their frequency components. The Fourier transform decomposes time-domain signals into their constituent frequency components, by means of a sum of sinusoids that oscillate infinitely in time -- in other words, the Fourier transform gives us knowledge of which frequencies are present in a signal, with no temporal information. However, many important signals such as speech and music contain frequency components that evolve with time, such as the basic melody.
+\begin{wrapfigure}{r}{7.5cm}
+	\vspace{-1.0em}
+	\includegraphics[width=7.5cm]{./tf_tradeoff_dorfler.png}
+	\caption{Time-frequency tradeoff for a glockenspiel signal}
+	\label{fig:dorflertradeoff}
+	\vspace{-1.5em}
+\end{wrapfigure}
 
-For this class of signal, joint time-frequency analysis is an important tool. Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and performing a Fourier analysis of each windowed section. This is also referred to as the short-time Fourier transform (STFT), and the output of the STFT is visually represented as a spectrogram. Since time and frequency are Fourier duals of each other, time-frequency analysis is subject to the Heisenberg uncertainty principal \todo{cite me}. This means that when performing time-frequency analysis, one cannot be arbitrarily precise in both time and frequency, and must trade one for the other by varying the duration of the STFT window.
+Musical signals have characteristics that lead to conflicting requirements in the STFT \cite{doerflerphd}. In the low frequency region, music needs to be analyzed with long-duration windows for a high, or fine, frequency resolution -- notes in the low frequencies lay the harmonic basis of a song. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows. The time-frequency tradeoff on a musical glockenspiel signal is shown in figure \ref{fig:dorflertradeoff}.
 
-Musical signals have characteristics that lead to conflicting requirements in the STFT. In the low frequency region, music needs to be analyzed with long-duration windows for a high, or fine, frequency resolution -- notes in the low frequencies lay the harmonic basis of a song, and this is also reflected by the psychoacoustic system and cochlea, which can separate low frequencies more finely than high frequencies. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows.
+The Constant-Q transform (CQT) \cite{jbrown} is time-frequency transform designed for music signals, obtained by performing an STFT with a window size that varies by frequency region. It was not invertible in its original formulation, but later works led to approximate inversions \cite{klapuricqt, fitzgeraldcqt}. Most recently, the Nonstationary Gabor transform (NSGT) \cite{balazs} was created as a transform with adaptive time-frequency resolution and a perfect inversion, which is a generalization of the CQT and can be used to construct an invertible CQT, or CQ-NSGT \cite{invertiblecqt}. An example of the varying time-frequency resolution of the NSGT can be seen in figure \ref{fig:nsgttradeoff}. Note how in figure \ref{fig:nsgttradeoff}a, due to the high frequency resolution, the temporal events are blurry or smeared such that the times of note onsets are unclear. The inverse case is shown in figure \ref{fig:nsgttradeoff}b, which contains sharp localization of note onsets from the high time resolution, but blurry or smeared frequency components. Finally, \ref{fig:nsgttradeoff}c shows how the NSGT represents the musical signal with minimal blurriness, or good resolution, in both time and frequency.
 
-The Constant-Q transform (CQT), first proposed by \textcite{jbrown} and refined by \textcite{klapuricqt}, is a time-frequency transform obtained by varying the window size by frequency region, designed for musical signals by operating on a log frequency scale. Recent work by \textcite{balazs} resulted in the creation of time-frequency transforms with perfect inversions and arbitrary frequency scales, called the Nonstationary Gabor transform (NSGT). The NSGT is flexible and can be used to analyze signals with a logarithmic or Western pitch scale (i.e., the CQT or CQ-NSGT), or other useful frequency scales such as the Mel and Bark psychoacoustic scales.
+\begin{figure}[ht]
+	\centering
+	\subfloat[Wide window STFT (93ms)]{\includegraphics[height=3.5cm]{./tf_tradeoff_balasz2.png}}
+	\label{subfig:blurrytime}
+	\hspace{0.1em}
+	\subfloat[Narrow window STFT (6ms)]{\includegraphics[height=3.5cm]{./tf_tradeoff_balasz1.png}}
+	\label{subfig:blurryfrequency}
+	\hspace{0.1em}
+	\subfloat[NSGT with window varying from 6-93ms]{\includegraphics[height=3.5cm]{./tf_tradeoff_balasz3.png}}
+	\caption{Spectrograms of a glockenspiel signal}
+	\label{fig:nsgttradeoff}
+\end{figure}
 
-Most recently, deep learning solutions for music information tasks have achieved state-of-the-art results, such as Bock's onset detection and beat tracking algorithms, and Open-Unmix for music source separation, based on the spectrogram. On the other hand, direct waveform models are achieving success, bypassing the difficulty of choosing an optimal TFR/latent space representation with the STFT window size.
+Using the NSGT to represent music signals, therefore, may address the following common scenarios in different music information retrieval (MIR) models or algorithms based on the STFT spectrogram:
 
-The motivation for this thesis is to replace the STFT-based spectrogram with different configurations of the NSGT in deep learning solutions in two problem spaces -- in onset detection and beat tracking, and in music source separation.
+\begin{itemize}
+	\item
+		It can replace the manual balancing of time and frequency resolution, which is controlled by changing the STFT window size
+	\item
+		It can replace the use of multiple STFTs with different window sizes, by containing the desired time-frequency information of music signals in a single transform
+\end{itemize}
 
-\subsection{Thesis objective}
+Additionally, the CQT implemented with the NSGT, or CQ-NSGT, solves the most important downside of the CQT, the lack of perfect inverse \cite{jbrown, klapuricqt, fitzgeraldcqt}, which may have been a barrier to its wider adoption as an alternative to the STFT.
 
-The main objective of this thesis is to demonstrate the viability of swapping the STFT with NSGT in spectrogram-based algorithms or machine learning models for MIR. My hypothesis is that by choosing the appropriate parameters for the NSGT to suit the specific task, one can achieve better performance than using the standard STFT. This could also represent a way to retrofit or improve previous state-of-the-art models without significantly changing the model architecture, and surpassing the trend of new end-to-end waveform models such as Demucs.
+\subsection{Related work and thesis objective}
 
-\subsection{Related work}
+\citet{musicsepgood} describe the motivation and task of music source separation as follows:
+
+\begin{quote}
+	Many people listen to recorded music as part of their everyday lives [...] Sometimes we might want to remix the balance within the music, perhaps to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1- channel surround sound system. We might also want to change the spatial location of a musical instrument within the mix. All of these applications are relatively straightforward, provided we have access to separate sound channels (stems) for each musical audio object. However, if we only have access to the final recording mix, which is usually the case, this is much more challenging. To estimate the original musical sources, which would allow us to remix, suppress or upmix the sources, we need to perform musical source separation (MSS). In the general source separation problem, we are given one or more mixture signals that contain different mixtures of some original source signals. [...] The task is to recover one or more of the source signals given the mixtures.
+\end{quote}
+
+\citet{umx}'s deep learning model, named Open-Unmix, is intended to be a near state-of-the-art, open implementation of music source separation based on the open MUSDB18 dataset \cite{musdb18} and intended to foster reproducible research and a baseline of high performance. It uses the STFT spectrogram as the input and output representation of musical signals. The choice of window size in the task of source separation based on STFT spectrograms can have a significant impact on the results \cite{musicsepwindow}, but this consideration is not explored in Open-Unmix.
+
+A simpler algorithm for harmonic/percussive source separation (HPSS) \cite{fitzgerald1}, also based on the STFT spectrogram, was evaluated alongside Open-Unmix in the SiSec 2018 music source separation evaluation campaign \cite{sisec2018} as a primitive (and low performance) baseline. The initial HPSS algorithm was later modified to use STFT spectrograms with different window sizes \cite{driedger, fitzgerald2}, and to use the CQT in place of the STFT \cite{fitzgerald2}.
+
+The objective of this thesis for the task of music source separation is to substitute the STFT spectrogram with the NSGT spectrogram, to observe how the NSGT compares to the STFT with different window sizes. Open-Unmix will be modified to use the NSGT, and the results will be compared to the original model.
+
+\todo[inline]{segue into onset detection and beat tracking}
+
+The tasks of onset detection and beat tracking are closely related.
 
 \subsection{Contribution and results}
 
 \subsection{Outline}
 
-This thesis is organized as follows. Section \ref{sec:theorystandard} will cover the theory of the DFT and its fast FFT implementation, and their use in music systems. Section \ref{sec:theoryvariant} will describe several variants of the FFT that may be useful for music applications. Section \ref{sec:libraries} will describe and benchmark existing open-source FFT libraries, and develop a new FFT library containing implementations of the studied variants. Section \ref{sec:results} will describe the outputs and performance analysis of the variants in the new library, as well as results achieved in a real-world music system by substituting the standard FFT with each variant. Finally, section \ref{sec:conclusion} will discuss the findings and explore whether there is value in using a variant instead of the standard FFT when creating new music systems.
+This thesis is organized as follows. Section \todo{booyakasha actually fill this in}.
 
 \vfill
 \clearpage
@@ -137,6 +177,10 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 
 \section{Nonstationary Gabor transform}
 \label{sec:theorynsgt}
+
+Additionally, the constant-Q transform \cite{jbrown, klapuricqt, invertiblecqt} even before its formulation as a specialized variant of the nonstationary Gabor transform \cite{balazs}, is an STFT applied with window of different sizes, which are of long duration at low frequencies to create a fine frequency resolution (and sacrificing time resolution as per the time-frequency uncertainty principle), and gradually decrease the windows in duration to improve the time resolution (and sacrifice frequency resolution). At the same time, consider that the iterative harmonic-percussive source separation algorithms in \cite{driedger, fitzgerald2} use two-pass spectral masking with two different configurations of spectrograms -- one with a large window size (4096 samples in \cite{driedger}, 16384 samples in \cite{fitzgerald2}) for representing the harmonic or pitched instruments sharply and estimating the harmonic mask, and one with a short window size (256 samples in \cite{driedger}, 1024 samples in \cite{fitzgerald2}) for representing percussion or transients more sharply and estimating the percussive mask.
+
+The connection to the CQT, or NSGT, is that these contain within a single transform the high frequency resolution of a the large-size spectrogram in the low frequency regions, and the high time resolution of the small-size spectrogram in the high frequency regions. According to \citet{musicsepgood}'s survey on music source separation, most spectral masking techniques try to exploit the 
 
 \subsection{Theoretical background}
 
@@ -167,6 +211,35 @@ This thesis is organized as follows. Section \ref{sec:theorystandard} will cover
 
 \section{Music source separation}
 \label{sec:musicsep}
+
+\citet{musicsepgood}'s survey on music source separation describes how many contemporary methods of separation are based on the common technique of spectrogram masking \cite{masking, speechmask, musicmask}, and exploit that different sources have different characteristic representations in the spectrogram -- see figure \ref{fig:sepgood} for an illustration. Optimally sparse representation of music signals in the transform domain is an active area of research \cite{sparsitykowalski, sparsitykowalski2}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[hello world]{\includegraphics[height=4.5cm]{./mss1.png}}
+	\subfloat[hello world]{\includegraphics[height=4.7cm]{./mss2.png}}
+	\caption{MSS sparsity}
+	\label{fig:sepgood}
+\end{figure}
+
+\begin{enumerate}
+	\item
+		Apply the algorithm in two passes, using a wide window STFT to attain a high frequency resolution and perform a better harmonic estimate, and a narrow window STFT to attain a high time resolution and perform a better percussive estimate \cite{fitzgerald2, driedger}
+	\item
+		Replace the STFT with the CQT to perform a vocal or singing voice separation \cite{fitzgerald2}
+\end{enumerate}
+
+The harmonic-percussive source separation algorithm of \citet{fitzgerald1} is based on median filtering and spectral masking using magnitude spectrograms. The original algorithm with soft masks, and the binary masking and iterative variants introduced in \cite{driedger}, are both implemented in librosa \cite{librosa}, a popular open-source MIR library -- see figure \ref{fig:hpsslibrosa} for a diagram of how the algorithm works. The algorithm exploits transform sparsity, by noticing that harmonic or pitched sounds as horizontal lines in the spectrogram, percussive sounds as vertical lines, and estimating each using median filtering. \citet{driedger}'s iterative variant uses two passes, with a large-window STFT to generate a spectrogram with a higher frequency resolution in the first pass for an improved harmonic estimate, and a small-window STFT to generate a spectrogram with a higher time resolution in the second pass for an improved percussive estimate.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=8cm]{./sphx_glr_plot_hprss_001.png}
+	\caption{Harmonic/percussive/residual source separation in librosa}
+	\label{fig:hpsslibrosa}
+\end{figure}
+
+
+These algorithms sacrifice separation quality for simplicity, scoring rather low in recent objective evaluations\cite{sisec2018}, losing in objective metrics and subjective evaluations to solutions based on deep learning\cite{umx, demucs}. \citet{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
 
 \subsection{Task definition and survey}
 
