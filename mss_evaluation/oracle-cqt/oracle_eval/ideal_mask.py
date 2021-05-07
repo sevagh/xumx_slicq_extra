@@ -20,7 +20,7 @@ from nsgt import NSGT, MelScale, LogScale, BarkScale, VQLogScale
 import json
 from types import SimpleNamespace
 
-from shared import ideal_mask, TFTransform
+from shared import ideal_mask, ideal_mixphase, TFTransform
 
 
 if __name__ == '__main__':
@@ -62,29 +62,30 @@ if __name__ == '__main__':
     with open(args.config_file) as jf:
         config = json.load(jf)
         tmp = None
-        for stft_win in config['stft_configs']['window_sizes']:
+        for stft_win in config.get('stft_configs', {}).get('window_sizes', []):
             tmp = {'type': 'stft', 'window': stft_win}
             tmp['name'] = f's{str(stft_win)}'
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)
-        #for nsgt_conf in config['nsgt_configs']:
-        #    tmp = {'type': 'nsgt', 'scale': nsgt_conf['scale'], 'fmin': nsgt_conf['fmin'], 'fmax': 22050, 'bins': nsgt_conf['bins']}
-        #    fmin_str = f"{nsgt_conf['fmin']}"
-        #    fmin_str = fmin_str.replace('.', '')
-        #    tmp['name'] = f"{nsgt_conf['scale']}"
+        for nsgt_conf in config.get('nsgt_configs', []):
+            tmp = {'type': 'nsgt', 'scale': nsgt_conf['scale'], 'fmin': nsgt_conf['fmin'], 'fmax': 22050, 'bins': nsgt_conf['bins']}
+            fmin_str = f"{nsgt_conf['fmin']}"
+            fmin_str = fmin_str.replace('.', '')
+            tmp['name'] = f"{nsgt_conf['scale']}"
 
-        #    if nsgt_conf.get('gamma', None):
-        #        tmp['gamma'] = nsgt_conf['gamma']
+            if nsgt_conf.get('gamma', None):
+                tmp['gamma'] = nsgt_conf['gamma']
 
-        #    tf_transform = SimpleNamespace(**tmp)
-        #    tfs.append(tf_transform)
+            tf_transform = SimpleNamespace(**tmp)
+            tfs.append(tf_transform)
 
     masks = [
             {'power': 1, 'binary': False},
             {'power': 2, 'binary': False},
             {'power': 1, 'binary': True},
             {'power': 2, 'binary': True},
+            {'power': 1, 'binary': False, 'phasemix': True},
     ]
 
     mss_evaluations = list(itertools.product(mus.tracks[:max_tracks], tfs, masks))
@@ -101,17 +102,29 @@ if __name__ == '__main__':
             mask_name += 'r'
         mask_name += f"m{str(mask['power'])}"
 
+        if mask.get('phasemix', False):
+            mask_name = 'mpi'
+
         name = mask_name
         if tf_transform.name != '':
             name += f'-{tf_transform.name}'
 
-        est = ideal_mask(
-            track,
-            tf,
-            mask['power'],
-            mask['binary'],
-            0.5,
-            os.path.join(args.eval_dir, f'{name}'))
+        est = None
+        if not mask.get('phasemix', False):
+            # ideal mask
+            est, _ = ideal_mask(
+                track,
+                tf,
+                mask['power'],
+                mask['binary'],
+                0.5,
+                os.path.join(args.eval_dir, f'{name}'))
+        else:
+            print('doing phasemix!')
+            est, _ = ideal_mixphase(
+                track,
+                tf,
+                os.path.join(args.eval_dir, f'{name}'))
 
         gc.collect()
 

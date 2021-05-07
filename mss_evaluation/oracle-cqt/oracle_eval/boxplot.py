@@ -12,7 +12,8 @@ import sys
 import gc
 import itertools
 
-controls = ['irm1-s1024', 'irm1-s4096', 'irm1-s16384'] 
+#controls = ['irm1-s1024', 'irm1-s4096', 'irm1-s16384'] 
+controls = ['mpi-s4096']
 
 
 def save_boxplot(pandas_in, pdf_out, single=False):
