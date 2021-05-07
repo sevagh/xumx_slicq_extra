@@ -79,7 +79,7 @@
 \vspace{3.5em}
 
 \begin{abstract}
-	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Examples of music information retrieval (MIR) tasks where such models have achieved success are onset detection and music source separation. Despite its ubiquity, the STFT has a fixed and bounded time-frequency resolution, such that one must sacrifice time for frequency resolution (or vice versa) by changing the window size. The Nonstationary Gabor Transform (NSGT) is an adaptive time-frequency transform which can vary its time-frequency resolution to better represent music signals. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with different configurations of the NSGT in deep learning models for onset detection and music source separation respectively, showing significant improvements in the results.
+	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Two tasks where such models have achieved success are music source separation and onset detection. Despite its ubiquity, the STFT has a fixed and bounded time-frequency resolution, such that one must sacrifice time for frequency resolution (or vice versa) by changing the window size. The Nonstationary Gabor Transform (NSGT) is an adaptive time-frequency transform which can vary its time-frequency resolution to better represent music signals. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with different configurations of the NSGT in deep learning models for onset detection and music source separation respectively, showing significant improvements in the results.
 \end{abstract}
 
 \vfill
@@ -106,15 +106,16 @@ For this class of signal, joint time-frequency analysis is an important tool. Ti
 
 \subsection{Motivation}
 
-\begin{wrapfigure}{r}{7.5cm}
-	\vspace{-1.0em}
-	\includegraphics[width=7.5cm]{./tf_tradeoff_dorfler.png}
+Musical signals have characteristics that lead to conflicting requirements in the STFT \cite{doerflerphd}. In the low frequency region, music needs to be analyzed with long-duration windows for a high frequency resolution, as bass notes lay the harmonic basis of a song. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows. 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=9cm]{./tf_tradeoff_dorfler.png}
 	\caption{Time-frequency tradeoff for a glockenspiel signal}
 	\label{fig:dorflertradeoff}
-	\vspace{-1.5em}
-\end{wrapfigure}
+\end{figure}
 
-Musical signals have characteristics that lead to conflicting requirements in the STFT \cite{doerflerphd}. In the low frequency region, music needs to be analyzed with long-duration windows for a high, or fine, frequency resolution -- notes in the low frequencies lay the harmonic basis of a song. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows. The time-frequency tradeoff on a musical glockenspiel signal is shown in figure \ref{fig:dorflertradeoff}.
+The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in figure \ref{fig:dorflertradeoff}. Notice how the wide window spectrogram shows frequency components (horizontal lines) with a sharper definition than the blurry lines in the narrow window spectrogram, while the narrow window spectrogram shows temporal events (vertical lines) with a sharper definition than the wide window spectrogram.
 
 The Constant-Q transform (CQT) \cite{jbrown} is time-frequency transform designed for music signals, obtained by performing an STFT with a window size that varies by frequency region. It was not invertible in its original formulation, but later works led to approximate inversions \cite{klapuricqt, fitzgeraldcqt}. Most recently, the Nonstationary Gabor transform (NSGT) \cite{balazs} was created as a transform with adaptive time-frequency resolution and a perfect inversion, which is a generalization of the CQT and can be used to construct an invertible CQT, or CQ-NSGT \cite{invertiblecqt}. An example of the varying time-frequency resolution of the NSGT can be seen in figure \ref{fig:nsgttradeoff}. Note how in figure \ref{fig:nsgttradeoff}a, due to the high frequency resolution, the temporal events are blurry or smeared such that the times of note onsets are unclear. The inverse case is shown in figure \ref{fig:nsgttradeoff}b, which contains sharp localization of note onsets from the high time resolution, but blurry or smeared frequency components. Finally, \ref{fig:nsgttradeoff}c shows how the NSGT represents the musical signal with minimal blurriness, or good resolution, in both time and frequency.
 
@@ -135,14 +136,14 @@ Using the NSGT to represent music signals, therefore, may address the following 
 
 \begin{itemize}
 	\item
-		It can replace the manual balancing of time and frequency resolution, which is controlled by changing the STFT window size
+		It can replace the manual balancing or trade-off of time and frequency resolution, which is controlled by changing the STFT window size
 	\item
 		It can replace the use of multiple STFTs with different window sizes, by containing the desired time-frequency information of music signals in a single transform
 \end{itemize}
 
-Additionally, the CQT implemented with the NSGT, or CQ-NSGT, solves the most important downside of the CQT, the lack of perfect inverse \cite{jbrown, klapuricqt, fitzgeraldcqt}, which may have been a barrier to its wider adoption as an alternative to the STFT.
+Additionally, the CQT implemented with the NSGT, or CQ-NSGT, solves the most important downside of the CQT, the lack of perfect inverse \cite{jbrown, klapuricqt, fitzgeraldcqt}, which may have been \todo{is a barrier, find ref} a barrier to its wider adoption as an alternative to the STFT.
 
-\subsection{Related work and thesis objective}
+\subsection{Related work and thesis objectives}
 
 \citet{musicsepgood} describe the motivation and task of music source separation as follows:
 
@@ -150,13 +151,20 @@ Additionally, the CQT implemented with the NSGT, or CQ-NSGT, solves the most imp
 	Many people listen to recorded music as part of their everyday lives [...] Sometimes we might want to remix the balance within the music, perhaps to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1- channel surround sound system. We might also want to change the spatial location of a musical instrument within the mix. All of these applications are relatively straightforward, provided we have access to separate sound channels (stems) for each musical audio object. However, if we only have access to the final recording mix, which is usually the case, this is much more challenging. To estimate the original musical sources, which would allow us to remix, suppress or upmix the sources, we need to perform musical source separation (MSS). In the general source separation problem, we are given one or more mixture signals that contain different mixtures of some original source signals. [...] The task is to recover one or more of the source signals given the mixtures.
 \end{quote}
 
-\citet{umx}'s deep learning model, named Open-Unmix, is intended to be a near state-of-the-art, open implementation of music source separation based on the open MUSDB18 dataset \cite{musdb18} and intended to foster reproducible research and a baseline of high performance. It uses the STFT spectrogram as the input and output representation of musical signals. The choice of window size in the task of source separation based on STFT spectrograms can have a significant impact on the results \cite{musicsepwindow}, but this consideration is not explored in Open-Unmix.
+\citet{umx}'s deep learning model, named Open-Unmix, is intended to be a near state-of-the-art, open implementation of music source separation based on the MUSDB18 dataset \cite{musdb18} and intended to foster reproducible research and a baseline of high performance. It uses the STFT spectrogram as the input and output representation of musical signals, and a deep neural network to estimate invidual sources from a mixture. The choice of window size in the task of source separation based on STFT spectrograms can have a significant impact on the results \cite{musicsepwindow}, but this consideration is not explored in Open-Unmix.
 
-A simpler algorithm for harmonic/percussive source separation (HPSS) \cite{fitzgerald1}, also based on the STFT spectrogram, was evaluated alongside Open-Unmix in the SiSec 2018 music source separation evaluation campaign \cite{sisec2018} as a primitive (and low performance) baseline. The initial HPSS algorithm was later modified to use STFT spectrograms with different window sizes \cite{driedger, fitzgerald2}, and to use the CQT in place of the STFT \cite{fitzgerald2}.
+A simpler and older algorithm for harmonic/percussive source separation (HPSS) \cite{fitzgerald1}, also based on the STFT spectrogram, was evaluated alongside Open-Unmix in the SiSec 2018 music source separation evaluation campaign \cite{sisec2018} as a primitive (and low performance) baseline. The HPSS algorithm was later modified to use STFT spectrograms with different window sizes \cite{driedger, fitzgerald2}, and to use the CQT in place of the STFT \cite{fitzgerald2}. This lets us state some questions as the objectives of this thesis with regards to the task of music source separation:
 
-The objective of this thesis for the task of music source separation is to substitute the STFT spectrogram with the NSGT spectrogram, to observe how the NSGT compares to the STFT with different window sizes. Open-Unmix will be modified to use the NSGT, and the results will be compared to the original model.
+\begin{enumerate}
+	\item
+		Can the CQT, or more generally the NSGT of which the CQ-NSGT is a variant, replace the STFT in spectrogram-based music source separation
+	\item
+		How does the separation performance of the NSGT, which combines the behavior of narrow and wide window STFTs, compare to the separation performance of different window sizes of STFT
+	\item
+		Can Open-Unmix use the NSGT to surpass its previous STFT-based performance, and also to beat even newer and better-performing models like Demucs and Conv-Tasnet \cite{demucs}
+\end{enumerate}
 
-\todo[inline]{segue into onset detection and beat tracking}
+\todo[inline]{segue into onset detection}
 
 The tasks of onset detection and beat tracking are closely related.
 
@@ -332,7 +340,11 @@ The Bayesian optimization process can additionally perform some random parameter
 	  Transform & Parameters & Median SDR \\
 	 \hline
 	 \hline
-	 STFT (control) & window = 4096, overlap = 1024 & 6.65 \\
+	 STFT, UMX default & window = 4096, overlap = 1024 & 6.65 \\
+	 \hline
+	 STFT, wide & window = 16384, overlap = 4096 & 6.16 \\
+	 \hline
+	 STFT, narrow & window = 1024, overlap = 256 & 5.37 \\
 	 \hline
 	 NSGT, CQ-Log & 138 bins, 47.3 Hz fmin & 7.20 \\
 	 \hline
@@ -356,9 +368,35 @@ Finally, a full evaluation was done on all 50 tracks of the MUSDB18-HQ test set.
 \label{fig:nsgtboxplots}
 \end{figure}
 
-Considering again the IRM1 (for simplicity), the best performing NSGT configuration with the Bark scale, 239 bins, and a starting frequency of 30.1 Hz achieves median SDR scores of 10.42, 9.29, 8.06, and 8.21 in vocals, drums, bass, and other respectively. The control scores computed with an STFT using the UMX default settings of window size 4096 and overlap 1024 achieves median SDR scores of 8.62, 7.07, 6.68, and 6.87 in vocals, drums, bass, and other respectively.
+Considering again the IRM1 (for simplicity), the median SDR score across all tracks for each of the 4 sources is shown in table \ref{table:nsgtbayesresults2} for the same STFT and NSGT configurations from table \ref{table:nsgtbayesresults} are shown along with the SDR score per target, median across all tracks.
 
-To sum up, using the best selected Bark-scale NSGT discovered by 200 iterations of Bayesian optimization achieved improvements of \textbf{+1.3-2.2} points in median SDR score over the STFT. However, recall that this is simply the maximum possible performance of spectral masking with the NSGT, assuming that the system can produce a perfect estimate of the sources.
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|l|c|c|c|c|c| }
+	 \hline
+	  Transform & Vocals SDR & Drums SDR & Bass SDR & Other SDR \\
+	 \hline
+	 \hline
+	 STFT, UMX default & 8.62 & 7.07 & 6.68 & 6.87 \\
+	 \hline
+	 STFT, wider & 6.16 \\
+	 \hline
+	 STFT, narrow & 5.37 \\
+	 \hline
+	 NSGT, CQ-Log & 7.20 \\
+	 \hline
+	 NSGT, VQ-Log & 7.20 \\
+	 \hline
+	 NSGT, Mel & 7.44 \\
+	 \hline
+	 NSGT, Bark & 10.42 & 9.29 & 8.06 & 8.21 \\
+	 \hline
+\end{tabular}
+	\caption{SDR per source, full MUSDB18-HQ test set evaluation}
+	\label{table:nsgtbayesresults2}
+\end{table}
+
+To sum up, using the best selected Bark-scale NSGT discovered by 200 iterations of Bayesian optimization achieved improvements of \textbf{+1.3-2.2} \todo{adjust for fuller testbench} points in median SDR score over the STFT. However, recall that this is simply the maximum possible performance of spectral masking with the NSGT, assuming that the system can produce a perfect estimate of the sources.
 
 The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, and check how much of the theoretical SDR improvements occur in the actual separation model, trained only on MUSDB18-HQ. The goal is to try to surpass Conv-Tasnet and Demucs with the UMX-NSGT variant.
 
@@ -369,8 +407,8 @@ The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, an
 \vfill
 \clearpage
 
-\section{Onset detection and beat tracking}
-\label{sec:beattrack}
+\section{Onset detection}
+\label{sec:onsets}
 
 \vfill
 \clearpage

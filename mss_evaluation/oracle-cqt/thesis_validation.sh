@@ -2,7 +2,7 @@
 
 pybin="/home/sevagh/venvs/thesis/bin/python3"
 expdir="exp-final"
-conf="final_config.json"
+conf="extra_config.json"
 
 #export MUSDB_MAX_TRACKS=1
 export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
@@ -14,11 +14,11 @@ export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
 #$pybin oracle_eval/ideal_mask.py --mono --eval_dir $expdir ./"${conf}"
 
 # crunch and boxplot
-#$pybin oracle_eval/aggregate.py --out=./"${expdir}"/data.pandas ./"${expdir}"/*
-#$pybin oracle_eval/boxplot.py ./"${expdir}"/data.pandas ./"${expdir}"/boxplot.pdf
+#$pybin oracle_eval/aggregate.py --out=./"${expdir}"/data.pandas ./"${expdir}"/irm1-*
+$pybin oracle_eval/boxplot.py ./"${expdir}"/data.pandas ./"${expdir}"/boxplot.pdf
 
 # describe tf configs
 #$pybin oracle_eval/describe_tf.py ./"${conf}"
 
 # bayesian control
-$pybin oracle_eval/grid_ideal_mask.py --mono --n-random-tracks=3 --control
+#$pybin oracle_eval/grid_ideal_mask.py --mono --n-random-tracks=3 --control

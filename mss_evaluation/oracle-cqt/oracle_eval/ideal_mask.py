@@ -47,6 +47,9 @@ class TFTransform:
     def __init__(self, ntrack, fs, tf_transform):
         use_nsgt = (tf_transform.type == "nsgt")
 
+        self.nperseg = tf_transform.window
+        self.noverlap = self.nperseg // 4
+
         self.nsgt = None
         self.tf_transform = tf_transform
         self.N = ntrack
@@ -69,13 +72,13 @@ class TFTransform:
 
     def forward(self, audio):
         if not self.nsgt:
-            return stft(audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64)
+            return stft(audio.T, nperseg=self.nperseg, noverlap=self.noverlap)[-1].astype(np.complex64)
         else:
             return multichan_nsgt(audio, self.nsgt)
 
     def backward(self, X):
         if not self.nsgt:
-            return istft(X, nperseg=4096, noverlap=1024)[1].T[:self.N, :].astype(np.float32)
+            return istft(X, nperseg=self.nperseg, noverlap=self.noverlap)[1].T[:self.N, :].astype(np.float32)
         else:
             return multichan_insgt(X, self.nsgt)
 
@@ -213,8 +216,7 @@ if __name__ == '__main__':
         tmp = None
         for stft_win in config['stft_configs']['window_sizes']:
             tmp = {'type': 'stft', 'window': stft_win}
-            #tmp['name'] = f's{str(stft_win)[0]}' # use first digit of window size
-            tmp['name'] = ''
+            tmp['name'] = f's{str(stft_win)}'
 
             tf_transform = SimpleNamespace(**tmp)
             tfs.append(tf_transform)

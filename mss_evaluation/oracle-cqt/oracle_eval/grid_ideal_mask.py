@@ -57,8 +57,8 @@ class TrackEvaluator:
     def __init__(self, tracks):
         self.tracks = tracks
 
-    def eval_control(self):
-        return self.ideal_mask(alpha=1, binary_mask=False, control=True)
+    def eval_control(self, window_size=4096):
+        return self.ideal_mask(alpha=1, binary_mask=False, control=True, nperseg=window_size, noverlap=window_size//4)
 
     def eval_vqlog(self, fmin=20.0, bins=12, gamma=25):
         return self.ideal_mask(scale='vqlog', fmin=fmin, bins=bins, gamma=gamma, alpha=1, binary_mask=False, control=False)
@@ -72,7 +72,7 @@ class TrackEvaluator:
     def eval_bark(self, fmin=20.0, bins=12):
         return self.ideal_mask(scale='bark', fmin=fmin, bins=bins, alpha=1, binary_mask=False, control=False)
 
-    def ideal_mask(self, scale='cqlog', fmin=20.0, bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False):
+    def ideal_mask(self, scale='cqlog', fmin=20.0, bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False, nperseg=4096, noverlap=1024):
         bins = int(bins)
         med_sdrs = []
 
@@ -98,7 +98,7 @@ class TrackEvaluator:
             eps = np.finfo(np.float32).eps
 
             if control:
-                X = stft(track.audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64)
+                X = stft(track.audio.T, nperseg=nperseg, noverlap=noverlap)[-1].astype(np.complex64)
             else:
                 X = multichan_nsgt(track.audio, nsgt)
 
@@ -116,7 +116,7 @@ class TrackEvaluator:
                     # compute spectrogram of target source:
                     # magnitude of STFT to the power alpha
                     if control:
-                        P[name] = np.abs(stft(source.audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64))**alpha
+                        P[name] = np.abs(stft(source.audio.T, nperseg=nperseg, noverlap=noverlap)[-1].astype(np.complex64))**alpha
                     else:
                         P[name] = np.abs(multichan_nsgt(source.audio, nsgt))**alpha
                     model += P[name]
@@ -128,7 +128,7 @@ class TrackEvaluator:
                 if binary_mask:
                     # compute STFT of target source
                     if control:
-                        Yj = stft(source.audio.T, nperseg=4096, noverlap=1024)[-1].astype(np.complex64)
+                        Yj = stft(source.audio.T, nperseg=nperseg, noverlap=noverlap)[-1].astype(np.complex64)
                     else:
                         Yj = multichan_nsgt(source.audio, nsgt)
 
@@ -145,7 +145,7 @@ class TrackEvaluator:
 
                 # invert to time domain
                 if control:
-                    target_estimate = istft(Yj, nperseg=4096, noverlap=1024)[1].T[:N, :].astype(np.float32)
+                    target_estimate = istft(Yj, nperseg=nperseg, noverlap=noverlap)[1].T[:N, :].astype(np.float32)
                 else:
                     target_estimate = multichan_insgt(Yj, nsgt)
 
@@ -298,7 +298,9 @@ if __name__ == '__main__':
 
     if args.control:
         print('evaluating control stft')
-        print(t.eval_control())
+        print('window size 4096: {0}'.format(t.eval_control(window_size=4096)))
+        print('window size 1024: {0}'.format(t.eval_control(window_size=1024)))
+        print('window size 16384: {0}'.format(t.eval_control(window_size=16384)))
         sys.exit(0)
 
     optimize(t.eval_vqlog, pbounds_vqlog, "vqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir)

@@ -12,7 +12,7 @@ import sys
 import gc
 import itertools
 
-controls = ['ibm1', 'ibm2', 'irm1', 'irm2'] 
+controls = ['irm1-s1024', 'irm1-s4096', 'irm1-s16384'] 
 
 
 def save_boxplot(pandas_in, pdf_out, single=False):
@@ -36,7 +36,7 @@ def save_boxplot(pandas_in, pdf_out, single=False):
     pandas.set_option('display.max_columns', None)  
     pandas.set_option('display.max_rows', None)  
 
-    print(df.groupby(
+    print(df[(df.metric == "SDR")].groupby(
         ['method', 'target', 'metric']
     ).median('time'))
 
