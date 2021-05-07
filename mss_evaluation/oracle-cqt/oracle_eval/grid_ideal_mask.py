@@ -20,6 +20,8 @@ from bayes_opt.util import load_logs
 from bayes_opt.logger import JSONLogger
 from bayes_opt.event import Events
 
+from shared import ideal_mask, ideal_mixphase, TFTransform
+
 
 import scipy
 from scipy.signal import stft, istft
@@ -31,34 +33,13 @@ import json
 from types import SimpleNamespace
 
 
-mempool = cupy.get_default_memory_pool()
-
-
-def multichan_nsgt(audio, nsgt):
-    n_chan = audio.shape[1]
-    Xs = []
-    for i in range(n_chan):
-        Xs.append(np.asarray(nsgt.forward(audio[:, i])))
-    return np.asarray(Xs).astype(np.complex64)
-
-
-def multichan_insgt(C, nsgt):
-    n_chan = C.shape[0]
-    rets = []
-    for i in range(n_chan):
-        C_chan = C[i, :, :]
-        inv = nsgt.backward(C_chan)
-        rets.append(inv)
-    ret_audio = np.asarray(rets)
-    return ret_audio.T
-
-
 class TrackEvaluator:
-    def __init__(self, tracks):
+    def __init__(self, tracks, phasemix=False):
         self.tracks = tracks
+        self.phasemix = phasemix # switch between IRM1 and phasemix
 
     def eval_control(self, window_size=4096):
-        return self.ideal_mask(alpha=1, binary_mask=False, control=True, nperseg=window_size, noverlap=window_size//4)
+        return self.ideal_mask(alpha=1, binary_mask=False, control=True, stft_window=window_size)
 
     def eval_vqlog(self, fmin=20.0, bins=12, gamma=25):
         return self.ideal_mask(scale='vqlog', fmin=fmin, bins=bins, gamma=gamma, alpha=1, binary_mask=False, control=False)
@@ -72,108 +53,26 @@ class TrackEvaluator:
     def eval_bark(self, fmin=20.0, bins=12):
         return self.ideal_mask(scale='bark', fmin=fmin, bins=bins, alpha=1, binary_mask=False, control=False)
 
-    def ideal_mask(self, scale='cqlog', fmin=20.0, bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False, nperseg=4096, noverlap=1024):
+    def ideal_mask(self, scale='cqlog', fmin=20.0, bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False, stft_window=4096):
         bins = int(bins)
+
         med_sdrs = []
 
-        scl = None
-        if scale == 'mel':
-            scl = MelScale(fmin, 22050, bins)
-        elif scale == 'bark':
-            scl = BarkScale(fmin, 22050, bins)
-        elif scale == 'cqlog':
-            scl = LogScale(fmin, 22050, bins)
-        elif scale == 'vqlog':
-            scl = VQLogScale(fmin, 22050, bins, gamma=gamma)
-        else:
-            raise ValueError(f"unsupported scale {scale}")
+        transform_type = "nsgt"
+        if control:
+            transform_type = "stft"
 
         for track in self.tracks:
             #print(f'track: {track.name}')
             N = track.audio.shape[0]
 
-            nsgt = NSGT(scl, track.rate, N, real=True, matrixform=True)
+            tf = TFTransform(N, track.rate, transform_type, stft_window, scale, fmin, bins, gamma)
 
-            # small epsilon to avoid dividing by zero
-            eps = np.finfo(np.float32).eps
-
-            if control:
-                X = stft(track.audio.T, nperseg=nperseg, noverlap=noverlap)[-1].astype(np.complex64)
+            bss_scores = None
+            if self.phasemix:
+                _, bss_scores = ideal_mixphase(track, tf, eval_dir=None)
             else:
-                X = multichan_nsgt(track.audio, nsgt)
-
-            (I, F, T) = X.shape
-
-            # soft mask stuff
-            if not binary_mask:
-                # Compute sources spectrograms
-                P = {}
-                # compute model as the sum of spectrograms
-                model = eps
-
-                # parallelize this
-                for name, source in track.sources.items():
-                    # compute spectrogram of target source:
-                    # magnitude of STFT to the power alpha
-                    if control:
-                        P[name] = np.abs(stft(source.audio.T, nperseg=nperseg, noverlap=noverlap)[-1].astype(np.complex64))**alpha
-                    else:
-                        P[name] = np.abs(multichan_nsgt(source.audio, nsgt))**alpha
-                    model += P[name]
-
-            # now performs separation
-            estimates = {}
-            accompaniment_source = 0
-            for name, source in track.sources.items():
-                if binary_mask:
-                    # compute STFT of target source
-                    if control:
-                        Yj = stft(source.audio.T, nperseg=nperseg, noverlap=noverlap)[-1].astype(np.complex64)
-                    else:
-                        Yj = multichan_nsgt(source.audio, nsgt)
-
-                    # Create Binary Mask
-                    Mask = np.divide(np.abs(Yj)**alpha, (eps + np.abs(X)**alpha))
-                    Mask[np.where(Mask >= theta)] = 1
-                    Mask[np.where(Mask < theta)] = 0
-                else:
-                    # compute soft mask as the ratio between source spectrogram and total
-                    Mask = np.divide(np.abs(P[name]), model)
-
-                # multiply the mix by the mask
-                Yj = np.multiply(X, Mask)
-
-                # invert to time domain
-                if control:
-                    target_estimate = istft(Yj, nperseg=nperseg, noverlap=noverlap)[1].T[:N, :].astype(np.float32)
-                else:
-                    target_estimate = multichan_insgt(Yj, nsgt)
-
-                # set this as the source estimate
-                estimates[name] = target_estimate
-
-                # accumulate to the accompaniment if this is not vocals
-                if name != 'vocals':
-                    accompaniment_source += target_estimate
-
-            estimates['accompaniment'] = accompaniment_source
-
-            gc.collect()
-
-            # cupy disable fft caching to free blocks
-            fft_cache = get_plan_cache()
-            fft_cache.set_size(0)
-
-            mempool.free_all_blocks()
-
-            # cupy reenable fft caching
-            fft_cache.set_size(16)
-            fft_cache.set_memsize(-1)
-
-            bss_scores = museval.eval_mus_track(
-                track,
-                estimates,
-            ).scores
+                _, bss_scores = ideal_mask(track, tf, alpha=alpha, binary_mask=binary_mask, theta=theta, eval_dir=None)
 
             scores = np.zeros((4, 1), dtype=np.float32)
             for target_idx, t in enumerate(bss_scores['targets']):
@@ -184,7 +83,6 @@ class TrackEvaluator:
                     scores[target_idx, metric_idx] = agg
 
             median_sdr = np.median(scores)
-            #print(f'{median_sdr=}')
             med_sdrs.append(median_sdr)
 
         return np.median(med_sdrs)
@@ -229,7 +127,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--control',
         action='store_true',
-        help='evaluate control (stft 2048)'
+        help='evaluate control (stft)'
+    )
+    parser.add_argument(
+        '--phasemix',
+        action='store_true',
+        help='phasemix'
     )
     parser.add_argument(
         '--n-random-tracks',
@@ -279,7 +182,7 @@ if __name__ == '__main__':
         print(f'using tracks 0-{max_tracks} from MUSDB18-HQ test set')
         tracks = mus.tracks[:max_tracks]
 
-    t = TrackEvaluator(tracks)
+    t = TrackEvaluator(tracks, phasemix=args.phasemix)
 
     bins = (12,348)
     fmins = (15.0,60.0)
