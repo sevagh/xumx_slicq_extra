@@ -1,6 +1,6 @@
 scipy
 numpy
-cupy-cuda113
+cupy-cuda112
 git+git://github.com/sevagh/sigsep-mus-eval@feat/cupy-accel#egg=museval
 git+git://github.com/sevagh/nsgt#egg=nsgt
 librosa
@@ -11,3 +11,4 @@ line_profiler
 memory_profiler
 tqdm
 bayesian-optimization
+musdb

@@ -43,18 +43,13 @@ if __name__ == '__main__':
         'config_file',
         help='json file with time-frequency (stft, cqt) evaluation configs',
     )
-    parser.add_argument(
-        '--mono',
-        action='store_true',
-        help='use mono channel (faster evaluation)'
-    )
 
     args = parser.parse_args()
 
     max_tracks = int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize))
 
     # initiate musdb
-    mus = musdb.DB(subsets='test', is_wav=True, mono=args.mono)
+    mus = musdb.DB(subsets='test', is_wav=True)
 
     # accumulate all time-frequency configs to compare
     tfs = []

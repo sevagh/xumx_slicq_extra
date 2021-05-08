@@ -1,27 +1,18 @@
 import sys
 import os
 import musdb
-import gc
 import itertools
 import museval
+from functools import partial
 import numpy as np
 import random
-import librosa
-import functools
 import argparse
-import pandas as pd
-from io import StringIO
-import cupy
-from cupy.fft.config import get_plan_cache
-import tqdm
-from collections import defaultdict
 from bayes_opt import BayesianOptimization
 from bayes_opt.util import load_logs
 from bayes_opt.logger import JSONLogger
 from bayes_opt.event import Events
 
 from shared import ideal_mask, ideal_mixphase, TFTransform
-
 
 import scipy
 from scipy.signal import stft, istft
@@ -34,26 +25,38 @@ from types import SimpleNamespace
 
 
 class TrackEvaluator:
-    def __init__(self, tracks, phasemix=False):
+    def __init__(self, tracks, oracle='irm1'):
         self.tracks = tracks
-        self.phasemix = phasemix # switch between IRM1 and phasemix
+        self.oracle_func = None
+        if oracle == 'irm1':
+            self.oracle_func = partial(ideal_mask, binary_mask=False, alpha=1)
+        elif oracle == 'irm2':
+            self.oracle_func = partial(ideal_mask, binary_mask=False, alpha=2)
+        elif oracle == 'ibm1':
+            self.oracle_func = partial(ideal_mask, binary_mask=True, alpha=1)
+        elif oracle == 'ibm2':
+            self.oracle_func = partial(ideal_mask, binary_mask=True, alpha=2)
+        elif oracle == 'mpi':
+            self.oracle_func = partial(ideal_mixphase)
+        else:
+            raise ValueError(f'unsupported oracle {oracle}')
 
     def eval_control(self, window_size=4096):
-        return self.ideal_mask(alpha=1, binary_mask=False, control=True, stft_window=window_size)
+        return self.oracle(control=True, stft_window=window_size)
 
     def eval_vqlog(self, fmin=20.0, bins=12, gamma=25):
-        return self.ideal_mask(scale='vqlog', fmin=fmin, bins=bins, gamma=gamma, alpha=1, binary_mask=False, control=False)
+        return self.oracle(scale='vqlog', fmin=fmin, bins=bins, gamma=gamma, control=False)
 
     def eval_cqlog(self, fmin=20.0, bins=12):
-        return self.ideal_mask(scale='cqlog', fmin=fmin, bins=bins, alpha=1, binary_mask=False, control=False)
+        return self.oracle(scale='cqlog', fmin=fmin, bins=bins, control=False)
 
     def eval_mel(self, fmin=20.0, bins=12):
-        return self.ideal_mask(scale='mel', fmin=fmin, bins=bins, alpha=1, binary_mask=False, control=False)
+        return self.oracle(scale='mel', fmin=fmin, bins=bins, control=False)
 
     def eval_bark(self, fmin=20.0, bins=12):
-        return self.ideal_mask(scale='bark', fmin=fmin, bins=bins, alpha=1, binary_mask=False, control=False)
+        return self.oracle(scale='bark', fmin=fmin, bins=bins, control=False)
 
-    def ideal_mask(self, scale='cqlog', fmin=20.0, bins=12, gamma=25, alpha=2, binary_mask=False, theta=0.5, control=False, stft_window=4096):
+    def oracle(self, scale='cqlog', fmin=20.0, bins=12, gamma=25, control=False, stft_window=4096):
         bins = int(bins)
 
         med_sdrs = []
@@ -68,11 +71,7 @@ class TrackEvaluator:
 
             tf = TFTransform(N, track.rate, transform_type, stft_window, scale, fmin, bins, gamma)
 
-            bss_scores = None
-            if self.phasemix:
-                _, bss_scores = ideal_mixphase(track, tf, eval_dir=None)
-            else:
-                _, bss_scores = ideal_mask(track, tf, alpha=alpha, binary_mask=binary_mask, theta=theta, eval_dir=None)
+            _, bss_scores = self.oracle_func(track, tf, eval_dir=None)
 
             scores = np.zeros((4, 1), dtype=np.float32)
             for target_idx, t in enumerate(bss_scores['targets']):
@@ -120,19 +119,21 @@ if __name__ == '__main__':
         description='Search NSGT configs for best ideal mask'
     )
     parser.add_argument(
-        '--mono',
-        action='store_true',
-        help='use mono channel (faster evaluation)'
-    )
-    parser.add_argument(
         '--control',
         action='store_true',
         help='evaluate control (stft)'
     )
     parser.add_argument(
-        '--phasemix',
-        action='store_true',
-        help='phasemix'
+        '--control-window-sizes',
+        type=str,
+        default='1024,2048,4096,8192,16384',
+        help='comma-separated window sizes of stft to evaluate'
+    )
+    parser.add_argument(
+        '--oracle',
+        type=str,
+        default='irm1',
+        help='type of oracle to compute (choices: irm1, irm2, ibm1, ibm2, mpi)'
     )
     parser.add_argument(
         '--n-random-tracks',
@@ -170,7 +171,7 @@ if __name__ == '__main__':
     random.seed(args.random_seed)
 
     # initiate musdb
-    mus = musdb.DB(subsets='test', is_wav=True, mono=args.mono)
+    mus = musdb.DB(subsets='test', is_wav=True)
 
     max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
 
@@ -182,7 +183,7 @@ if __name__ == '__main__':
         print(f'using tracks 0-{max_tracks} from MUSDB18-HQ test set')
         tracks = mus.tracks[:max_tracks]
 
-    t = TrackEvaluator(tracks, phasemix=args.phasemix)
+    t = TrackEvaluator(tracks, oracle=args.oracle)
 
     bins = (12,348)
     fmins = (15.0,60.0)
@@ -199,11 +200,12 @@ if __name__ == '__main__':
         'fmin': fmins
     }
 
+    print('oracle: {0}'.format(args.oracle))
+
     if args.control:
         print('evaluating control stft')
-        print('window size 4096: {0}'.format(t.eval_control(window_size=4096)))
-        print('window size 1024: {0}'.format(t.eval_control(window_size=1024)))
-        print('window size 16384: {0}'.format(t.eval_control(window_size=16384)))
+        for window_size in [int(x) for x in args.control_window_sizes.split(',')]:
+            print('window size {0}: {1}'.format(window_size, t.eval_control(window_size=window_size)))
         sys.exit(0)
 
     optimize(t.eval_vqlog, pbounds_vqlog, "vqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir)

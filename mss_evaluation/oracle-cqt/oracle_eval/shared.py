@@ -110,6 +110,7 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None):
         magnitude of STFT raised to the power alpha. Typical parameters involve a
         ratio of magnitudes (alpha=1) and a majority vote (theta = 0.5)
     """
+
     X = tf.forward(track.audio)
 
     (I, F, T) = X.shape
