@@ -79,7 +79,7 @@
 \vspace{3.5em}
 
 \begin{abstract}
-	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used as the input representation of music signals in deep learning models. Two tasks where such models have achieved success are music source separation and onset detection. Despite its ubiquity, the STFT has a fixed and bounded time-frequency resolution, such that one must sacrifice time for frequency resolution (or vice versa) by changing the window size. The Nonstationary Gabor Transform (NSGT) is an adaptive time-frequency transform which can vary its time-frequency resolution to better represent music signals. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating music signals. Next, the STFT is replaced with different configurations of the NSGT in deep learning models for onset detection and music source separation respectively, showing significant improvements in the results.
+	The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. The STFT is commonly used to represent musical signals in digital signal processing algorithms and machine learning models for music information retrieval (MIR). Despite the ubiquity of the STFT, it is limited by a fixed and bounded time-frequency resolution. The Nonstationary Gabor Transform (NSGT) is an alternative time-frequency transform which better represent musical signals by varying its time-frequency resolution. In the task of music source separation, deep learning models based on the time-domain waveform have surpassed the previous state-of-the-art established by STFT-based models. In this thesis, first the STFT and NSGT are described as tools for representing and manipulating musical signals. Next, the task of music source separation is described. Finally, the STFT is replaced with different configurations of the NSGT in music source separation, demonstrating improved and competitive results.
 \end{abstract}
 
 \vfill
@@ -145,6 +145,8 @@ Additionally, the CQT implemented with the NSGT, or CQ-NSGT, solves the most imp
 
 \subsection{Related work and thesis objectives}
 
+\todo[inline]{read more surveys, come up with something better here}
+
 \citet{musicsepgood} describe the motivation and task of music source separation as follows:
 
 \begin{quote}
@@ -163,10 +165,6 @@ A simpler and older algorithm for harmonic/percussive source separation (HPSS) \
 	\item
 		Can Open-Unmix use the NSGT to surpass its previous STFT-based performance, and also to beat even newer and better-performing models like Demucs and Conv-Tasnet \cite{demucs}
 \end{enumerate}
-
-\todo[inline]{segue into onset detection}
-
-The tasks of onset detection and beat tracking are closely related.
 
 \subsection{Contribution and results}
 
@@ -275,6 +273,11 @@ Most recently, the SigSep\footnote{\url{https://sigsep.github.io/}} community ha
 The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research.
 
 In modern music source separation, the stems of MUSDB18 have determined the four most common sources to separate -- drums, bass, vocals, and other. SigSep's own network, Open-Unmix, is trained only on MUSDB18, and produces near-state-of-the-art results. The absolute state-of-the-art crown is jointly held by Conv-Tasnet and Demucs, both of which surpass Open-Unmix. Both models operate directly on the waveform domain, which indicates that they could surpass the maximum possible poerformance of time-frequency masking approaches, as is done in speech separation. However, in practise they are still below the limits of masking-based approaches.
+
+\vfill
+\clearpage
+
+\section{Music source separation with the NSGT}
 
 \subsection{Surpassing the STFT ideal oracle mask}
 
@@ -406,13 +409,6 @@ The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, an
 
 \vfill
 \clearpage
-
-\section{Onset detection}
-\label{sec:onsets}
-
-\vfill
-\clearpage
-
 \section{Conclusions}
 \label{sec:conclusion}
 
