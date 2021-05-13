@@ -1,11 +1,22 @@
-report:
+dev-report:
 	latexmk -pvc report.tex
 
-proposal:
+dev-proposal:
 	latexmk -pvc proposal.tex
 
-presentation01:
+dev-presentation01:
 	latexmk -pvc presentation01.tex
+
+all: clean report proposal presentation01
+
+report:
+	latexmk report.tex
+
+proposal:
+	latexmk proposal.tex
+
+presentation01:
+	latexmk presentation01.tex
 
 clean:
 	latexmk -C

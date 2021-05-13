@@ -243,13 +243,21 @@ The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in 
 
 \todo[inline]{whats the output, what does it mean, how does it relate to the FFT coefficients, time-frequency matrix}
 
-\subsection{Common frequency scales and examples}
+\subsection{Frequency scales}
 
-\subsubsection{Constant-Q transform with the log scale}
+\subsubsection{Constant-Q log}
 
-\subsubsection{Variable-Q transform}
+log, octave
 
-\subsubsection{Mel and Bark}
+\subsubsection{Variable-Q log}
+
+same with gamma
+
+from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
+
+\subsubsection{Mel}
+
+\subsubsection{Bark}
 
 \vfill
 \clearpage
@@ -298,13 +306,15 @@ The task of music source separation is to split a mixed song into its constituen
 
 Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.
 
-\begin{wrapfigure}{r}{8cm}
+%\begin{wrapfigure}{r}{8cm}
+\begin{figure}[ht]
 	\vspace{-1.0em}
 	\includegraphics[width=8cm]{./maskdemo.png}
 	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
 	\label{fig:masks}
 	\vspace{-1.5em}
-\end{wrapfigure}
+%\end{wrapfigure}
+\end{figure}
 
 \citet{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
 \[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
