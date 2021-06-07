@@ -16,3 +16,6 @@
 [submodule "mss_evaluation/open-unmix-nsgt"]
 	path = mss_evaluation/open-unmix-nsgt
 	url = git@github.com:sevagh/open-unmix-nsgt
+[submodule "mss_evaluation/umx-mr"]
+	path = mss_evaluation/umx-mr
+	url = git@github.com:sevagh/umx-mr.git
