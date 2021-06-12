@@ -13,6 +13,6 @@
 [submodule "mss_evaluation/mss-oracle-experiments"]
 	path = mss_evaluation/mss-oracle-experiments
 	url = https://github.com/sevagh/mss-oracle-experiments
-[submodule "mss_evaluation/umx-nsgt"]
-	path = mss_evaluation/umx-nsgt
-	url = git@github.com:sevagh/umx-nsgt.git
+[submodule "mss_evaluation/umx-sliCQ"]
+	path = mss_evaluation/umx-sliCQ
+	url = git@github.com:sevagh/umx-sliCQ.git
