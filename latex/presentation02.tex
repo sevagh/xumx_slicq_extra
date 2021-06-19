@@ -1,0 +1,392 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Boadilla}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{fancyvrb}
+\usepackage{multicol}
+\usepackage{optparams}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning}
+\newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
+\usepackage{subfig}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+\addbibresource{citations.bib}
+\usepackage{pgfpages}
+\usepackage{xcolor}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+\setbeameroption{hide notes}
+\input{variables.tex}
+
+\title{Improving Open-Unmix for Music Source Separation}
+\subtitle{Brainstorming session}
+\author{Sevag Hanssian}
+\institute{DDMAL, McGill}
+\setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+  \clearfield{isbn}%
+  \clearfield{title}%
+  \clearfield{url}%
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{inproceedings}{
+    \clearfield{booktitle}%
+}{}
+}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Music Source Separation}
+	Task introduction \footcite{musicsepgood}:
+	\begin{enumerate}
+		\item
+			When producing music, instruments are recorded separately (aka stems), and are combined (mixing + mastering) to make mixed song -- commonly 4 sources, bass, drums, vocals, other, deriving from MUSDB18-HQ dataset \footcite{musdb18hq}. E.g.:
+			\begin{verbatim}
+			# ls MUSDB18-HQ/train/Night\ Panther\ -\ Fire/
+			vocals.wav mixture.wav drums.wav other.wav bass.wav
+			\end{verbatim}
+		\item
+			On the flip side, given a mixed song, we want to decompose it back into its stems (without having access to the stems)
+		\item
+			How? Exploit time-frequency characteristics of the sources that distinguish them from each other. Simplistic approach \footcite{fitzgerald1}: harmonic sources have long sustained frequencies, percussive sources are transient and broadband, i.e. tall, short-lived spikes in time
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Visualizations}
+	\begin{figure}[ht]
+		\centering
+		\subfloat{\includegraphics[height=2.5cm]{./mixing.png}}
+		\hspace{0.1em}
+		\subfloat{\includegraphics[height=2.5cm]{./demixing.png}}
+		\caption{Mixing and ``demixing'' or source separation}
+	\end{figure}
+	\begin{figure}[ht]
+		\centering
+		\subfloat{\includegraphics[height=2cm]{./mixedspecgram.png}}
+		\hspace{0.1em}
+		\subfloat{\includegraphics[height=2cm]{./harm_soft.png}}
+		\hspace{0.1em}
+		\subfloat{\includegraphics[height=2cm]{./perc_soft.png}}
+		\caption{HPSS example}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Neural networks for Music Source Separation}
+	Task introduction \footcite{musicsepgood}:
+	\begin{enumerate}
+		\item
+			\textbf{Ground truth:} source stems that are combined to make mixed song -- commonly 4 sources, bass, drums, vocals, other. Also very commonly 1 network per source
+		\item
+			\textbf{Network inputs:} mixed waveform and 1 source -- direct waveform, or a TFR (time-frequency representation)  e.g. STFT
+		\item
+			\textbf{Estimate source:} given the mixed input, learn how to extract a source. Common approach: learnable magnitude-STFT mask, e.g. same shape as spectrogram but $\in [0.0, 1.0]$, to multiply mixed spectrogram with
+		\item
+			\textbf{Back to waveform:} after estimating the source, convert it back to waveform -- can use masking or mix-phase inversion. Mixture supplies the STFT phase, estimates only use magnitude
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Visualizations}
+	\begin{figure}[ht]
+		\includegraphics[height=2.5cm]{./mask_simple.png}
+		\caption{Example of a binary mask applied to an STFT}
+	\end{figure}
+	\begin{figure}[ht]
+		\includegraphics[height=2.5cm]{./whynophase.png}
+		\caption{Why we don't try to learn phase in neural networks}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Open-Unmix}
+	Very open source, near-SOTA music source separation. Intended to be a ``platform'' for future MSS research.
+	\begin{figure}[ht]
+		\includegraphics[height=3cm]{./umx1.png}
+		\caption{Open-Unmix diagram}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Open-Unmix network}
+	UMX simplied (example for vocals, but identical for other stems):
+	\begin{enumerate}
+		\item
+			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
+		\item
+			\textbf{Network:} magnitude STFT = $abs(STFT(x))$ = $\text{Time} \times \text{Frequency}$\\E.g. for STFT with 4096-sized window, on 6 seconds of audio = $258 \text{ time frames} \times 2049 \text{ frequencies}$
+		\item
+			\textbf{Linear encoder:} 2049 frequencies $\rightarrow$ 512 (compressed frequencies)
+			(+ batchnorm + tanh)
+		\item
+			\textbf{Recurrence}: BLSTM, hidden = 512, 3 layers, dropout + skip-conn\\
+			258 frames of 512 compressed frequencies pass through the LSTM
+		\item
+			\textbf{Linear decoder:}
+			\begin{enumerate}
+				\item
+					1024 (LSTM skip conn) $\rightarrow$ 512 (compressed frequencies)\\(+ batchnorm + relu)
+				\item
+					512 $\rightarrow$ 2049 (original frequencies)\\(+ batchnorm + relu)
+			\end{enumerate}
+		\item
+			\textbf{Apply positive mask on mix:} return $\text{mix} \times \text{network output}$
+		\item
+			\textbf{Loss:} MSE of $abs(STFT(y))$ vs. $unmix(abs(STFT(x)))$ i.e. how identical is the estimate vocals magnitude STFT to the ground truth vocals magnitude STFT
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Getting the stem waveform}
+	Recall: output of unmix is the estimated \textbf{magnitude STFT} of the vocal stem\\\ \\
+
+	Open-unmix uses phase of mixture:
+	\begin{enumerate}
+		\item
+			\textbf{x, inference:} x = mix waveform
+		\item
+			\textbf{Estimate Ymag, vocals:}\\
+			\qquad $X_{\text{mag}} = abs(\text{STFT}(x))$, $\hat{Y}_{\text{mag}} = \text{network}(X_{\text{mag}})$
+		\item
+			\textbf{Mix phase inversion:}\\
+			\qquad $X_{\text{phase}} = atan2(\text{STFT}(x))$\\
+			\qquad $\hat{Y}_{\text{complex}} = \hat{Y}_{\text{mag}} + j X_{\text{phase}} \rightarrow \hat{y} = \text{iSTFT}(\hat{Y}_{\text{complex}})$
+		\item
+			Evaluation: BSS (SDR, SAR, SIR, ISR) on $\hat{y}, y_{\text{groundtruth}}$
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Oracle, or ideal, performance}
+	Mix phase oracle (hasn't been evaluated before). Given ground truths, \textbf{how good can source separation be?} Assuming a perfect estimate from the neural network\\
+
+	Using ground-truth instead of network predictions:
+	\begin{enumerate}
+		\item
+			\textbf{x, y ground truth:} x = mix waveform, y = vocals
+		\item
+			\textbf{Ideal mix phase inversion:}\\
+			\qquad $X_{\text{phase}} = atan2(\text{STFT}(x))$\\
+			\qquad $Y_{\text{mag}} = abs(\text{STFT}(y))$\\
+			\qquad $Y_{\text{ideal complex}} = Y_{\text{mag}} + j X_{\text{phase}} \rightarrow y_{\text{ideal}} = \text{iSTFT}(Y_{\text{ideal complex}})$
+		\item
+			Evaluation: BSS (SDR, SAR, SIR, ISR) on $y_{\text{ideal}}, y_{\text{groundtruth}}$
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{STFT time-frequency tradeoff -- solved by NSGT}
+	\begin{figure}[ht]
+		\centering
+		\subfloat[STFT, 93ms window]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz2.png}}
+		\hspace{0.5em}
+		\subfloat[STFT, 6ms window]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz1.png}}\\
+		\subfloat[NSGT, 6-93ms window]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz3.png}}
+		\caption{STFT vs. NSGT}
+		\label{fig:stfttradeoff}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Idea: choose NSGT configuration for ideal mix phase oracle}
+	Original idea which kicked off entire project. STFT is minimally configurable: window and hop size only.
+
+	NSGT:
+	\begin{enumerate}
+		\item
+			Choice of frequency scale: Constant-Q/logarithmic, Variable-Q, Mel, Bark
+		\item
+			Choice of fmin (10.0-130.0 Hz in \footcite{balazs})
+		\item
+			Choice of fmax (nyquist for performance, typically)
+		\item
+			Choice of total frequency bins (or ``bins per octave'' in cqt language)
+	\end{enumerate}
+	Slice-wise (e.g. windowed, familiar to the STFT) variant = ``sliCQ'' NSGT\\
+
+	NSGT is not too special or exotic -- it's an FFT applied with varying window sizes (the special trait of the NSGT is the scheme to compute the perfect inverse using frame theory)
+\end{frame}
+
+\begin{frame}
+	\frametitle{After some hyperparam searches}
+	Using SDR only (the most important score):\\
+	STFT, UMX default (window = 4096): vocals 8.62, drums 7.07, bass 6.68, other 6.87\\
+
+	NSGT (with maximum slice length capped at 8192 frames):\\
+
+	Bass NSGT = Bark, 105 bins, 25.4-22050 Hz, slice = 7180 = 8.47\\
+	Drums NSGT = Mel, 104 bins, 49.3-22050 Hz, slice = 7108 = 10.5\\
+	Other NSGT = Bark, 64 bins, 90.0-22050 Hz, slice = 4416 = 13.94\\
+	Vocals NSGT = Mel, 116 bins, 37.7-22050 Hz, slice = 8024 = 9.83\\\ \\
+
+
+	\textbf{Hypothesis}:
+	\begin{enumerate}
+		\item
+			If one can prepare a neural network that can estimate the magnitude-sliCQ-NSGT
+		\item
+			Then using the above configurations can get significant SDR gains since they perform considerably better in the mix-phase oracle
+		\item
+			UMX-STFT: estimate abs(STFT-4096) $\rightarrow$ \\
+			\qquad UMX-NSGT: estimate abs(NSGT-Bark-105-25.4Hz-7180)
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{NSGT-sliCQ detail}
+
+	\begin{enumerate}
+		\item
+			x, mixed waveform
+		\item
+			nsgt = NSGT(fscale=mel, fbins=105, fmin=25.4, fmax=22050, sllen=7180)
+		\item
+			X = nsgt.forward(x), complex 3d slicq
+		\item
+			Shape: $\text{Slice} \times \text{Frequency bin} \times \text{Time-in-slice}$
+			e.g. $67 \times 117 \times 234$
+		\item
+			2d shape:
+			\begin{enumerate}
+				\item
+					Flatten: $(67 \times 234) \times 117$ time-freq = $15678 \times 117$
+				\item
+					50\% overlap: $7839 \times 117$ -- noninvertible
+			\end{enumerate}
+		\item
+			117 frequency bins are nonlinear on the desired scale:
+			\begin{verbatim}
+			 25.4           49.84    75.1   101.2 ...
+			\end{verbatim}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NSGT-sliCQ inside Open-Unmix}
+	NSGT-sliCQ choices:
+	\begin{itemize}
+		\item
+			Reduce to 2d (overlap-add or flatten) -- same dimensionality as an STFT
+		\item
+			Treat as 3-dimensional sequence of 2d time-frequency frames!\\
+			2-d spectrogram = image (RGB x width x height $\rightarrow$ mono/stereo x time x frequency)\\
+			3-d sliCQ = video (temporal frame x mono/stereo x (2d time x frequency)\\
+			$\text{Slice} \times (\text{Frequency} \times \text{Time-in-slice})$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Open-Unmix with 2d sliCQ + LSTM}
+	UMX-sliCQ 2d:
+	\begin{enumerate}
+		\item
+			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
+		\item
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+		\item
+			\textbf{Flatten:} $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow 15678 \text{ time} \times 117 \text { frequencies}$\\
+			\textbf{\textcolor{red}{LSTMs can deal with overlapping sequences, right?}}
+		\item
+			\textbf{Recurrence}: BLSTM, hidden = 117, 3 layers, dropout + skip-conn\\
+			15678 frames of 117 frequencies pass through the LSTM\\
+			\textbf{contrast with} 258 frames of 512 compressed frequencies of STFT
+			\textbf{\textcolor{red}{huge sequence length is not good -- slow training, bad gradients, never worked for me}}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Open-Unmix with 3d sliCQ + LSTM}
+	UMX-sliCQ 3d:
+	\begin{enumerate}
+		\item
+			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
+		\item
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+		\item
+			\textbf{Flatten differently:} $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow 67 \text{ slices} \times (117 \text { frequencies} \times 234 \text { time-in-slice} = 27378)$\\
+			\textbf{LSTM is now taking the temporally evolving sequence of ``1D'' flattened sliCQ tf frames)}
+		\item
+			\textbf{Recurrence}: BLSTM, hidden = 27378, 3 layers, dropout + skip-conn\\
+			67 frames of 27378 sliCQ coefficients pass through the LSTM\\
+			\textbf{contrast with} 258 frames of 512 compressed frequencies of STFT
+			\textbf{\textcolor{red}{reducing the 1D dimensionality to not have a hidden size of 27378 -- linear encoder?}}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Open-Unmix with 3d sliCQ + Conv-LSTM}
+	UMX-sliCQ 3d:
+	\begin{enumerate}
+		\item
+			\textbf{x, y training example:} x = mix waveform, y = vocal stem
+		\item
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+		\item
+			\textbf{Conv3d encoder:} Use $1 \times T \times F$ kernels to not touch the slice/temporal dimension:\\
+			$67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 67 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
+			\textbf{LSTM is now taking the temporally evolving sequence of ``1D'' flattened convencoder(sliCQ)}
+		\item
+			\textbf{Recurrence}: BLSTM, hidden = 60, 3 layers, dropout + skip-conn\\
+			67 frames of 60 conv3d(sliCQ) coefficients pass through the LSTM
+		\item
+			\textbf{ConvTranspose3d decoder:} grow $60 = 6 \times 10$ back to $117 \times 234$
+
+			\textbf{``feels right'' but doesn't generalize - \textcolor{red}{convolution parameter selection - kernels, layers, hidden channels}}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Open-Unmix with 3d sliCQ + Convolutions, no LSTM}
+	UMX-sliCQ 3d:
+	\begin{enumerate}
+		\item
+			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
+		\item
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+		\item
+			\textbf{Conv3d encoder:} Use $S \times T \times F$ kernels to also find patterns across the slice dimension
+			$67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 4 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
+		\item
+			\textbf{ConvTranspose3d decoder:} grow $4 \times 6 \times 10$ back to $67 \times 117 \times 234$
+	\end{enumerate}
+	\textbf{\textcolor{red}{based more on Convolutional autoencoder/decoder theory, not an adaptation of UMX anymore}}\\
+	\textbf{\textcolor{red}{no luck}}\\
+\end{frame}
+
+\end{document}

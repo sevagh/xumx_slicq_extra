@@ -7,7 +7,10 @@ dev-proposal:
 dev-presentation01:
 	latexmk -pvc presentation01.tex
 
-all: clean report proposal presentation01
+dev-presentation02:
+	latexmk -pvc presentation02.tex
+
+all: clean report proposal presentation01 presentation02
 
 report:
 	latexmk report.tex
@@ -17,6 +20,9 @@ proposal:
 
 presentation01:
 	latexmk presentation01.tex
+
+presentation01:
+	latexmk presentation02.tex
 
 clean:
 	latexmk -C
