@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{multimedia}
 \usepackage{fancyvrb}
+\usepackage{soul}
 \usepackage{multicol}
 \usepackage{optparams}
 \usepackage{adjustbox}
@@ -70,25 +71,68 @@
 \maketitle
 \end{frame}
 
-\begin{frame}[fragile]
-	\frametitle{Music Source Separation}
-	Task introduction \footcite{musicsepgood}:
+
+\begin{frame}
+	\adjustbox{valign=c}{{\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}Timeline}}\hfill
+	\adjustbox{valign=c}{
+	\newcounter{year}
+	\begin{tikzpicture}[yscale=0.5,%
+		   year/.style={draw=red,text=blue,fill=yellow!20,shape=ellipse,inner sep=2pt},
+		   description/.style={rectangle,align=left,text width=60mm,anchor=west},
+		   timeline/.style={->,thick,red!50}]
+
+	    \foreach \year/\desc [count=\y] in {%
+	       01-2020/Looked at HPSS (harmonic-percussive source separation) in MUMT 501,%
+	       01-2021/Implemented HPSS with CQT in MUMT 622,%
+		01-2021/Studied the NSGT-sliCQ (perfect CQT implementation) in MUMT 622,%
+	       05-2021/Decided on thesis topic: adapt Open-Unmix neural network to replace STFT with NSGT-sliCQ%
+	       } { \ifnum\y=1 \node[description](\y){\desc};
+		   \else\node[description,below=1ex of \z](\y){\desc};
+		   \fi
+		   \node[year](y-\y) [left=of \y] {\year};
+		   \ifnum\y>1\draw[timeline] (y-\z)-- (y-\y);\fi
+		   \global\let\z=\y% for drawing from last node
+	       }
+
+	\end{tikzpicture}
+	}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Competition}
+	By pure luck, there is a May-August 2021 competition by the creators of Open-Unmix: \href{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}\\
+	\includegraphics[height=2.5cm]{./challenge.png}\\
+	Deadlines:
 	\begin{enumerate}
 		\item
-			When producing music, instruments are recorded separately (aka stems), and are combined (mixing + mastering) to make mixed song -- commonly 4 sources, bass, drums, vocals, other, deriving from MUSDB18-HQ dataset \footcite{musdb18hq}. E.g.:
+			\st{Round 1: May 3rd - June 13th, 12 PM UTC} - hidden dataset A, already finished
+		\item
+			Round 2: June 14th - July 31st, 12 PM UTC - hidden dataset B
+		\item
+			Team Freeze deadline: 23rd July, 12 PM UTC
+	\end{enumerate}
+	All submissions get evaluated on a full hidden dataset in August (meaning I have until July 31 to submit a winner)
+\end{frame}
+
+\begin{frame}
+	\frametitle{Competition pt2}
+	I made 1 submission to Round 1: tiny tweaks (LSTM $\rightarrow$ GRU, swap batchnorm and activations, etc.), added my Periphery stems (4 albums) dataset to MUSDB18-HQ to try to train with extra metal data\\
+	\includegraphics[height=4cm]{./top5.png}
+	\includegraphics[height=2.17cm]{./currentplace.png}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Music Source Separation}
+	\begin{enumerate}
+		\item
+			When producing music, instruments are recorded separately (aka stems), and combined (linear mixture) to make mixed song -- commonly 4 sources, bass, drums, vocals, other, deriving from MUSDB18-HQ dataset \footcite{musdb18hq}, e.g.:
 			\begin{verbatim}
 			# ls MUSDB18-HQ/train/Night\ Panther\ -\ Fire/
 			vocals.wav mixture.wav drums.wav other.wav bass.wav
 			\end{verbatim}
 		\item
 			On the flip side, given a mixed song, we want to decompose it back into its stems (without having access to the stems)
-		\item
-			How? Exploit time-frequency characteristics of the sources that distinguish them from each other. Simplistic approach \footcite{fitzgerald1}: harmonic sources have long sustained frequencies, percussive sources are transient and broadband, i.e. tall, short-lived spikes in time
 	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Visualizations}
 	\begin{figure}[ht]
 		\centering
 		\subfloat{\includegraphics[height=2.5cm]{./mixing.png}}
@@ -96,20 +140,10 @@
 		\subfloat{\includegraphics[height=2.5cm]{./demixing.png}}
 		\caption{Mixing and ``demixing'' or source separation}
 	\end{figure}
-	\begin{figure}[ht]
-		\centering
-		\subfloat{\includegraphics[height=2cm]{./mixedspecgram.png}}
-		\hspace{0.1em}
-		\subfloat{\includegraphics[height=2cm]{./harm_soft.png}}
-		\hspace{0.1em}
-		\subfloat{\includegraphics[height=2cm]{./perc_soft.png}}
-		\caption{HPSS example}
-	\end{figure}
 \end{frame}
 
 \begin{frame}[fragile]
 	\frametitle{Neural networks for Music Source Separation}
-	Task introduction \footcite{musicsepgood}:
 	\begin{enumerate}
 		\item
 			\textbf{Ground truth:} source stems that are combined to make mixed song -- commonly 4 sources, bass, drums, vocals, other. Also very commonly 1 network per source
@@ -141,35 +175,8 @@
 		\includegraphics[height=3cm]{./umx1.png}
 		\caption{Open-Unmix diagram}
 	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Open-Unmix network}
-	UMX simplied (example for vocals, but identical for other stems):
-	\begin{enumerate}
-		\item
-			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
-		\item
-			\textbf{Network:} magnitude STFT = $abs(STFT(x))$ = $\text{Time} \times \text{Frequency}$\\E.g. for STFT with 4096-sized window, on 6 seconds of audio = $258 \text{ time frames} \times 2049 \text{ frequencies}$
-		\item
-			\textbf{Linear encoder:} 2049 frequencies $\rightarrow$ 512 (compressed frequencies)
-			(+ batchnorm + tanh)
-		\item
-			\textbf{Recurrence}: BLSTM, hidden = 512, 3 layers, dropout + skip-conn\\
-			258 frames of 512 compressed frequencies pass through the LSTM
-		\item
-			\textbf{Linear decoder:}
-			\begin{enumerate}
-				\item
-					1024 (LSTM skip conn) $\rightarrow$ 512 (compressed frequencies)\\(+ batchnorm + relu)
-				\item
-					512 $\rightarrow$ 2049 (original frequencies)\\(+ batchnorm + relu)
-			\end{enumerate}
-		\item
-			\textbf{Apply positive mask on mix:} return $\text{mix} \times \text{network output}$
-		\item
-			\textbf{Loss:} MSE of $abs(STFT(y))$ vs. $unmix(abs(STFT(x)))$ i.e. how identical is the estimate vocals magnitude STFT to the ground truth vocals magnitude STFT
-	\end{enumerate}
+	UMX estimates source magnitude STFT with a nonnegative mask (ReLU)\\
+	4 networks, 1 per source (bass, drums, vocals, other)
 \end{frame}
 
 \begin{frame}
@@ -211,40 +218,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{STFT time-frequency tradeoff -- solved by NSGT}
-	\begin{figure}[ht]
-		\centering
-		\subfloat[STFT, 93ms window]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz2.png}}
-		\hspace{0.5em}
-		\subfloat[STFT, 6ms window]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz1.png}}\\
-		\subfloat[NSGT, 6-93ms window]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz3.png}}
-		\caption{STFT vs. NSGT}
-		\label{fig:stfttradeoff}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Idea: choose NSGT configuration for ideal mix phase oracle}
-	Original idea which kicked off entire project. STFT is minimally configurable: window and hop size only.
-
-	NSGT:
-	\begin{enumerate}
-		\item
-			Choice of frequency scale: Constant-Q/logarithmic, Variable-Q, Mel, Bark
-		\item
-			Choice of fmin (10.0-130.0 Hz in \footcite{balazs})
-		\item
-			Choice of fmax (nyquist for performance, typically)
-		\item
-			Choice of total frequency bins (or ``bins per octave'' in cqt language)
-	\end{enumerate}
-	Slice-wise (e.g. windowed, familiar to the STFT) variant = ``sliCQ'' NSGT\\
-
-	NSGT is not too special or exotic -- it's an FFT applied with varying window sizes (the special trait of the NSGT is the scheme to compute the perfect inverse using frame theory)
-\end{frame}
-
-\begin{frame}
-	\frametitle{After some hyperparam searches}
+	\frametitle{STFT vs. NSGT oracle performance}
 	Using SDR only (the most important score):\\
 	STFT, UMX default (window = 4096): vocals 8.62, drums 7.07, bass 6.68, other 6.87\\
 
@@ -254,7 +228,6 @@
 	Drums NSGT = Mel, 104 bins, 49.3-22050 Hz, slice = 7108 = 10.5\\
 	Other NSGT = Bark, 64 bins, 90.0-22050 Hz, slice = 4416 = 13.94\\
 	Vocals NSGT = Mel, 116 bins, 37.7-22050 Hz, slice = 8024 = 9.83\\\ \\
-
 
 	\textbf{Hypothesis}:
 	\begin{enumerate}
@@ -268,33 +241,9 @@
 	\end{enumerate}
 \end{frame}
 
-\begin{frame}[fragile]
-	\frametitle{NSGT-sliCQ detail}
-
-	\begin{enumerate}
-		\item
-			x, mixed waveform
-		\item
-			nsgt = NSGT(fscale=mel, fbins=105, fmin=25.4, fmax=22050, sllen=7180)
-		\item
-			X = nsgt.forward(x), complex 3d slicq
-		\item
-			Shape: $\text{Slice} \times \text{Frequency bin} \times \text{Time-in-slice}$
-			e.g. $67 \times 117 \times 234$
-		\item
-			2d shape:
-			\begin{enumerate}
-				\item
-					Flatten: $(67 \times 234) \times 117$ time-freq = $15678 \times 117$
-				\item
-					50\% overlap: $7839 \times 117$ -- noninvertible
-			\end{enumerate}
-		\item
-			117 frequency bins are nonlinear on the desired scale:
-			\begin{verbatim}
-			 25.4           49.84    75.1   101.2 ...
-			\end{verbatim}
-	\end{enumerate}
+\begin{frame}
+	\frametitle{sliCQ in UMX, dimensionality visuals}
+	\includegraphics[height=6.5cm]{./umxslicqdimred.png}
 \end{frame}
 
 \begin{frame}
@@ -309,6 +258,72 @@
 			3-d sliCQ = video (temporal frame x mono/stereo x (2d time x frequency)\\
 			$\text{Slice} \times (\text{Frequency} \times \text{Time-in-slice})$
 	\end{itemize}
+	Input size:
+	\begin{enumerate}
+		\item
+			input stft, 6s audio = abs(STFT(4096)) = $258 \times 2049 \approx 500,000$
+		\item
+			input slicq, 6s audio = abs(sliCQ(mel,116,37.7)) = $67 \times 117 \times 244 \approx 1,912,716$
+		\item
+			UMX has ~1 million parameters for 500,000-sized input. Scale accordingly? Do I necessarily need a model that has 4 million parameters, or similar?
+		\item
+			Leaning towards CNN for large, structured inputs
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{STFT in UMX, visual}
+	\includegraphics[height=3cm]{./umxstftlstm.png}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{sliCQ in UMX LSTM, option 1}
+	\includegraphics[height=2.7cm]{./umxslicqlstm1.png}\\
+	\textbf{nb:} overlap version is non-invertible
+\end{frame}
+
+\begin{frame}
+	\frametitle{sliCQ in UMX LSTM, option 2}
+	\includegraphics[height=2.7cm]{./umxslicqlstm2.png}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Debugging ideas}
+	The ``golden test'': overfit to 2 training examples (2x 6s segments) + 1 validation example (1x 12s segment)
+	\begin{verbatim}
+        /home/sevagh/musdbdebug/
+        └── train
+            ├── Actions - One Minute Smile
+            ├── Night Panther - Fire
+            └── Steven Clark - Bounty
+	\end{verbatim}
+	Gradient debugging with Tensorboard
+\end{frame}
+
+\begin{frame}
+	\frametitle{Resources}
+	umx-junkyard: all my wild experiments (conv2d,3d,4d, lstm, gru, dilations, maxpools, etc.)\\
+	\includegraphics[height=6cm]{./junkyard.png}\\
+	easy to copy-paste blocks of code from various configurations
+\end{frame}
+
+\begin{frame}
+	\frametitle{Golden test -- overfit 2 training + 1 validation}
+	Tensorboard plots:
+	\begin{enumerate}
+		\item
+			Loss: MSE
+		\item
+			SDR: SI-SDR (true source separation performance)\\
+			(tried this as loss function but it's very computationally expensive w.r.t gradients)
+		\item
+			Audio clips of source separation
+		\item
+			Plots of 3D magnitude sliCQ coefficients (input x y and y est) -- using TSNE for 3d
+		\item
+			Also 2d spectrogram from sliCQ
+	\end{enumerate}
 \end{frame}
 
 \begin{frame}
@@ -318,13 +333,13 @@
 		\item
 			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
 		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
 		\item
-			\textbf{Flatten:} $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow 15678 \text{ time} \times 117 \text { frequencies}$\\
+			\textbf{Flatten:} $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow 16384 \text{ time} \times 117 \text { frequencies}$\\
 			\textbf{\textcolor{red}{LSTMs can deal with overlapping sequences, right?}}
 		\item
 			\textbf{Recurrence}: BLSTM, hidden = 117, 3 layers, dropout + skip-conn\\
-			15678 frames of 117 frequencies pass through the LSTM\\
+			16384 frames of 117 frequencies pass through the LSTM\\
 			\textbf{contrast with} 258 frames of 512 compressed frequencies of STFT
 			\textbf{\textcolor{red}{huge sequence length is not good -- slow training, bad gradients, never worked for me}}
 	\end{enumerate}
@@ -337,15 +352,15 @@
 		\item
 			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
 		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
 		\item
-			\textbf{Flatten differently:} $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow 67 \text{ slices} \times (117 \text { frequencies} \times 234 \text { time-in-slice} = 27378)$\\
+			\textbf{Flatten differently:} $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow 67 \text{ slices} \times (117 \text { frequencies} \times 244 \text { time-in-slice} = 28548)$\\
 			\textbf{LSTM is now taking the temporally evolving sequence of ``1D'' flattened sliCQ tf frames)}
 		\item
-			\textbf{Recurrence}: BLSTM, hidden = 27378, 3 layers, dropout + skip-conn\\
+			\textbf{Recurrence}: BLSTM, hidden = 28548, 3 layers, dropout + skip-conn\\
 			67 frames of 27378 sliCQ coefficients pass through the LSTM\\
 			\textbf{contrast with} 258 frames of 512 compressed frequencies of STFT
-			\textbf{\textcolor{red}{reducing the 1D dimensionality to not have a hidden size of 27378 -- linear encoder?}}
+			\textbf{\textcolor{red}{reducing the 1D dimensionality to not have a hidden size of 28548 -- linear encoder?}}
 	\end{enumerate}
 \end{frame}
 
@@ -356,16 +371,16 @@
 		\item
 			\textbf{x, y training example:} x = mix waveform, y = vocal stem
 		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
 		\item
 			\textbf{Conv3d encoder:} Use $1 \times T \times F$ kernels to not touch the slice/temporal dimension:\\
-			$67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 67 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
+			$67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 67 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
 			\textbf{LSTM is now taking the temporally evolving sequence of ``1D'' flattened convencoder(sliCQ)}
 		\item
 			\textbf{Recurrence}: BLSTM, hidden = 60, 3 layers, dropout + skip-conn\\
 			67 frames of 60 conv3d(sliCQ) coefficients pass through the LSTM
 		\item
-			\textbf{ConvTranspose3d decoder:} grow $60 = 6 \times 10$ back to $117 \times 234$
+			\textbf{ConvTranspose3d decoder:} grow $60 = 6 \times 10$ back to $117 \times 244$
 
 			\textbf{``feels right'' but doesn't generalize - \textcolor{red}{convolution parameter selection - kernels, layers, hidden channels}}
 	\end{enumerate}
@@ -378,12 +393,12 @@
 		\item
 			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
 		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-25.4hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} $
+			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
 		\item
 			\textbf{Conv3d encoder:} Use $S \times T \times F$ kernels to also find patterns across the slice dimension
-			$67 \text{ slices} \times 117 \text{ frequencies} \times 234 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 4 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
+			$67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 4 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
 		\item
-			\textbf{ConvTranspose3d decoder:} grow $4 \times 6 \times 10$ back to $67 \times 117 \times 234$
+			\textbf{ConvTranspose3d decoder:} grow $4 \times 6 \times 10$ back to $67 \times 117 \times 244$
 	\end{enumerate}
 	\textbf{\textcolor{red}{based more on Convolutional autoencoder/decoder theory, not an adaptation of UMX anymore}}\\
 	\textbf{\textcolor{red}{no luck}}\\
