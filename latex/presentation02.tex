@@ -170,7 +170,7 @@
 
 \begin{frame}
 	\frametitle{Open-Unmix}
-	Very open source, near-SOTA music source separation. Intended to be a ``platform'' for future MSS research.
+	Very open source, near-SOTA music source separation. Intended to be a ``platform'' for future MSS research\footcite{umx}
 	\begin{figure}[ht]
 		\includegraphics[height=3cm]{./umx1.png}
 		\caption{Open-Unmix diagram}
@@ -251,7 +251,7 @@
 	NSGT-sliCQ choices:
 	\begin{itemize}
 		\item
-			Reduce to 2d (overlap-add or flatten) -- same dimensionality as an STFT
+			Reduce to 2d - flatten 2 out of 3 axes -- same dimensionality as an STFT
 		\item
 			Treat as 3-dimensional sequence of 2d time-frequency frames!\\
 			2-d spectrogram = image (RGB x width x height $\rightarrow$ mono/stereo x time x frequency)\\
@@ -273,19 +273,44 @@
 
 \begin{frame}
 	\frametitle{STFT in UMX, visual}
-	\includegraphics[height=3cm]{./umxstftlstm.png}
+	\includegraphics[height=3cm]{./umxstftlstm.png}\\
+	Adjacent STFT frequency vectors have a temporal overlap (hop) with the previous -- so, the LSTM is already somewhat dealing with overlapping information
 \end{frame}
 
 
 \begin{frame}
-	\frametitle{sliCQ in UMX LSTM, option 1}
+	\frametitle{3d -> 2d sliCQ in UMX LSTM, option 1}
 	\includegraphics[height=2.7cm]{./umxslicqlstm1.png}\\
-	\textbf{nb:} overlap version is non-invertible
+	Big problem here is the time sequence goes from \textasciitilde 250 to \textasciitilde 16,000 -- no matter what vanishing gradient, gradient clipping, GRU, activations, etc. you play with, 16000 may be simply intractable for an RNN for this problem?
 \end{frame}
 
 \begin{frame}
-	\frametitle{sliCQ in UMX LSTM, option 2}
-	\includegraphics[height=2.7cm]{./umxslicqlstm2.png}
+	\frametitle{3d -> 2d sliCQ in UMX LSTM, option 2}
+	\includegraphics[height=2.7cm]{./umxslicqlstm2.png}\\
+	Alternative ideas include:
+	\begin{enumerate}
+		\item
+			Linear decoder for $117 \times 244 = 28548 \rightarrow 512$, dim reduction of 28548 ``flattened time-frequency'' coefficients within each time step/slice
+		\item
+			Convolutional decoder for $117 \times 244 \rightarrow 10 \times 24$, dim reduction\\
+			temporally evolving sequence of 67 slices of $10 \times 24 = 240$ ``time-frequency'' feature maps
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{3d sliCQ CDAE, option 3}
+	\includegraphics[height=2.7cm]{./umxslicqcdae.png}\\
+	\textbf{n.b.} My personal preferred/favorite idea. Why?
+	\begin{enumerate}
+		\item
+			Exploit natural 3d structure of sliCQ, versus concatenations/reshapings that may not be correct
+		\item
+			Low params, powerful, and expressive - used with STFT to good effect \footcite{plumbley1, plumbley2}
+		\item
+			Not dealing with two distinct temporal dimensions in an LSTM
+		\item
+			I've done something similar \href{https://github.com/sevagh/MiXiN}{https://github.com/sevagh/MiXiN} -- not award-winning, but it worked, kinda...
+	\end{enumerate}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -303,105 +328,9 @@
 
 \begin{frame}
 	\frametitle{Resources}
-	umx-junkyard: all my wild experiments (conv2d,3d,4d, lstm, gru, dilations, maxpools, etc.)\\
+	umx-junkyard: all my wild experiments (conv2d,3d, lstm, gru, dilations, maxpools, etc.)\\
 	\includegraphics[height=6cm]{./junkyard.png}\\
 	easy to copy-paste blocks of code from various configurations
-\end{frame}
-
-\begin{frame}
-	\frametitle{Golden test -- overfit 2 training + 1 validation}
-	Tensorboard plots:
-	\begin{enumerate}
-		\item
-			Loss: MSE
-		\item
-			SDR: SI-SDR (true source separation performance)\\
-			(tried this as loss function but it's very computationally expensive w.r.t gradients)
-		\item
-			Audio clips of source separation
-		\item
-			Plots of 3D magnitude sliCQ coefficients (input x y and y est) -- using TSNE for 3d
-		\item
-			Also 2d spectrogram from sliCQ
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Open-Unmix with 2d sliCQ + LSTM}
-	UMX-sliCQ 2d:
-	\begin{enumerate}
-		\item
-			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
-		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
-		\item
-			\textbf{Flatten:} $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow 16384 \text{ time} \times 117 \text { frequencies}$\\
-			\textbf{\textcolor{red}{LSTMs can deal with overlapping sequences, right?}}
-		\item
-			\textbf{Recurrence}: BLSTM, hidden = 117, 3 layers, dropout + skip-conn\\
-			16384 frames of 117 frequencies pass through the LSTM\\
-			\textbf{contrast with} 258 frames of 512 compressed frequencies of STFT
-			\textbf{\textcolor{red}{huge sequence length is not good -- slow training, bad gradients, never worked for me}}
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Open-Unmix with 3d sliCQ + LSTM}
-	UMX-sliCQ 3d:
-	\begin{enumerate}
-		\item
-			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
-		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
-		\item
-			\textbf{Flatten differently:} $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow 67 \text{ slices} \times (117 \text { frequencies} \times 244 \text { time-in-slice} = 28548)$\\
-			\textbf{LSTM is now taking the temporally evolving sequence of ``1D'' flattened sliCQ tf frames)}
-		\item
-			\textbf{Recurrence}: BLSTM, hidden = 28548, 3 layers, dropout + skip-conn\\
-			67 frames of 27378 sliCQ coefficients pass through the LSTM\\
-			\textbf{contrast with} 258 frames of 512 compressed frequencies of STFT
-			\textbf{\textcolor{red}{reducing the 1D dimensionality to not have a hidden size of 28548 -- linear encoder?}}
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Open-Unmix with 3d sliCQ + Conv-LSTM}
-	UMX-sliCQ 3d:
-	\begin{enumerate}
-		\item
-			\textbf{x, y training example:} x = mix waveform, y = vocal stem
-		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
-		\item
-			\textbf{Conv3d encoder:} Use $1 \times T \times F$ kernels to not touch the slice/temporal dimension:\\
-			$67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 67 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
-			\textbf{LSTM is now taking the temporally evolving sequence of ``1D'' flattened convencoder(sliCQ)}
-		\item
-			\textbf{Recurrence}: BLSTM, hidden = 60, 3 layers, dropout + skip-conn\\
-			67 frames of 60 conv3d(sliCQ) coefficients pass through the LSTM
-		\item
-			\textbf{ConvTranspose3d decoder:} grow $60 = 6 \times 10$ back to $117 \times 244$
-
-			\textbf{``feels right'' but doesn't generalize - \textcolor{red}{convolution parameter selection - kernels, layers, hidden channels}}
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Open-Unmix with 3d sliCQ + Convolutions, no LSTM}
-	UMX-sliCQ 3d:
-	\begin{enumerate}
-		\item
-			\textbf{x, y training example:} x = mix waveform, y = vocal stem (6 second sequence)
-		\item
-			\textbf{Network:} magnitude NSGT = $abs(NSGT(x))$ = $\text{Slices} \times \text{Frequency} \times \text{Time-in-slice}$\\E.g. for NSGT-mel-115-37.7hz, on 6 seconds of audio = $67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} $
-		\item
-			\textbf{Conv3d encoder:} Use $S \times T \times F$ kernels to also find patterns across the slice dimension
-			$67 \text{ slices} \times 117 \text{ frequencies} \times 244 \text{ time-in-slice bins} \rightarrow$ strided convolution layers $\rightarrow 4 \text{ slices} \times (6 \text { fconv} \times 10 \text { tconv} = 60)$\\
-		\item
-			\textbf{ConvTranspose3d decoder:} grow $4 \times 6 \times 10$ back to $67 \times 117 \times 244$
-	\end{enumerate}
-	\textbf{\textcolor{red}{based more on Convolutional autoencoder/decoder theory, not an adaptation of UMX anymore}}\\
-	\textbf{\textcolor{red}{no luck}}\\
 \end{frame}
 
 \end{document}
