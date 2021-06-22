@@ -247,6 +247,32 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{sliCQ spectrograms}
+	\begin{figure}
+		\subfloat[Overlap]{\includegraphics[height=4.25cm]{./spectrogram_overlap.png}}
+		\subfloat[Flatten time, no overlap]{\includegraphics[height=4cm]{./spectrogram_nooverlap.png}}
+		\caption{Almost obvious that using the overlapped spectrogram is the better choice}
+	\end{figure}
+	The patterns human eyes see probably align with what we can expect a neural network to learn
+\end{frame}
+
+\begin{frame}
+	\frametitle{sliCQ overlap -- 2 problems}
+	\begin{enumerate}
+		\item
+			50\% overlap is not an invertible operation
+		\item
+			Attempts: learn from 50\% overlap:\\
+			$\text{input} = 117 \times 16000$\\
+			$\text{overlap-add} \rightarrow 117 \times 8000$ -- proper patterns here
+			$117 \times 8000 \rightarrow 117 \times 8000 \text{ mask}$\\
+			Then grow the learned mask to the 2x dimension of the original transform:\\
+			$\text{ ConvTranspose2d(stride=(1,2))}(117 \times 8000) \rightarrow 117 \times 16000$\\
+			Also tried Linear layers, etc.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
 	\frametitle{NSGT-sliCQ inside Open-Unmix}
 	NSGT-sliCQ choices:
 	\begin{itemize}
@@ -281,7 +307,14 @@
 \begin{frame}
 	\frametitle{3d -> 2d sliCQ in UMX LSTM, option 1}
 	\includegraphics[height=2.7cm]{./umxslicqlstm1.png}\\
-	Big problem here is the time sequence goes from \textasciitilde 250 to \textasciitilde 16,000 -- no matter what vanishing gradient, gradient clipping, GRU, activations, etc. you play with, 16000 may be simply intractable for an RNN for this problem?
+	Big problem here is the time sequence goes from \textasciitilde 250 to \textasciitilde 16,000 -- no matter what vanishing gradient, gradient clipping, GRU, activations, etc. you play with, 16000 may be simply intractable for an RNN for this problem?\\
+	Ideas tried (not very successfully):
+	\begin{enumerate}
+		\item
+			Conv layers to reduce time dimension
+		\item
+			Max and average pooling to reduce time dimension
+	\end{enumerate}
 \end{frame}
 
 \begin{frame}
@@ -331,6 +364,17 @@
 	umx-junkyard: all my wild experiments (conv2d,3d, lstm, gru, dilations, maxpools, etc.)\\
 	\includegraphics[height=6cm]{./junkyard.png}\\
 	easy to copy-paste blocks of code from various configurations
+\end{frame}
+
+\begin{frame}
+	\frametitle{Tensorboard}
+	\begin{figure}
+		\centering
+		\subfloat[Loss = MSE, SI-SDR = source sep performance]{\includegraphics[width=3cm]{./tboard1.png}}
+		\subfloat[Spectrograms of X, Y, Yest]{\includegraphics[width=3cm]{./tboard2.png}}
+		\subfloat[Audio clips of validation separation]{\includegraphics[width=3cm]{./tboard3.png}}
+		\subfloat[Gradients]{\includegraphics[width=3cm]{./tboard4.png}}
+	\end{figure}
 \end{frame}
 
 \end{document}
