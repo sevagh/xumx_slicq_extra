@@ -180,6 +180,25 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Open-Unmix - how can the NSGT-sliCQ make it better?}
+	\begin{figure}[ht]
+		\subfloat[6ms stft]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz1.png}}
+		\subfloat[93ms stft]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz2.png}}
+		\subfloat[6-93 nsgt]{\includegraphics[height=2.5cm]{./tf_tradeoff_balasz3.png}}
+		\caption{Time-frequency tradeoff\footcite{balazs}}
+		\vspace{-0.5em}
+	\end{figure}
+	\begin{enumerate}
+		\item
+			Window size affects source sep -- e.g. image bass and drums have very different harmonic and percussive analysis requirements \footcite{musicsepwindow}
+		\item
+			Transients can be useful information in music -- best for the neural network to have a sharper transient representation presented to it \footcite{transientsep}
+		\item
+			In umx, 4096 presents a balanced total SDR, but 16384 improved bass
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
 	\frametitle{Getting the stem waveform}
 	Recall: output of unmix is the estimated \textbf{magnitude STFT} of the vocal stem\\\ \\
 
@@ -219,22 +238,31 @@
 
 \begin{frame}
 	\frametitle{STFT vs. NSGT oracle performance}
-	Using SDR only (the most important score):\\
-	STFT, UMX default (window = 4096): vocals 8.62, drums 7.07, bass 6.68, other 6.87\\
-
-	NSGT (with maximum slice length capped at 8192 frames):\\
-
-	Bass NSGT = Bark, 105 bins, 25.4-22050 Hz, slice = 7180 = 8.47\\
-	Drums NSGT = Mel, 104 bins, 49.3-22050 Hz, slice = 7108 = 10.5\\
-	Other NSGT = Bark, 64 bins, 90.0-22050 Hz, slice = 4416 = 13.94\\
-	Vocals NSGT = Mel, 116 bins, 37.7-22050 Hz, slice = 8024 = 9.83\\\ \\
-
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|l|c|c|c|c|c| }
+	 \hline
+	  Transform & Vocals SDR & Drums SDR & Bass SDR & Other SDR \\
+	 \hline
+	 \hline
+	 STFT-umx & 8.62 & 7.07 & 6.68 & 6.87 \\
+	 \hline
+	 NSGT-bark-105 &  & & 8.47 & \\
+	 \hline
+	 NSGT-mel-104 & & 10.5 & & \\
+	 \hline
+	 NSGT-bark-64 & & & & 13.94 \\
+	 \hline
+	 NSGT-mel-116 & 9.83 & & & \\
+	 \hline
+\end{tabular}
+	\caption{SDR per source, MUSDB18-HQ validation set evaluation}
+	\vspace{-0.5em}
+\end{table}
 	\textbf{Hypothesis}:
 	\begin{enumerate}
 		\item
-			If one can prepare a neural network that can estimate the magnitude-sliCQ-NSGT
-		\item
-			Then using the above configurations can get significant SDR gains since they perform considerably better in the mix-phase oracle
+			If one can prepare a neural network that can estimate the magnitude-sliCQ-NSGT, then using the above configurations can get significant SDR gains since they perform considerably better in the mix-phase oracle
 		\item
 			UMX-STFT: estimate abs(STFT-4096) $\rightarrow$ \\
 			\qquad UMX-NSGT: estimate abs(NSGT-Bark-105-25.4Hz-7180)
@@ -255,18 +283,26 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Best architecture so far}
+	\begin{figure}
+		\includegraphics[height=3cm]{./bestarch.png}
+		\includegraphics[height=4cm]{./best1.png}
+		\includegraphics[height=4cm]{./best2.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
 	\frametitle{sliCQ overlap -- 2 problems}
 	\begin{enumerate}
 		\item
-			50\% overlap is not an invertible operation
+			50\% overlap is not an invertible operation. Flattened version (with gaps) can still pass through neural network, not dissimilar performance in conv net
 		\item
-			Attempts: learn from 50\% overlap:\\
-			$\text{input} = 117 \times 16000$\\
-			$\text{overlap-add} \rightarrow 117 \times 8000$ -- proper patterns here
-			$117 \times 8000 \rightarrow 117 \times 8000 \text{ mask}$\\
-			Then grow the learned mask to the 2x dimension of the original transform:\\
-			$\text{ ConvTranspose2d(stride=(1,2))}(117 \times 8000) \rightarrow 117 \times 16000$\\
-			Also tried Linear layers, etc.
+			\textbf{Alternative idea:} process huge slice independently:\\
+			slice length: 264600 (6.0 second duration, umx training size)\\
+			nsgt coefs for 264600 = $264600 * \text{ coef factor} = \approx 14000$\\
+			produces $3 \text{ slices} \times 117 \text{ freq} \times 14000 \text{ time-in-slice}$\\
+			stack data as $(\text{batch} \times \text{slices}), \text{freq}, \text { time-in-slice}$\\
+			slice length is long enough that temporal information \textit{within} the slice represents 6s of music, enough to learn the temporal relationship of source separation without messing with overlapping multiple slices
 	\end{enumerate}
 \end{frame}
 
