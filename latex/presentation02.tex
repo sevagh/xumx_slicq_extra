@@ -199,6 +199,25 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{NSGT-sliCQ TF grids}
+	\begin{figure}[ht]
+		\subfloat[regular time-frequency grid]{\includegraphics[height=3cm]{./sgt.png}}\hspace{0.5em}
+		\subfloat[irregular time-frequency grid]{\includegraphics[height=3cm]{./nsgt_freq.png}}
+		\caption{Time-frequency grids of the (stationary) gabor transform aka STFT vs. irregular tf grid of NSGT}
+	\end{figure}
+	\begin{enumerate}
+		\item
+			This might have consequences to the neural net
+		\item
+			E.g. irregular time points passing through the LSTM
+		\item
+			Convolution filter processing nonlinearly-spaced points
+		\item
+			My attitude: just pray and try stuff anyway, no point guessing what a network can or cant learn
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
 	\frametitle{Getting the stem waveform}
 	Recall: output of unmix is the estimated \textbf{magnitude STFT} of the vocal stem\\\ \\
 
