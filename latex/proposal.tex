@@ -9,6 +9,7 @@
 %\usepackage{listings}
 %\usepackage{minted}
 %\usepackage{subfig}
+\usepackage{todonotes}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks,
@@ -24,8 +25,8 @@
 \usepackage[
     %backend=biber, 
     natbib=true,
-    style=authoryear,
-    sorting=none
+    style=numeric,
+    sorting=none,
 ]{biblatex}
 \addbibresource{citations.bib}
 \input{variables.tex}
@@ -45,39 +46,33 @@
 
 \section{Introduction / Motivation}
 
-The discrete Fourier transform (DFT) is an important algorithm in the modern world, and ubiquitous in many fields including sonar, seismology, audio, music, and speech. It is used to decompose time-domain acoustic signals into their frequency components for time-frequency analysis. Music information retrieval (MIR) systems commonly apply the DFT to compute the spectrum of the music signal, which can be used directly in digital signal processing (DSP) -based algorithms (\cite{fitzgerald}), or as input features for machine learning models (\cite{musicnn1}).
+The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. It applies the Fourier transform on overlapping, fixed-size windows of the input signal, and it is commonly used to represent musical signals in digital signal processing algorithms and machine learning models for music information retrieval (MIR). Despite the ubiquity of the STFT, it is limited by a fixed and bounded time-frequency resolution determined by the window size. In the Nonstationary Gabor Transform (NSGT) \cite{balazs}, and its realtime variant the sliCQ transform \cite{invertiblecqt}, the Fourier transform is applied with varying window sizes to adapt the time-frequency resolution to fit the characteristics of the studied signals. A well-known use of the NSGT or sliCQ transform is to implement the constant-Q transform for music \cite{jbrown, klapuricqt}.
 
-Despite its importance, the DFT has some deficiencies in real-world music systems. The DFT outputs a linearly spaced frequency spectrum, yet the human auditory system has non-linear frequency resolution. Analyzing music and speech with accurate human auditory models is essential; a common approach is to adjust the frequency outputs of the DFT to fit the psychoacoustic Mel or Bark frequency scales. Real-world signals, including music and audio, tend to be sparse (\cite{sparse}), where only a subset of the output of the DFT contains useful information; in practice, some of the outputs of the DFT are ignored or discarded.
-
-In my thesis, I propose to describe and implement several variants of the DFT that address these points. First, considering perception, the \textit{non-uniform} and \textit{warped} DFTs will be explored, which can be used to modify the output spectrum to more closely resemble the human auditory system's frequency resolution. From the related perspective of time-frequency resolution, the \textit{fractional} DFT will also be examined. Next, from the angle of computational efficiency, the \textit{sparse} and \textit{pruned} DFTs are explored, which compute fewer data points. These variants of the DFT can be considered separately, or combined in a hybrid algorithm. Finally, the effects of substituting variants of the DFT in different MIR systems will be analyzed.
+In the task of music source separation, a mixed song is decomposed into its constituent sources, which are typically either different instruments (drums, bass, vocals) or groups of sources with similar characteristics (percussive, harmonic) \cite{musicsepgood}. Machine learning models for music source separation based on the STFT are numerous and have achieved success for several years \cite{sisec2018}. In this thesis, the STFT is replaced with the sliCQ in Open-Unmix (umx), a contemporary neural network \cite{umx} for music source separation. The ``umx-sliCQ'' model was submitted to the ISMIR 2021 Music Demixing Challenge, where it successfully separated the hidden data set within the required time limit. The submitted model did not surpass STFT-based submissions, but demonstrates a viable and flexible starting point for future sliCQ-based models.
 
 \section{Previous Work}
 
-\citet{warped1} and \citet{warped2} describe the implementation and audio applications of the warped-frequency DFT. The related non-uniform DFT is examined in depth by \citet{nufft1}, and a modern implementation is available in \citet{nufft2}. \citet{betterbss} demonstrated improved results when using warped-frequency STFTs in music source separation tasks. The sparse DFT is described in \citet{sparse} and accompanied by a high-quality reference implementation. The pruned DFT is described by \citet{pruned}, and implementation ideas are provided by the popular open source FFT library, fftw, in \href{http://www.fftw.org/pruned.html}{http://www.fftw.org/pruned.html}.\\
-
-\citet{bettermfcc} showed how using Mel-Frequency Cepstral Coefficients (MFCC) based on the warped DFT improved the accuracy of a speech processing task over the regular DFT-based MFCC. A similar study in the domain of music can be undertaken on MIR models that use mel spectrograms, MFCCs (or the Bark-scale equivalents) as input features. \citet{fractional1} improved the accuracy of a machine learning musical instrument classifier by replacing MFCC features with MFCCs based on Fractional Fourier Transforms (FrFT). Implementation ideas for the FrFT are described in \citet{fractional2}.
-
-%Finally, two influential, open-source FFT libraries that exist are the Fastest Fourier Transform in the West\footnote{\href{
+\citet{umx}'s Open-Unmix is an open-source, reference implementation for music source separation, based on the STFT and intended to foster research. It was chosen as the base model to adapt to the sliCQ. It uses the same window size STFT for each source, but a survey shows that the STFT window size can significantly affect the source separation performance, depending on the source \cite{tftradeoff1}. Similarly, some music source separation algorithms \cite{fitzgerald1, driedger} use different window size STFTs to improve the music source separation performance. Another system \cite{fitzgerald2} replaced the STFT with the constant-Q transform to improve the separation quality of vocals. \citet{plumbley2} presented a multi-resolution neural network for vocal separation. In their model, ``multi-resolution'' refers to time-frequency resolution, and an effect similar to the constant-Q transform is achieved by varying the size of the time and frequency convolutional filters applied to the STFT.
 
 \section{Proposed Research / Methodology}
 
-The thesis can be broken up into these sections:
-\begin{enumerate}
+The thesis will be broken up into the following sections:
+\begin{tight_enumerate}
 	\item
-		Present the motivation for why the DFT is important to music systems. Show a range of MIR systems that use the DFT/FFT.
+		Present the motivation for why time-frequency analysis is useful for acoustic signals, and how the STFT is typically used in MIR systems. Describe \citet{gabor1946}'s time-frequency uncertainty principle and how this limitation is manifested in the STFT.
 	\item
-		Describe the mathematical formula of the DFT and a pseudocode implementation of the FFT (including the original Cooley-Tukey algorithm and modern state of the art mixed radix implementations). Describe the range and state of popular open-source FFT libraries (FFTW, KissFFT, Intel IPP, numpy/scipy FFT, Nvidia cuFFT, etc.), along with benchmarks.
+		Describe the constant-Q transform, NSGT, and sliCQ transforms, and how they use varying time-frequency resolution to better represent musical signals within the constraints of the time-frequency uncertainty principle.
 	\item
-		Introduce the variants: sparse, pruned, non-uniform, warped, and fractional FFTs. Describe the mathematical formulae and pseudocode implementations. Develop a library implementing 1D FFTs and the variants.
+		Describe the parallelized tensor operations and performance optimizations applied to the sliCQ transform using PyTorch \cite{pytorch}, which is a crucial step required to able to use the sliCQ transform in GPU-based machine learning models.
 	\item
-		Describe operations based on the FFT, such as the STFT and frequency-domain convolution and correlation, per variant.
+		Present Open-Unmix and describe its architecture, codebase, and baseline performance.
 	\item
-		Substitute DFT variants in a recent, state-of-the-art MIR system and provide an in-depth analysis of results, benchmarks, and profiling to describe the impact. From this case study, attempt to extrapolate or generalize the results to determine if using these variants in MIR systems is worthwhile.
-\end{enumerate}
+		Describe how Open-Unmix was adapted step by step to replace the STFT with the sliCQ transform, and show the training details and performance of the final trained model (as well as important intermediate steps such as hyperparameter tuning).
+\end{tight_enumerate}
 
 \section{Contributions / Summary}
 
-The DFT and its most popular implementation, the FFT, are hugely important in many MIR systems and applications. I hope to explore whether variants of the classic DFT and FFT show promise in improving the results, or reducing the computational footprint, of a state-of-the-art MIR system. If favorable results can be shown, while taking into account the implementation cost of replacing the DFT with the variant, this could demonstrate a potentially promising avenue of improvements to a wide class of MIR systems.
+In the task of music source separation, the sliCQ transform is explored as a replacement of the popular and widely-used STFT. Open-Unmix (umx), an open-source reference neural network for music source separation, was adapted to use the sliCQ transform. The resulting ``umx-sliCQ'' model was trained and submitted to the ISMIR 2021 Music Demixing Challenge, where it passed the test suite, but couldn't surpass the score of the original STFT-based model. However, the performance of the ``umx-sliCQ'' model was shown to improve significantly after several rounds of hyperparameter tuning. Future work can build on this and explore more performance gains from further model architecture changes and hyperparameter tuning.
 
 \vfill
 \clearpage %force a page break
