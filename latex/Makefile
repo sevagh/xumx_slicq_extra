@@ -1,28 +1,21 @@
-dev-report:
-	latexmk -pvc report.tex
+LATEXMK_FLAGS ?= ""
 
-dev-proposal:
-	latexmk -pvc proposal.tex
+texpdf:
+	latexmk ${LATEXMK_FLAGS} $(tex_fname)
 
-dev-presentation01:
-	latexmk -pvc presentation01.tex
+report-dev: export LATEXMK_FLAGS="-pvc"
+report-dev: report
 
-dev-presentation02:
-	latexmk -pvc presentation02.tex
+report: tex_fname="report.tex"
+report: texpdf
 
-all: clean report proposal presentation01 presentation02
+proposal-dev: export LATEXMK_FLAGS="-pvc"
+proposal-dev: proposal
 
-report:
-	latexmk report.tex
+proposal: tex_fname="proposal.tex"
+proposal: texpdf
 
-proposal:
-	latexmk proposal.tex
-
-presentation01:
-	latexmk presentation01.tex
-
-presentation01:
-	latexmk presentation02.tex
+all: report
 
 clean:
 	latexmk -C

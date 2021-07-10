@@ -112,9 +112,9 @@ Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed by di
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Wide window STFT (93ms)]{\includegraphics[height=5cm]{./tf_tradeoff_balasz2.png}}
+	\subfloat[Wide window STFT (93ms)]{\includegraphics[height=5cm]{./images-tftheory/tf_tradeoff_balasz2.png}}
 	\hspace{0.5em}
-	\subfloat[Narrow window STFT (6ms)]{\includegraphics[height=5cm]{./tf_tradeoff_balasz1.png}}
+	\subfloat[Narrow window STFT (6ms)]{\includegraphics[height=5cm]{./images-tftheory/tf_tradeoff_balasz1.png}}
 	\caption{Different window size STFT spectrograms of a glockenspiel signal}
 	\label{fig:stfttradeoff}
 \end{figure}
@@ -123,7 +123,7 @@ The Nonstationary Gabor transform (NSGT) \cite{balazs} is a time-frequency trans
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[height=5cm]{./tf_tradeoff_balasz3.png}
+	\includegraphics[height=5cm]{./images-tftheory/tf_tradeoff_balasz3.png}
 	\caption{NSGT spectrogram of a glockenspiel signal, varying window (6-93ms)}
 	\label{fig:nsgttradeoff}
 \end{figure}
@@ -207,12 +207,11 @@ The more general NSGT should be studied instead the CQT for the following reason
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Linear frequency spectrum]{\includegraphics[height=4.75cm]{../latex/violindft.png}}
-	\subfloat[Constant-Q transform]{\includegraphics[height=4.75cm]{../latex/violincqt.png}}
+	\subfloat[Linear frequency spectrum]{\includegraphics[height=4.75cm]{./images-tftheory/violindft.png}}
+	\subfloat[Constant-Q transform]{\includegraphics[height=4.75cm]{./images-tftheory/violincqt.png}}
 	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$}
 	\label{fig:earlycqt}
 \end{figure}
-
 
 Additionally, the constant-Q transform \cite{jbrown, klapuricqt, invertiblecqt} even before its formulation as a specialized variant of the nonstationary Gabor transform \cite{balazs}, is an STFT applied with window of different sizes, which are of long duration at low frequencies to create a fine frequency resolution (and sacrificing time resolution as per the time-frequency uncertainty principle), and gradually decrease the windows in duration to improve the time resolution (and sacrifice frequency resolution). At the same time, consider that the iterative harmonic-percussive source separation algorithms in \cite{driedger, fitzgerald2} use two-pass spectral masking with two different configurations of spectrograms -- one with a large window size (4096 samples in \cite{driedger}, 16384 samples in \cite{fitzgerald2}) for representing the harmonic or pitched instruments sharply and estimating the harmonic mask, and one with a short window size (256 samples in \cite{driedger}, 1024 samples in \cite{fitzgerald2}) for representing percussion or transients more sharply and estimating the percussive mask.
 
@@ -220,7 +219,7 @@ The connection to the CQT, or NSGT, is that these contain within a single transf
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=9cm]{./tf_tradeoff_dorfler.png}
+	\includegraphics[width=9cm]{./images-tftheory/tf_tradeoff_dorfler.png}
 	\caption{Time-frequency tradeoff for a glockenspiel signal}
 	\label{fig:dorflertradeoff}
 \end{figure}
@@ -269,8 +268,8 @@ from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[hello world]{\includegraphics[height=4.5cm]{./mss1.png}}
-	\subfloat[hello world]{\includegraphics[height=4.7cm]{./mss2.png}}
+	\subfloat[hello world]{\includegraphics[height=4.5cm]{./images-mss/mss1.png}}
+	\subfloat[hello world]{\includegraphics[height=4.7cm]{./images-mss/mss2.png}}
 	\caption{MSS sparsity}
 	\label{fig:sepgood}
 \end{figure}
@@ -286,7 +285,7 @@ The harmonic-percussive source separation algorithm of \citet{fitzgerald1} is ba
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[height=8cm]{./sphx_glr_plot_hprss_001.png}
+	\includegraphics[height=8cm]{./images-mss/sphx_glr_plot_hprss_001.png}
 	\caption{Harmonic/percussive/residual source separation in librosa}
 	\label{fig:hpsslibrosa}
 \end{figure}
@@ -309,7 +308,7 @@ Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indica
 %\begin{wrapfigure}{r}{8cm}
 \begin{figure}[ht]
 	\vspace{-1.0em}
-	\includegraphics[width=8cm]{./maskdemo.png}
+	\includegraphics[width=8cm]{./images-mss/maskdemo.png}
 	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
 	\label{fig:masks}
 	\vspace{-1.5em}
@@ -423,7 +422,7 @@ Finally, a full evaluation was done on all 50 tracks of the MUSDB18-HQ test set.
 
 \begin{figure}[ht]
 	\centering
-\makebox[\textwidth]{\includegraphics[width=15cm]{./oracle_boxplot.pdf}}
+\makebox[\textwidth]{\includegraphics[width=15cm]{./images-bss/oracle_boxplot.pdf}}
 \caption{Music separation results for NSGT oracle masks}
 \label{fig:nsgtboxplots}
 \end{figure}
