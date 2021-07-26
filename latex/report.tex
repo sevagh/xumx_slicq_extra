@@ -29,12 +29,7 @@
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\textfraction}{0.1}
 \renewcommand{\floatpagefraction}{0.75}
-\usepackage[
-    %backend=biber, 
-    natbib=true,
-    style=numeric,
-    sorting=none,
-]{biblatex}
+\usepackage[backend=biber,authordate,annotation]{biblatex-chicago}
 \addbibresource{citations.bib}
 \input{variables.tex}
 
@@ -59,6 +54,8 @@
   \setlength\mintednumbersep{8pt}%
   \addtolength\mintednumbersep{-\wd0}%
 }
+
+\newcommand{\ichfeedback}[1]{\todo[color=green!40,inline]{#1}}
 
 \title{\ThesisTitle}
 
@@ -106,7 +103,7 @@ For this class of signal, joint time-frequency analysis is an important tool. Ti
 
 \subsection{Motivation}
 
-Musical signals have characteristics that lead to conflicting requirements in the STFT \cite{doerflerphd}. In the low frequency region, music needs to be analyzed with long-duration windows for a high frequency resolution, as bass notes lay the harmonic basis of a song \todo{heavy citation stuff here}. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows.
+Musical signals have characteristics that lead to conflicting requirements in the STFT \textcite{doerflerphd}. In the low frequency region, music needs to be analyzed with long-duration windows for a high frequency resolution, as bass notes lay the harmonic basis of a song \todo{heavy citation stuff here}. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows.
 
 Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed by different window sizes of STFT. Note how in figure \ref{fig:stfttradeoff}a, due to the high frequency resolution, the temporal events are blurry or smeared such that the times of note onsets are unclear. The inverse case is shown in figure \ref{fig:stfttradeoff}b, which contains sharp localization of note onsets from the high time resolution, but blurry or smeared frequency components.
 
@@ -156,7 +153,7 @@ The results will be compare the results to the classic Open-Unmix and to the cur
 
 \subsection{Outline}
 
-This thesis is organized as follows. Section \todo{booyakasha actually fill this in}.
+This thesis is organized as follows. Section \todo{actually fill this in}.
 
 \begin{enumerate}
 	\item
@@ -173,20 +170,52 @@ This thesis is organized as follows. Section \todo{booyakasha actually fill this
 		Adapt Open-Unmix to use the NSGT and surpass its previous STFT-based performance, and to also beat the current state-of-the-art, Demucs and Conv-Tasnet \cite{demucs}
 \end{enumerate}
 
-
 \vfill
 \clearpage
 
-\section{Short-time Fourier transform}
+\section{Background}
+\label{sec:background}
+
+\subsection{Joint time-frequency analysis of acoustic signals}
 \label{sec:theorystft}
+
+\subsubsection{Acoustic signals and their digital representation}
+
+\ichfeedback{is this a good section?}
+
+\todo[inline]{acoustic signals, pressure waves, etc.}
+
+\todo[inline]{discrete time, shannon-nyquist sampling theorem}
+
+\subsubsection{Fourier transform and frequency analysis}
+
+\todo[inline]{discrete-time fourier transform, spectral analysis, spectrogram}
+
+\subsubsection{Time-frequency uncertainty and the Gabor transform}
+
+\todo[inline]{Joint time-frequency analysis}
+
+\todo[inline]{dennis gabor also noted the need for joint TFA, so the above and below will have similarities}
+
+\todo[inline]{Time-frequency uncertainty principle}
 
 Dennis Gabor's seminal paper on information theory describes the analysis of a speech signal by applying the Fourier transform to finite, windowed segments of the input signal, referred to as the Gabor transform, and considered synonymous with the short-time Fourier transform. From the Gabor transform, which used a fixed or stationary window size, 
 
-\vfill
-\clearpage
+\subsection{Transforms of acoustic signals}
 
-\section{Nonstationary Gabor transform}
-\label{sec:theorynsgt}
+\ichfeedback{for each, describe algorithmic complexity and common libraries - FFTW, librosa, essentia, etc.}
+
+\todo[inline]{algorithmic analysis - how many window operations, how many FFTs are done, etc.}
+
+\todo[inline]{reference implementations and related code available: ltfat, matlab, python nsgt, essentia}
+
+\subsubsection{Fast Fourier Transform (FFT)}
+
+\subsubsection{Short-time Fourier Transform (STFT)}
+
+\subsubsection{Constant-Q Transform (CQT)}
+
+\todo[inline]{the original judith brown CQT is the origin of the research that led to the NSGT}
 
 The Constant-Q transform (CQT) is time-frequency transform for musical signals, originally designed by \citet{jbrown}, the relationship between the fundamental frequency and its harmonics on a logarithmic frequency scale more clearly than the linear frequency scale of the traditional discrete Fourier transform (DFT).
 
@@ -226,43 +255,84 @@ The connection to the CQT, or NSGT, is that these contain within a single transf
 
 The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in figure \ref{fig:dorflertradeoff}. Notice how the wide window spectrogram shows frequency components (horizontal lines) with a sharper definition than the blurry lines in the narrow window spectrogram, while the narrow window spectrogram shows temporal events (vertical lines) with a sharper definition than the wide window spectrogram.
 
-\subsection{Theoretical background}
+\subsubsection{Nonstationary Gabor Transform (NSGT)}
+\label{sec:theorynsgt}
 
-\todo[inline]{frame theory and shit}
+\todo[inline]{brief intro to frame theory and math stuff}
 
-\subsection{Irregular time and frequency sampling}
+\todo[inline]{irregular time and frequency sampling, show grids, varying time-frequency resolution etc.}
 
 \todo[inline]{arbitrary f scales and time scales}
 
-\subsection{Code implementation and computation cost}
+\subsubsection{sliCQ Transform}
+\label{sec:theoryslicq}
 
-\todo[inline]{how many windows, how many FFTs}
-
-\subsection{Output coefficients and dimensions}
+\todo[inline]{slicq is the realtime variant}
 
 \todo[inline]{whats the output, what does it mean, how does it relate to the FFT coefficients, time-frequency matrix}
-
-\subsection{Frequency scales}
-
-\subsubsection{Constant-Q log}
-
-log, octave
-
-\subsubsection{Variable-Q log}
-
-same with gamma
-
-from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
-
-\subsubsection{Mel}
-
-\subsubsection{Bark}
 
 \vfill
 \clearpage
 
-\section{Music source separation}
+\subsection{Nonlinear frequency scales for music analysis}
+\label{sec:freqscales}
+
+\ichfeedback{better title? this is a bit long. ``Frequency scales that may be useful for music or psychoacoustic purposes'' seems like a mouthful - ``Frequency scales for music analysis``?}
+
+\subsubsection{Scales based on Western pitch}
+
+constant-q, log, western pitch scale, octave
+
+variable-q - same with gamma offset
+
+from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
+
+\subsubsection{Psychoacoustic scales}
+
+mel, bark
+
+\vfill
+\clearpage
+
+\subsection{Machine learning}
+\label{sec:ml}
+
+\ichfeedback{if i'm presenting a neural network, it's probably necessary to have this section?}
+
+\subsubsection{Deep learning}
+\label{sec:dl}
+
+\vfill
+\clearpage
+
+\subsection{Music source separation}
 \label{sec:musicsep}
+
+\subsubsection{Task motivation and definition}
+
+\todo[inline]{purposes and uses - why do we want to do this}
+
+The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that music source separation could operate on the level of instruments, or for broader categories of sources, grouped into harmonic, percussive, and singing voice.
+
+\subsubsection{Public datasets}
+
+\ichfeedback{feels like a good section to have? MUSDB18-HQ, different datasets - there are many and it's an important consideration in music source separation}
+
+\subsubsection{Evaluation measures}
+
+\todo[inline]{bss, peass, snr-si, sdr-si? subjective, objective, MOS}
+
+\subsubsection{Survey of computational approaches}
+
+\ichfeedback{spectral masking, NMF, machine learning, deep learning - i can lean on the machine learning introduction section right before}
+
+\todo[inline]{summary of approaches over the year e.g. nonnegative matrix factorization to machine learning to deep learning}
+
+\subsubsection{Time-frequency masking and oracle estimators}
+
+\ichfeedback{i think the idea of the oracle mask computed from ground truths is important enough to be in the section title}
+
+\ichfeedback{it will come up later in the thesis when choosing hyperparameters for the sliCQ}
 
 \citet{musicsepgood}'s survey on music source separation describes how many contemporary methods of separation are based on the common technique of spectrogram masking \cite{masking, speechmask, musicmask}, and exploit that different sources have different characteristic representations in the spectrogram -- see figure \ref{fig:sepgood} for an illustration. Optimally sparse representation of music signals in the transform domain is an active area of research \cite{sparsitykowalski, sparsitykowalski2}.
 
@@ -273,6 +343,8 @@ from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
 	\caption{MSS sparsity}
 	\label{fig:sepgood}
 \end{figure}
+
+Harmonic/percussive source separation is the quintessential example.
 
 \begin{enumerate}
 	\item
@@ -291,18 +363,7 @@ The harmonic-percussive source separation algorithm of \citet{fitzgerald1} is ba
 \end{figure}
 
 
-These algorithms sacrifice separation quality for simplicity, scoring rather low in recent objective evaluations\cite{sisec2018}, losing in objective metrics and subjective evaluations to solutions based on deep learning\cite{umx, demucs}. \citet{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
-
-\subsection{Uses of music source separation}
-
-\todo[inline]{purposes and uses}
-
-\subsection{Task definition and survey}
-
-The task of music source separation is to split a mixed song into its constituent components, or sources. \citet{musicsepgood} describe that music source separation could operate on the level of instruments, or for broader categories of sources, grouped into harmonic, percussive, and singing voice.
-
-\todo[inline]{incorporate my sparsity hypothesis/justification for nsgt}
-
+These algorithms sacrifice separation quality for simplicity, scoring rather low in recent objective evaluations\cite{sisec2018}, losing in objective metrics and subjective evaluations to solutions based on deep learning\cite{umx, demucs}.
 Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.
 
 %\begin{wrapfigure}{r}{8cm}
@@ -326,18 +387,46 @@ The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 data
 
 In modern music source separation, the stems of MUSDB18 have determined the four most common sources to separate -- drums, bass, vocals, and other. SigSep's own network, Open-Unmix, is trained only on MUSDB18, and produces near-state-of-the-art results. The absolute state-of-the-art crown is jointly held by Conv-Tasnet and Demucs, both of which surpass Open-Unmix. Both models operate directly on the waveform domain, which indicates that they could surpass the maximum possible poerformance of time-frequency masking approaches, as is done in speech separation. However, in practise they are still below the limits of masking-based approaches.
 
-\subsection{Evaluation measures}
+\subsubsection{Open-Unmix (UMX)}
 
-\todo[inline]{bss, peass, snr-si, sdr-si? subjective, objective, MOS}
+ \citet{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
 
 \vfill
 \clearpage
 
-\section{Music source separation with the NSGT}
+\section{Methodology}
 
-\subsection{Surpassing the STFT ideal oracle mask}
+\subsection{sliCQ transform in deep learning}
+
+\subsubsection{Matrix and ragged forms}
+
+\todo[inline]{first describe the reference library's generator-based design for ragged and matrix}
+
+\subsubsection{PyTorch implementation}
+
+\todo[inline]{explain how this is necessary for neural networks and deep learning}
+
+\todo[inline]{describe optimizations done here}
+
+\todo[inline]{describe optimizations case by case or line by line?}
+
+\subsubsection{Grouping frequency bins by time resolution}
+
+\todo[inline]{call it the ragged transform}
+
+\subsubsection{Performance benchmarks}
+
+\subsubsection{Overlapping slices and plotting sliCQ spectrograms}
+
+\ichfeedback{overlap-add 50\% slice business here too, showing its non-invertible, use Essentia to support argument, justifying how i need to add a final convolutional layer to grow by 50\%}
+
+\todo[inline]{show slicq overlap and plotting code from library}
+
+\subsection{Choosing sliCQ parameters with oracle estimators}
 
 The first experiment to run is to discover which configuration of the NSGT has the potential to surpass the maximum performance of time-frequency masking using the STFT spectrogram. This should indicate whether substituting the NSGT in Open-Unmix is worthwhile.
+
+\subsubsection{Mix-phase oracle}
 
 Given ground truth data, such as what is available in MUSDB18, we have available to us the individually recorded sources for each track. From this, we can compute the ideal or oracle masks::
 
@@ -355,6 +444,8 @@ Given ground truth data, such as what is available in MUSDB18, we have available
 Finally, using these pairs of $x, y$, we can get the maximum possible BSS metrics of any algorithm or model based on time-frequency masking. This is the methodology used to find the so-called oracle estimator or oracle mask, which represents the maximum possible performance of any algorithm or model for music source separation that uses spectrogram masking (CITE UMX, etc.).
 
 Approaching or surpassing the ideal mask performance is a common benchmark in source separation literature. \todo{weak} Demucs talks about it but doesn't achieve it.
+
+\subsubsection{Random grid search}
 
 The space of possible NSGT parameters is large. First, there are multiple frequency scales to choose from -- the log (or octave) scale is the case of the CQT, but the NSGT can also use the Mel and Bark psychoacoustic scales. For the frequency bins, the original CQT papers \cite{klapuricqt, invertiblecqt} use multiples of 12 bins or pitches per octave (based on the 12-tone pitch scale), and use one or many octaves, leading to CQTs with 12-96 frequency bins in steps of 12. When using the Mel or Bark scales however, there is no need to continue with the 12-tone pitch per octave strategy, since we are already departing from music theory. Also, bins above 96 are not described in the literature, but without a good justification. Therefore, the range of bins evaluated are integers between 12-348, not just multiples of 12.
 
@@ -459,18 +550,52 @@ To sum up, using the best selected Bark-scale NSGT discovered by 200 iterations 
 
 The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, and check how much of the theoretical SDR improvements occur in the actual separation model, trained only on MUSDB18-HQ. The goal is to try to surpass Conv-Tasnet and Demucs with the UMX-NSGT variant.
 
-\subsection{Open-Unmix-NSGT}
+\subsubsection{Comparing different sliCQ and STFT configurations}
+
+\ichfeedback{I don't love the title here but what i mean is i want to pick, as we discussed, multiple STFT window sizes e.g. 512 1024 2048 4096 8192, and multiple sliCQ configurations e.g. Bark, Mel, 33Hz, 57Hz, 200 bins, 500 bins, 12 bins and contrast them all side by side - visual spectrograms, describe the time-frequency resolution, etc.}
+
+\ichfeedback{if you pick a bad scoring config, e.g. Constant-Q Log scale with 14 frequency bins and frequency limits 12.3 Hz -- 22050 Hz, you can get an oracle score of -7 dB SDR (completely terrible performance - i've seen it happen), and if you pick a good one, you get +8.9 dB SDR (surpassing the STFT)}
+
+\ichfeedback{it would be good to plot the magnitude and phase of the good and bad slicq. most likely the ``bad'' one is losing phase information when we ignore its phase. something must be controlling why a few hz in either direction is causing such a dramatic SDR difference}
+
+\subsection{Open-Unmix with the sliCQ transform}
+
+\todo[inline]{incorporate my sparsity hypothesis/justification for nsgt}
 
 \todo[inline]{better hope umx shines here}
 
+\subsubsection{Working with the ragged sliCQ transform}
+
+\ichfeedback{describe here how frequency bins are grouped by the same time-resolution, to produce a list of ``blocks'' of time-frequency coefficients}
+
+\subsubsection{Convolutional neural network architecture}
+
+\todo[inline]{grais and plumbley 2 papers can go here}
+
+\subsubsection{Improved loss functions from CrossNet-Open-Unmix}
+
 \vfill
 \clearpage
-\section{Conclusions}
-\label{sec:conclusion}
+
+\section{Experiment}
+
+\subsection{Training}
 
 foo
 
-\subsection{Evaluation}
+\subsection{Results}
+
+\ichfeedback{this will be the real results section evaluated on the MUSDB18-HQ test set on my computer, compared to the pretrained models of classic umx and xumx}
+
+\subsection{ISMIR 2021 Music Demixing Challenge}
+
+\ichfeedback{i know this shouldn't be a core part of the thesis, but it's still fun to describe?}
+
+\vfill
+\clearpage
+
+\section{Conclusion}
+\label{sec:conclusion}
 
 foo
 
