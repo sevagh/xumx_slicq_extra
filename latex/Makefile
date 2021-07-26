@@ -1,7 +1,7 @@
 LATEXMK_FLAGS ?= ""
 
 texpdf:
-	latexmk ${LATEXMK_FLAGS} $(tex_fname)
+	latexmk $(tex_fname) ${LATEXMK_FLAGS} 
 
 report-dev: export LATEXMK_FLAGS="-pvc"
 report-dev: report
