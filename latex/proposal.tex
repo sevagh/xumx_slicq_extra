@@ -22,12 +22,7 @@
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\textfraction}{0.1}
 \renewcommand{\floatpagefraction}{0.75}
-\usepackage[
-    %backend=biber, 
-    natbib=true,
-    style=numeric,
-    sorting=none,
-]{biblatex}
+\usepackage[backend=biber,authordate,annotation]{biblatex-chicago}
 \addbibresource{citations.bib}
 \input{variables.tex}
 
@@ -46,35 +41,27 @@
 
 \section{Introduction / Motivation}
 
-The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. It is computed by applying the discrete Fourier transform on overlapping, fixed-size windows of the input signal, and it is commonly used to represent music in digital signal processing algorithms and machine learning models for music information retrieval (MIR). Despite its popularity, the STFT limited by a fixed and bounded time-frequency resolution determined by the window size. In the sliCQ transform \cite{invertiblecqt}, which is the realtime variant of the Nonstationary Gabor Transform (NSGT) \cite{balazs}, the Fourier transform is applied with varying window sizes to adapt the time-frequency resolution to the characteristics of the studied signal. A well-known use of the sliCQ transform is to implement the constant-Q transform for music \cite{jbrown, klapuricqt}.
+The short-time Fourier transform (STFT) is an important tool for the time-frequency analysis of acoustic signals. It is computed by applying the discrete Fourier transform on overlapping, fixed-size windows of the input signal, and it is commonly used to represent music in computational music information retrieval (MIR). Despite its popularity, the STFT limited by a fixed and bounded time-frequency resolution. In the sliCQ transform (\cite{invertiblecqt}), which is the realtime variant of the Nonstationary Gabor Transform (\cite{balazs}), the Fourier transform is applied with varying window sizes to adapt the time-frequency resolution to the characteristics of the studied signal. One important application of the sliCQ transform is to implement an invertible constant-Q transform for music (\cite{jbrown, klapuricqt}).
 
-In the task of music source separation \cite{musicsepgood}, a mixed song is decomposed into its constituent sources, which are typically either different instruments (drums, bass, vocals) or groups of sources with similar characteristics (percussive, harmonic). Machine learning models for music source separation with the STFT have achieved success in recent years \cite{sisec2018}, but choosing the appropriate time-frequency resolution for the STFT is an important step which can significantly affect results \cite{tftradeoff1, tftradeoff2}. In this thesis, the STFT is replaced with the sliCQ transform in Open-Unmix (umx), a contemporary neural network \cite{umx} for music source separation. The proposed model, \textit{umx-sliCQ}, was submitted to the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} where it successfully separated the hidden data set within the required time limit. The submitted model did not surpass STFT-based submissions, but demonstrates a viable and flexible starting point for future sliCQ-based models.
+In the task of music source separation (\cite{musicsepgood}), a mixed song is decomposed into its constituent sources, which are typically either different instruments (drums, bass, vocals) or groups of sources with similar characteristics (percussive, harmonic). Machine learning models for music source separation with the STFT have achieved success in recent years (\cite{sisec2018}), but choosing the appropriate time-frequency resolution for the STFT is an important step which can significantly affect results (\cite{tftradeoff1, tftradeoff2}). In this thesis, the STFT is replaced with the sliCQ transform in Open-Unmix (\cite{umx}), a neural network for music source separation. The proposed model was submitted to the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} where it successfully separated the hidden data set within the required time limit. The sliCQ-based model did not surpass Open-Unmix, but demonstrates a viable and flexible starting point for future improvements.
 
 \section{Previous Work}
 
-\citet{umx}'s Open-Unmix is an open-source, reference implementation of a deep neural network for music source separation, based on the STFT and intended to foster reproducible research. It was chosen as the initial model to adapt to the sliCQ transform. Other music source separation algorithms exist which use multiple STFTs with different window size \cite{fitzgerald1, driedger}, or which replace the STFT with the constant-Q transform \cite{fitzgerald2}. In both cases, the aim is to improve the results by manipulating time-frequency resolution. \citet{plumbley2} presented a multi-resolution neural network for singing voice separation in music. In their model, ``multi-resolution'' refers to time-frequency resolution, which is varied by applying different sizes of time and frequency filters to the STFT.
+Computational source separation has a long history (\cite{musicsepsurvey}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music source separation, the sources are known and fixed. Most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}). Independent Component Analysis (ICA) can be used to exploit spatial information of the sources, which can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources (\cite{musicsepsurvey, musicsepgood}). In the case of monoaural or stereo music, spatial information cannot be used. Sources are assumed to be sufficiently different from each other such that they can be extracted with time-frequency masks applied in the spectral domain. These methods include techniques like Kernel Additive Modeling (KAM) or Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}).
+
+More recently, data-driven approaches based on deep learning leapfrogged past approaches (\cite{sisec2018}). Open-Unmix was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
+
+Manipulating time-frequency resolution is a common strategy for improving spectrogram-based music source separation. \textcite{fitzgerald1, driedger} use multiple STFTs with different window sizes. \textcite{fitzgerald2, cqtseparation, bettermusicsep} replaced the STFT with the constant-Q transform. \textcite{plumbley2} used varying sizes of time and frequency filters applied to the STFT according to the constant-Q scale, to separate singing voice in music.
 
 \section{Proposed Research / Methodology}
 
-The thesis will be broken up into the following sections:
-\begin{tight_enumerate}
-	\item
-		Present the motivation for why time-frequency analysis is useful for acoustic signals, how the STFT is typically used in music processing systems, and its limitations.
-	\item
-		Describe the constant-Q transform, NSGT, and sliCQ transforms, and how they use varying time-frequency resolution to better represent musical signals. Show why the NSGT and sliCQ are good implementation choices for the constant-Q transform.
-	\item
-		Describe the implementation of tensor operations in the sliCQ transform using PyTorch \cite{pytorch}, enabling its efficient and optimized computation in deep learning models.
-	\item
-		Describe the task of music source separation, as well as typical STFT-based approaches. Present Open-Unmix and describe its architecture, codebase, and baseline performance.
-	\item
-		Describe how Open-Unmix was adapted step by step to replace the STFT with the sliCQ transform, and show the training details and performance of the final trained model (as well as important intermediate steps such as hyperparameter tuning).
-\end{tight_enumerate}
+To support the use of the sliCQ transform inside deep learning networks, the reference implementation of the sliCQ transform\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to add support for GPU computation using a deep learning framework. This first contribution is necessary to use the sliCQ transform in GPU-based machine or deep learning models. Next, sliCQ parameters must be chosen that can surpass the STFT in music source separation. Spectrograms from the sliCQ transform will be shown alongside STFT spectrograms with different window sizes to demonstrate the improved visual clarity of tonal and transient components, and better detection of musical events.
+
+Finally, Open-Unmix will be adapted to use the sliCQ transform in place of the STFT, potentially incorporating ideas from other neural networks for music source separation including the convolutional denoising autoencoder architecture (\cite{plumbley1, plumbley2}). The network should be trained using only the open MUSDB18-HQ dataset (\cite{musdb18hq}), and music separation results will be compared with the pre-trained Open-Unmix model using the BSS evaluation metrics (\cite{bss, sisec2018}).
 
 \section{Contributions / Summary}
 
-In music source separation approaches that use the STFT, choosing the appropriate time-frequency resolution plays an important role. The sliCQ transform with varying time-frequency resolution is explored as a replacement for the STFT. First, the reference Python implementation for the sliCQ transform\footnote{\url{https://github.com/grrrr/nsgt}} was forked\footnote{\url{https://github.com/sevagh/nsgt}} to add support for fast and efficient GPU computation using PyTorch. This first contribution enables the sliCQ transform to be used by other researchers in different GPU-based machine learning models and problems going forward.
-
-Next, the sliCQ transform was used in a deep neural network for music source separation, using the STFT-based Open-Unmix as a starting point. The proposed model, \textit{umx-sliCQ}, was submitted to the ISMIR 2021 Music Demixing Challenge. It passed the test suite, showing that the sliCQ transform can be used in an effective music source separation system. The final submitted model did not surpass the score of the original Open-Unmix model. However, the performance of \textit{umx-sliCQ} was shown to improve significantly after several rounds of hyperparameter tuning. Future work should build on this and explore more performance gains from further model architecture changes or hyperparameter tuning.
+In music source separation approaches that use the STFT, choosing the appropriate time-frequency resolution plays an important role. In this thesis, the sliCQ transform with varying time-frequency resolution is explored as a replacement for the STFT in a deep learning model for music source separation. The proposed model was submitted to the ISMIR 2021 Music Demixing Challenge. It passed the evaluation suite, showing that the sliCQ transform can be used in an effective music source separation system. The final submitted model did not surpass the score of the original Open-Unmix model. However, the sliCQ transform is a flexible transform, and future work could explore alternative parameter search strategies or neural network architectures to further improve the source separation performance.
 
 \vfill
 \clearpage %force a page break
