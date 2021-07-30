@@ -14,7 +14,8 @@ except ImportError:
     cupy = None
 
 from openunmix.utils import load_separator as umx_separator
-from xumx.test import separate as xumx_separator
+from xumx_sony.test import load_xumx_model as xumx_separator_sony
+from xumx_sony.test import separate as xumx_separate_sony
 from xumx_slicq.utils import load_separator as xumx_slicq_separator
 
 umx_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../pretrained_models/umx')
@@ -22,59 +23,57 @@ xumx_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
 xumx_slicq_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../vendor/xumx-sliCQ/pretrained-model')
 
 
-def pretrained_model(track, model, eval_dir=None):
+def pretrained_model(track, model, eval_dir=None, is_xumx=False):
     N = track.audio.shape[0]
 
-    track_audio = torch.unsqueeze(
-        torch.tensor(
+    if not is_xumx:
+        track_audio = torch.unsqueeze(torch.tensor(
             track.audio.T,
             dtype=torch.float32,
             device="cpu"
-        ),
-    dim=0)
+        ), dim=0)
 
-    # apply pretrained model forward/inference
-    target_estimates = model(track_audio)
+        # apply pretrained model forward/inference
+        target_estimates = torch.squeeze(model(track_audio), dim=0)
 
-    # assign to dict for eval
-    estimates = {}
-    accompaniment_source = 0
-    for name, source in track.sources.items():
+        # assign to dict for eval
+        estimates = {}
+        accompaniment_source = 0
+        for name, source in track.sources.items():
 
-        # set this as the source estimate
-        if name == 'vocals':
-            estimates[name] = target_estimate[..., 0]
-        elif name == 'bass':
-            estimates[name] = target_estimate[..., 1]
-        elif name == 'drums':
-            estimates[name] = target_estimate[..., 2]
-        elif name == 'other':
-            estimates[name] = target_estimate[..., 3]
+            # set this as the source estimate
+            if name == 'vocals':
+                estimates[name] = target_estimates[0, ...].detach().cpu().numpy().T
+            elif name == 'bass':
+                estimates[name] = target_estimates[1, ...].detach().cpu().numpy().T
+            elif name == 'drums':
+                estimates[name] = target_estimates[2, ...].detach().cpu().numpy().T
+            elif name == 'other':
+                estimates[name] = target_estimates[3, ...].detach().cpu().numpy().T
 
-        # accumulate to the accompaniment if this is not vocals
-        if name != 'vocals':
-            accompaniment_source += target_estimate
+            # accumulate to the accompaniment if this is not vocals
+            if name != 'vocals':
+                accompaniment_source += estimates[name]
 
-    estimates['accompaniment'] = accompaniment_source
+        estimates['accompaniment'] = accompaniment_source
+    else:
+        estimates = xumx_separate_sony(
+            track.audio,
+            model,
+            chunk_dur=60.,
+        )
 
+    print(estimates)
     gc.collect()
 
-    if cupy:
-        # cupy disable fft caching to free blocks
-        fft_cache = cupy.fft.config.get_plan_cache()
-        fft_cache.set_size(0)
-
-        cupy.get_default_memory_pool().free_all_blocks()
-
-        # cupy reenable fft caching
-        fft_cache.set_size(16)
-        fft_cache.set_memsize(-1)
-
+    print('bss evaluation')
     bss_scores = museval.eval_mus_track(
         track,
         estimates,
         output_dir=eval_dir,
     )
+
+    print(bss_scores)
 
     return estimates, bss_scores
 
@@ -106,8 +105,7 @@ if __name__ == '__main__':
                 umx_pretrained_path,
                 targets=["vocals", "bass", "drums", "other"]
             ),
-            'xumx': lambda audio: xumx_separator(
-                audio,
+            'xumx': xumx_separator_sony(
                 model_path=xumx_pretrained_path
             ),
             'xumx_slicq': xumx_slicq_separator(
@@ -116,7 +114,7 @@ if __name__ == '__main__':
     }
 
     for track in tqdm.tqdm(mus.tracks):
-        for model in ['umx', 'xumx', 'xumx_slicq']:
+        for model in ['xumx', 'umx', 'xumx_slicq']:
             print(f'evaluating track {track.name} with model {model}')
             est_path = os.path.join(args.eval_dir, f'{model}') if args.eval_dir else None
             aud_path = os.path.join(args.audio_dir, f'{model}') if args.audio_dir else None
@@ -124,7 +122,9 @@ if __name__ == '__main__':
             est, _ = pretrained_model(
                 track,
                 loaded_models[model],
-                eval_dir=est_path)
+                eval_dir=est_path,
+                is_xumx=(model == 'xumx')
+            )
 
             gc.collect()
 
