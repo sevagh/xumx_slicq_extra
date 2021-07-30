@@ -63,10 +63,11 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False):
             chunk_dur=60.,
         )
 
-    print(estimates)
+        estimates['accompaniment'] = estimates['drums'] + estimates['bass'] + estimates['other']
+
     gc.collect()
 
-    print('bss evaluation')
+    print(f'bss evaluation to store in {eval_dir}')
     bss_scores = museval.eval_mus_track(
         track,
         estimates,
@@ -114,7 +115,7 @@ if __name__ == '__main__':
     }
 
     for track in tqdm.tqdm(mus.tracks):
-        for model in ['xumx', 'umx', 'xumx_slicq']:
+        for model in ['umx', 'xumx_slicq', 'xumx']:
             print(f'evaluating track {track.name} with model {model}')
             est_path = os.path.join(args.eval_dir, f'{model}') if args.eval_dir else None
             aud_path = os.path.join(args.audio_dir, f'{model}') if args.audio_dir else None
