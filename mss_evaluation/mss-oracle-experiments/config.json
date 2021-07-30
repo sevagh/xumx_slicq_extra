@@ -1,0 +1,14 @@
+{
+	"stft_configs": {
+					"window_sizes": [4096]
+	},
+  "nsgt_configs": [
+    {
+      "bins": 10,
+      "fmin": 68.64,
+      "scale": "mel",
+      "sllen": 1024,
+      "trlen": 256 
+    }
+  ]
+}
