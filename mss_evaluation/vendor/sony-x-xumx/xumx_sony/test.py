@@ -64,28 +64,30 @@ def separate(
         unmix_target,
         niter=1,
         softmask=False,
-        chunk_dur=30.,
+        chunk_size=2621440,
         sample_rate=44100,
         alpha=1.0,
         residual_model=False
 ):
     # split and separate sources using moving window protocol for each chunk of audio
     # chunk duration must be lower for machines with low memory
-    chunk_size = int(sample_rate * chunk_dur)
-    if (audio.shape[0] % chunk_size) == 0:
-        nchunks = (audio.shape[0] // chunk_size)
-    else:
-        nchunks = (audio.shape[0] // chunk_size) + 1
+    print(f'audio.shape: {audio.shape}')
+    N = audio.shape[0]
 
-    nchunks = int(nchunks)
+    if (N % chunk_size) == 0:
+        nchunks = (N // chunk_size)
+    else:
+        nchunks = (N // chunk_size) + 1
 
     estimates = {}
 
     for chunk_idx in trange(nchunks):
         cur_chunk = audio[chunk_idx * chunk_size: min((chunk_idx + 1) * chunk_size, audio.shape[0]),:]
+        print(f'cur_chunk.shape: {cur_chunk.shape}')
 
         # convert numpy audio to NNabla Variable
         audio_nn = nn.Variable.from_numpy_array(cur_chunk.T[None, ...])
+        print(f'audio_nn.shape: {audio_nn.shape}')
         source_names = []
         V = []
         mix_spec, msk, _ = unmix_target(audio_nn, test=True)
@@ -122,15 +124,18 @@ def separate(
                 n_fft=unmix_target.n_fft,
                 n_hopsize=unmix_target.n_hop
             )
+            print(f'after istft: {audio_hat.shape}')
             cur_estimates[name] = audio_hat.T
 
         # after each chunk, stitch estimated chunks together
-        for key in cur_estimates:
-            if any(estimates) is False:
-                estimates = cur_estimates
-            else:
-                for key in cur_estimates:
-                    estimates[key] = np.concatenate((estimates[key], cur_estimates[key]), axis=0)
+        if any(estimates) is False:
+            estimates = cur_estimates
+        else:
+            for key in cur_estimates:
+                estimates[key] = np.concatenate((estimates[key], cur_estimates[key]), axis=0)
+
+    for key in estimates:
+        print(f'estimates[key].shape: {estimates[key].shape}')
 
     return estimates
 

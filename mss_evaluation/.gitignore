@@ -3,3 +3,5 @@
 *.lprof
 *.dat
 *.egg-info
+/*.pyc
+__pycache__
