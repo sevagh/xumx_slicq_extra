@@ -8,10 +8,6 @@ import museval
 import numpy as np
 import random
 from warnings import warn
-try:
-    import cupy
-except ImportError:
-    cupy = None
 
 from openunmix.utils import load_separator as umx_separator
 from xumx_sony.test import load_xumx_model as xumx_separator_sony
@@ -89,7 +85,18 @@ if __name__ == '__main__':
         help='Folder where audio results are saved',
         default=None,
     )
-
+    parser.add_argument(
+        '--model',
+        default="",
+        type=str,
+        help='model to evaluate ("" == all)'
+    )
+    parser.add_argument(
+        '--track-offset',
+        default=0,
+        type=int,
+        help='track offset'
+    )
     parser.add_argument(
         '--eval_dir',
         nargs='?',
@@ -109,13 +116,13 @@ if __name__ == '__main__':
             'xumx': xumx_separator_sony(
                 model_path=xumx_pretrained_path
             ),
-            'xumx_slicq': xumx_slicq_separator(
+            'slicq': xumx_slicq_separator(
                 xumx_slicq_pretrained_path
             ),
     }
 
-    for track in tqdm.tqdm(mus.tracks):
-        for model in ['xumx', 'umx', 'xumx_slicq']:
+    for track in tqdm.tqdm(mus.tracks[args.track_offset:]):
+        for model in (['xumx', 'umx', 'slicq'] if not args.model else [args.model]):
             print(f'evaluating track {track.name} with model {model}')
             est_path = os.path.join(args.eval_dir, f'{model}') if args.eval_dir else None
             aud_path = os.path.join(args.audio_dir, f'{model}') if args.audio_dir else None
