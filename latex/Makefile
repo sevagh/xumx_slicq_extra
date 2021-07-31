@@ -28,3 +28,4 @@ clean:
 	-rm *.snm
 	-rm *.vrb
 	-rm *.fls
+	-rm *.toc

@@ -219,6 +219,26 @@ Dennis Gabor's seminal paper on information theory describes the analysis of a s
 
 \subsubsection{Constant-Q Transform (CQT)}
 
+
+Summary of the most relevant CQT implementations:
+
+\begin{enumerate}
+	\item
+	    Brown, 1991, first proposed CQT with a naive very slow implementation.
+    \item
+	    Brown and Puckette, 1992: implemented a faster CQT based on a sparse representation in the frequency domain. This is the current Essentia implementation!
+    \item
+	    Sch{\"o}rkhuber and Klapuri, 2010: a faster CQT based on the same principles as Brown and Puckette, 1992. For first time, it is introduced an algorithm for an approximated reconstruction of the CQT coefficients. Code: \url{http://www.iem.at/~schoerkhuber/cqt2010/} - this is the librosa implementation
+    \item
+	    Velasco, Holighaus, D{\"o}rfler and Grill, 2011: they approach the problem differently - by means of a nonstationary Gabor transform. This allows perfect reconstruction for first time while the transform is still computationally efficient (faster than Sch{\"o}rkhuber and Klapuri, 2010). However, it does not allow real-time implementations and phases are not accurate. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
+    \item
+	    Holighaus, D{\"o}rfler, Velasco and Grill, 2012: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They propose sliCQT (slicing by using an overlapping window) to allow real-time computations. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
+    \item
+	    Sch{\"o}rkhuber, Klapuri, Holighaus and Dörfler, 2014: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They solve the problem with phases by means of a frequency mapping and they also propose a Variable-Q transform (that allows ie. ERBlets). Code: \url{http://www.cs.tut.fi/sgn/arg/CQT/}
+    \item
+	    Sch{\"o}rkhuber, Klapuri, Holighaus and D{\"o}rfler, 2014, a nonstationary Gabor transform, allows perfect reconstruction while the phases are still accurate. It might be interesting to implement this in Essentia.
+\end{enumerate}
+
 \todo[inline]{the original judith brown CQT is the origin of the research that led to the NSGT}
 
 The Constant-Q transform (CQT) is time-frequency transform for musical signals, originally designed by \textcite{jbrown}, the relationship between the fundamental frequency and its harmonics on a logarithmic frequency scale more clearly than the linear frequency scale of the traditional discrete Fourier transform (DFT).
@@ -423,6 +443,8 @@ In modern music source separation, the stems of MUSDB18 have determined the four
 \subsubsection{Overlapping slices and plotting sliCQ spectrograms}
 
 \ichfeedback{overlap-add 50\% slice business here too, showing its non-invertible, use Essentia to support argument, justifying how i need to add a final convolutional layer to grow by 50\%}
+
+\todo[inline]{overlap essentia stuff: \url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
 
 \todo[inline]{show slicq overlap and plotting code from library}
 
