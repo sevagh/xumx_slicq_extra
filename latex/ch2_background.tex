@@ -1,0 +1,246 @@
+\documentclass[report.tex]{subfiles}
+\begin{document}
+
+\section{Background}
+\label{sec:background}
+
+\subsection{Joint time-frequency analysis of acoustic signals}
+\label{sec:theorystft}
+
+\subsubsection{Acoustic signals and the waveform}
+
+\ichfeedback{is this a good section? time-domain stuff}
+
+\todo[inline]{acoustic signals, pressure waves, etc.}
+
+\todo[inline]{discrete time, shannon-nyquist sampling theorem}
+
+\subsubsection{Fourier transform and the frequency domain}
+
+\todo[inline]{discrete-time fourier transform, spectral analysis, spectrogram}
+
+\subsubsection{Time-frequency analysis for time-varying frequency}
+
+\ichfeedback{time-frequency analysis was first done by Gabor because frequencies of some natural sounds (speech, music, sirens, etc.) have a time-varying frequency such that only time or only frequency analysis alone cannot describe the signal}
+
+\subsubsection{Time-frequency uncertainty and the Gabor transform}
+
+\todo[inline]{Joint time-frequency analysis}
+
+\todo[inline]{dennis gabor also noted the need for joint TFA, so the above and below will have similarities}
+
+\todo[inline]{Time-frequency uncertainty principle}
+
+Dennis Gabor's seminal paper on information theory describes the analysis of a speech signal by applying the Fourier transform to finite, windowed segments of the input signal, referred to as the Gabor transform, and considered synonymous with the short-time Fourier transform. From the Gabor transform, which used a fixed or stationary window size, 
+
+\subsection{Transforms of acoustic signals}
+
+\ichfeedback{for each, describe algorithmic complexity and common libraries - FFTW, librosa, essentia, etc.}
+
+\todo[inline]{algorithmic analysis - how many window operations, how many FFTs are done, etc.}
+
+\todo[inline]{reference implementations and related code available: ltfat, matlab, python nsgt, essentia}
+
+\subsubsection{Fast Fourier Transform (FFT)}
+
+\subsubsection{Short-time Fourier Transform (STFT)}
+
+\subsubsection{Constant-Q Transform (CQT)}
+
+
+Summary of the most relevant CQT implementations:
+
+\begin{enumerate}
+	\item
+	    Brown, 1991, first proposed CQT with a naive very slow implementation.
+    \item
+	    Brown and Puckette, 1992: implemented a faster CQT based on a sparse representation in the frequency domain. This is the current Essentia implementation!
+    \item
+	    Sch{\"o}rkhuber and Klapuri, 2010: a faster CQT based on the same principles as Brown and Puckette, 1992. For first time, it is introduced an algorithm for an approximated reconstruction of the CQT coefficients. Code: \url{http://www.iem.at/~schoerkhuber/cqt2010/} - this is the librosa implementation
+    \item
+	    Velasco, Holighaus, D{\"o}rfler and Grill, 2011: they approach the problem differently - by means of a nonstationary Gabor transform. This allows perfect reconstruction for first time while the transform is still computationally efficient (faster than Sch{\"o}rkhuber and Klapuri, 2010). However, it does not allow real-time implementations and phases are not accurate. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
+    \item
+	    Holighaus, D{\"o}rfler, Velasco and Grill, 2012: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They propose sliCQT (slicing by using an overlapping window) to allow real-time computations. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
+    \item
+	    Sch{\"o}rkhuber, Klapuri, Holighaus and Dörfler, 2014: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They solve the problem with phases by means of a frequency mapping and they also propose a Variable-Q transform (that allows ie. ERBlets). Code: \url{http://www.cs.tut.fi/sgn/arg/CQT/}
+    \item
+	    Sch{\"o}rkhuber, Klapuri, Holighaus and D{\"o}rfler, 2014, a nonstationary Gabor transform, allows perfect reconstruction while the phases are still accurate. It might be interesting to implement this in Essentia.
+\end{enumerate}
+
+\todo[inline]{the original judith brown CQT is the origin of the research that led to the NSGT}
+
+The Constant-Q transform (CQT) is time-frequency transform for musical signals, originally designed by \textcite{jbrown}, the relationship between the fundamental frequency and its harmonics on a logarithmic frequency scale more clearly than the linear frequency scale of the traditional discrete Fourier transform (DFT).
+
+The original CQT had no inverse transform, but later works led to approximate inverses \cite{klapuricqt, fitzgeraldcqt}. 
+, which has an important application in the perfectly-invertible CQT, or CQ-NSGT \cite{invertiblecqt}
+
+The more general NSGT should be studied instead the CQT for the following reasons:
+\begin{itemize}
+	\item
+		It solves the earlier CQT's \cite{jbrown, klapuricqt, fitzgeraldcqt} lack of stable inverse, which was a known weakness \cite{lackinverse}
+	\item
+		It can use other potentially interesting frequency scales besides the constant-Q logarithmic scale, such as the psychoacoustically-motivated mel, Bark, or ERB scales \todo{cite me}, or variable-Q scales \todo{cite gamma and other}
+\end{itemize}
+
+ The CQT has a high temporal resolution at high frequencies \cite{cqtransient} .
+
+ A demonstration of the CQT is shown in figure \ref{fig:earlycqt}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Linear frequency spectrum]{\includegraphics[height=4.75cm]{./images-tftheory/violindft.png}}
+	\subfloat[Constant-Q transform]{\includegraphics[height=4.75cm]{./images-tftheory/violincqt.png}}
+	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$}
+	\label{fig:earlycqt}
+\end{figure}
+
+Additionally, the constant-Q transform \cite{jbrown, klapuricqt, invertiblecqt} even before its formulation as a specialized variant of the nonstationary Gabor transform \cite{balazs}, is an STFT applied with window of different sizes, which are of long duration at low frequencies to create a fine frequency resolution (and sacrificing time resolution as per the time-frequency uncertainty principle), and gradually decrease the windows in duration to improve the time resolution (and sacrifice frequency resolution). At the same time, consider that the iterative harmonic-percussive source separation algorithms in \cite{driedger, fitzgerald2} use two-pass spectral masking with two different configurations of spectrograms -- one with a large window size (4096 samples in \cite{driedger}, 16384 samples in \cite{fitzgerald2}) for representing the harmonic or pitched instruments sharply and estimating the harmonic mask, and one with a short window size (256 samples in \cite{driedger}, 1024 samples in \cite{fitzgerald2}) for representing percussion or transients more sharply and estimating the percussive mask.
+
+The connection to the CQT, or NSGT, is that these contain within a single transform the high frequency resolution of a the large-size spectrogram in the low frequency regions, and the high time resolution of the small-size spectrogram in the high frequency regions. According to \textcite{musicsepgood}'s survey on music source separation, most spectral masking techniques try to exploit the 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=9cm]{./images-tftheory/tf_tradeoff_dorfler.png}
+	\caption{Time-frequency tradeoff for a glockenspiel signal}
+	\label{fig:dorflertradeoff}
+\end{figure}
+
+The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in figure \ref{fig:dorflertradeoff}. Notice how the wide window spectrogram shows frequency components (horizontal lines) with a sharper definition than the blurry lines in the narrow window spectrogram, while the narrow window spectrogram shows temporal events (vertical lines) with a sharper definition than the wide window spectrogram.
+
+\subsubsection{Nonstationary Gabor Transform (NSGT)}
+\label{sec:theorynsgt}
+
+\todo[inline]{brief intro to frame theory and math stuff}
+
+\todo[inline]{irregular time and frequency sampling, show grids, varying time-frequency resolution etc.}
+
+\todo[inline]{arbitrary f scales and time scales}
+
+\subsubsection{sliCQ Transform}
+\label{sec:theoryslicq}
+
+\todo[inline]{slicq is the realtime variant}
+
+\todo[inline]{whats the output, what does it mean, how does it relate to the FFT coefficients, time-frequency matrix}
+
+\vfill
+\clearpage
+
+\subsection{Nonlinear frequency scales for music analysis}
+\label{sec:freqscales}
+
+\ichfeedback{better title? this is a bit long. ``Frequency scales that may be useful for music or psychoacoustic purposes'' seems like a mouthful - ``Frequency scales for music analysis``?}
+
+\subsubsection{Scales based on Western pitch}
+
+constant-q, log, western pitch scale, octave
+
+variable-q - same with gamma offset
+
+from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
+
+\subsubsection{Psychoacoustic scales}
+
+mel, bark
+
+\vfill
+\clearpage
+
+\subsection{Machine learning}
+\label{sec:ml}
+
+\ichfeedback{if i'm presenting a neural network, it's probably necessary to have this section?}
+
+\subsubsection{Deep learning}
+\label{sec:dl}
+
+\vfill
+\clearpage
+
+\subsection{Music source separation}
+\label{sec:musicsep}
+
+\subsubsection{Task motivation and definition}
+
+\todo[inline]{purposes and uses - why do we want to do this}
+
+The task of music source separation is to split a mixed song into its constituent components, or sources. \textcite{musicsepgood} describe that music source separation could operate on the level of instruments, or for broader categories of sources, grouped into harmonic, percussive, and singing voice.
+
+\subsubsection{Public datasets}
+
+\ichfeedback{feels like a good section to have? MUSDB18-HQ, different datasets - there are many and it's an important consideration in music source separation}
+
+\subsubsection{Evaluation measures}
+
+\todo[inline]{bss, peass, snr-si, sdr-si? subjective, objective, MOS}
+
+\subsubsection{Survey of computational approaches}
+
+\ichfeedback{spectral masking, NMF, machine learning, deep learning - i can lean on the machine learning introduction section right before}
+
+\todo[inline]{summary of approaches over the year e.g. nonnegative matrix factorization to machine learning to deep learning}
+
+\subsubsection{Time-frequency masking and oracle estimators}
+
+\ichfeedback{i think the idea of the oracle mask computed from ground truths is important enough to be in the section title}
+
+\ichfeedback{it will come up later in the thesis when choosing hyperparameters for the sliCQ}
+
+\textcite{musicsepgood}'s survey on music source separation describes how many contemporary methods of separation are based on the common technique of spectrogram masking \cite{masking, speechmask, musicmask}, and exploit that different sources have different characteristic representations in the spectrogram -- see figure \ref{fig:sepgood} for an illustration. Optimally sparse representation of music signals in the transform domain is an active area of research \cite{sparsitykowalski, sparsitykowalski2}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[hello world]{\includegraphics[height=4.5cm]{./images-mss/mss1.png}}
+	\subfloat[hello world]{\includegraphics[height=4.7cm]{./images-mss/mss2.png}}
+	\caption{MSS sparsity}
+	\label{fig:sepgood}
+\end{figure}
+
+Harmonic/percussive source separation is the quintessential example.
+
+\begin{enumerate}
+	\item
+		Apply the algorithm in two passes, using a wide window STFT to attain a high frequency resolution and perform a better harmonic estimate, and a narrow window STFT to attain a high time resolution and perform a better percussive estimate \cite{fitzgerald2, driedger}
+	\item
+		Replace the STFT with the CQT to perform a vocal or singing voice separation \cite{fitzgerald2}
+\end{enumerate}
+
+The harmonic-percussive source separation algorithm of \textcite{fitzgerald1} is based on median filtering and spectral masking using magnitude spectrograms. The original algorithm with soft masks, and the binary masking and iterative variants introduced in \cite{driedger}, are both implemented in librosa \cite{librosa}, a popular open-source MIR library -- see figure \ref{fig:hpsslibrosa} for a diagram of how the algorithm works. The algorithm exploits transform sparsity, by noticing that harmonic or pitched sounds as horizontal lines in the spectrogram, percussive sounds as vertical lines, and estimating each using median filtering. \textcite{driedger}'s iterative variant uses two passes, with a large-window STFT to generate a spectrogram with a higher frequency resolution in the first pass for an improved harmonic estimate, and a small-window STFT to generate a spectrogram with a higher time resolution in the second pass for an improved percussive estimate.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=8cm]{./images-mss/sphx_glr_plot_hprss_001.png}
+	\caption{Harmonic/percussive/residual source separation in librosa}
+	\label{fig:hpsslibrosa}
+\end{figure}
+
+
+These algorithms sacrifice separation quality for simplicity, scoring rather low in recent objective evaluations\cite{sisec2018}, losing in objective metrics and subjective evaluations to solutions based on deep learning\cite{umx, demucs}.
+Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.
+
+%\begin{wrapfigure}{r}{8cm}
+\begin{figure}[ht]
+	\vspace{-1.0em}
+	\includegraphics[width=8cm]{./images-mss/maskdemo.png}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
+	\label{fig:masks}
+	\vspace{-1.5em}
+%\end{wrapfigure}
+\end{figure}
+
+\textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
+\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
+
+Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
+
+Most recently, the SigSep\footnote{\url{https://sigsep.github.io/}} community has been running the Signal Separation Evaluation Campaign (SISEC), which sets the tone for the modern state-of-the-art models. SiSec uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality, or BSSv4 variant.
+
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research.
+
+In modern music source separation, the stems of MUSDB18 have determined the four most common sources to separate -- drums, bass, vocals, and other. SigSep's own network, Open-Unmix, is trained only on MUSDB18, and produces near-state-of-the-art results. The absolute state-of-the-art crown is jointly held by Conv-Tasnet and Demucs, both of which surpass Open-Unmix. Both models operate directly on the waveform domain, which indicates that they could surpass the maximum possible poerformance of time-frequency masking approaches, as is done in speech separation. However, in practise they are still below the limits of masking-based approaches.
+
+\subsubsection{Open-Unmix (UMX)}
+
+ \textcite{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
+
+\end{document}
