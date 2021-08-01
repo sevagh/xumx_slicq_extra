@@ -18,7 +18,7 @@ controls = ['mpi-s4096']
 
 def save_boxplot(pandas_in, pdf_out, single=False):
     metrics = ['SDR', 'SIR', 'SAR', 'ISR']
-    targets = ['vocals', 'accompaniment', 'drums', 'bass', 'other']
+    targets = ['vocals', 'drums', 'bass', 'other']
 
     df = pandas.read_pickle(pandas_in)
     df['control'] = df.method.isin(controls)
