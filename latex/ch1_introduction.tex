@@ -4,15 +4,21 @@
 \section{Introduction}
 \label{sec:intro}
 
-The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the sound pressure wave \todo{cite something}. Another way to characterize acoustic signals is by their frequency components. The Fourier transform can be used to obtain the frequency components present in a signal, but contains no temporal information. However, many important signals such as speech and music contain frequency components that change with time.
+The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the sound pressure wave \todo{cite something}. Another way to characterize acoustic signals is by their frequency components. The Fourier transform is used to obtain the frequency components present in a signal. This is also known as spectral analysis, which is an important technique in analyzing and understanding audio \todo{cite sth}.
 
-For this class of signal, joint time-frequency analysis is an important tool. Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and taking the Fourier transform of each windowed section. This is also referred to as the short-time Fourier transform (STFT) or spectrogram \todo{cite textbook}. The STFT is subject to a fixed and bounded time-frequency resolution, such that one cannot be arbitrarily precise in both time and frequency, and must trade them off by varying the duration of the STFT window.
+One downside of the Fourier transform is that it contains no temporal information. The Fourier transform represents the frequency components of an acoustic signal by a sum of infinite sinusoids, but it does not describehow these frequencies evolve with time. Many important signals such as speech and music contain frequency components that change with time. For these signals, joint time-frequency analysis is an essential tool.
+
+Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and taking the Fourier transform of each windowed section. This is also referred to as the short-time Fourier transform (STFT) or spectrogram \todo{cite textbook}. The STFT is subject to a fixed and bounded time-frequency resolution, such that one cannot be arbitrarily precise in both time and frequency, and must trade them off by changing the duration of the window. This arises from the Heisenberg uncertainty principle, and is a result of time and frequency being Fourier duals of each other, a principle from quantum computing.
 
 \subsection{Motivation}
 
-Musical signals have characteristics that lead to conflicting requirements in the STFT \cite{doerflerphd}. In the low frequency region, music needs to be analyzed with long-duration windows for a high frequency resolution, as bass notes lay the harmonic basis of a song \todo{heavy citation stuff here}. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm. These transients have fast attacks and decays and need to be analyzed with short-duration windows.
+Musical signals have characteristics that lead to conflicting requirements in the STFT. According to \textcite{doerflerphd}, music needs to be analyzed with long-duration windows in the low frequency region for a high frequency resolution, because the bass notes lay the harmonic basis of a song. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm; these transients have fast attacks and decays and need to be analyzed with short-duration windows (\cite{doerflerphd}). \textcite{cqtransient} similarly state that
 
-Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed by different window sizes of STFT. Note how in figure \ref{fig:stfttradeoff}a, due to the high frequency resolution, the temporal events are blurry or smeared such that the times of note onsets are unclear. The inverse case is shown in figure \ref{fig:stfttradeoff}b, which contains sharp localization of note onsets from the high time resolution, but blurry or smeared frequency components.
+\begin{quote}
+	a well-known disadvantage of the STFT is the rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies. In contrast to this we know that due to both musical and auditory aspects frequency resolution is preferred that increases from high to low frequencies (and vice versa for time resolution).
+\end{quote}
+
+Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed with STFTs using different window sizes. Note how in figure \ref{fig:stfttradeoff}(a), due to the high frequency resolution, the temporal events are blurry or smeared such that the times of note onsets are unclear. The inverse case is shown in figure \ref{fig:stfttradeoff}(b), which contains sharp localization of note onsets from the high time resolution, but blurry or smeared frequency components.
 
 \begin{figure}[ht]
 	\centering
@@ -23,7 +29,7 @@ Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed by di
 	\label{fig:stfttradeoff}
 \end{figure}
 
-The Nonstationary Gabor transform (NSGT) \cite{balazs} is a time-frequency transform with a varying time-frequency resolution and a perfect inverse. The NSGT spectrogram of the musical glockenspiel signal is shown in figure \ref{fig:nsgttradeoff}, where one can observe minimal blurriness, or good resolution, in both time and frequency, arising from the varying window size of the NSGT.
+The first use of the STFT was by \textcite{gabor1946} to analyze a speech signal, which used fixed-size Gaussian windows. This was called the Gabor transform, and is now considered a special case of the STFT (\cite{dictionary}). Building on the Gabor transform, the Nonstationary Gabor transform (NSGT) of \textcite{balazs} is a time-frequency transform with a varying time-frequency resolution and a perfect inverse. The NSGT is computed by varying the window size on which the Fourier transform taken. The NSGT spectrogram of the musical glockenspiel signal is shown in figure \ref{fig:nsgttradeoff}, where one can observe minimal blurriness (or good resolution) in both time and frequency, which is an improvement over the STFT spectrogram.
 
 \begin{figure}[ht]
 	\centering
@@ -32,9 +38,9 @@ The Nonstationary Gabor transform (NSGT) \cite{balazs} is a time-frequency trans
 	\label{fig:nsgttradeoff}
 \end{figure}
 
-The NSGT is based on the constant-Q transform, which was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. Although it was not one of the original goals, by the nature of its nonlinear frequency resolution and short-duration windows in the high frequency regions, the CQT demonstrates a good time resolution at high frequencies \cite{cqtransient}, making it a good choice for representing transients \todo{cite the musical importance}.
+The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. From the short windows, the CQT demonstrates a good time resolution at high frequencies (\cite{cqtransient}), making it a good choice for representing transients (\cite[Chapter~2]{}).
 
-The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT \cite{invertiblecqt, variableq1}. The NSGT can in practice be constructed with any arbitrary frequency scale. Using the NSGT instead of the STFT to represent musical signals may be of interest, as it is a single transform which can replace the need to explicitly trade-off of time and frequency resolution with different window sizes of STFT, and it can be configured to use frequency scales that are most appropriate for the task at hand.
+The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT (\cite{invertiblecqt, variableq1}). The sliCQ transform, introduced in \textcite{invertiblecqt}, computes the NSGT on slices of the audio signal instead of the entire signal, allowing realtime processing. The NSGT and sliCQ transform can in practice be constructed with any frequency scale that is monotonically increasing. Using the NSGT instead of the STFT to represent musical signals may be of interest, as it is a single transform which can replace the need to explicitly trade-off of time and frequency resolution with different window sizes of STFT, and it can be configured to use frequency scales that are appropriate for the task.
 
 \subsection{Related work and thesis objectives}
 
