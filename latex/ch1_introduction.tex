@@ -38,9 +38,11 @@ The first use of the STFT was by \textcite{gabor1946} to analyze a speech signal
 	\label{fig:nsgttradeoff}
 \end{figure}
 
-The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. From the short windows, the CQT demonstrates a good time resolution at high frequencies (\cite{cqtransient}), making it a good choice for representing transients (\cite[Chapter~2]{}).
+The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. From the short windows, the CQT demonstrates a good time resolution at high frequencies (\cite{cqtransient}), making it a good choice for representing transients, important for timbre and instrument identification (\cite{timbretransients1, timbretransients2}).
 
-The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT (\cite{invertiblecqt, variableq1}). The sliCQ transform, introduced in \textcite{invertiblecqt}, computes the NSGT on slices of the audio signal instead of the entire signal, allowing realtime processing. The NSGT and sliCQ transform can in practice be constructed with any frequency scale that is monotonically increasing. Using the NSGT instead of the STFT to represent musical signals may be of interest, as it is a single transform which can replace the need to explicitly trade-off of time and frequency resolution with different window sizes of STFT, and it can be configured to use frequency scales that are appropriate for the task.
+The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT (\cite{invertiblecqt, variableq1}). The sliCQ transform, introduced by \textcite{invertiblecqt}, computes the NSGT on slices of the audio signal instead of the entire signal, allowing realtime processing. The NSGT and sliCQ transform can in practice be constructed with any frequency scale that is monotonically increasing. Using the NSGT instead of the STFT to represent musical signals may be of interest, as it is a single transform which can replace the need to explicitly trade-off of time and frequency resolution with different window sizes of STFT, and it can be configured to use frequency scales that are appropriate for the task.
+
+In the task of music source separation, or music demixing, a mixed song, which is a linear mixture of several sources, is split or \textit{de-mixed} back into its original sources. Once all the instrument and vocal sources are mixed together in the final song, completely isolating them without any bleed or artifacts is a difficult task. Using a time-frequency transform which represents musical signals better, such as the sliCQ transform, may
 
 \subsection{Related work and thesis objectives}
 
@@ -60,9 +62,7 @@ As the NSGT is a generalization of the CQT, and can be used to implement differe
 
 \subsection{Contribution and results}
 
-The contributions of this thesis would be the demonstration of the successful use of the NSGT in a domain which is generally dominated by the STFT. 
-
-The results will be compare the results to the classic Open-Unmix and to the current state-of-the-art, Demucs and Conv-Tasnet \cite{demucs}.
+The contributions of this thesis would be the demonstration of the successful use of the NSGT in a domain which is generally dominated by the STFT.  The results will be compare the results to the original Open-Unmix.
 
 \subsection{Outline}
 
