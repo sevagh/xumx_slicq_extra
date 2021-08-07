@@ -164,6 +164,19 @@ mel, bark
 \subsection{Music source separation}
 \label{sec:musicsep}
 
+\textcite{musicsepgood} describe the motivation and task of music source separation as follows:
+
+\begin{quote}
+	Many people listen to recorded music as part of their everyday lives [...] Sometimes we might want to remix the balance within the music, perhaps to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1- channel surround sound system. We might also want to change the spatial location of a musical instrument within the mix. All of these applications are relatively straightforward, provided we have access to separate sound channels (stems) for each musical audio object. However, if we only have access to the final recording mix, which is usually the case, this is much more challenging. To estimate the original musical sources, which would allow us to remix, suppress or upmix the sources, we need to perform musical source separation (MSS). In the general source separation problem, we are given one or more mixture signals that contain different mixtures of some original source signals. [...] The task is to recover one or more of the source signals given the mixtures.
+\end{quote}
+
+\textcite{umx}'s deep learning model, named Open-Unmix, is intended to be a near state-of-the-art, open implementation of music source separation based on the MUSDB18 dataset \cite{musdb18} and intended to foster reproducible research and a baseline of high performance. It uses the STFT spectrogram as the input and output representation of musical signals, and a deep neural network to estimate invidual sources from a mixture. The choice of window size in the task of source separation based on STFT spectrograms can have an impact on the results of speech and music source separation \cite{musicsepwindow}, but this consideration is not explored in Open-Unmix.
+
+The CQT was shown to surpass the performance of the STFT in speech separation \cite{cqtseparation}. A simpler and older algorithm for harmonic/percussive source separation (HPSS) \cite{fitzgerald1}, also based on the STFT spectrogram, was evaluated alongside Open-Unmix in the SiSec 2018 music source separation evaluation campaign \cite{sisec2018} as a primitive (and low performance) baseline. The HPSS algorithm was later modified to use STFT spectrograms with different window sizes \cite{driedger, fitzgerald2}, and to use the CQT in place of the STFT \cite{fitzgerald2}. Using the STFT with a warped, or non-linear frequency scale, was also shown to improve music source separation results \cite{bettermusicsep}.
+
+As the NSGT is a generalization of the CQT, and can be used to implement different frequency scales, it is chosen as the transform to study in this thesis. The objectives of this thesis are to discover which configurations of the NSGT can surpass different window sizes of the STFT in music source separation, and to adapt Open-Unmix to use the NSGT.
+
+
 \subsubsection{Task motivation and definition}
 
 \todo[inline]{purposes and uses - why do we want to do this}

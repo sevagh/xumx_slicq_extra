@@ -4,11 +4,17 @@
 \section{Introduction}
 \label{sec:intro}
 
-The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the sound pressure wave \todo{cite something}. Another way to characterize acoustic signals is by their frequency components. The Fourier transform is used to obtain the frequency components present in a signal. This is also known as spectral analysis, which is an important technique in analyzing and understanding audio \todo{cite sth}.
+The study of acoustic signals forms the core of many fields including sonar, seismology, audio, music, and speech. Acoustic signals are functions of time, representing the evolving amplitude of the sound pressure wave (\cite[Chapter~4]{melbook}). Another way to characterize acoustic signals is by their frequency components, which can be computed from the Fourier transform (\cite[Chapter~2]{melbook}).
 
-One downside of the Fourier transform is that it contains no temporal information. The Fourier transform represents the frequency components of an acoustic signal by a sum of infinite sinusoids, but it does not describehow these frequencies evolve with time. Many important signals such as speech and music contain frequency components that change with time. For these signals, joint time-frequency analysis is an essential tool.
+One downside of the Fourier transform is that it contains no temporal information -- the Fourier transform represents the frequency components of an acoustic signal by a sum of infinite sinusoids, but it does not describe how these frequencies evolve with time (\cite{gabordiagrams}). Many important signals such as speech and music contain frequency components that change with time (\cite{gabor1946}). However, Fourier analysis alone is not enough to represent variable-frequency sounds. For these signals, joint time-frequency analysis is an essential tool.
 
-Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and taking the Fourier transform of each windowed section. This is also referred to as the short-time Fourier transform (STFT) or spectrogram \todo{cite textbook}. The STFT is subject to a fixed and bounded time-frequency resolution, such that one cannot be arbitrarily precise in both time and frequency, and must trade them off by changing the duration of the window.
+Time-frequency analysis is performed by multiplying the signal being studied by finite, consecutive windows of a short duration, and taking the Fourier transform of each windowed section. This is also referred to as the short-time Fourier transform (STFT) or spectrogram (\cite[Chapter~3]{melbook}). \textcite{melbook} describe the resulting spectral analysis as an important technique in analyzing and understanding audio that has been in use since the 1930s.
+
+The STFT is subject to a fixed and bounded time-frequency resolution, such that one cannot be arbitrarily precise in both time and frequency, and must trade them off by changing the duration of the window (\cite{gabor1946, gabordiagrams}). Improving the fixed time-frequency resolution of the STFT-based spectrogram in the visualization and analysis of general audio is an important direction of research (\cite{bettertfres1, bettertfres2}).
+
+In the task of music source separation, or music demixing, a mixed song which is a linear mixture of several sources is split or \textit{de-mixed} back into its original sources (\cite{musicsepgood, musicsepsurvey}). Music demixing systems commonly split mixed songs into 4 sources: vocals, drums, bass, and other (guitar, piano, etc.), following the example of open mixing and demixing datasets (\cite{otherdataset1, otherdataset2, musdb18, musdb18hq}).
+
+The STFT spectrogram is a popular tool used by various music demixing systems throughout the years (\cite{musicsepgood, musicsepsurvey, sisec2018, fitzgerald1, umx, plumbley1, plumbley2}). The tradeoff of time-frequency resolution is an important consideration in these systems (\cite{tftradeoff1, tftradeoff2}). Other music demixing systems replaced the STFT with different time-frequency transforms (\cite{fitzgerald2, cqtseparation, bettermusicsep}), which is another way of improving results through the manipulation of time-frequency resolution.
 
 \subsection{Motivation}
 
@@ -29,7 +35,20 @@ Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed with 
 	\label{fig:stfttradeoff}
 \end{figure}
 
-The first use of the STFT was by \textcite{gabor1946} to analyze a speech signal, which used fixed-size Gaussian windows. This was called the Gabor transform, and is now considered a special case of the STFT (\cite{dictionary}). Building on the Gabor transform, the Nonstationary Gabor transform (NSGT) of \textcite{balazs} is a time-frequency transform with a varying time-frequency resolution and a perfect inverse. The NSGT is computed by varying the window size on which the Fourier transform taken. The NSGT spectrogram of the musical glockenspiel signal is shown in figure \ref{fig:nsgttradeoff}, where one can observe minimal blurriness (or good resolution) in both time and frequency, which is an improvement over the STFT spectrogram.
+\textcite{dictionary} note that the first use of the STFT was by \textcite{gabor1946} to analyze a speech signal, which used fixed-size Gaussian windows. This was called the Gabor transform, and is now considered a special case of the STFT (\cite{dictionary}).
+
+The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. The visual comparison of the original constant-Q transform and the Fourier transform is shown in \ref{fig:violin}. From the use of short windows in the high frequencies, the CQT demonstrates good time resolution (\cite{cqtransient}) in the region of transients and broadband signals, which are important for timbre and instrument identification (\cite{timbretransients1, timbretransients2}).
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Linear-frequency DFT]{\includegraphics[height=5.2cm]{./violindft.png}}
+	\hspace{0.5em}
+	\subfloat[Constant-Q transform]{\includegraphics[height=5.5cm]{./violincqt.png}}
+	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$\cite{jbrown}}
+	\label{fig:violin}
+\end{figure}
+
+Building on the Gabor transform (or STFT), and using the constant-Q transform as the motivating application, \textcite{balazs} proposed the Nonstationary Gabor transform (NSGT) as a time-frequency transform with a varying time-frequency resolution and a perfect inverse. The NSGT is computed by varying the window size on which the Fourier transform taken. The NSGT spectrogram of the musical glockenspiel signal is shown in figure \ref{fig:nsgttradeoff}, where one can observe minimal blurriness (or good resolution) in both time and frequency, which is an improvement over the STFT spectrogram seen in figure \ref{fig:stfttradeoff}.
 
 \begin{figure}[ht]
 	\centering
@@ -38,49 +57,24 @@ The first use of the STFT was by \textcite{gabor1946} to analyze a speech signal
 	\label{fig:nsgttradeoff}
 \end{figure}
 
-The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. From the short windows, the CQT demonstrates a good time resolution at high frequencies (\cite{cqtransient}), making it a good choice for representing transients, important for timbre and instrument identification (\cite{timbretransients1, timbretransients2}).
-
-The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT (\cite{invertiblecqt, variableq1}). The sliCQ transform, introduced by \textcite{invertiblecqt}, computes the NSGT on slices of the audio signal instead of the entire signal, allowing realtime processing. The NSGT and sliCQ transform can in practice be constructed with any frequency scale that is monotonically increasing. Using the NSGT instead of the STFT to represent musical signals may be of interest, as it is a single transform which can replace the need to explicitly trade-off of time and frequency resolution with different window sizes of STFT, and it can be configured to use frequency scales that are appropriate for the task.
-
-In the task of music source separation, or music demixing, a mixed song, which is a linear mixture of several sources, is split or \textit{de-mixed} back into its original sources. Once all the instrument and vocal sources are mixed together in the final song, completely isolating them without any bleed or artifacts is a difficult task. Using a time-frequency transform which represents musical signals better, such as the sliCQ transform, may
-
 \subsection{Related work and thesis objectives}
 
-\todo[inline]{read more surveys, come up with something better here}
+Some music demixing literature (\cite{fitzgerald1, driedger, tftradeoff1, tftradeoff2}) describe the use of different window sizes of the STFT to improve source separation performance. In contrast, using the NSGT instead of the STFT may be of interest, as it is a single transform which can replace the need to explicitly trade-off of time and frequency resolution.
 
-\textcite{musicsepgood} describe the motivation and task of music source separation as follows:
+Other music demixing systems have been proposed that use the CQT instead of the STFT (\cite{fitzgerald2, cqtseparation, bettermusicsep}). However, these papers used implementations of the CQT which lacked a stable inverse (\cite{lackinverse}), and for which different approximate inversion schemes have been proposed (\cite{klapuricqt, fitzgeraldcqt}). The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT (\cite{invertiblecqt, variableq1}). The sliCQ transform, introduced by \textcite{invertiblecqt}, computes the NSGT on slices of the audio signal instead of the entire signal, allowing realtime processing. The NSGT and sliCQ transform can in practice be constructed with any frequency scale that is monotonically increasing, and can use frequency scales that are appropriate for the task, e.g. musical or psychoacoustic scales.
 
-\begin{quote}
-	Many people listen to recorded music as part of their everyday lives [...] Sometimes we might want to remix the balance within the music, perhaps to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1- channel surround sound system. We might also want to change the spatial location of a musical instrument within the mix. All of these applications are relatively straightforward, provided we have access to separate sound channels (stems) for each musical audio object. However, if we only have access to the final recording mix, which is usually the case, this is much more challenging. To estimate the original musical sources, which would allow us to remix, suppress or upmix the sources, we need to perform musical source separation (MSS). In the general source separation problem, we are given one or more mixture signals that contain different mixtures of some original source signals. [...] The task is to recover one or more of the source signals given the mixtures.
-\end{quote}
+Additionally, there are papers that describe frequency-warped transforms, with an interest in using nonlinear musical or auditory frequency scales for specific applications (\cite{warped1, warped2, earlywarped1, earlywarped2, warpedcomparison, warpedpsycho}). The NSGT and sliCQ transform, with their support for arbitrary frequency scales with perfect invertibility, is therefore of interest as the best implementation choice for these various frequency warping schemes, and as a general platform for frequency analysis of audio with nonlinear frequency scales. Finally, the NSGT and sliCQ transforms have open-source reference implementations in MATLAB\footnote{\url{http://ltfat.org/doc/filterbank/cqt_code.html}} and Python\footnote{\url{https://github.com/grrrr/nsgt}}, allowing for reproducibility and further research.
 
-\textcite{umx}'s deep learning model, named Open-Unmix, is intended to be a near state-of-the-art, open implementation of music source separation based on the MUSDB18 dataset \cite{musdb18} and intended to foster reproducible research and a baseline of high performance. It uses the STFT spectrogram as the input and output representation of musical signals, and a deep neural network to estimate invidual sources from a mixture. The choice of window size in the task of source separation based on STFT spectrograms can have an impact on the results of speech and music source separation \cite{musicsepwindow}, but this consideration is not explored in Open-Unmix.
-
-The CQT was shown to surpass the performance of the STFT in speech separation \cite{cqtseparation}. A simpler and older algorithm for harmonic/percussive source separation (HPSS) \cite{fitzgerald1}, also based on the STFT spectrogram, was evaluated alongside Open-Unmix in the SiSec 2018 music source separation evaluation campaign \cite{sisec2018} as a primitive (and low performance) baseline. The HPSS algorithm was later modified to use STFT spectrograms with different window sizes \cite{driedger, fitzgerald2}, and to use the CQT in place of the STFT \cite{fitzgerald2}. Using the STFT with a warped, or non-linear frequency scale, was also shown to improve music source separation results \cite{bettermusicsep}.
-
-As the NSGT is a generalization of the CQT, and can be used to implement different frequency scales, it is chosen as the transform to study in this thesis. The objectives of this thesis are to discover which configurations of the NSGT can surpass different window sizes of the STFT in music source separation, and to adapt Open-Unmix to use the NSGT.
+In this thesis, \textcite{umx}'s deep neural network for music demixing, which is based on the STFT, will be considered as the starting point. It is chosen for being fully open-source\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} with the intention of encouraging further research. The objective of this thesis is to adapt Open-Unmix to use the sliCQ transform instead of the STFT. The goal is to present a working neural network with the sliCQ transform, such that future researchers can use it as a starting point to configure the sliCQ transform in a way that suits their application without needing to write their own frequency warping schemes or use multiple STFT window sizes.
 
 \subsection{Contribution and results}
 
-The contributions of this thesis would be the demonstration of the successful use of the NSGT in a domain which is generally dominated by the STFT.  The results will be compare the results to the original Open-Unmix.
+The first contribution of this thesis is the adaptation of the reference Python NSGT and sliCQ library\footnote{\url{https://github.com/grrrr/nsgt}} to use PyTorch (\cite{pytorch}), a modern deep learning framework. This allows the NSGT and sliCQ transforms to be computed on the graphical processing unit (GPU), which due to its capabilities for parallel computing is the preferred device on which to train deep neural networks (\cite{pytorch}). The resulting library, released as open-source software,\footnote{\url{https://github.com/sevagh/nsgt}} allows future researchers to use the NSGT and sliCQ transform in any GPU-based machine or deep learning model.
+
+The second contribution of this thesis is the adaptation of the reference Open-Unmix\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} neural network for STFT-based music demixing (\cite{umx}) to use the sliCQ transform. Ideas were also incorporated from CrossNet-OpenUnmix (\cite{xumx}), which is an adaptation Open-Unmix. The final result, named \textit{xumx-sliCQ} and also released as open-source software,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} was a successful neural network which could perform the task of music source separation using the sliCQ transform. It scored lower than Open-Unmix and CrossNet-Open-Unmix, but it can act as a starting point for future research. Variations of sliCQ parameters and neural network architectures are among the possible angles for improvement.
 
 \subsection{Outline}
 
-This thesis is organized as follows. Section \todo{actually fill this in}.
-
-\begin{enumerate}
-	\item
-		Describe the STFT and its bounded and fixed time-frequency resolution
-	\item
-		Describe the NSGT, its theoretical background, its suitability for musical signals, and demonstrate different configurations of NSGT
-	\item
-		Describe and present a review of the task of music source separation, including datasets, evaluation measures, and existing models and algorithms
-	\item
-		Find configurations of the NSGT that can outperform the STFT in spectrogram-based music source separation
-	\item
-		Compare the performance of the NSGT to the separation performance of different window sizes of STFT
-	\item
-		Adapt Open-Unmix to use the NSGT and surpass its previous STFT-based performance, and to also beat the current state-of-the-art, Demucs and Conv-Tasnet \cite{demucs}
-\end{enumerate}
+This thesis is organized as follows. Chapter 2 covers the background of acoustic signals, frequency analysis, and the important transforms in this thesis including the Fourier transform, STFT, CQT, NSGT, and sliCQ transforms. It also covers the different interesting musical and psychoacoustic frequency scales and the task of music demixing. Chapter 3 describes the methodology for the two objectives of the thesis -- the PyTorch adaptation of the NSGT and sliCQ library, and the replacement of the STFT with the sliCQ transform inside the Open-Unmix neural network. Chapter 4 shows the experiments and results, and chapter 5 discusses the results and concludes the thesis.
 
 \end{document}
