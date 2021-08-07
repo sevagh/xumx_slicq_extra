@@ -5,13 +5,34 @@
 
 \subsection{sliCQ transform performance analysis}
 
+\subsection{sliCQ transform parameter search}
+
 \subsection{Neural network training}
 
-foo
+The training parameters of xumx-sliCQ were kept similar to Open-Unmix and CrossNet-Open-Unmix:
+
+
+The training curves can be seen in figure \ref{fig:networkloss}. These were taken from Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard}} which is a visual web component of the Tensorflow deep learning framework (\cite{tensorflow, tensorflowsoft}) that is also compatible with PyTorch. It was used to visualize the loss curves of xumx-sliCQ during training.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Train loss]{\includegraphics[width=\textwidth]{./images-neural/train_loss.png}}
+	\hspace{0.5em}
+	\subfloat[Validation loss]{\includegraphics[width=\textwidth]{./images-neural/valid_loss.png}}
+	\caption{Tensorboard loss curves for xumx-sliCQ, 1000 epochs}
+	\label{fig:networkloss}
+\end{figure}
 
 \subsection{Demixing results}
 
-\ichfeedback{this will be the real results section evaluated on the MUSDB18-HQ test set on my computer, compared to the pretrained models of classic umx and xumx}
+The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{musdb18hq}) dataset's test split, are shown in figure \ref{fig:bssboxplot}. Open-Unmix is the reference model (\cite{umx}) and is labelled ``umx'' in the boxplot. CrossNet-Open-Unmix 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=5cm]{./images-bss/boxplot_full.png}
+	\caption{Boxplot of full MUSDB18-HQ test set evaluation of Open-Unmix vs. CrossNet-Open-Unmix vs. xumx-sliCQ}
+	\label{fig:bssboxplot}
+\end{figure}
 
 \subsection{Inference performance analysis}
 
