@@ -4,22 +4,51 @@
 \section{Background}
 \label{sec:background}
 
-\subsection{Joint time-frequency analysis of acoustic signals}
+\subsection{Acoustic signals and their transforms}
 \label{sec:theorystft}
 
 \subsubsection{Acoustic signals and the time-domain waveform}
 
-\ichfeedback{is this a good section? time-domain stuff}
+\textcite[Chapter~2]{discretebook} define a signal as a term which is
 
-\todo[inline]{acoustic signals, pressure waves, etc.}
+\begin{quote}
+	generally applied to something that conveys information. Signals ... convey information about the state or behavior of a physical system, and often, signals are synthesized for the purpose of communicating information between humans or between humans and machines... Signals are represented mathematically as functions of one or more independent variables. For example, a speech signal is represented mathematically as a function of time, and a photographic image is represented as a brightness function of two spatial variables.
+\end{quote}
 
-\todo[inline]{discrete time, shannon-nyquist sampling theorem}
+As audio or sound waves are the primary signal being studied in this thesis, we turn to \textcite[Chapter~2]{moore}, who describes the phenomenon of sound waves as follows:
 
-\subsubsection{Fourier transform and the frequency domain}
+\begin{quote}
+	Sound originates from the vibration of an object. This vibration is impressed upon the surrounding medium (usually air) as a pattern of changes in pressure
+\end{quote}
 
-\todo[inline]{discrete-time fourier transform, spectral analysis, spectrogram}
+The waveform is defined as the pressure variation plotted against time (\cite{moore, melbook}). In the waveform representation of a signal, the function is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$ is denoted by $x_{a}(t)$. Continuous-time signals are also known as analog signals.
 
-\subsubsection{Time-frequency analysis}
+In digital processing, continuous-time signals need to be sampled, or quantized in both time and amplitude, to form a sequence of numbers that describe the waveform (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.
+
+Continuous-time signals are typically captured into discrete-time representations by a process called sampling (\cite[Chapter~2]{melbook}) -- more specifically, the discretization of time is called sampling, and the discretization of amplitude is called quantization. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x(t)$ is defined by the sampling period $T$:
+
+\[ x[n] = x_{a}(nT) \]
+
+Two variables describe the nature of the discrete representation: the sampling rate $F_{s} = \frac{1}{T}$, and the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
+
+\todo[inline]{shanon-nyquist sampling theorem}
+
+A continuous-time pressure waveform, and the sequence representing its digitally sampled discrete-time version, are shown in figure \ref{fig:discretecontinuous}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Continuous-time waveform]{\includegraphics[height=3.5cm]{./images-tftheory/continuoustime.png}}
+	\hspace{0.1em}
+	\subfloat[Discrete-time waveform]{\includegraphics[height=3.5cm]{./images-tftheory/discretetime.png}}
+	\caption{A continous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
+	\label{fig:discretecontinuous}
+\end{figure}
+
+\subsubsection{Frequency analysis and the Fourier transform}
+
+Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
+
+\subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
 
 \textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
 \begin{flalign}
@@ -50,20 +79,6 @@ The STFT, or short-time Fourier transform, has been described independently from
 \end{flalign}
 
 where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
-
-\subsection{Transforms of acoustic signals}
-
-\ichfeedback{for each, describe algorithmic complexity and common libraries - FFTW, librosa, essentia, etc.}
-
-\todo[inline]{algorithmic analysis - how many window operations, how many FFTs are done, etc.}
-
-\todo[inline]{reference implementations and related code available: ltfat, matlab, python nsgt, essentia}
-
-\subsubsection{Discrete and Fast Fourier Transform (DFT, FFT)}
-
-Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
-
-\subsubsection{Short-time Fourier Transform (STFT)}
 
 \subsubsection{Constant-Q Transform (CQT)}
 
@@ -126,7 +141,7 @@ The connection to the CQT, or NSGT, is that these contain within a single transf
 
 The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in figure \ref{fig:dorflertradeoff}. Notice how the wide window spectrogram shows frequency components (horizontal lines) with a sharper definition than the blurry lines in the narrow window spectrogram, while the narrow window spectrogram shows temporal events (vertical lines) with a sharper definition than the wide window spectrogram.
 
-\subsubsection{Nonstationary Gabor Transform (NSGT)}
+\subsubsection{Nonstationary Gabor Transform (NSGT) and the sliCQ transform}
 \label{sec:theorynsgt}
 
 \todo[inline]{brief intro to frame theory and math stuff}
@@ -134,9 +149,6 @@ The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in 
 \todo[inline]{irregular time and frequency sampling, show grids, varying time-frequency resolution etc.}
 
 \todo[inline]{arbitrary f scales and time scales}
-
-\subsubsection{sliCQ Transform}
-\label{sec:theoryslicq}
 
 \todo[inline]{slicq is the realtime variant}
 
