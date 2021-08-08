@@ -19,6 +19,17 @@
 
 \subsubsection{Frequency scales and slice length selection}
 
+The reference library contains the octave and log scales, which are used for creating a constant-Q transform with logarithmic frequency spacing deriving from the 12-tone Western pitch scale. It also includes the Mel psychoacoustic scale.
+
+In my fork of the NSGT library, two additional frequency scales were added:
+
+\begin{enumerate}
+	\item
+		Bark psychoacoustic scale
+	\item
+		Variable-Q scale (\cite{variableq1,variableq2})
+\end{enumerate}
+
 \todo[inline]{intention to support minimum slice length support, Bark scale, VQ scale}
 
 \subsubsection{PyTorch optimizations}

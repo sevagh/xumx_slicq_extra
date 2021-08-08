@@ -7,7 +7,7 @@
 \subsection{Joint time-frequency analysis of acoustic signals}
 \label{sec:theorystft}
 
-\subsubsection{Acoustic signals and the waveform}
+\subsubsection{Acoustic signals and the time-domain waveform}
 
 \ichfeedback{is this a good section? time-domain stuff}
 
@@ -19,21 +19,37 @@
 
 \todo[inline]{discrete-time fourier transform, spectral analysis, spectrogram}
 
-\subsubsection{Time-frequency analysis for time-varying frequency}
+\subsubsection{Time-frequency analysis}
 
-\ichfeedback{time-frequency analysis was first done by Gabor because frequencies of some natural sounds (speech, music, sirens, etc.) have a time-varying frequency such that only time or only frequency analysis alone cannot describe the signal}
+\textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
+\begin{flalign}
+	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
+	G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n},
+\end{flalign}
 
-\subsubsection{Time-frequency uncertainty and the Gabor transform}
+where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle (which is minimized by using the Gaussian function as a window), stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' Gabor called named the time-frequency tile the \textit{logon}, or smallest possible unit of time-frequency information. Mathematically, this can be stated as:
+\[ \Delta t\Delta f \ge 1 \]
 
-\todo[inline]{Joint time-frequency analysis}
+$\Delta t$ and $\Delta f$ are, as defined by Gabor, ``the uncertainties inherent in the definition of the epoch $t$ and frequency $f$ of an oscillation.'' The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other. This is further illustrated in figure \ref{fig:gabortf}, which shows the tiling of the time-frequency plane, and how frequency and time resolution must be sacrificed for one another by the lower bound of the time-frequency tile area.
 
-\todo[inline]{dennis gabor also noted the need for joint TFA, so the above and below will have similarities}
+\begin{figure}[ht]
+	\centering
+	\subfloat{\includegraphics[height=3cm]{./images-tftheory/gabor3.png}}
+	\hspace{0.1em}
+	\subfloat{\includegraphics[height=2.56cm]{./images-tftheory/gabor4.png}}
+	\caption{A demonstration of the mutually exclusive formulations of time analysis and frequency analysis, and the lower bound of time-frequency resolution defined by Gabor's TF uncertainty principle (\cite{gabordiagrams})}
+	\label{fig:gabortf}
+\end{figure}
 
-\todo[inline]{Time-frequency uncertainty principle}
+Gabor noted the need for variable-frequency analysis, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.'' Similarly, psychoacoustics research shows that humans have been able to beat the time-frequency uncertainty principle (\cite{psycho1, psycho2}), indicating the presence of nonlinear operators in the auditory system.
 
-Dennis Gabor's seminal paper on information theory describes the analysis of a speech signal by applying the Fourier transform to finite, windowed segments of the input signal, referred to as the Gabor transform, and considered synonymous with the short-time Fourier transform. From the Gabor transform, which used a fixed or stationary window size, 
+The STFT, or short-time Fourier transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described in equation (2):
+\begin{flalign}
+	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)]\\
+	X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n},
+\end{flalign}
 
-This arises from the Heisenberg uncertainty principle, and is a result of time and frequency being Fourier duals of each other, a principle from quantum computing.
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
 
 \subsection{Transforms of acoustic signals}
 
@@ -43,14 +59,13 @@ This arises from the Heisenberg uncertainty principle, and is a result of time a
 
 \todo[inline]{reference implementations and related code available: ltfat, matlab, python nsgt, essentia}
 
-\subsubsection{Fast Fourier Transform (FFT)}
+\subsubsection{Discrete and Fast Fourier Transform (DFT, FFT)}
 
 Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
 
 \subsubsection{Short-time Fourier Transform (STFT)}
 
 \subsubsection{Constant-Q Transform (CQT)}
-
 
 Summary of the most relevant CQT implementations:
 
