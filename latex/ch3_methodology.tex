@@ -3,13 +3,25 @@
 
 \section{Methodology}
 
-\subsection{sliCQ transform in deep learning}
+\subsection{NSGT Python library}
 
 \subsubsection{Matrix and ragged forms}
 
 \todo[inline]{first describe the reference library's generator-based design for ragged and matrix}
 
-\subsubsection{PyTorch implementation}
+\subsubsection{Overlapping slices and plotting sliCQ spectrograms}
+
+\ichfeedback{overlap-add 50\% slice business here too, showing its non-invertible, use Essentia to support argument, justifying how i need to add a final convolutional layer to grow by 50\%}
+
+\todo[inline]{overlap essentia stuff: \url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+
+\todo[inline]{show slicq overlap and plotting code from library}
+
+\subsubsection{Frequency scales and slice length selection}
+
+\todo[inline]{intention to support minimum slice length support, Bark scale, VQ scale}
+
+\subsubsection{PyTorch optimizations}
 
 \todo[inline]{explain how this is necessary for neural networks and deep learning}
 
@@ -20,16 +32,6 @@
 \subsubsection{Grouping frequency bins by time resolution}
 
 \todo[inline]{call it the ragged transform}
-
-\subsubsection{Performance benchmarks}
-
-\subsubsection{Overlapping slices and plotting sliCQ spectrograms}
-
-\ichfeedback{overlap-add 50\% slice business here too, showing its non-invertible, use Essentia to support argument, justifying how i need to add a final convolutional layer to grow by 50\%}
-
-\todo[inline]{overlap essentia stuff: \url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
-
-\todo[inline]{show slicq overlap and plotting code from library}
 
 \subsection{Choosing sliCQ parameters with oracle estimators}
 
@@ -54,118 +56,42 @@ Finally, using these pairs of $x, y$, we can get the maximum possible BSS metric
 
 Approaching or surpassing the ideal mask performance is a common benchmark in source separation literature. \todo{weak} Demucs talks about it but doesn't achieve it.
 
+\subsubsection{sliCQ parameter search}
+
+The sliCQ transform has several configurable parameters. Their choices and considered value ranges are described in tables \ref{table:slicqfreqparam} and \ref{table:slicqotherparam}. Parameter ranges were considered from various CQT and NSGT papers. \textcite{invertiblecqt} provides sliCQ parameter ideas for the minimum frequency and bins: they varied the minimum frequency between 10.0--130.0 Hz ($\xi_{\text{min}} \in [10.0, 130.0]$) and bins-per-octave from 12 to 192 ($B \in [12, 192]$).
+
+Bins-per-octave applies the Western pitch scale by using multiples of 12 frequency bins, corresponding to the 12-tone scale. The total number of frequency bins from the bins-per-octave can be computed from the following formula (\cite{invertiblecqt}):
+\begin{flalign}
+	K = \text{integer}([B*\log_{2}(\frac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1])
+\end{flalign}
+
+The min and max of 12--192 bins-per-octave therefore corresponds to the total number of frequency bins 122--1941. In the case of other frequency scales, the total number of bins is controlled directly -- 12 Mel bins results in a 12-bin transform output (or 13 with the DC bin, 0 Hz, added). For that reason, in this thesis the octave scale with the bins-per-octave argument is not used. Instead, the logarithmic scale is used directly for output frequency bin control. The result is still the constant-Q transform, except removed from 12-tone pitch scale analogy.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l| }
+	 \hline
+	 Parameter & Values & Notes \\
+	 \hline
+	 \hline
+	 Frequency scale & \makecell[l]{ Constant-Q \\ Variable-Q \\ Mel \\ Bark } & \\
+	 \hline
+	 Minimum frequency (Hz) & 10.0 -- 130.0 & \\
+	 \hline
+	 Maximum frequency (Hz) & 22050.0 & Fixed to Nyquist for performance reasons \\
+	 \hline
+	 Frequency bins & 10 -- 300 & Constrain sliCQ transform size \\
+	 \hline
+	 Slice length & Auto & Minimum to support frequency scale \\
+	 \hline
+\end{tabular}
+	\caption{Frequency scale parameters for the sliCQ transform}
+	\label{table:slicqfreqparam}
+\end{table}
+
 \subsubsection{Random grid search}
 
-The space of possible NSGT parameters is large. First, there are multiple frequency scales to choose from -- the log (or octave) scale is the case of the CQT, but the NSGT can also use the Mel and Bark psychoacoustic scales. For the frequency bins, the original CQT papers \cite{klapuricqt, invertiblecqt} use multiples of 12 bins or pitches per octave (based on the 12-tone pitch scale), and use one or many octaves, leading to CQTs with 12-96 frequency bins in steps of 12. When using the Mel or Bark scales however, there is no need to continue with the 12-tone pitch per octave strategy, since we are already departing from music theory. Also, bins above 96 are not described in the literature, but without a good justification. Therefore, the range of bins evaluated are integers between 12-348, not just multiples of 12.
-
-The minimum and maximum frequencies of the scales are also configurable. To eliminate one parameter from the evaluation, the maximum frequency was fixed at 22050 Hz, or the Nyquist rate, half of the sampling rate of 44.1 kHz in MUSDB18-HQ. The minimum frequency is varied between 15-60 Hz (below the 20 Hz limit of human hearing\todo{citeme}, up to 60 Hz to include the value of 57 Hz used in \cite{klapuricqt}). Finally, the variable-Q log scale introduces the additional parameter of $\gamma$ for the frequency offset, which is varied between 0-100 Hz.
-
-The BSS evaluation is computationally expensive -- for an average track in MUSDB18-HQ, it takes 30 seconds to compute all of the BSS metrics, even after the significant performance optimizations described previously.
-
-\todo[inline]{describe optimizations here - small-ish section nbd - cupy replacing scipy, and that's that}
-
-For a more fair evaluation, 3 separate randomly-selected tracks from the MUSDB18-HQ test set are considered (with a fixed random seed for consistency). We would prefer to find an NSGT configuration that performs best across multiple tracks, and not overfit to one particular song. For 3 songs, the BSS evaluation of the ideal magnitude ratio mask for a single configuration of NSGT therefore takes 1.5 minutes. Although there are 4 possible types of oracle mask based on spectrograms (ideal magnitude binary mask, ideal power binary mask, ideal magnitude ratio mask, ideal power ratio mask), for the optimization process the most common case of ideal ratio magnitude mask is used.
-
-With all of this information in mind, an exhaustive grid search across all NSGT configurations is not feasible. The Bayesian optimization technique \cite{bayesian} was selected, as it is ``an approach to optimizing objective functions that take a long time (minutes or hours) to evaluate'' and ``best-suited for optimization over continuous domains of less than 20 dimensions.'' The open-source Python library \textit{BayesianOptimization}\footnote{\href{https://github.com/fmfn/BayesianOptimization}{https://github.com/fmfn/BayesianOptimization}} was used in the testbench implementation.
-
-The Bayesian optimization process considers a black-box function (that being optimized) which takes varying input parameters and outputs a single scalar value. The function was designed to accept the configuration of the NSGT as an input, and return a single scalar value representing the median SDR score with the ideal magnitude ratio mask across all 4 MUSDB18-HQ targets (drums, vocals, bass, other) and across the 3 tracks. A different value can be returned to target different aspects of source separation performance -- for example, one could optimize on the SAR if their primary goal is to reduce artifacts. However, SDR is the most commonly used single-value metric to demonstrate overall source separation effectiveness in literature.
-
-The Bayesian optimization process can additionally perform some random parameter selections in the beginning, to help improve the subsequent iterative optimization. Table \ref{table:nsgtparamsirm} contains the parameter ranges of the evaluated NSGT configs and the number of Bayesian optimization iterations. Table \ref{table:nsgtbayesresults} shows the best configurations selected by the optimization process, compared to the control ideal ratio magnitude mask performance of the STFT with the default Open-Unmix settings of window size = 4096 and overlap = 1024 \cite{umx}.
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l|c|c|c| }
-	 \hline
-	  Scale & Parameters & Random iter & Optimization iter \\
-	 \hline
-	 \hline
-	 VQ-Log & 12-348 bins, 15-60 Hz fmin, 0-100 Hz $\gamma$ & 20 & 180 \\
-	 \hline
-	 CQ-Log & 12-348 bins, 15-60 Hz fmin & 20 & 180 \\
-	 \hline
-	 Mel & 12-348 bins, 15-60 Hz fmin & 20 & 180 \\
-	 \hline
-	 Bark & 12-348 bins, 15-60 Hz fmin & 20 & 180 \\
-	 \hline
-\end{tabular}
-	\caption{NSGT parameter ranges evaluated by Bayesian optimization}
-	\label{table:nsgtparamsirm}
-\end{table}
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l|c|c|c| }
-	 \hline
-	  Transform & Parameters & Median SDR \\
-	 \hline
-	 \hline
-	 STFT, UMX default & window = 4096, overlap = 1024 & 6.65 \\
-	 \hline
-	 STFT, wide & window = 16384, overlap = 4096 & 6.16 \\
-	 \hline
-	 STFT, narrow & window = 1024, overlap = 256 & 5.37 \\
-	 \hline
-	 NSGT, CQ-Log & 138 bins, 47.3 Hz fmin & 7.20 \\
-	 \hline
-	 NSGT, VQ-Log & 134 bins, 47.3 Hz fmin, 1.7 Hz gamma & 7.20 \\
-	 \hline
-	 NSGT, Mel & 263 bins, 24.9 Hz fmin & 7.44 \\
-	 \hline
-	 NSGT, Bark & 239 bins, 30.1 Hz fmin & 7.45 \\
-	 \hline
-\end{tabular}
-	\caption{Best NSGT configurations selected by Bayesian optimization}
-	\label{table:nsgtbayesresults}
-\end{table}
-
-Finally, a full evaluation was done on all 50 tracks of the MUSDB18-HQ test set. The output is a box plot, in the same style as the SiSec 2018 campaign using the same evaluation code.\footnote{\href{https://github.com/sigsep/sigsep-mus-2018-analysis}{https://github.com/sigsep/sigsep-mus-2018-analysis}} The resulting box plots can be seen in figure \ref{fig:nsgtboxplots}.
-
-\begin{figure}[ht]
-	\centering
-\makebox[\textwidth]{\includegraphics[width=15cm]{./images-bss/oracle_boxplot.pdf}}
-\caption{Music separation results for NSGT oracle masks}
-\label{fig:nsgtboxplots}
-\end{figure}
-
-Considering again the IRM1 (for simplicity), the median SDR score across all tracks for each of the 4 sources is shown in table \ref{table:nsgtbayesresults2} for the same STFT and NSGT configurations from table \ref{table:nsgtbayesresults} are shown along with the SDR score per target, median across all tracks.
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l|l|l|c|c|c|c|c| }
-	 \hline
-	  Transform & Vocals SDR & Drums SDR & Bass SDR & Other SDR \\
-	 \hline
-	 \hline
-	 STFT, UMX default & 8.62 & 7.07 & 6.68 & 6.87 \\
-	 \hline
-	 STFT, wider & 6.16 \\
-	 \hline
-	 STFT, narrow & 5.37 \\
-	 \hline
-	 NSGT, CQ-Log & 7.20 \\
-	 \hline
-	 NSGT, VQ-Log & 7.20 \\
-	 \hline
-	 NSGT, Mel & 7.44 \\
-	 \hline
-	 NSGT, Bark & 10.42 & 9.29 & 8.06 & 8.21 \\
-	 \hline
-\end{tabular}
-	\caption{SDR per source, full MUSDB18-HQ test set evaluation}
-	\label{table:nsgtbayesresults2}
-\end{table}
-
-To sum up, using the best selected Bark-scale NSGT discovered by 200 iterations of Bayesian optimization achieved improvements of \textbf{+1.3-2.2} \todo{adjust for fuller testbench} points in median SDR score over the STFT. However, recall that this is simply the maximum possible performance of spectral masking with the NSGT, assuming that the system can produce a perfect estimate of the sources.
-
-The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, and check how much of the theoretical SDR improvements occur in the actual separation model, trained only on MUSDB18-HQ. The goal is to try to surpass Conv-Tasnet and Demucs with the UMX-NSGT variant.
-
-\subsubsection{Comparing different sliCQ and STFT configurations}
-
-\ichfeedback{I don't love the title here but what i mean is i want to pick, as we discussed, multiple STFT window sizes e.g. 512 1024 2048 4096 8192, and multiple sliCQ configurations e.g. Bark, Mel, 33Hz, 57Hz, 200 bins, 500 bins, 12 bins and contrast them all side by side - visual spectrograms, describe the time-frequency resolution, etc.}
-
-\ichfeedback{if you pick a bad scoring config, e.g. Constant-Q Log scale with 14 frequency bins and frequency limits 12.3 Hz -- 22050 Hz, you can get an oracle score of -7 dB SDR (completely terrible performance - i've seen it happen), and if you pick a good one, you get +8.9 dB SDR (surpassing the STFT)}
-
-\ichfeedback{it would be good to plot the magnitude and phase of the good and bad slicq. most likely the ``bad'' one is losing phase information when we ignore its phase. something must be controlling why a few hz in either direction is causing such a dramatic SDR difference}
+\textcite{randomgrid} know what they're talking about
 
 \subsection{Open-Unmix with the sliCQ transform}
 
