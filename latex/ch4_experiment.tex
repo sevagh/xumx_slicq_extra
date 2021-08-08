@@ -7,47 +7,6 @@
 
 \subsection{sliCQ transform parameter search}
 
-Finally, a full evaluation was done on all 50 tracks of the MUSDB18-HQ test set. The output is a box plot, in the same style as the SiSec 2018 campaign using the same evaluation code.\footnote{\href{https://github.com/sigsep/sigsep-mus-2018-analysis}{https://github.com/sigsep/sigsep-mus-2018-analysis}} The resulting box plots can be seen in figure \ref{fig:nsgtboxplots}.
-
-\begin{figure}[ht]
-	\centering
-\makebox[\textwidth]{\includegraphics[width=15cm]{./images-bss/oracle_boxplot.pdf}}
-\caption{Music separation results for NSGT oracle masks}
-\label{fig:nsgtboxplots}
-\end{figure}
-
-Considering again the IRM1 (for simplicity), the median SDR score across all tracks for each of the 4 sources is shown in table \ref{table:nsgtbayesresults2} for the same STFT and NSGT configurations from table \ref{table:nsgtbayesresults} are shown along with the SDR score per target, median across all tracks.
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l|l|l|c|c|c|c|c| }
-	 \hline
-	  Transform & Vocals SDR & Drums SDR & Bass SDR & Other SDR \\
-	 \hline
-	 \hline
-	 STFT, UMX default & 8.62 & 7.07 & 6.68 & 6.87 \\
-	 \hline
-	 STFT, wider & 6.16 \\
-	 \hline
-	 STFT, narrow & 5.37 \\
-	 \hline
-	 NSGT, CQ-Log & 7.20 \\
-	 \hline
-	 NSGT, VQ-Log & 7.20 \\
-	 \hline
-	 NSGT, Mel & 7.44 \\
-	 \hline
-	 NSGT, Bark & 10.42 & 9.29 & 8.06 & 8.21 \\
-	 \hline
-\end{tabular}
-	\caption{SDR per source, full MUSDB18-HQ test set evaluation}
-	\label{table:nsgtbayesresults2}
-\end{table}
-
-To sum up, using the best selected Bark-scale NSGT discovered by 200 iterations of Bayesian optimization achieved improvements of \textbf{+1.3-2.2} \todo{adjust for fuller testbench} points in median SDR score over the STFT. However, recall that this is simply the maximum possible performance of spectral masking with the NSGT, assuming that the system can produce a perfect estimate of the sources.
-
-The next step is to adapt UMX to use the Bark-scale NSGT instead of the STFT, and check how much of the theoretical SDR improvements occur in the actual separation model, trained only on MUSDB18-HQ. The goal is to try to surpass Conv-Tasnet and Demucs with the UMX-NSGT variant.
-
 \subsubsection{Comparing different sliCQ and STFT configurations}
 
 \ichfeedback{I don't love the title here but what i mean is i want to pick, as we discussed, multiple STFT window sizes e.g. 512 1024 2048 4096 8192, and multiple sliCQ configurations e.g. Bark, Mel, 33Hz, 57Hz, 200 bins, 500 bins, 12 bins and contrast them all side by side - visual spectrograms, describe the time-frequency resolution, etc.}
@@ -73,11 +32,29 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 
 \subsection{Demixing results}
 
-The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{musdb18hq}) dataset's test split, are shown in figure \ref{fig:bssboxplot}. Open-Unmix is the reference model (\cite{umx}) and is labelled ``umx'' in the boxplot. CrossNet-Open-Unmix 
+The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{musdb18hq}) dataset's test split, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label.
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{ |l|l|p{4cm}|p{4cm}| }
+	 \hline
+	  Project & Boxplot label & Code repository & Pretrained model \\
+	 \hline
+	 \hline
+		\makecell[l]{Open-Unmix \\ \textcite{umx}} & umx & \url{https://github.com/sigsep/open-unmix-pytorch} & \url{https://zenodo.org/record/3370489} (UMX-HQ) \\
+	 \hline
+		\makecell[l]{CrossNet-Open-Unmix \\ \textcite{xumx}} & xumx & \url{https://github.com/sony/ai-research-code/tree/master/x-umx} & \url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5} (X-UMX) \\
+	 \hline
+		\makecell[l]{xumx-sliCQ \\ (this paper)} & sliCQ & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+	 \hline
+\end{tabular}
+	\caption{Evaluated pretrained models in the BSS boxplot}
+	\label{table:bsseval}
+\end{table}
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[height=5cm]{./images-bss/boxplot_full.png}
+	\includegraphics[width=\textwidth]{./images-bss/boxplot_full.png}
 	\caption{Boxplot of full MUSDB18-HQ test set evaluation of Open-Unmix vs. CrossNet-Open-Unmix vs. xumx-sliCQ}
 	\label{fig:bssboxplot}
 \end{figure}
