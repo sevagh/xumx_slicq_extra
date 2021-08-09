@@ -3,7 +3,11 @@
 
 \section{Methodology}
 
+The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ transform (\cite{slicq}) was named xumx-sliCQ, and is the subject and main result of this thesis. The following methodology section will cover how xumx-sliCQ was written step-by-step.
+
 \subsection{NSGT Python library}
+
+The starting point for the sliCQ transform used in this paper is the Python reference library\footnote{\url{https://github.com/grrrr/nsgt}} for the NSGT (\cite{slicq}) and sliCQ transform. It was forked to my own GitHub profile,\footnote{\url{https://github.com/sevagh/nsgt}} where modifications were made to support its use in GPU deep learning, and to add some extra features such as new frequency scales.
 
 \subsubsection{Matrix and ragged forms}
 

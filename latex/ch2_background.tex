@@ -31,9 +31,28 @@ Continuous-time signals are typically captured into discrete-time representation
 
 Two variables describe the nature of the discrete representation: the sampling rate $F_{s} = \frac{1}{T}$, and the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
 
-\todo[inline]{shanon-nyquist sampling theorem}
+The first variable, the sampling rate, $F_{s}$, relates to the Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), which was described by both \textcite{nyquist1928} and \cite{shannon1948}. It states that the maximum frequency that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \frac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency. If the signal contains frequencies above the Nyquist rate ($F \ge F_{\text{nyq}}$), it cannot be accurately represented due to the phenomenon of aliasing due to undersampling (\cite[Chapter~4]{discretebook}). An illustration is shown in figure \ref{fig:aliasing}.
 
-A continuous-time pressure waveform, and the sequence representing its digitally sampled discrete-time version, are shown in figure \ref{fig:discretecontinuous}.
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.75\textwidth]{./images-tftheory/aliasing.png}
+	\caption{Examples of under, uniform, and oversampling. Image generated with \textcite{aliasmatlab}'s MATLAB package}
+	\label{fig:aliasing}
+\end{figure}
+
+The second variable, the quantization levels of the amplitude, 
+
+An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}. Finally, a continuous-time pressure waveform, and the sequence representing its digitally sampled discrete-time version, are shown in figure \ref{fig:discretecontinuous}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Analog-to-digital converter (ADC)]{\includegraphics[height=2.2cm]{./images-tftheory/adc1.png}}
+	\hspace{0.1em}
+	\subfloat[ADC details with the ideal continuous-discrete (C/D) circuit]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
+	\subfloat[Waveform results of the ADC process]{\includegraphics[width=\textwidth]{./images-tftheory/adc3.png}}\\
+	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations (\cite[Chapter~4]{discretebook})}
+	\label{fig:adccircuit}
+\end{figure}
 
 \begin{figure}[ht]
 	\centering
@@ -43,6 +62,9 @@ A continuous-time pressure waveform, and the sequence representing its digitally
 	\caption{A continous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
 	\label{fig:discretecontinuous}
 \end{figure}
+
+\vfill
+\clearpage
 
 \subsubsection{Frequency analysis and the Fourier transform}
 
@@ -212,11 +234,36 @@ The task of music source separation is to split a mixed song into its constituen
 
 \subsubsection{Public datasets}
 
-\ichfeedback{feels like a good section to have? MUSDB18-HQ, different datasets - there are many and it's an important consideration in music source separation}
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset (\cite{musdb18}), and more recently the HQ (high-quality) version (\cite{musdb18hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets (\cite{otherdataset1, otherdataset2}).
+
+The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test split. Following the rules defined in the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} for a network to be considered trained only on MUSDB18-HQ, the predefined data splits must be used.
 
 \subsubsection{Evaluation measures}
 
-\todo[inline]{bss, peass, snr-si, sdr-si? subjective, objective, MOS}
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. There are 4 distinct metrics that comprise BSS:
+
+\begin{itemize}
+\item
+	\textbf{ISR:} source Image to Spatial distortion Ratio
+\item
+	\textbf{SIR:} Signal to Interference Ratio
+\item
+	\textbf{SAR:} Signal to Artifacts Ratio
+\item
+	\textbf{SDR:} Signal to Distortion Ratio
+\end{itemize}
+
+Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from the following equation:
+
+\[ \]
+
+In the SigSep community and in the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measure used is BSS v4, a variant of BSS available in their Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval.\footnote{\url{https://github.com/sigsep/bsseval}} The differences between BSS as used in SiSec 2016 (\cite{sisec2016}) and BSS v4 are outlined in the bsseval project's GitHub README file:
+
+\begin{quote}
+	One particularity of BSSEval is to compute the metrics after optimally matching the estimates to the true sources through linear distortion filters. This allows the criteria to be robust to some linear mismatches... this matching is the reason for most of the computation cost of BSSEval...
+
+	For this package, we enabled the option of having time invariant distortion filters, instead of necessarily taking them as varying over time as done in the previous versions of BSSEval. First, enabling this option significantly reduces the computational cost for evaluation because matching needs to be done only once for the whole signal. Second, it introduces much more dynamics in the evaluation, because time-varying matching filters turn out to over-estimate performance. Third, this makes matching more robust, because true sources are not silent throughout the whole recording, while they often were for short windows
+\end{quote}
 
 \subsubsection{Survey of computational approaches}
 
