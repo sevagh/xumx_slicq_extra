@@ -21,11 +21,18 @@ As audio or sound waves are the type of signal studied in this thesis, \textcite
 	Sound originates from the vibration of an object. This vibration is impressed upon the surrounding medium (usually air) as a pattern of changes in pressure
 \end{quote}
 
-The waveform is defined as the pressure variation plotted against time (\cite{moore, melbook}). In the waveform representation of a signal, the function is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$ is denoted by $x_{a}(t)$. Continuous-time signals are also known as analog signals.
+The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and the waveform is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are both shown in figure \ref{fig:discretecontinuous}.
 
-In digital processing, continuous-time signals need to be sampled, or quantized in both time and amplitude, to form a sequence of numbers that describe the waveform (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.
+\begin{figure}[ht]
+	\centering
+	\subfloat[Continuous-time waveform]{\includegraphics[height=2.25cm]{./images-tftheory/continuoustime.png}}
+	\hspace{0.1em}
+	\subfloat[Discrete-time waveform]{\includegraphics[height=2.25cm]{./images-tftheory/discretetime.png}}
+	\caption{A continous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
+	\label{fig:discretecontinuous}
+\end{figure}
 
-Continuous-time signals are typically captured into discrete-time representations by a process called sampling (\cite[Chapter~2]{melbook}) -- more specifically, the discretization of time is called sampling, and the discretization of amplitude is called quantization. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x(t)$ is defined by the sampling period $T$:
+Continuous-time signals are continuous in both time and amplitude. They are captured into discrete-time representations by a process called sampling (\cite[Chapter~2]{melbook}) -- more specifically, the discretization of time is called sampling, and the discretization of amplitude is called quantization. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x(t)$ is defined by the sampling period $T$:
 \[ x[n] = x_{a}(nT) \]
 
 Two important variables describe the nature of the discrete representation: the sampling rate $F_{s} = \frac{1}{T}$, and the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
@@ -42,29 +49,16 @@ First, continuous time needs to be sampled into the discrete time domain. The sa
 Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chapter~4]{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values.'' The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as
 \[ \hat{x}[n] = Q(x[n]) \]
 
-, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}).
-
-An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}. Finally, a continuous-time pressure waveform, and the sequence representing its digitally sampled discrete-time version, are shown in figure \ref{fig:discretecontinuous}.
+, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Analog-to-digital converter (ADC)]{\includegraphics[height=2.2cm]{./images-tftheory/adc1.png}}
 	\hspace{0.1em}
 	\subfloat[ADC details: sampler and quantizer]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
-	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.675\textwidth]{./images-tftheory/adc3.png}}\\
+	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.75\textwidth]{./images-tftheory/adc3.png}}\\
 	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations (\cite[Chapter~4]{discretebook})}
 	\label{fig:adccircuit}
-\end{figure}
-
-\vspace{-1em}
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Continuous-time waveform]{\includegraphics[height=2.25cm]{./images-tftheory/continuoustime.png}}
-	\hspace{0.1em}
-	\subfloat[Discrete-time waveform]{\includegraphics[height=2.25cm]{./images-tftheory/discretetime.png}}
-	\caption{A continous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
-	\label{fig:discretecontinuous}
 \end{figure}
 
 \vfill
