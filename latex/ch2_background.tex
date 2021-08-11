@@ -4,10 +4,7 @@
 \section{Background}
 \label{sec:background}
 
-\subsection{Acoustic signals and their transforms}
-\label{sec:theorystft}
-
-\subsubsection{Acoustic signals and the time-domain waveform}
+\subsection{Acoustic signals and the time-domain waveform}
 
 \textcite[Chapter~2]{discretebook} define a signal as a term which
 
@@ -63,6 +60,19 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 
 \vfill
 \clearpage
+
+\subsection{Transforms of acoustic signals}
+
+\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} In fact this signal is well-known and used in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt}). This is due to the pitched percussive nature of the glockenspiel's timbre, such that it contains both the tonal and transient properties of music, which have conflicting needs in their time and frequency resolution.
+
+Figure \ref{fig:glockwaveform} shows the time-domain, discrete-time waveform of the glockenspiel signal plotted using MATLAB and the LTFAT. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel as the input signal.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=6.5cm]{./images-gspi/gspi_time_domain.png}
+	\caption{Glockenspiel waveform}
+	\label{fig:glockwaveform}
+\end{figure}
 
 \subsubsection{Frequency analysis and the Fourier transform}
 
