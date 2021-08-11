@@ -63,7 +63,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 
 \subsection{Transforms of acoustic signals}
 
-\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} In fact this signal is well-known and used in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt}). This is due to the pitched percussive nature of the glockenspiel's timbre, such that it contains both the tonal and transient properties of music, which have conflicting needs in their time and frequency resolution.
+\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} In fact this signal is well-known and used in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt}). This is due to the pitched percussive nature of the glockenspiel's timbre, such that it contains both the tonal and transient properties of music, which have conflicting needs in their time and frequency resolution\todo{citeme}.
 
 Figure \ref{fig:glockwaveform} shows the time-domain, discrete-time waveform of the glockenspiel signal plotted using MATLAB and the LTFAT. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel as the input signal.
 
@@ -75,6 +75,8 @@ Figure \ref{fig:glockwaveform} shows the time-domain, discrete-time waveform of 
 \end{figure}
 
 \subsubsection{Frequency analysis and the Fourier transform}
+
+The \textit{spectrum} of a signal is a compact representation of the frequency components of a signal that is composed of sinusoids, which are the basic building block of creating complicated signals (\cite[Chapter~3]{dspfirst}).
 
 Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
 
