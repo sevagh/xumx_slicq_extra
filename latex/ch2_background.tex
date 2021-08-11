@@ -1,10 +1,21 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
+\chaptertodo{
+intersperse TF-presentation on Gabor in Chapter 2 transforms section\\
+Gabor transform, STFT need diagrams (similar to TF presentations)\\
+Fourier pdf: \url{https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7389485}\\
+Fourier history: \url{https://ieeexplore.ieee.org/document/7389485}\\
+}
+
+\vfill
+\clearpage
+
 \section{Background}
 \label{sec:background}
 
 \subsection{Acoustic signals and the time-domain waveform}
+\label{sec:timedomain}
 
 \textcite[Chapter~2]{discretebook} define a signal as a term which
 
@@ -63,20 +74,29 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 
 \subsection{Transforms of acoustic signals}
 
-\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} In fact this signal is well-known and used in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt}). This is due to the pitched percussive nature of the glockenspiel's timbre, such that it contains both the tonal and transient properties of music, which have conflicting needs in their time and frequency resolution\todo{citeme}.
+\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} In fact this signal is well-known and used in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt}). This is due to the pitched percussive nature of the glockenspiel's timbre, such that it contains both the tonal and transient properties of music, which have conflicting needs in their time and frequency resolution\todo{cite glockenspiel definition}, which is the main theme of this thesis.
 
 Figure \ref{fig:glockwaveform} shows the time-domain, discrete-time waveform of the glockenspiel signal plotted using MATLAB and the LTFAT. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel as the input signal.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[height=6.5cm]{./images-gspi/gspi_time_domain.png}
+	\includegraphics[width=\textwidth]{./images-gspi/gspi_time_domain.png}
 	\caption{Glockenspiel waveform}
 	\label{fig:glockwaveform}
 \end{figure}
 
+\vfill
+\clearpage
+
 \subsubsection{Frequency analysis and the Fourier transform}
 
-The \textit{spectrum} of a signal is a compact representation of the frequency components of a signal that is composed of sinusoids, which are the basic building block of creating complicated signals (\cite[Chapter~3]{dspfirst}).
+The continuous-time Fourier transform $X(j\omega)$ of a time-domain waveform $x(t)$ is defined by the pair of equations \ref{equation:ctft} and \ref{equation:ictft} (\cite[Chapter~11]{dspfirst}):
+\begin{align}
+	X(j\omega) = \int_{-\infty}^{\infty}{x(t)e^{-j\omega t}\mathit{dt}} \tag{1}\label{equation:ctft} \\
+	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
+\end{align}
+
+$X(j\omega)$ is referred to by \textcite{dspfirst} as the frequency-domain representation of the signal $x(t)$, as the equation \ref{equation:ictft} defines the signal $x(t)$ as a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' $x(t)$, as has been mentioned in section \ref{sec:timedomain}, is the time-domain representation. The continuous-time Fourier transform provides a one-to-one mapping of the time domain to the frequency domain (\cite{dspfirst}).
 
 Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
 
