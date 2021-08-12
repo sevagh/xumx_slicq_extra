@@ -1,17 +1,6 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\chaptertodo{
-intersperse TF-presentation on Gabor in Chapter 2 transforms section\\
-Gabor transform, STFT need diagrams (similar to TF presentations)\\
-Fourier pdf: \url{https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7389485}\\
-Fourier history: \url{https://ieeexplore.ieee.org/document/7389485}\\
-3 souls of the STFT: \url{https://www.researchgate.net/publication/307653687_Arbitrary_Phase_Vocoders_by_means_of_Warping}\\
-}
-
-\vfill
-\clearpage
-
 \section{Background}
 \label{sec:background}
 
@@ -34,24 +23,23 @@ The waveform is defined as the function of pressure variation plotted against ti
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Continuous-time waveform]{\includegraphics[height=2.25cm]{./images-tftheory/continuoustime.png}}
-	\hspace{0.1em}
-	\subfloat[Discrete-time waveform]{\includegraphics[height=2.25cm]{./images-tftheory/discretetime.png}}
+	\subfloat[Continuous-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/continuoustime.png}}\\
+	\subfloat[Discrete-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/discretetime.png}}
 	\caption{A continous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
 	\label{fig:discretecontinuous}
 \end{figure}
 
-Continuous-time signals are continuous in both time and amplitude. They are captured into discrete-time representations by a process called sampling (\cite[Chapter~2]{melbook}) -- more specifically, the discretization of time is called sampling, and the discretization of amplitude is called quantization. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x(t)$ is defined by the sampling period $T$:
+Continuous-time signals are continuous in both time and amplitude. They are captured into discrete-time representations by \textit{sampling} the continuous time values and \textit{quantizing} the amplitude values (\cite[Chapter~2]{melbook}). The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x(t)$ is defined by the sampling period $T$:
 \[ x[n] = x_{a}(nT) \]
 
 Two important variables describe the nature of the discrete representation: the sampling rate $F_{s} = \frac{1}{T}$, and the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
 
-First, continuous time needs to be sampled into the discrete time domain. The sampling rate, $F_{s}$, relates to the Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), which was described by both \textcite{nyquist1928} and \textcite{shannon1948}. It states that the maximum frequency that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \frac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency. If the signal contains frequencies above the Nyquist rate ($F \ge F_{\text{nyq}}$), it cannot be accurately represented due to the phenomenon of aliasing due to undersampling (\cite[Chapter~4]{discretebook}). An illustration is shown in figure \ref{fig:aliasing}.
+First, continuous time needs to be sampled into the discrete time domain. The sampling rate, $F_{s}$, relates to the Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), which was described by both \textcite{nyquist1928} and \textcite{shannon1948}. It states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \frac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency. The diagram in figure \ref{fig:aliasing} shows the phenomenon of \textit{undersampling}, which occurs when a time-domain signal is undersampled, i.e. the maximum frequency of the signal exceeds $F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately (\cite[Chapter~4]{dspfirst}). We refer the readers to the chapter in the textbook for a more full description of challenges in signal sampling.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.75\textwidth]{./images-tftheory/aliasing.png}
-	\caption{Examples of under, uniform, and oversampling. Image generated with \textcite{aliasmatlab}'s MATLAB package}
+	\includegraphics[width=0.5\textwidth]{./images-tftheory/aliasing_undersampling.png}
+	\caption{An undersampled cosine wave and the resulting incorrect reconstruction (\cite{dspfirst})}
 	\label{fig:aliasing}
 \end{figure}
 
@@ -74,14 +62,21 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 \clearpage
 
 \subsection{Transforms of acoustic signals}
+\label{sec:freqdomain}
 
-\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} In fact this signal is well-known and used in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt}). This is due to the pitched percussive nature of the glockenspiel's timbre, such that it contains both the tonal and transient properties of music, which have conflicting needs in their time and frequency resolution\todo{cite glockenspiel definition}, which is the main theme of this thesis.
+\textcite[Chapter~2B]{moore} states that
 
-Figure \ref{fig:glockwaveform} shows the time-domain, discrete-time waveform of the glockenspiel signal plotted using MATLAB and the LTFAT. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel as the input signal.
+\begin{quote}
+	[a]lthough all sounds can be specified by their variation in pressure with time, it is often more convenient, and more meaningful, to specify them in a different way when the sounds are complex. This method is based on a theorem by Fourier, who proved that almost any complex waveform can be analyzed, or broken down, into a series of sinusoids with specific frequencies, amplitudes, and phases. This is done using a mathematical procedure called the Fourier transform.
+\end{quote}
+
+Throughout this section, the description of the Fourier transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
+
+\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal is used often in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}); in the demo website\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} of \textcite{wmdct}, ``the famous glockenspiel signal'' is mentioned and used for many of the examples. This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-gspi/gspi_time_domain.png}
+	\includegraphics[width=0.825\textwidth]{./images-gspi/gspi_time_domain.png}
 	\caption{Glockenspiel waveform}
 	\label{fig:glockwaveform}
 \end{figure}
@@ -91,17 +86,42 @@ Figure \ref{fig:glockwaveform} shows the time-domain, discrete-time waveform of 
 
 \subsubsection{Frequency analysis and the Fourier transform}
 
-The continuous-time Fourier transform $X(j\omega)$ of a time-domain waveform $x(t)$ is defined by the pair of equations \ref{equation:ctft} and \ref{equation:ictft} (\cite[Chapter~11]{dspfirst}):
+The Fourier transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite{fourierhistory}). The Fourier transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier transform to music is described in \textcite{fouriermusic}, who state that
+
+\begin{quote}
+	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string.
+\end{quote}
+
+The continuous-time Fourier transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \ref{equation:ctft} and \ref{equation:ictft} (\cite[Chapter~11]{dspfirst}):
 \begin{align}
 	X(j\omega) = \int_{-\infty}^{\infty}{x(t)e^{-j\omega t}\mathit{dt}} \tag{1}\label{equation:ctft} \\
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
 \end{align}
 
-$X(j\omega)$ is referred to by \textcite{dspfirst} as the frequency-domain representation of the signal $x(t)$, as the equation \ref{equation:ictft} defines the signal $x(t)$ as a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' $x(t)$, as has been mentioned in section \ref{sec:timedomain}, is the time-domain representation. The continuous-time Fourier transform provides a one-to-one mapping of the time domain to the frequency domain (\cite{dspfirst}).
+$X(j\omega)$ is referred to by \textcite{dspfirst} as the frequency-domain representation of the signal $x(t)$, as the equation \ref{equation:ictft} defines the signal $x(t)$ as a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' $x(t)$, as has been mentioned in section \ref{sec:timedomain}, is the time-domain representation of the signal -- therefore, the continuous-time Fourier transform provides a one-to-one mapping of the time domain to the frequency domain (\cite{dspfirst}).
+
+As discussed in section \ref{sec:timedomain}, signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally. The discrete-time Fourier transform (DTFT), also called the discrete Fourier transform (DFT), is derived from a sampled version of the continuous-time Fourier transform (shown previously in equations \ref{equation:ctft} and \ref{equation:ictft}), and is defined by the pair of equations \ref{equation:dtft} and \ref{equation:idtft} (\cite[Chapter~12]{melbook}):
+
+\begin{align}
+	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
+	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
+\end{align}
+
+\chaptertodo{
+DTFT is complex - magnitude + phase + related spectral plot of glockenspiel\\
+continue FFT stuff, cooley-tukey bluestein and quote its importance and O(nlogn)\\
+}
 
 Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
 
 \subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
+
+\chaptertodo{
+mutually exclusive formulations of time and frequency, gabor stuff\\
+intersperse TF-presentation on Gabor in Chapter 2 transforms section\\
+Gabor transform, STFT need diagrams (similar to TF presentations)\\
+3 souls of the STFT: \url{https://www.researchgate.net/publication/307653687_Arbitrary_Phase_Vocoders_by_means_of_Warping}\\
+}
 
 \textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
 \begin{flalign}
@@ -244,24 +264,9 @@ mel, bark
 \subsection{Music source separation}
 \label{sec:musicsep}
 
-\textcite{musicsepgood} describe the motivation and task of music source separation as follows:
-
-\begin{quote}
-	Many people listen to recorded music as part of their everyday lives [...] Sometimes we might want to remix the balance within the music, perhaps to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1- channel surround sound system. We might also want to change the spatial location of a musical instrument within the mix. All of these applications are relatively straightforward, provided we have access to separate sound channels (stems) for each musical audio object. However, if we only have access to the final recording mix, which is usually the case, this is much more challenging. To estimate the original musical sources, which would allow us to remix, suppress or upmix the sources, we need to perform musical source separation (MSS). In the general source separation problem, we are given one or more mixture signals that contain different mixtures of some original source signals. [...] The task is to recover one or more of the source signals given the mixtures.
-\end{quote}
-
-\textcite{umx}'s deep learning model, named Open-Unmix, is intended to be a near state-of-the-art, open implementation of music source separation based on the MUSDB18 dataset \cite{musdb18} and intended to foster reproducible research and a baseline of high performance. It uses the STFT spectrogram as the input and output representation of musical signals, and a deep neural network to estimate invidual sources from a mixture. The choice of window size in the task of source separation based on STFT spectrograms can have an impact on the results of speech and music source separation \cite{musicsepwindow}, but this consideration is not explored in Open-Unmix.
-
-The CQT was shown to surpass the performance of the STFT in speech separation \cite{cqtseparation}. A simpler and older algorithm for harmonic/percussive source separation (HPSS) \cite{fitzgerald1}, also based on the STFT spectrogram, was evaluated alongside Open-Unmix in the SiSec 2018 music source separation evaluation campaign \cite{sisec2018} as a primitive (and low performance) baseline. The HPSS algorithm was later modified to use STFT spectrograms with different window sizes \cite{driedger, fitzgerald2}, and to use the CQT in place of the STFT \cite{fitzgerald2}. Using the STFT with a warped, or non-linear frequency scale, was also shown to improve music source separation results \cite{bettermusicsep}.
-
-As the NSGT is a generalization of the CQT, and can be used to implement different frequency scales, it is chosen as the transform to study in this thesis. The objectives of this thesis are to discover which configurations of the NSGT can surpass different window sizes of the STFT in music source separation, and to adapt Open-Unmix to use the NSGT.
-
-
 \subsubsection{Task motivation and definition}
 
 \todo[inline]{purposes and uses - why do we want to do this}
-
-The task of music source separation is to split a mixed song into its constituent components, or sources. \textcite{musicsepgood} describe that music source separation could operate on the level of instruments, or for broader categories of sources, grouped into harmonic, percussive, and singing voice.
 
 \subsubsection{Public datasets}
 
@@ -308,61 +313,12 @@ In the SigSep community and in the most recent SiSec evaluation (\cite{sisec2018
 
 \ichfeedback{it will come up later in the thesis when choosing hyperparameters for the sliCQ}
 
-\textcite{musicsepgood}'s survey on music source separation describes how many contemporary methods of separation are based on the common technique of spectrogram masking \cite{masking, speechmask, musicmask}, and exploit that different sources have different characteristic representations in the spectrogram -- see figure \ref{fig:sepgood} for an illustration. Optimally sparse representation of music signals in the transform domain is an active area of research \cite{sparsitykowalski, sparsitykowalski2}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[hello world]{\includegraphics[height=4.5cm]{./images-mss/mss1.png}}
-	\subfloat[hello world]{\includegraphics[height=4.7cm]{./images-mss/mss2.png}}
-	\caption{MSS sparsity}
-	\label{fig:sepgood}
-\end{figure}
-
-Harmonic/percussive source separation is the quintessential example.
-
-\begin{enumerate}
-	\item
-		Apply the algorithm in two passes, using a wide window STFT to attain a high frequency resolution and perform a better harmonic estimate, and a narrow window STFT to attain a high time resolution and perform a better percussive estimate \cite{fitzgerald2, driedger}
-	\item
-		Replace the STFT with the CQT to perform a vocal or singing voice separation \cite{fitzgerald2}
-\end{enumerate}
-
-The harmonic-percussive source separation algorithm of \textcite{fitzgerald1} is based on median filtering and spectral masking using magnitude spectrograms. The original algorithm with soft masks, and the binary masking and iterative variants introduced in \cite{driedger}, are both implemented in librosa \cite{librosa}, a popular open-source MIR library -- see figure \ref{fig:hpsslibrosa} for a diagram of how the algorithm works. The algorithm exploits transform sparsity, by noticing that harmonic or pitched sounds as horizontal lines in the spectrogram, percussive sounds as vertical lines, and estimating each using median filtering. \textcite{driedger}'s iterative variant uses two passes, with a large-window STFT to generate a spectrogram with a higher frequency resolution in the first pass for an improved harmonic estimate, and a small-window STFT to generate a spectrogram with a higher time resolution in the second pass for an improved percussive estimate.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[height=8cm]{./images-mss/sphx_glr_plot_hprss_001.png}
-	\caption{Harmonic/percussive/residual source separation in librosa}
-	\label{fig:hpsslibrosa}
-\end{figure}
-
-
-These algorithms sacrifice separation quality for simplicity, scoring rather low in recent objective evaluations\cite{sisec2018}, losing in objective metrics and subjective evaluations to solutions based on deep learning\cite{umx, demucs}.
-Surveys on speech \cite{speechmask} and music separation \cite{musicmask} indicate that the majority of separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.
-
-%\begin{wrapfigure}{r}{8cm}
-\begin{figure}[ht]
-	\vspace{-1.0em}
-	\includegraphics[width=8cm]{./images-mss/maskdemo.png}
-	\caption{Results of a soft and hard oracle mask applied for speech denoising. The oracle mask is the ideal mask for a given signal -- to compute it, the target and interference signals must be known.}
-	\label{fig:masks}
-	\vspace{-1.5em}
-%\end{wrapfigure}
-\end{figure}
-
-\textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. The soft mask used in \cite{fitzgerald1, fitzgerald2} is a Wiener filter given in the following equation, where $\hat{S}$ represents the complex-valued spectrogram:
-\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{2}}{|\hat{S}_{\text{interference}}|^{2} + |\hat{S}_{\text{target}}|^{2}} \]
-
-Soft masks generally produce higher quality sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
-
-Most recently, the SigSep\footnote{\url{https://sigsep.github.io/}} community has been running the Signal Separation Evaluation Campaign (SISEC), which sets the tone for the modern state-of-the-art models. SiSec uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality, or BSSv4 variant.
-
-The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset \cite{musdb18} (or the HQ, high-quality, equivalent \cite{musdb18-hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research.
-
-In modern music source separation, the stems of MUSDB18 have determined the four most common sources to separate -- drums, bass, vocals, and other. SigSep's own network, Open-Unmix, is trained only on MUSDB18, and produces near-state-of-the-art results. The absolute state-of-the-art crown is jointly held by Conv-Tasnet and Demucs, both of which surpass Open-Unmix. Both models operate directly on the waveform domain, which indicates that they could surpass the maximum possible poerformance of time-frequency masking approaches, as is done in speech separation. However, in practise they are still below the limits of masking-based approaches.
-
-\subsubsection{Open-Unmix (UMX)}
+\subsubsection{Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX)}
 
  \textcite{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
+
+ \subsubsection{Convolutional denoising autoencoders}
+
+ \todo[inline]{plumbley's papers here and a bit of CNN theory}
 
 \end{document}
