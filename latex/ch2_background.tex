@@ -324,9 +324,25 @@ In the SigSep community and in the most recent SiSec evaluation (\cite{sisec2018
 
 \subsubsection{Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX)}
 
+\chaptertodo{
+	\url{https://papers.nips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf}\\
+	use my RNN slides from MIR-presentations\\
+	UMX bi-LSTM comes from \url{https://www.researchgate.net/publication/335688695_Open-Unmix_-_A_Reference_Implementation_for_Music_Source_Separation}\\
+	more umx \url{https://hal.inria.fr/hal-02293689/document}\\
+	bi-LSTM here which comes from \url{https://www.researchgate.net/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending}\\
+	more here \url{https://ieeexplore.ieee.org/document/7952158}\\
+	more here \url{https://www.researchgate.net/profile/Yuki-Mitsufuji/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending/links/59ed4f844585151983ccdcba/Improving-music-source-separation-based-on-deep-neural-networks-through-data-augmentation-and-network-blending.pdf}\\
+	finally comes from here \url{https://www.semanticscholar.org/paper/Framewise-phoneme-classification-with-bidirectional-Graves-Schmidhuber/2f83f6e1afadf0963153974968af6b8342775d82}
+
+}
+
  \textcite{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
 
  \subsubsection{Convolutional denoising autoencoders}
+
+ While the discussed Open-Unmix model is based on a sequence-to-sequence LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}).
+
+ In particular, the CDAE networks of \textcite{plumbley1} and \textcite{plumbley2} give some simple and adaptable ideas for performing music demixing with 2D convolutional layers applied on time-frequency transforms.
 
  \todo[inline]{plumbley's papers here and a bit of CNN theory}
 
