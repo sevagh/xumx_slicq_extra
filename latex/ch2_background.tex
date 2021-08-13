@@ -58,8 +58,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 	\label{fig:adccircuit}
 \end{figure}
 
-\vfill
-\clearpage
+\newpagefill
 
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
@@ -81,12 +80,11 @@ Throughout this section, the description of the Fourier transform of acoustic si
 	\label{fig:glockwaveform}
 \end{figure}
 
-\vfill
-\clearpage
+\newpagefill
 
 \subsubsection{Frequency analysis and the Fourier transform}
 
-The Fourier transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite{fourierhistory}). The Fourier transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier transform to music is described in \textcite{fouriermusic}, who state that
+The Fourier transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite{fourierhistory}). The Fourier transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier transform to music is described by \textcite{fouriermusic}, who state that
 
 \begin{quote}
 	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string.
@@ -98,21 +96,35 @@ The continuous-time Fourier transform (CTFT) of a time-domain acoustic waveform 
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
 \end{align}
 
-$X(j\omega)$ is referred to by \textcite{dspfirst} as the frequency-domain representation of the signal $x(t)$, as the equation \ref{equation:ictft} defines the signal $x(t)$ as a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' $x(t)$, as has been mentioned in section \ref{sec:timedomain}, is the time-domain representation of the signal -- therefore, the continuous-time Fourier transform provides a one-to-one mapping of the time domain to the frequency domain (\cite{dspfirst}).
+$X(j\omega)$ is referred to by \textcite{dspfirst} as the frequency-domain representation of the signal $x(t)$, as the equation \ref{equation:ictft} defines the signal $x(t)$ as a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' The continuous-time Fourier transform provides a one-to-one mapping of the time domain to the frequency domain.
 
 As discussed in section \ref{sec:timedomain}, signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally. The discrete-time Fourier transform (DTFT), also called the discrete Fourier transform (DFT), is derived from a sampled version of the continuous-time Fourier transform (shown previously in equations \ref{equation:ctft} and \ref{equation:ictft}), and is defined by the pair of equations \ref{equation:dtft} and \ref{equation:idtft} (\cite[Chapter~12]{melbook}):
-
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
 \end{align}
 
-\chaptertodo{
-DTFT is complex - magnitude + phase + related spectral plot of glockenspiel\\
-continue FFT stuff, cooley-tukey bluestein and quote its importance and O(nlogn)\\
-}
+The Fourier transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier transform can be expressed in the rectangular form in equation \ref{equation:rect} or polar form in equation \ref{equation:polar} (\cite[Chapter~2]{discretebook}):
+\begin{align}
+	X(e^{j\omega}) = X_{\text{real}}(e^{j\omega}) + j X_{\text{imag}}(e^{j\omega}) \tag{5}\label{equation:rect} \\
+	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\measuredangle X(e^{j\omega})} \tag{6}\label{equation:polar}
+\end{align}
 
-Its most common implementation choice \todo{citeme}, the Fast Fourier Transform (FFT), is considered one of the most important algorithms in modern computing \todo{citeme}.
+The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively (\cite{discretebook}).
+
+In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). However, starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten}).
+
+The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \frac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. A longer DFT therefore has a finer frequency resolution with more points.  An illustration of the complex DFT spectrum along with its magnitude and phase spectra are shown in figure \ref{fig:glockdft}, computed using the FFT implementation of the DFT available in MATLAB, using two different lengths of DFT to show the difference in the lower and higher frequency resolutions.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=\textwidth]{./images-gspi/gspi_dft.png}}\\
+	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=\textwidth]{./images-gspi/gspi_dft_bigger.png}}
+	\caption{DFT of the Glockenspiel waveform, computed with the FFT}
+	\label{fig:glockdft}
+\end{figure}
+
+\newpagefill
 
 \subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
 
@@ -227,8 +239,7 @@ The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in 
 
 \todo[inline]{whats the output, what does it mean, how does it relate to the FFT coefficients, time-frequency matrix}
 
-\vfill
-\clearpage
+\newpagefill
 
 \subsection{Nonlinear frequency scales for music analysis}
 \label{sec:freqscales}
@@ -247,8 +258,7 @@ from \cite{variableq1, variableq2}, same as cq-log but with a gamma parameter
 
 mel, bark
 
-\vfill
-\clearpage
+\newpagefill
 
 \subsection{Machine learning}
 \label{sec:ml}
@@ -258,8 +268,7 @@ mel, bark
 \subsubsection{Deep learning}
 \label{sec:dl}
 
-\vfill
-\clearpage
+\newpagefill
 
 \subsection{Music source separation}
 \label{sec:musicsep}
