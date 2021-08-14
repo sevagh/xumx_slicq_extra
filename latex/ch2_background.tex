@@ -10,16 +10,16 @@
 \textcite[Chapter~2]{discretebook} define a signal as a term which
 
 \begin{quote}
-	conveys information about the state or behavior of a physical system, and often, signals are synthesized for the purpose of communicating information between humans or between humans and machines... Signals are represented mathematically as functions of one or more independent variables. For example, a speech signal is represented mathematically as a function of time, and a photographic image is represented as a brightness function of two spatial variables.
+	conveys information about the state or behavior of a physical system... [S]ignals are synthesized for the purpose of communicating information between humans or between humans and machines... Signals are represented mathematically as functions of one or more independent variables. For example, a speech signal is represented mathematically as a function of time, and a photographic image is represented as a brightness function of two spatial variables.
 \end{quote}
 
-As audio or sound waves are the type of signal studied in this thesis, \textcite[Chapter~2]{moore} describes the phenomenon of sound waves as follows:
+\textcite[Chapter~2]{moore} describes the more specific case of sound, or audio signals, as follows:
 
 \begin{quote}
 	Sound originates from the vibration of an object. This vibration is impressed upon the surrounding medium (usually air) as a pattern of changes in pressure
 \end{quote}
 
-The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and the waveform is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are both shown in figure \ref{fig:discretecontinuous}.
+The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are both shown in figure \ref{fig:discretecontinuous}.
 
 \begin{figure}[ht]
 	\centering
@@ -29,12 +29,11 @@ The waveform is defined as the function of pressure variation plotted against ti
 	\label{fig:discretecontinuous}
 \end{figure}
 
-Continuous-time signals are continuous in both time and amplitude. They are captured into discrete-time representations by \textit{sampling} the continuous time values and \textit{quantizing} the amplitude values (\cite[Chapter~2]{melbook}). The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x(t)$ is defined by the sampling period $T$:
-\[ x[n] = x_{a}(nT) \]
+\newpagefill
 
-Two important variables describe the nature of the discrete representation: the sampling rate $F_{s} = \frac{1}{T}$, and the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
+Continuous-time signals are converted into discrete-time representations by two processes: \textit{sampling}, or considering periodic points on the continuous time axis throughout the waveform, and the \textit{quantization} of the amplitude values of the waveform at those points to find the closest digital number (\cite[Chapter~2]{melbook}). The sampling process is controlled by the sampling period $T \text{ seconds}$, or the sampling (or sample) rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity with which time values are considered. The amplitude quantization process is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
 
-First, continuous time needs to be sampled into the discrete time domain. The sampling rate, $F_{s}$, relates to the Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), which was described by both \textcite{nyquist1928} and \textcite{shannon1948}. It states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \frac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency. The diagram in figure \ref{fig:aliasing} shows the phenomenon of \textit{undersampling}, which occurs when a time-domain signal is undersampled, i.e. the maximum frequency of the signal exceeds $F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately (\cite[Chapter~4]{dspfirst}). We refer the readers to the chapter in the textbook for a more full description of challenges in signal sampling.
+First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency. The diagram in figure \ref{fig:aliasing} shows the phenomenon of \textit{undersampling}, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately (\cite[Chapter~4]{dspfirst}). We refer the readers to the chapter in the textbook for a more full description of challenges in signal sampling.
 
 \begin{figure}[ht]
 	\centering
@@ -43,17 +42,15 @@ First, continuous time needs to be sampled into the discrete time domain. The sa
 	\label{fig:aliasing}
 \end{figure}
 
-Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chapter~4]{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values.'' The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as
-\[ \hat{x}[n] = Q(x[n]) \]
-
-, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
+Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chapter~4]{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values.'' The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Analog-to-digital converter (ADC)]{\includegraphics[height=2.2cm]{./images-tftheory/adc1.png}}
 	\hspace{0.1em}
 	\subfloat[ADC details: sampler and quantizer]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
-	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.75\textwidth]{./images-tftheory/adc3.png}}\\
+	\vspace{0.1em}
+	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.85\textwidth]{./images-tftheory/adc3.png}}\\
 	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations (\cite[Chapter~4]{discretebook})}
 	\label{fig:adccircuit}
 \end{figure}
@@ -113,9 +110,18 @@ The Fourier transform is a complex-valued function of $\omega$, which is the var
 
 The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively (\cite{discretebook}).
 
-In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). However, starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten}).
+In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). However, starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten}). Refer to figure \ref{fig:bigo} to see the differences in the expected running times of the FFT over the naive implementation.
 
-The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \frac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. A longer DFT therefore has a finer frequency resolution with more points.  An illustration of the complex DFT spectrum along with its magnitude and phase spectra are shown in figure \ref{fig:glockdft}, computed using the FFT implementation of the DFT available in MATLAB, using two different lengths of DFT to show the difference in the lower and higher frequency resolutions.
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{./images-misc/bigo.png}\\
+	\caption{Visual comparison of the ``Big-O'', or worst-case running times of algorithms (taken from \url{https://www.bigocheatsheet.com/})}
+	\label{fig:bigo}
+\end{figure}
+
+The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. A longer DFT therefore has a finer frequency resolution with more points, but it requires a longer input signal -- the conflict of input signal length and the DFT frequency resolution is the heart of the time-frequency tug-of-war, which will be covered in section \ref{sec:jointtfa}.
+
+An illustration of the complex DFT spectrum along with its magnitude and phase spectra are shown in figure \ref{fig:glockdft}, computed using the FFT implementation of the DFT in MATLAB (\cite{matlab}), using two different lengths of DFT to show the difference in the lower and higher frequency resolutions.
 
 \begin{figure}[ht]
 	\centering
@@ -128,12 +134,10 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 \newpagefill
 
 \subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
+\label{sec:jointtfa}
 
 \chaptertodo{
 describe the unit impulse as an infinite time pulse contrast with Fourier which is an infinite frequency\\
-mutually exclusive formulations of time and frequency, gabor stuff\\
-intersperse TF-presentation on Gabor in Chapter 2 transforms section\\
-Gabor transform, STFT need diagrams (similar to TF presentations)\\
 3 souls of the STFT: \url{https://www.researchgate.net/publication/307653687_Arbitrary_Phase_Vocoders_by_means_of_Warping}\\
 }
 
@@ -145,37 +149,22 @@ In his paper, Gabor quotes famed American telecommunication engineer John Carson
 	[t]he foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren
 \end{quote}
 
+We refer the reader to \cite{carsonfamous} for a summary of Carson's accomplishments.
+
 According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.'' We can begin from figure \ref{fig:gaborfirst}, showing the mutually exclusive formulations of time and frequency. Figure \ref{fig:gaborfirst}(a) shows the unit impulse, which is a theoretical 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=5cm]{./images-tftheory/gabor2.png}
+	\subfloat[foo]{\includegraphics[width=6.5cm]{./images-tftheory/gabor13.png}}
+	\hspace{0.2em}
+	\subfloat[bar]{\includegraphics[width=6.2cm]{./images-tftheory/gabor1.png}}
 	\caption{tf intuition}
 	\label{fig:tfintuition}
 \end{figure}
 
-We refer the reader to \cite{carsonfamous} for a summary of Carson's accomplishments. From various papers describing the significance of Gabor's works, we can list his important contributions:
+Gabor derived the principal of time-frequency uncertainty stemming from Heisenberg's uncertainty principle in quantum physics, leading to an explosion of wavelet research in the 1980s (\cite{homage1})
 
-\begin{enumerate}
-	\item
-	\item
-		Gabor derived the principal of time-frequency uncertainty stemming from Heisenberg's uncertainty principle in quantum physics, leading to an explosion of wavelet research in the 1980s (\cite{homage1})
-	\item
-		Gabor was the first to propose that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function -- this was the first known use of the short-time Fourier transform, local Fourier transform, or windowed Fourier transform (\cite{dictionary})
-	\item
-		The short-time Fourier transform was rediscovered independently of Gabor (\cite{stftindie}), but is increasingly referred to as the Gabor transform (\cite{dictionary})
-	\item
-		Gabor showed that the use of the Gaussian window in the short-time Fourier transform minimizes time-frequency uncertainty (\cite{gabor1946})
-\end{enumerate}
-
-%
-%
-%	\begin{quote}
-%	\vspace{2em}
-%		Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.\cite{korpel}
-%
-
-\textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
+\textcite{gabor1946} performed the first joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
 \begin{flalign}
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
 	G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n},
