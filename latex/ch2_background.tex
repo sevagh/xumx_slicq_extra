@@ -83,6 +83,7 @@ Throughout this section, the description of the Fourier transform of acoustic si
 \newpagefill
 
 \subsubsection{Frequency analysis and the Fourier transform}
+\label{sec:freqanal}
 
 The Fourier transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite{fourierhistory}). The Fourier transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier transform to music is described by \textcite{fouriermusic}, who state that
 
@@ -129,11 +130,50 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 \subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
 
 \chaptertodo{
+describe the unit impulse as an infinite time pulse contrast with Fourier which is an infinite frequency\\
 mutually exclusive formulations of time and frequency, gabor stuff\\
 intersperse TF-presentation on Gabor in Chapter 2 transforms section\\
 Gabor transform, STFT need diagrams (similar to TF presentations)\\
 3 souls of the STFT: \url{https://www.researchgate.net/publication/307653687_Arbitrary_Phase_Vocoders_by_means_of_Warping}\\
 }
+
+\textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals. Gabor starts from the Fourier transform, which as described in section \ref{sec:freqanal} is a tool that can express a time-domain signal as a sum of infinite complex sinusoids containing the frequency components present in the signal.
+
+In his paper, Gabor quotes famed American telecommunication engineer John Carson to describe the limitations of the Fourier transform:
+
+\begin{quote}
+	[t]he foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren
+\end{quote}
+
+According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.'' We can begin from figure \ref{fig:gaborfirst}, showing the mutually exclusive formulations of time and frequency. Figure \ref{fig:gaborfirst}(a) shows the unit impulse, which is a theoretical 
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=5cm]{./images-tftheory/gabor2.png}
+	\caption{tf intuition}
+	\label{fig:tfintuition}
+\end{figure}
+
+We refer the reader to \cite{carsonfamous} for a summary of Carson's accomplishments. From various papers describing the significance of Gabor's works, we can list his important contributions:
+
+\begin{enumerate}
+	\item
+	\item
+		Gabor derived the principal of time-frequency uncertainty stemming from Heisenberg's uncertainty principle in quantum physics, leading to an explosion of wavelet research in the 1980s (\cite{homage1})
+	\item
+		Gabor was the first to propose that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function -- this was the first known use of the short-time Fourier transform, local Fourier transform, or windowed Fourier transform (\cite{dictionary})
+	\item
+		The short-time Fourier transform was rediscovered independently of Gabor (\cite{stftindie}), but is increasingly referred to as the Gabor transform (\cite{dictionary})
+	\item
+		Gabor showed that the use of the Gaussian window in the short-time Fourier transform minimizes time-frequency uncertainty (\cite{gabor1946})
+\end{enumerate}
+
+%
+%
+%	\begin{quote}
+%	\vspace{2em}
+%		Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.\cite{korpel}
+%
 
 \textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, contained the first suggestion of joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
 \begin{flalign}
