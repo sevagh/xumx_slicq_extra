@@ -68,7 +68,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 
 Throughout this section, the description of the Fourier transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
 
-\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal is used often in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}); in the demo website\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} of \textcite{wmdct}, ``the famous glockenspiel signal'' is mentioned and used for many of the examples. This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$.
+\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal contains 262144 samples, and is sampled with a rate of 44100 Hz, meaning the total duration is $\sfrac{262144}{44100} \approx$ 5.94 seconds.
 
 \begin{figure}[ht]
 	\centering
@@ -76,8 +76,6 @@ Throughout this section, the description of the Fourier transform of acoustic si
 	\caption{Glockenspiel waveform}
 	\label{fig:glockwaveform}
 \end{figure}
-
-The signal contains 262144 samples, and is sampled with a rate of 44100 Hz, meaning the total duration is $\sfrac{262144}{44100} \approx$ 5.94 seconds.
 
 \newpagefill
 
@@ -187,7 +185,7 @@ Note that these are not a refutation of Gabor's ideas, but in fact a confirmatio
 	[i]n time-frequency analysis, it has been proven that linear operators cannot exceed the uncertainty bound... Nonlinearity does not by itself confer any acuity advantage, and in fact most nonlinearities are merely distortions and thus deleterious. However [...] any carefully crafted analysis that can beat this limit must necessarily be nonlinear.
 \end{quote}
 
-Nevertheless, if we choose to proceed with time-frequency analysis despite the limitations, it's preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to it lowest possible value, $1$. \textcite{gabor1946} states and answers the question as follows:
+Nevertheless, if we choose to proceed with time-frequency analysis despite the limitations, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to it lowest possible value, $1$. \textcite{gabor1946} states and answers the question as follows:
 
 \begin{quote}
 What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function
@@ -248,7 +246,7 @@ As $\alpha \rightarrow 0$, this reduces to Dirac delta functions spaced at $\Del
 	\phi_{\mathit{jk}}(t) &= \delta (t - j \Delta t) + j \delta (t - j \Delta t) = a_{\mathit{ij}} + j b_{\mathit{ij}} 
 \end{flalign}
 
-We now explore the connection to Shannon's sampling theorem (\cite{shannon1948}). Shannon states that ``to reconstruct $\psi$ we must take equally spaced samples at a minimum of the Nyquist frequency, which is twice the maximal frequency.'' In equation \ref{equation:twodelta}, the $\alpha = 0$ limit of the Gabor equations represents two samples, $a_{\mathit{ij}}$ and $b_{\mathit{ij}}$, for each $\Delta t$ interval.
+We now explore the connection to Shannon's sampling theorem (\cite{shannon1948}). Shannon states that ``to reconstruct $\psi$ we must take equally spaced samples at a minimum of the Nyquist frequency, which is twice the maximal frequency.'' In equation \ref{equation:twodelta}, the $\alpha = 0$ limit of the Gabor equations represents exactly two samples, $a_{\mathit{ij}}$ and $b_{\mathit{ij}}$, for each $\Delta t$ interval.
 
 The STFT, or short-time Fourier transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described in equation (2):
 \begin{flalign}
@@ -388,6 +386,11 @@ mel, bark
 \label{sec:ml}
 
 \ichfeedback{if i'm presenting a neural network, it's probably necessary to have this section?}
+
+\chaptertodo{
+	use MIR presentation introduction to machine and deep learning\\
+	mention signal processing, basis pursuit, etc., i.e. classic approximate/probabilistic signal processing
+}
 
 \subsubsection{Deep learning}
 \label{sec:dl}
