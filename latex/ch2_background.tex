@@ -1,6 +1,10 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
+\chaptertodo{
+	unfuck all equations, labels, numbering, etc. -- make it all dynamic
+}
+
 \section{Background}
 \label{sec:background}
 
@@ -19,7 +23,7 @@
 	Sound originates from the vibration of an object. This vibration is impressed upon the surrounding medium (usually air) as a pattern of changes in pressure
 \end{quote}
 
-The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are both shown in figure \ref{fig:discretecontinuous}.
+The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
 
 \begin{figure}[ht]
 	\centering
@@ -38,7 +42,7 @@ First, continuous time needs to be sampled into the discrete time domain. The re
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{./images-tftheory/aliasing_undersampling.png}
-	\caption{An undersampled cosine wave and the resulting incorrect reconstruction (\cite{dspfirst})}
+	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) from \textcite{dspfirst}}
 	\label{fig:aliasing}
 \end{figure}
 
@@ -199,7 +203,7 @@ What is the shape of the signal for which the product $\Delta t \Delta f$ actual
 
 where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform.
 
-The mathematical details, derivations, and proofs of these equations are beyond the scope of this thesis. However, an interesting connection between \textcite{gabor1946}'s equations and \textcite{shannon1948}'s sampling theorem can be shown with a precursory overview of the equations. Gabor's original paper describes the Gaussian functions by the following set of equations:
+The mathematical details, derivations, and proofs of these equations are beyond the scope of this thesis. However, an interesting connection between \textcite{gabor1946}'s equations and \textcite{shannon1948}'s sampling theorem can be shown with a precursory overview of the equations. Gabor's original paper describes the Gabor transform by the following set of equations:
 
 \begin{flalign}
 	\psi(t) &= \text{e}^{-\alpha^{2}(t-t_{0})}\text{cis}(2\pi f_{0}t + \phi)\\
