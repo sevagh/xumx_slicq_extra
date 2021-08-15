@@ -1,6 +1,10 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
+\chaptertodo{
+	unfuck all equations, labels, numbering, etc. -- make it all dynamic
+}
+
 \section{Background}
 \label{sec:background}
 
@@ -19,7 +23,7 @@
 	Sound originates from the vibration of an object. This vibration is impressed upon the surrounding medium (usually air) as a pattern of changes in pressure
 \end{quote}
 
-The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are both shown in figure \ref{fig:discretecontinuous}.
+The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
 
 \begin{figure}[ht]
 	\centering
@@ -38,7 +42,7 @@ First, continuous time needs to be sampled into the discrete time domain. The re
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{./images-tftheory/aliasing_undersampling.png}
-	\caption{An undersampled cosine wave and the resulting incorrect reconstruction (\cite{dspfirst})}
+	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) from \textcite{dspfirst}}
 	\label{fig:aliasing}
 \end{figure}
 
@@ -190,7 +194,7 @@ Gabor performed joint time-frequency analysis by multiplying overlapping, tempor
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)], G_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n}
 \end{flalign}
 
-where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time-frequency resolution of the transform.
+where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform.
 
 The STFT, or short-time Fourier transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equation \ref{equation:stft}:
 \begin{flalign}\tag{8}\label{equation:stft}
