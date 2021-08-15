@@ -17,6 +17,7 @@ In the task of music source separation, or music demixing, a mixed song which is
 The STFT spectrogram is a popular tool used by various music demixing systems throughout the years (\cite{musicsepgood, musicsepsurvey, sisec2018, fitzgerald1, umx, plumbley1, plumbley2}). The tradeoff of time-frequency resolution is an important consideration in these systems (\cite{tftradeoff1, tftradeoff2}). Other music demixing systems replaced the STFT with different time-frequency transforms (\cite{fitzgerald2, cqtseparation, bettermusicsep}), which is another way of improving results through the manipulation of time-frequency resolution.
 
 \subsection{Motivation}
+\label{sec:motivation}
 
 Musical signals have characteristics that lead to conflicting requirements in the STFT. According to \textcite{doerflerphd}, music needs to be analyzed with long-duration windows in the low frequency region for a high frequency resolution, because the bass notes lay the harmonic basis of a song. Conversely, the high frequency region contains transients and broadband sounds, which are useful for timbre identification and rhythm; these transients have fast attacks and decays and need to be analyzed with short-duration windows (\cite{doerflerphd}). \textcite{cqtransient} similarly state that
 

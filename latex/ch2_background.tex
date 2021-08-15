@@ -144,7 +144,7 @@ Continuing from the discussion of the DFT in the previous section \ref{sec:freqa
 
 According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.''
 
-Gabor derived the principal of time-frequency uncertainty from Heisenberg's uncertainty principle in quantum physics, which states that ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' (\cite{heisenberg1927}). Gabor's time-frequency uncertainty principle states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ as the \textit{logon}, or smallest possible unit of time-frequency information.
+Gabor derived the principal of time-frequency uncertainty from Heisenberg's uncertainty principle in quantum physics, which states that ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' (\cite{hallm, heisenberg1927}). Gabor's time-frequency uncertainty principle states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ as the \textit{logon}, or smallest possible unit of time-frequency information.
 
 Let's start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \ref{equation:delta}:
 \begin{flalign}\label{equation:delta}
@@ -161,8 +161,8 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 \begin{figure}[ht]
 	\centering
 	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[height=5cm]{./images-tftheory/gabor13.png}}
-	\hspace{0.5em}
-	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the cost of temporally localized sample values]{\includegraphics[height=5cm]{./images-tftheory/gabor2.png}}
+	\hspace{2em}
+	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the cost of temporally localized sample values]{\includegraphics[height=6.25cm]{./images-tftheory/gabor2.png}}
 	\caption{Time-frequency tradeoff intuitions (\cite{gabor2})}
 	\label{fig:gaborfirst}
 \end{figure}
@@ -234,28 +234,45 @@ We close the chapter with a quote from \textcite{doerflersouls}, who describe th
 
 \subsubsection{Constant-Q Transform (CQT)}
 
-Summary of the most relevant CQT implementations:
+As initially described in section \ref{sec:motivation}, music should be analyzed with long-duration windows in the low frequency region, and with short-duration windows in the high frequency region (\cite{doerflerphd, cqtransient}). \textcite{cqtransient} also discussed the disadvantage of the STFT, which is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies. In contrast to this we know that due to both musical and auditory aspects frequency resolution is preferred that increases from high to low frequencies (and vice versa for time resolution).''
 
-\begin{enumerate}
-	\item
-	    Brown, 1991, first proposed CQT with a naive very slow implementation.
-    \item
-	    Brown and Puckette, 1992: implemented a faster CQT based on a sparse representation in the frequency domain. This is the current Essentia implementation!
-    \item
-	    Sch{\"o}rkhuber and Klapuri, 2010: a faster CQT based on the same principles as Brown and Puckette, 1992. For first time, it is introduced an algorithm for an approximated reconstruction of the CQT coefficients. Code: \url{http://www.iem.at/~schoerkhuber/cqt2010/} - this is the librosa implementation
-    \item
-	    Velasco, Holighaus, D{\"o}rfler and Grill, 2011: they approach the problem differently - by means of a nonstationary Gabor transform. This allows perfect reconstruction for first time while the transform is still computationally efficient (faster than Sch{\"o}rkhuber and Klapuri, 2010). However, it does not allow real-time implementations and phases are not accurate. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
-    \item
-	    Holighaus, D{\"o}rfler, Velasco and Grill, 2012: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They propose sliCQT (slicing by using an overlapping window) to allow real-time computations. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
-    \item
-	    Sch{\"o}rkhuber, Klapuri, Holighaus and Dörfler, 2014: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They solve the problem with phases by means of a frequency mapping and they also propose a Variable-Q transform (that allows ie. ERBlets). Code: \url{http://www.cs.tut.fi/sgn/arg/CQT/}
-    \item
-	    Sch{\"o}rkhuber, Klapuri, Holighaus and D{\"o}rfler, 2014, a nonstationary Gabor transform, allows perfect reconstruction while the phases are still accurate. It might be interesting to implement this in Essentia.
-\end{enumerate}
+The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\Delta f} = Q$.
+
+The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. Judith Brown's CQT also demonstrated a good time resolution (\cite{cqtransient}) for transients and broadband signals through its use of short-duration windows in the high-frequency regions. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each region. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+\begin{align}\tag{9}\label{equation:jbrowncqt}
+	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos(\frac{2\pi n}{N[k]})
+\end{align}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Properties of DFT, CQT]{\includegraphics[height=5.05cm]{./images-tftheory/dftvcqt.png}}
+	\hspace{0.5em}
+	\subfloat[Window sizes for CQT]{\includegraphics[height=5cm]{./images-tftheory/qwindowchanges.png}}
+	\caption{Various aspects of \textcite{jbrown}'s CQT}
+	\label{fig:jbrowncqt}
+\end{figure}
+
+Shortly after the original CQT (\cite{jbrown}), a faster implementation of the same algorithm was published by \textcite{msp}. These early implementations of the CQT were computed by using specific window sizes for each frequency region of interest, and were also not designed to be invertible, making them suitable only for analysis. \textcite{klapuricqt}, considering \textcite{msp}'s CQT as a base, improved the performance, and introduced for the first time an algorithm for an approximated reconstruction of the CQT coefficients. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
 \todo[inline]{the original judith brown CQT is the origin of the research that led to the NSGT}
-
 The Constant-Q transform (CQT) is time-frequency transform for musical signals, originally designed by \textcite{jbrown}, the relationship between the fundamental frequency and its harmonics on a logarithmic frequency scale more clearly than the linear frequency scale of the traditional discrete Fourier transform (DFT).
+
+ A demonstration of the CQT is shown in figure \ref{fig:earlycqt}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Linear frequency spectrum]{\includegraphics[height=4.75cm]{./images-tftheory/violindft.png}}
+	\subfloat[Constant-Q transform]{\includegraphics[height=4.75cm]{./images-tftheory/violincqt.png}}
+	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$}
+	\label{fig:earlycqt}
+\end{figure}
+
+\subsubsection{Nonstationary Gabor Transform (NSGT) and the sliCQ transform}
+\label{sec:theorynsgt}
+
+\chaptertodo{
+	tf presentation 2 -- intro to doerfler 2 dictionaries and single transform NSGT
+}
 
 The original CQT had no inverse transform, but later works led to approximate inverses \cite{klapuricqt, fitzgeraldcqt}. 
 , which has an important application in the perfectly-invertible CQT, or CQ-NSGT \cite{invertiblecqt}
@@ -267,18 +284,6 @@ The more general NSGT should be studied instead the CQT for the following reason
 	\item
 		It can use other potentially interesting frequency scales besides the constant-Q logarithmic scale, such as the psychoacoustically-motivated mel, Bark, or ERB scales \todo{cite me}, or variable-Q scales \todo{cite gamma and other}
 \end{itemize}
-
- The CQT has a high temporal resolution at high frequencies \cite{cqtransient} .
-
- A demonstration of the CQT is shown in figure \ref{fig:earlycqt}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Linear frequency spectrum]{\includegraphics[height=4.75cm]{./images-tftheory/violindft.png}}
-	\subfloat[Constant-Q transform]{\includegraphics[height=4.75cm]{./images-tftheory/violincqt.png}}
-	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$}
-	\label{fig:earlycqt}
-\end{figure}
 
 Additionally, the constant-Q transform \cite{jbrown, klapuricqt, invertiblecqt} even before its formulation as a specialized variant of the nonstationary Gabor transform \cite{balazs}, is an STFT applied with window of different sizes, which are of long duration at low frequencies to create a fine frequency resolution (and sacrificing time resolution as per the time-frequency uncertainty principle), and gradually decrease the windows in duration to improve the time resolution (and sacrifice frequency resolution). At the same time, consider that the iterative harmonic-percussive source separation algorithms in \cite{driedger, fitzgerald2} use two-pass spectral masking with two different configurations of spectrograms -- one with a large window size (4096 samples in \cite{driedger}, 16384 samples in \cite{fitzgerald2}) for representing the harmonic or pitched instruments sharply and estimating the harmonic mask, and one with a short window size (256 samples in \cite{driedger}, 1024 samples in \cite{fitzgerald2}) for representing percussion or transients more sharply and estimating the percussive mask.
 
@@ -293,8 +298,18 @@ The connection to the CQT, or NSGT, is that these contain within a single transf
 
 The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in figure \ref{fig:dorflertradeoff}. Notice how the wide window spectrogram shows frequency components (horizontal lines) with a sharper definition than the blurry lines in the narrow window spectrogram, while the narrow window spectrogram shows temporal events (vertical lines) with a sharper definition than the wide window spectrogram.
 
-\subsubsection{Nonstationary Gabor Transform (NSGT) and the sliCQ transform}
-\label{sec:theorynsgt}
+\begin{enumerate}
+    \item
+	    Velasco, Holighaus, D{\"o}rfler and Grill, 2011: they approach the problem differently - by means of a nonstationary Gabor transform. This allows perfect reconstruction for first time while the transform is still computationally efficient (faster than Sch{\"o}rkhuber and Klapuri, 2010). However, it does not allow real-time implementations and phases are not accurate. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
+    \item
+	    Holighaus, D{\"o}rfler, Velasco and Grill, 2012: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They propose sliCQT (slicing by using an overlapping window) to allow real-time computations. Code: \url{http://www.univie.ac.at/nonstatgab/toolbox.php}
+    \item
+	    Sch{\"o}rkhuber, Klapuri, Holighaus and Dörfler, 2014: Based on the Velasco, Holighaus, Dörfler and Grill, 2011 - allowing perfect reconstruction. They solve the problem with phases by means of a frequency mapping and they also propose a Variable-Q transform (that allows ie. ERBlets). Code: \url{http://www.cs.tut.fi/sgn/arg/CQT/}
+    \item
+	    Sch{\"o}rkhuber, Klapuri, Holighaus and D{\"o}rfler, 2014, a nonstationary Gabor transform, allows perfect reconstruction while the phases are still accurate. It might be interesting to implement this in Essentia.
+\end{enumerate}
+
+
 
 \todo[inline]{brief intro to frame theory and math stuff}
 
