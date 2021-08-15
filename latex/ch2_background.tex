@@ -119,9 +119,7 @@ In \textcite[Chapter~9]{discretebook} it is described that in its original formu
 	\label{fig:bigo}
 \end{figure}
 
-The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. A longer DFT therefore has a finer frequency resolution with more points, but it requires a longer input signal -- the conflict of input signal length and the DFT frequency resolution is the heart of the time-frequency tug-of-war, which will be covered in section \ref{sec:jointtfa}.
-
-An illustration of the complex DFT spectrum along with its magnitude and phase spectra are shown in figure \ref{fig:glockdft}, computed using the FFT implementation of the DFT in MATLAB (\cite{matlab}), using two different lengths of DFT to show the difference in the lower and higher frequency resolutions.
+The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. A longer DFT therefore has a finer frequency resolution, but it requires a longer input signal -- this is the heart of the conflict between time and frequency, which will be covered in section \ref{sec:jointtfa}. An illustration of the complex DFT spectrum along with its magnitude and phase spectra are shown in figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
 \begin{figure}[ht]
 	\centering
