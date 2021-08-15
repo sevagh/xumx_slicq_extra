@@ -77,6 +77,8 @@ Throughout this section, the description of the Fourier transform of acoustic si
 	\label{fig:glockwaveform}
 \end{figure}
 
+The signal contains 262144 samples, and is sampled with a rate of 44100 Hz, meaning the total duration is $\sfrac{262144}{44100} \approx$ 5.94 seconds.
+
 \newpagefill
 
 \subsubsection{Frequency analysis and the Fourier transform}
@@ -119,13 +121,13 @@ In \textcite[Chapter~9]{discretebook} it is described that in its original formu
 	\label{fig:bigo}
 \end{figure}
 
-The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. A longer DFT therefore has a finer frequency resolution, but it requires a longer input signal -- this is the heart of the conflict between time and frequency, which will be covered in section \ref{sec:jointtfa}. An illustration of the complex DFT spectrum along with its magnitude and phase spectra are shown in figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
+The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=\textwidth]{./images-gspi/gspi_dft.png}}\\
 	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=\textwidth]{./images-gspi/gspi_dft_bigger.png}}
-	\caption{DFT of the Glockenspiel waveform, computed with the FFT}
+	\caption{DFT of the Glockenspiel waveform. Note the richer frequency information in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
 
@@ -134,55 +136,119 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 \subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
 \label{sec:jointtfa}
 
-\chaptertodo{
-describe the unit impulse as an infinite time pulse contrast with Fourier which is an infinite frequency\\
-3 souls of the STFT: \url{https://www.researchgate.net/publication/307653687_Arbitrary_Phase_Vocoders_by_means_of_Warping}\\
-}
+Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal}, \textcite[Chapter~10]{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...''
 
-\textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals. Gabor starts from the Fourier transform, which as described in section \ref{sec:freqanal} is a tool that can express a time-domain signal as a sum of infinite complex sinusoids containing the frequency components present in the signal.
-
-In his paper, Gabor quotes famed American telecommunication engineer John Carson to describe the limitations of the Fourier transform:
+\textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals. Gabor quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier transform:
 
 \begin{quote}
 	[t]he foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren
 \end{quote}
 
-We refer the reader to \cite{carsonfamous} for a summary of Carson's accomplishments.
+According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.''
 
-According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.'' We can begin from figure \ref{fig:gaborfirst}, showing the mutually exclusive formulations of time and frequency. Figure \ref{fig:gaborfirst}(a) shows the unit impulse, which is a theoretical 
+Let's start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \ref{equation:delta}:
+\begin{flalign}\label{equation:delta}
+\delta[n] = \begin{cases}
+	1 \text{\hspace{1em}} n = 0\\
+	0 \text{\hspace{1em}} \text{otherwise}
+\end{cases}
+\end{flalign}
+
+The impulse is a useful signal, as it is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0. The mathematical notation is that of the Kronecker delta function'' (\cite[Chapter~5]{dspfirst}). Note the Kronecker delta function is the discrete equivalent of the Dirac delta function (\cite[Chapter~2]{melbook}). Contrast this with the DFT of a signal that is only non-zero at the 0-frequency component, or the DC component, which is a ``cosine signal with zero frequency'' (\cite[Chapter~3]{dspfirst}).
+
+Figure \ref{fig:gaborfirst} shows the unit impulse contrasted with the DC-component DFT, and these two in fact demonstrate the mutually exclusive formulations of time and frequency. The unit impulse, which has a single non-zero value in the time domain, has an infinite extent in the frequency domain. Conversely, the DC-component DFT has a single non-zero value in the frequency domain, but has an infinite extent in the time domain.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[foo]{\includegraphics[width=6.5cm]{./images-tftheory/gabor13.png}}
-	\hspace{0.2em}
-	\subfloat[bar]{\includegraphics[width=6.2cm]{./images-tftheory/gabor1.png}}
-	\caption{tf intuition}
-	\label{fig:tfintuition}
+	\includegraphics[width=7cm]{./images-tftheory/gabor13.png}
+	\caption{The mutually exclusive formulations of time and frequency represented by two extremes -- unit impulse on the bottom left, non-zero DC DFT spectrum on the top right}
+	\label{fig:gaborfirst}
 \end{figure}
 
-Gabor derived the principal of time-frequency uncertainty stemming from Heisenberg's uncertainty principle in quantum physics, leading to an explosion of wavelet research in the 1980s (\cite{homage1})
+Gabor derived the principal of time-frequency uncertainty from Heisenberg's uncertainty principle in quantum physics, which is that $\sigma_{x}\sigma_{p} \ge \sfrac{h}{4\pi}$ (\cite{hallm}). In words, ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' (\cite{heisenberg1927}).
 
-\textcite{gabor1946} performed the first joint time-frequency decomposition of a signal by applying the Fourier transform locally to overlapping portions of the signal multiplied by Gaussian windows. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
+Gabor's time-frequency uncertainy principle is $\sigma_{t}\sigma_{f} \ge \sfrac{1}{4\pi}$, or $\Delta t\Delta f \ge 1$. In words, ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined by \textcite{gabor1946} as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ the \textit{logon}, or smallest possible unit of time-frequency information.
+
+The result of the time-frequency uncertainty principle is a property of the choice of the Fourier transform to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a consequence of the Fourier transform, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite{psycho2} describes one of these experiments:
+
+\begin{quote}
+	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen (DL) for a tone pulse of duration d. [...]  It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...]
+\end{quote}
+
+More recently, according to \textcite{psycho1}:
+
+\begin{quote}
+	[w]e have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10.
+\end{quote}
+
+Note that these are not a refutation of Gabor's ideas, but in fact a confirmation. \textcite{gabor1946} himself stated that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue.'' \textcite{psycho1} further state that:
+
+\begin{quote}
+	[i]n time-frequency analysis, it has been proven that linear operators cannot exceed the uncertainty bound... Nonlinearity does not by itself confer any acuity advantage, and in fact most nonlinearities are merely distortions and thus deleterious. However [...] any carefully crafted analysis that can beat this limit must necessarily be nonlinear.
+\end{quote}
+
+Nevertheless, if we choose to proceed with time-frequency analysis despite the limitations, it's preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to it lowest possible value, $1$. \textcite{gabor1946} states and answers the question as follows:
+
+\begin{quote}
+What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function
+\end{quote}
+
+\textcite{gabor1946} discovered that this can be done by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function, and by taking the Fourier transform of the Gaussian-windowed segments of the signal. In other words, Gabor proposed that any signal of finite energy can be decomposed into a linear combination of time-frequency shifts of the Gaussian function. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described in equation (1):
 \begin{flalign}
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
 	G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n},
 \end{flalign}
 
-where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform. With his transform, Gabor also introduced the first formulation of the time-frequency uncertainty principle (which is minimized by using the Gaussian function as a window), stating that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.'' Gabor called named the time-frequency tile the \textit{logon}, or smallest possible unit of time-frequency information. Mathematically, this can be stated as:
-\[ \Delta t\Delta f \ge 1 \]
+where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform.
 
-$\Delta t$ and $\Delta f$ are, as defined by Gabor, ``the uncertainties inherent in the definition of the epoch $t$ and frequency $f$ of an oscillation.'' The TF uncertainty principle arises from the fact that time and frequency are, in quantum physics terms, conjugate variables, or Fourier transforms of each other. This is further illustrated in figure \ref{fig:gabortf}, which shows the tiling of the time-frequency plane, and how frequency and time resolution must be sacrificed for one another by the lower bound of the time-frequency tile area.
+The mathematical details, derivations, and proofs of these equations are beyond the scope of this thesis. However, an interesting connection between \textcite{gabor1946}'s equations and \textcite{shannon1948}'s sampling theorem can be shown with a precursory overview of the equations. Gabor's original paper describes the Gaussian functions by the following set of equations:
+
+\begin{flalign}
+	\psi(t) &= \text{e}^{-\alpha^{2}(t-t_{0})}\text{cis}(2\pi f_{0}t + \phi)\\
+	\phi(f) &= \text{e}^{-\frac{\pi}{\alpha}^{2}(f-f_{0})^{2}}\text{cis}[-2\pi(f - f_{0}) + \phi)]\\
+	\Delta t &= \sqrt{\frac{\pi}{2}}\frac{1}{\alpha}, \Delta f = \frac{1}{\sqrt{2\pi}}\alpha
+\end{flalign}
+
+The parameter $\alpha$ of the Gaussian function determines both $\Delta t$ and $\Delta f$. Figure \ref{fig:gauswidth} shows the effect of the width of the Gaussian function on the time-frequency resolution, and figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-frequency plane.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat{\includegraphics[height=3cm]{./images-tftheory/gabor3.png}}
-	\hspace{0.1em}
-	\subfloat{\includegraphics[height=2.56cm]{./images-tftheory/gabor4.png}}
-	\caption{A demonstration of the mutually exclusive formulations of time analysis and frequency analysis, and the lower bound of time-frequency resolution defined by Gabor's TF uncertainty principle (\cite{gabordiagrams})}
+	\includegraphics[width=5cm]{./images-tftheory/gabor14.png}
+	\caption{The width of the Gaussian function, controlled by $\alpha$, and its effect on $\Delta t$ and $\Delta f$}
+	\label{fig:gauswidth}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Mutually exclusive time and frequency, and the lower bound of time-frequency resolution defined by Gabor's limit]{\includegraphics[height=3.4cm]{./images-tftheory/gabor3.png}}\\
+	\subfloat[High frequency/low time, and low frequency/high time resolution logons]{\includegraphics[height=3.2cm]{./images-tftheory/gabor4.png}}
+	\caption{Different time-frequency resolutions (\cite{gabordiagrams})}
 	\label{fig:gabortf}
 \end{figure}
 
-Gabor noted the need for variable-frequency analysis, stating that ``the foregoing solutions [of the Fourier transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren.'' Similarly, psychoacoustics research shows that humans have been able to beat the time-frequency uncertainty principle (\cite{psycho1, psycho2}), indicating the presence of nonlinear operators in the auditory system.
+\newpagefill
+
+Alternate forms of the Gabor equations are derived by \textcite{gabor2}:
+\begin{flalign}
+	C_{\mathit{jk}}(t) &= e^{\frac{-\pi (t - j\Delta t)^{2}}{\alpha^{2}}} \cos{[2\pi k \Delta f(t-j\Delta t)]}\\
+	S_{\mathit{jk}}(t) &= e^{\frac{-\pi (t - j\Delta t)^{2}}{\alpha^{2}}} \sin{[2\pi k \Delta f(t-j\Delta t)]}\\
+	\phi_{\mathit{jk}} &= C_{\mathit{jk}} + jS_{\mathit{jk}}
+\end{flalign}
+
+As $\alpha \rightarrow \infty$, this reduces to the Fourier transform:
+\begin{flalign}
+	C_{\mathit{jk}}(t) &= \cos{[2\pi j k \Delta f(t - j \Delta t)]}\\
+	S_{\mathit{jk}}(t) &= \sin{[2\pi j k \Delta f(t - j \Delta t)]}\\
+	\phi_{\mathit{jk}}(t) &= e^{[2\pi j k \Delta f(t - j \Delta t)]}
+\end{flalign}
+
+As $\alpha \rightarrow 0$, this reduces to Dirac delta functions spaced at $\Delta t$, or unit impulse function as shown previously in \ref{equation:delta}:
+\begin{flalign}\label{equation:twodelta}
+	C_{\mathit{jk}}(t) &= S_{\mathit{jk}}(t) = \delta (t - j\Delta t) \\
+	\phi_{\mathit{jk}}(t) &= \delta (t - j \Delta t) + j \delta (t - j \Delta t) = a_{\mathit{ij}} + j b_{\mathit{ij}} 
+\end{flalign}
+
+We now explore the connection to Shannon's sampling theorem (\cite{shannon1948}). Shannon states that ``to reconstruct $\psi$ we must take equally spaced samples at a minimum of the Nyquist frequency, which is twice the maximal frequency.'' In equation \ref{equation:twodelta}, the $\alpha = 0$ limit of the Gabor equations represents two samples, $a_{\mathit{ij}}$ and $b_{\mathit{ij}}$, for each $\Delta t$ interval.
 
 The STFT, or short-time Fourier transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described in equation (2):
 \begin{flalign}
@@ -191,6 +257,37 @@ The STFT, or short-time Fourier transform, has been described independently from
 \end{flalign}
 
 where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations (1) and (2) are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
+
+\textcite{doerflersouls} describe the powerful properties of the STFT and why its such an important tool in the analysis of acoustic signals:
+
+\begin{quote}
+	... the STFT has at least three souls: it is the Fourier transform of windowed portions of the signal, it is the convolution of the signal with modulated versions of the window and it is the scalar product of the signal with time-shifted modulated versions of the window. These three souls can be exploited in the applications, for the computation of the STFT and for its sampling ...
+\end{quote}
+
+Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2048 samples, and 16384 samples, which at the sample rate of the glockenspiel signal (44100 Hz) represent $\sfrac{128}{44100}\cdot 1000 = $ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}}
+
+The Hamming window is advantageous over the Gaussian window because it is exactly zero outside of its specified range. The Gaussian window asymptotially approaches zero but never reaches it. \textcite{gabor2} describes that the Gabor functions are not strictly local, because from their infinite Gaussian envelope, they stretch out to infinity. This is biologically problematic, but the Gaussian envelope is well-localized (99.7\% of its area is within 3 standard deviations of the mean), so that the Gabor transform with Gaussian windows is in practice a ``good enough approximation'' of biology. The Gaussian and Hamming windows are contrasted in figure \ref{fig:windows}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=10cm]{./images-tftheory/gaussianvshann.png}
+	\caption{The Gaussian and Hamming windows}
+	\label{fig:windows}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[STFT, 128-sample Hamming window]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_128.png}}
+	\subfloat[Gabor transform, 128-sample Gaussian window]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_128.png}}\\
+	\subfloat[STFT, 2048-sample Hamming window]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_2048.png}}
+	\subfloat[Gabor transform, 2048-sample Gaussian window]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_2048.png}}\\
+	\subfloat[STFT, 16384-sample Hamming window]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_16384.png}}
+	\subfloat[Gabor transform, 16384-sample Gaussian window]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_16384.png}}
+	\caption{Visual comparison of the Hamming-window STFT and the Gaussian-window STFT (i.e. the Gabor transform), using the Glockenspiel signal. Note how the time resolution decreases with the window size (blurry temporal events i.e. vertical lines), while the frequency resolution increases (sharper frequencies i.e. horizontal lines)}
+	\label{fig:stfts}
+\end{figure}
+
+\newpagefill
 
 \subsubsection{Constant-Q Transform (CQT)}
 
