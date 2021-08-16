@@ -1,10 +1,6 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\chaptertodo{
-	unfuck all equations, labels, numbering, etc. -- make it all dynamic
-}
-
 \section{Background}
 \label{sec:background}
 
@@ -238,13 +234,13 @@ We close the chapter with a quote from \textcite{doerflersouls}, who describe th
 
 \subsubsection{Constant-Q Transform (CQT)}
 
-As initially described in section \ref{sec:motivation}, music should be analyzed with long-duration windows in the low frequency region, and with short-duration windows in the high frequency region (\cite{doerflerphd, cqtransient}). \textcite{cqtransient} also discussed the disadvantage of the STFT, which is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies. In contrast to this we know that due to both musical and auditory aspects frequency resolution is preferred that increases from high to low frequencies (and vice versa for time resolution).''
+As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low frequency region, and with a high time resolution in the high frequency region (\cite{doerflerphd, cqtransient}). \textcite{cqtransient} also state the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies. In contrast to this we know that due to both musical and auditory aspects frequency resolution is preferred that increases from high to low frequencies (and vice versa for time resolution).''
 
-The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\Delta f} = Q$.
+The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\Delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. A demonstration of a violin scale analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
-The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. Judith Brown's CQT also demonstrated a good time resolution (\cite{cqtransient}) for transients and broadband signals through its use of short-duration windows in the high-frequency regions. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each region. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients and broadband signals (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each region. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
-	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos(\frac{2\pi n}{N[k]})
+	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
 
 \begin{figure}[ht]
@@ -258,18 +254,45 @@ The resulting transform used long-duration windows in the low frequency regions 
 
 Shortly after the original CQT (\cite{jbrown}), a faster implementation of the same algorithm was published by \textcite{msp}. These early implementations of the CQT were computed by using specific window sizes for each frequency region of interest, and were also not designed to be invertible, making them suitable only for analysis. \textcite{klapuricqt}, considering \textcite{msp}'s CQT as a base, improved the performance, and introduced for the first time an algorithm for an approximated reconstruction of the CQT coefficients. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
-\todo[inline]{the original judith brown CQT is the origin of the research that led to the NSGT}
-The Constant-Q transform (CQT) is time-frequency transform for musical signals, originally designed by \textcite{jbrown}, the relationship between the fundamental frequency and its harmonics on a logarithmic frequency scale more clearly than the linear frequency scale of the traditional discrete Fourier transform (DFT).
+Let's again start with the STFT. The standard \Verb#spectrogram# in MATLAB\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} is computed using the short-time Fourier transform. The number of DFT output bins is set to twice the window size, and the overlap is set to half of the window size. An STFT with 3 different window sizes is shown in figure \ref{fig:cqtvstft}. The frequency resolution of the linear STFT is fixed at $\sfrac{\mathit{fs}}{N}$, where $\mathit{fs}$ is the sampling frequency or sample rate, and $N$ is the number of output bins of the DFT. The time resolution of the linear STFT depends on the window size. The table \ref{table:stftparams} shows the frequency resolution per window size of the STFT.
 
- A demonstration of the CQT is shown in figure \ref{fig:earlycqt}.
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l|c|c|c|c| }
+	 \hline
+	  Window size (samples) & Window size (ms) & DFT output bins & $\Delta f$ (Hz) \\
+	 \hline
+	 \hline
+	 256 & 5.8 & 512 & 86.1 \\
+	 \hline
+	 1024 & 23.2 & 2048 & 21.5  \\
+	 \hline
+	 4096 & 92.9 & 8192 & 5.4  \\
+	 \hline
+\end{tabular}
+	\caption{STFT window sizes and frequency resolution}
+	\label{table:stftparams}
+\end{table}
+
+Note that the time resolution is getting worse as the window size increases -- consider that within a window of 92.9ms, there may be several musical events occurring, such as transients or onsets, which cannot be separately distinguished, and are blurred together. However, as a tradeoff, the frequency resolution is becoming sharper -- each row of the STFT for a window of 92.9ms represents a frequency increment of 5.4Hz. Visually, we observe the time resolution of the spectrogram becoming blurrier while the frequency resolution gets sharper as the window size increases.
+
+Next, let's consider the NSGT-CQT from the MATLAB Wavelet Toolbox function \Verb#cqt#.\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} Various plots of the CQT are shown in figure \ref{fig:cqtvstft}. Note that the bins per octave parameter controls the frequency resolution -- more bins per octave gives us a finer frequency discrimination. The Gabor atoms used to create the CQT are not constant like the STFT -- they consist of a set of window functions with different center frequencies and bandwidths to maintain the constant-Q ratio. The bins-per-octave settings shown are 12, 24, and 48, which correspond to a constant-Q ratio of $2^{\sfrac{1}{\text{bins}}}$, or 1.059, 1.029, and 1.014 respectively.
+
+The advantage of the CQT over the linear-frequency STFT can be seen by displaying the spectrograms side-by-side, in figure \ref{fig:cqtvstft}. Note that the CQT (regardless of bins per octave) seems to be identifying more frequency components from the glockenspiel signal, even if in the case of less bins per octave, the frequency bins are blurry. The time resolution in the CQTs is also sharp, even with high frequency resolution.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Linear frequency spectrum]{\includegraphics[height=4.75cm]{./images-tftheory/violindft.png}}
-	\subfloat[Constant-Q transform]{\includegraphics[height=4.75cm]{./images-tftheory/violincqt.png}}
-	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$}
-	\label{fig:earlycqt}
+	\subfloat[CQT spectrogram, 12 bins per octave]{\includegraphics[width=0.48\textwidth]{./images-tftheory/glock_cqt12.png}}
+	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.48\textwidth]{./images-tftheory/glock_stft256.png}}\\
+	\subfloat[CQT spectrogram, 24 bins per octave]{\includegraphics[width=0.48\textwidth]{./images-tftheory/glock_cqt24.png}}
+	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[width=0.48\textwidth]{./images-tftheory/glock_stft1024.png}}\\
+	\subfloat[CQT spectrogram, 48 bins per octave]{\includegraphics[width=0.48\textwidth]{./images-tftheory/glock_cqt48.png}}
+	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[width=0.48\textwidth]{./images-tftheory/glock_stft4096.png}}
+	\caption{CQT versus STFT}
+	\label{fig:cqtvstft}
 \end{figure}
+
+\newpagefill
 
 \subsubsection{Nonstationary Gabor Transform (NSGT) and the sliCQ transform}
 \label{sec:theorynsgt}
@@ -313,8 +336,6 @@ The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in 
 	    Sch{\"o}rkhuber, Klapuri, Holighaus and D{\"o}rfler, 2014, a nonstationary Gabor transform, allows perfect reconstruction while the phases are still accurate. It might be interesting to implement this in Essentia.
 \end{enumerate}
 
-
-
 \todo[inline]{brief intro to frame theory and math stuff}
 
 \todo[inline]{irregular time and frequency sampling, show grids, varying time-frequency resolution etc.}
@@ -324,11 +345,6 @@ The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in 
 \todo[inline]{slicq is the realtime variant}
 
 \todo[inline]{whats the output, what does it mean, how does it relate to the FFT coefficients, time-frequency matrix}
-
-\newpagefill
-
-\subsection{Nonlinear frequency scales for music analysis}
-\label{sec:freqscales}
 
 \ichfeedback{better title? this is a bit long. ``Frequency scales that may be useful for music or psychoacoustic purposes'' seems like a mouthful - ``Frequency scales for music analysis``?}
 
