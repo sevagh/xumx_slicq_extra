@@ -238,7 +238,7 @@ As described in section \ref{sec:motivation}, music should be analyzed with a hi
 
 The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\Delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. A demonstration of a violin scale analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
-The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each region. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each frequency bin of interest. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
@@ -252,7 +252,7 @@ The resulting transform used long-duration windows in the low frequency regions 
 	\label{fig:jbrowncqt}
 \end{figure}
 
-Shortly after the original CQT (\cite{jbrown}), a faster implementation of the same algorithm was published by \textcite{msp}. These early implementations of the CQT were computed by using specific window sizes for each frequency region of interest, and were also not designed to be invertible, making them suitable only for analysis. Based on \textcite{msp}'s implementation, \textcite{klapuricqt} introduced an algorithm for an approximated reconstruction of the CQT coefficients. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
+Shortly after the original CQT (\cite{jbrown}), a faster implementation of the same algorithm was published by \textcite{msp}. These early implementations of the CQT were computed by using specific window sizes for each frequency bin, and were also not designed to be invertible, making them suitable only for analysis. Based on \textcite{msp}'s implementation, \textcite{klapuricqt} introduced an algorithm for an approximated reconstruction of the CQT coefficients. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
 \textcite{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale (\cite{westernpitch1, westernpitch2}).
 
@@ -281,17 +281,23 @@ Let's consider spectrogram plots generated from the standard STFT spectrogram us
 \subsubsection{Nonstationary Gabor Transform (NSGT) and the sliCQ transform}
 \label{sec:theorynsgt}
 
+The section on the Nonstationary Gabor Transform begins with \textcite{doerflerphd}, who analyzed music with multiple Gabor dictionaries (i.e. STFTs). Figure \ref{fig:dorflertradeoff} shows the time-frequency tradeoff of the short and long window STFT analyses of the glockenspiel signal for its transient and tonal characteristics, and how two Gabor dictionaries combined gives us the ability to analyze either the transient or tonal aspects with a more appropriate resolution.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=9cm]{./images-tftheory/tf_tradeoff_dorfler.png}
-	\caption{Time-frequency tradeoff for a glockenspiel signal}
+	\includegraphics[width=0.8\textwidth]{./images-tftheory/tf_tradeoff_dorfler.png}
+	\caption{Time-frequency tradeoff for a glockenspiel signal (\cite{doerflerphd})}
 	\label{fig:dorflertradeoff}
 \end{figure}
 
-\chaptertodo{
-	tf presentation 2 -- intro to doerfler 2 dictionaries and single transform NSGT
-}
+As summarized by \textcite{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions.'' \textcite{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.''
+
+
+Continuing from their description of multiple Gabor frames, \textcite{adaptivecqt} continue on to describe the outcomes of the Nonstationary Gabor frames of \textcite{jaillet, balazs}:
+
+\begin{quote}
+	The nonstationary Gabor frames (see [Jaillet 2009], [Balazs 2011] for their definition and implementation)  are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.
+\end{quote}
 
 The more general NSGT should be studied instead the CQT for the following reasons:
 \begin{itemize}
@@ -300,12 +306,6 @@ The more general NSGT should be studied instead the CQT for the following reason
 	\item
 		It can use other potentially interesting frequency scales besides the constant-Q logarithmic scale, such as the psychoacoustically-motivated mel, Bark, or ERB scales \todo{cite me}, or variable-Q scales \todo{cite gamma and other}
 \end{itemize}
-
-Additionally, the constant-Q transform \cite{jbrown, klapuricqt, invertiblecqt} even before its formulation as a specialized variant of the nonstationary Gabor transform \cite{balazs}, is an STFT applied with window of different sizes, which are of long duration at low frequencies to create a fine frequency resolution (and sacrificing time resolution as per the time-frequency uncertainty principle), and gradually decrease the windows in duration to improve the time resolution (and sacrifice frequency resolution). At the same time, consider that the iterative harmonic-percussive source separation algorithms in \cite{driedger, fitzgerald2} use two-pass spectral masking with two different configurations of spectrograms -- one with a large window size (4096 samples in \cite{driedger}, 16384 samples in \cite{fitzgerald2}) for representing the harmonic or pitched instruments sharply and estimating the harmonic mask, and one with a short window size (256 samples in \cite{driedger}, 1024 samples in \cite{fitzgerald2}) for representing percussion or transients more sharply and estimating the percussive mask.
-
-The connection to the CQT, or NSGT, is that these contain within a single transform the high frequency resolution of a the large-size spectrogram in the low frequency regions, and the high time resolution of the small-size spectrogram in the high frequency regions. According to \textcite{musicsepgood}'s survey on music source separation, most spectral masking techniques try to exploit the 
-
-The time-frequency tradeoff is demonstrated on a musical glockenspiel signal in figure \ref{fig:dorflertradeoff}. Notice how the wide window spectrogram shows frequency components (horizontal lines) with a sharper definition than the blurry lines in the narrow window spectrogram, while the narrow window spectrogram shows temporal events (vertical lines) with a sharper definition than the wide window spectrogram.
 
 \todo[inline]{brief intro to frame theory and math stuff}
 
