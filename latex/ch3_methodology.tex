@@ -21,6 +21,25 @@ The starting point for the sliCQ transform used in this paper is the Python refe
 
 \todo[inline]{first describe the reference library's generator-based design for ragged and matrix}
 
+ragged difficult to work with but:
+
+\textcite{klapuricqt}
+\begin{quote}
+	There are at least three reasons why the CQT has not
+	widely replaced the DFT in audio signal processing. Firstly,
+	it is computationally more intensive than the DFT. Sec-
+	ondly, the CQT lacks an inverse transform that would allow
+	perfect reconstruction of the original signal from its trans-
+	form coefficients. Thirdly, CQT produces a data structure
+	that is more difficult to work with than the time-frequency
+	matrix (spectrogram) obtained by using short-time Fourier
+	transform in successive time frames. The last problem is
+	due to the fact that in CQT, the time resolution varies for
+	different frequency bins, in effect meaning that the ”sam-
+	pling” of different frequency bins is not synchronized. In
+	this paper, we propose solutions to these three problems.
+\end{quote}
+
 \subsubsection{Overlapping slices and plotting sliCQ spectrograms}
 
 \ichfeedback{overlap-add 50\% slice business here too, showing its non-invertible, use Essentia to support argument, justifying how i need to add a final convolutional layer to grow by 50\%}
