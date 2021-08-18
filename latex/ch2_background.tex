@@ -114,7 +114,7 @@ In \textcite[Chapter~9]{discretebook} it is described that in its original formu
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7\textwidth]{./images-misc/bigo.png}\\
+	\includegraphics[width=0.7\textwidth]{./images-misc/bigo.png}
 	\caption{Visual comparison of the ``Big-O'', or worst-case running times of algorithms (taken from \url{https://www.bigocheatsheet.com/})}
 	\label{fig:bigo}
 \end{figure}
@@ -167,7 +167,7 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 	\label{fig:gaborfirst}
 \end{figure}
 
-The result of the time-frequency uncertainty principle is a property of the choice of the Fourier transform to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a consequence of the Fourier transform, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite{psycho2} describes one of these experiments:
+The result of the time-frequency uncertainty principle is a property of the use of the Fourier transform to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a consequence of the Fourier transform, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite{psycho2} describes one of these experiments:
 
 \begin{quote}
 	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen (DL) for a tone pulse of duration d. [...]  It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...]
@@ -197,7 +197,14 @@ The STFT, or short-time Fourier transform, has been described independently from
 	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)], X_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations \ref{equation:gabort} and \ref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations \ref{equation:gabort} and \ref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}} The MATLAB documentation for the \Verb#iscola# function contains the diagram in figure \ref{fig:stftdiagram}, which shows how a windowed Fourier transform (i.e. Gabor transform or STFT) is performed on the input signal.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./images-tftheory/stft_diagram.png}
+	\caption{Diagram showing the forward and inverse STFT or Gabor transform}
+	\label{fig:stftdiagram}
+\end{figure}
 
 Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-frequency plane, and how the Gabor transform and the STFT with higher frequency or higher time resolution appear on the time-frequency plane.
 
@@ -209,9 +216,18 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2048 samples, and 16384 samples, which at the sample rate of the glockenspiel signal (44100 Hz) represent $\sfrac{128}{44100}\cdot 1000 = $ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}}
+Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2048 samples, and 16384 samples, which at the sample rate of the glockenspiel signal (44100 Hz) represent $\sfrac{128}{44100}\cdot 1000 = $ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in figure \ref{fig:gaussvshamm}.
 
-We close the chapter with a quote from \textcite{doerflersouls}, who describe the powerful properties of the STFT and why its such an important tool in the analysis of acoustic signals:
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./images-tftheory/gaussianvshamming.png}
+	\caption{2048-sample Hamming and Gaussian windows compared}
+	\label{fig:gaussvshamm}
+\end{figure}
+
+\newpagefill
+
+We close the chapter with a quote from \textcite{doerflersouls} on the powerful properties of the STFT:
 
 \begin{quote}
        ... the STFT has at least three souls: it is the Fourier transform of windowed portions of the signal, it is the convolution of the signal with modulated versions of the window and it is the scalar product of the signal with time-shifted modulated versions of the window. These three souls can be exploited in the applications, for the computation of the STFT and for its sampling ...
@@ -224,8 +240,7 @@ We close the chapter with a quote from \textcite{doerflersouls}, who describe th
 	\subfloat[STFT, 2048-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_2048.png}}
 	\subfloat[Gabor transform, 2048-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_2048.png}}\\
 	\subfloat[STFT, 16384-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_16384.png}}
-	\subfloat[Gabor transform, 16384-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_16384.png}}\\
-	\subfloat[2048-sample Gaussian vs. Hamming window]{\includegraphics[width=0.5\textwidth]{./images-tftheory/gaussianvshamming.png}}
+	\subfloat[Gabor transform, 16384-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_16384.png}}
 	\caption{Visual comparison of the Hamming-window STFT and the Gaussian-window STFT (i.e. the Gabor transform), using the Glockenspiel signal}
 	\label{fig:stfts}
 \end{figure}
@@ -234,11 +249,11 @@ We close the chapter with a quote from \textcite{doerflersouls}, who describe th
 
 \subsubsection{Constant-Q Transform (CQT)}
 
-As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low frequency region, and with a high time resolution in the high frequency region (\cite{doerflerphd, cqtransient}). \textcite{cqtransient} also state the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies. In contrast to this we know that due to both musical and auditory aspects frequency resolution is preferred that increases from high to low frequencies (and vice versa for time resolution).''
+\textcite{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low frequency region, and with a high time resolution in the high frequency region (\cite{doerflerphd, cqtransient}). 
 
-The constant-Q transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\Delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. A demonstration of a violin scale analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
+The constant-Q transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
-The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each frequency bin of interest. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each frequency bin of interest. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
@@ -252,15 +267,15 @@ The resulting transform used long-duration windows in the low frequency regions 
 	\label{fig:jbrowncqt}
 \end{figure}
 
-Shortly after the original CQT (\cite{jbrown}), a faster implementation of the same algorithm was published by \textcite{msp}. These early implementations of the CQT were computed by using specific window sizes for each frequency bin, and were also not designed to be invertible, making them suitable only for analysis. Based on \textcite{msp}'s implementation, \textcite{klapuricqt} introduced an algorithm for an approximated reconstruction of the CQT coefficients. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
+This first CQT implementation was not designed to be invertible, until \textcite{klapuricqt} introduced an algorithm for an approximate inverse of the CQT back to the time-domain waveform, with an inversion error of $\approx 10^{-3}$. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
 \textcite{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale (\cite{westernpitch1, westernpitch2}).
 
-\textcite{invertiblecqt} approach the problem differently, and they implement the constant-Q transform with Nonstationary Gabor frames (\cite{balazs}), which allows for perfect reconstruction for the first time. This is also called the CQ-NSGT, or constant-Q Nonstationary Gabor Transform. \textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced constant-Q'' transform, which can process the input signal in sliced chunks. \textcite{variableq1} introduced the variable-Q scale and improved the phase of the transform.
+\textcite{invertiblecqt} implemented the constant-Q transform with Nonstationary Gabor frames (\cite{balazs}), which allows for perfect reconstruction for the first time. This is also called the CQ-NSGT, or constant-Q Nonstationary Gabor Transform. The next section, \ref{sec:theorynsgt}, will cover the NSGT, but for now we shall continue with how the NSGT led to improved implementations of the CQT.
 
-From \textcite{invertiblecqt}, the total frequency bins of the CQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale. The formula given is $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min|max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
+\textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale. The formula given is $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
 
-In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} (\cite{essentia}), LTFAT,\footnote{\url{https://ltfat.org/}} (\cite{ltfat}) and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} (\cite{librosa}) still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}).
+In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} (\cite{essentia}), LTFAT,\footnote{\url{https://ltfat.org/}} (\cite{ltfat}) and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} (\cite{librosa}) still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{slicq} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
 Let's consider spectrogram plots generated from the standard STFT spectrogram using the \Verb#spectrogram# function in MATLAB,\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} compared with the CQ-NSGT from the Wavelet Toolbox using the \Verb#cqt# function. Various plots of the STFT spectrogram vs. CQT spectrogram are shown in figure \ref{fig:cqtvstft}. The bins-per-octave parameter controls the frequency resolution -- more bins-per-octave gives us a finer frequency discrimination.
 
@@ -278,7 +293,7 @@ Let's consider spectrogram plots generated from the standard STFT spectrogram us
 
 \newpagefill
 
-\subsubsection{Nonstationary Gabor Transform (NSGT) and the sliCQ transform}
+\subsubsection{Nonstationary Gabor Transform (NSGT)}
 \label{sec:theorynsgt}
 
 The section on the Nonstationary Gabor Transform begins with \textcite{doerflerphd}, who analyzed music with multiple Gabor dictionaries (i.e. STFTs). Figure \ref{fig:dorflertradeoff} shows the time-frequency tradeoff of the short and long window STFT analyses of the glockenspiel signal for its transient and tonal characteristics, and how two Gabor dictionaries combined gives us the ability to analyze either the transient or tonal aspects with a more appropriate resolution.
@@ -290,30 +305,76 @@ The section on the Nonstationary Gabor Transform begins with \textcite{doerflerp
 	\label{fig:dorflertradeoff}
 \end{figure}
 
-As summarized by \textcite{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions.'' \textcite{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for sparse signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.''
+As summarized by \textcite{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions.'' \textcite{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for [...] signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.''
 
+Using multiple transforms, such as using two Gabor transforms (or STFTs) with a small and large window for the transient and tonal properties of music, is also called an \textit{overcomplete} dictionary (\cite{dictionary}), where there is a lot of redundancy in the transform domain.
 
-Continuing from their description of multiple Gabor frames, \textcite{adaptivecqt} continue on to describe the outcomes of the Nonstationary Gabor frames of \textcite{jaillet, balazs}:
+The advantage of the CQT over such approaches is that it contains these desirable transform properties in one single transform. The NSGT is the next evolution of the CQT based on frame theory (\cite{frametheory}). To derive the NSGT, let's recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \ref{equation:stationarygab}:
+\begin{align} \tag{10}\label{equation:stationarygab}
+g_{\tau, \omega}(t) = g(t - \tau)e^{2\pi i t \omega}
+\end{align}
+
+As stated by \textcite{adaptivecqt}, ``[w]e will indicate such a frame as \textit{stationary}, since the window used for time-frequency shifts does not change and the time-frequency shifts form a lattice of $a \times b$.'' Figure \ref{fig:uniformtflattice} shows the resulting uniform $a \times b$ tiling of the time-frequency plane.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=6.25cm]{./images-tftheory/stationarygabor.png}
+	\caption{Uniform time-frequency resolution with the stationary Gabor transform}
+	\label{fig:uniformtflattice}
+\end{figure}
+
+We can also describe \textcite{doerflerphd}'s multiple Gabor systems with the following set of equations, continuing from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by the equations in \ref{equation:onegabor}.
+\begin{align}
+	\nonumber g_{m,n}(t) &= g(t - na)e^{j2\pi m b t}, m,n \in \mathbb{Z}\\
+	\nonumber f(t) &= \sum_{m,n \in \mathbb{Z}}c_{m,n}g_{m,n}(t) \tag{12}\label{equation:onegabor}
+\end{align}
+
+Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each distinct window size, with the equations in \ref{equation:multigabor}:
+\begin{align}
+	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r})e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
+	\nonumber f(t) &= \sum_{r=0}^{R-1}\sum_{m,n \in \mathbb{Z}}c^{r}_{m,n}g^{r}_{m,n}(t) \tag{13}\label{equation:multigabor}
+\end{align}
+
+Continuing from their summary of \textcite{doerflerphd}'s work on multiple Gabor frames, \textcite{adaptivecqt} continue on to describe the outcomes of the Nonstationary Gabor frames of \textcite{jaillet, balazs}: ``[t]he nonstationary Gabor frames [...] are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.''
+
+For a resolution that changes with time, the Nonstationary Gabor atom is chosen from a set of functions $\{g_{n}\}$ and a fixed frequency sampling step $b_{n}$:
+\begin{align}\tag{14}\label{equation:irregulartime}
+	g_{m,n}(t) &= g_{n}(t)e^{j2\pi m b_{n}t}, m,n \in \mathbb{Z}
+\end{align}
+
+To describe equation \ref{equation:irregulartime}, Balazs states:
 
 \begin{quote}
-	The nonstationary Gabor frames (see [Jaillet 2009], [Balazs 2011] for their definition and implementation)  are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.
+		[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.
 \end{quote}
 
-The more general NSGT should be studied instead the CQT for the following reasons:
-\begin{itemize}
-	\item
-		It solves the earlier CQT's \cite{jbrown, klapuricqt, fitzgeraldcqt} lack of stable inverse, which was a known weakness \cite{lackinverse}
-	\item
-		It can use other potentially interesting frequency scales besides the constant-Q logarithmic scale, such as the psychoacoustically-motivated mel, Bark, or ERB scales \todo{cite me}, or variable-Q scales \todo{cite gamma and other}
-\end{itemize}
+For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass function with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$:
+\begin{align}\tag{15}\label{equation:irregularfrequency}
+	h_{m,n}(t) = h_{m}(t - na_{m}), m,n \in \mathbb{Z}
+\end{align}
 
-\todo[inline]{brief intro to frame theory and math stuff}
+From these NSGT equations, we can get back the stationary Gabor transform by setting a fixed time constant $a$ or frequency constant $b$ in the equations \ref{equation:irregulartime} and \ref{equation:irregularfrequency} respectively. Finally, figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolution by time and by frequency.
 
-\todo[inline]{irregular time and frequency sampling, show grids, varying time-frequency resolution etc.}
+\begin{figure}[ht]
+	\centering
+	\subfloat[Gabor atoms that change with time]{\includegraphics[width=5cm]{./images-tftheory/irregulartime.png}}
+	\hspace{1em}
+	\subfloat[Gabor atoms that change with frequency]{\includegraphics[width=5cm]{./images-tftheory/irregularfrequency.png}}
+	\caption{Varying time-frequency resolution of the Nonstationary Gabor transform}
+	\label{fig:nonuniformtflattices}
+\end{figure}
 
-\todo[inline]{arbitrary f scales and time scales}
+As a final note, the general NSGT is more interesting to study than the CQ-NSGT (constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
-\todo[inline]{slicq is the realtime variant}
+\newpagefill
+
+\subsubsection{sliCQ Transform (sliCQT)}
+\label{sec:theoryslicqt}
+
+\todo[inline]{
+	slicq is the realtime variant\\
+	noninvertible overlap thing here
+}
 
 \newpagefill
 
@@ -349,7 +410,7 @@ The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test spl
 
 The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. There are 4 distinct metrics that comprise BSS:
 
-\begin{itemize}
+\begin{tight_itemize}
 \item
 	\textbf{ISR:} source Image to Spatial distortion Ratio
 \item
@@ -358,13 +419,20 @@ The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from t
 	\textbf{SAR:} Signal to Artifacts Ratio
 \item
 	\textbf{SDR:} Signal to Distortion Ratio
-\end{itemize}
+\end{tight_itemize}
 
-Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from the following equation:
+Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from the following equation \ref{equation:sdrinstr}:
+\begin{align}
+	\nonumber & \text{SDR}_{\text{instr}} = \\
+	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{10}\label{equation:sdrinstr}
+\end{align}
 
-\[ \]
+The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from the equation \ref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \ref{equation:sdrsong}:
+\begin{align}
+	\text{SDR}_{\text{song}} = \frac{1}{4}(\text{SDR}_{\text{bass}} + \text{SDR}_{\text{drums}} + \text{SDR}_{\text{vocals}} + \text{SDR}_{\text{other}}) \tag{11}\label{equation:sdrsong}
+\end{align}
 
-In the SigSep community and in the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measure used is BSS v4, a variant of BSS available in their Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval.\footnote{\url{https://github.com/sigsep/bsseval}} The differences between BSS as used in SiSec 2016 (\cite{sisec2016}) and BSS v4 are outlined in the bsseval project's GitHub README file:
+In the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measure used is BSS v4, a variant of BSS available in their Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval.\footnote{\url{https://github.com/sigsep/bsseval}} The differences between BSS as used in SiSec 2016 (\cite{sisec2016}) and BSS v4 are outlined in the bsseval project's GitHub README file:
 
 \begin{quote}
 	One particularity of BSSEval is to compute the metrics after optimally matching the estimates to the true sources through linear distortion filters. This allows the criteria to be robust to some linear mismatches... this matching is the reason for most of the computation cost of BSSEval...
