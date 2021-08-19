@@ -349,7 +349,7 @@ We can also describe \textcite{doerflerphd}'s multiple Gabor systems with the fo
 	\nonumber f(t) &= \sum_{m,n \in \mathbb{Z}}c_{m,n}g_{m,n}(t) \tag{12}\label{equation:onegabor}
 \end{align}
 
-Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each distinct window size, with the equations in \ref{equation:multigabor}:
+Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, with the equations in \ref{equation:multigabor}:
 \begin{align}
 	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r})e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{r=0}^{R-1}\sum_{m,n \in \mathbb{Z}}c^{r}_{m,n}g^{r}_{m,n}(t) \tag{13}\label{equation:multigabor}
@@ -382,7 +382,7 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
-As a final note, the general NSGT is more interesting to study than the CQ-NSGT (constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
+As a final note, we believe that the general NSGT is more interesting to study than the CQ-NSGT (constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
 Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library which has a spectrogram script. My modifications to the library will be described further in sections \ref{sec:methodology} and \ref{sec:experiment}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, constant-Q, and variable-Q, using a frequency range of 20--22050 Hz. For the variable-Q scale, the fixed frequency offset applied is 15 Hz. 20 Hz is the accepted lowest frequency of human hearing (\cite{moore}), and 22050 Hz is the Nyquist frequency (or maximum supported signal frequency) of the common sample rate, 44100 Hz. In practice, the minimum and maximum frequencies are also useful parameters that can be customized to fit the type of signal or application.
 
