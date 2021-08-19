@@ -386,7 +386,7 @@ As a final note, the general NSGT is more interesting to study than the CQ-NSGT 
 
 Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library which has a spectrogram script. My modifications to the library will be described further in sections \ref{sec:methodology} and \ref{sec:experiment}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, constant-Q, and variable-Q, using a frequency range of 20--22050 Hz. For the variable-Q scale, the fixed frequency offset applied is 15 Hz. 20 Hz is the accepted lowest frequency of human hearing (\cite{moore}), and 22050 Hz is the Nyquist frequency (or maximum supported signal frequency) of the common sample rate, 44100 Hz. In practice, the minimum and maximum frequencies are also useful parameters that can be customized to fit the type of signal or application.
 
-Details of the frequency scales used to generate the NSGT spectrograms are shown in tables \ref{table:nsgtfreqs} and \ref{table:nsgtqs}.
+Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
@@ -410,82 +410,99 @@ Details of the frequency scales used to generate the NSGT spectrograms are shown
 
 \begin{table}[ht]
 	\centering
-\begin{tabular}{ |l|l|l| }
+\begin{tabular}{ |l|l|p{9cm}| }
 	 \hline
-	 Scale & First 10 frequencies & Last 10 frequencies  \\
+	 Scale & Bins & First 5 frequency bins \\
 	 \hline
 	 \hline
-	 Constant-Q & b & c \\
+	 Constant-Q & 100 & 20.00, 21.47, 23.04, 24.73, 26.54 \\
 	 \hline
-	 Variable-Q & b & c \\
+	 Variable-Q (+15 Hz) & 100 & 35.00, 36.47, 38.04, 39.73, 41.54 \\
 	 \hline
-	 mel & b & c \\
+	 mel & 100 & 20.00, 45.56, 72.02, 99.42, 127.80 \\
 	 \hline
-	 Bark & b & c \\
+	 Bark & 100 & 20.00, 45.88, 71.85, 97.96, 124.24 \\
+	 \hline
+	 Constant-Q & 500 & 20.00, 20.28, 20.57, 20.86, 21.16 \\
+	 \hline
+	 Variable-Q (+15 Hz) & 500 & 35.00, 35.28, 35.57, 35.86, 36.16 \\
+	 \hline
+	 mel & 500 & 20.00, 25.00, 30.03, 35.10, 40.21 \\
+	 \hline
+	 Bark & 500 & 20.00, 25.13, 30.26, 35.40, 40.54 \\
+	 \hline
+\end{tabular}\\
+\vspace{1em}
+\begin{tabular}{ |l|l|p{9cm}| }
+	 \hline
+	 Scale & Bins & Last 5 frequency bins \\
+	 \hline
+	 \hline
+	 Constant-Q & 100 & 16614.38, 17832.63, 19140.20, 20543.64, 22050.00 \\
+	 \hline
+	 Variable-Q (+15 Hz) & 100 & 16629.38, 17847.63, 19155.20, 20558.64, 22065.00 \\
+	 \hline
+	 mel & 100 & 19087.44, 19789.79, 20517.07, 21270.17, 22050.00 \\
+	 \hline
+	 Bark & 100 & 18558.87, 19376.12, 20229.33, 21120.07, 22050.00 \\
+	 \hline
+	 Constant-Q & 500 & 20845.91, 21140.62, 21439.50, 21742.61, 22050.00 \\
+	 \hline
+	 Variable-Q (+15 Hz) & 500 & 20860.91, 21155.62, 21454.50, 21757.61, 22065.00 \\
+	 \hline
+	 mel & 500 & 21428.92, 21582.58, 21737.31, 21893.11, 22050.00 \\
+	 \hline
+	 Bark & 500 & 21308.75, 21491.70, 21676.21, 21862.31, 22050.00 \\
+	 \hline
+\end{tabular}\\
+\vspace{1em}
+\begin{tabular}{ |l|l|p{9cm}| }
+	 \hline
+	 Scale & Bins & First 5 Q factors \\
+	 \hline
+	 \hline
+	 Constant-Q & 100 & 7.06, 7.06, 7.06, 7.06, 7.06  \\
+	 \hline
+	 Variable-Q (+15 Hz) & 100 & 12.37, 12.00, 11.67, 11.35, 11.06 \\
+	 \hline
+	 mel & 100 & 0.40, 0.88, 1.34, 1.78, 2.21 \\
+	 \hline
+	 Bark & 100 & 0.39, 0.89, 1.38, 1.87, 2.35 \\
+	 \hline
+	 Constant-Q & 500 & 35.62, 35.62, 35.62, 35.62, 35.62 \\
+	 \hline
+	 Variable-Q (+15 Hz) & 500 & 62.33, 61.96, 61.59, 61.23, 60.87 \\
+	 \hline
+	 mel & 500 & 2.01, 2.49, 2.97, 3.45, 3.92 \\
+	 \hline
+	 Bark & 500 & 1.95, 2.45, 2.95, 3.45, 3.94 \\
+	 \hline
+\end{tabular}\\
+\vspace{1em}
+\begin{tabular}{ |l|l|p{9cm}| }
+	 \hline
+	 Scale & Bins & Last 5 Q factors \\
+	 \hline
+	 \hline
+	 Constant-Q & 100 & 7.06, 7.06, 7.06, 7.06, 7.06  \\
+	 \hline
+	 Variable-Q (+15 Hz) & 100 & 7.07, 7.07, 7.07, 7.07, 7.07 \\
+	 \hline
+	 mel & 100 & 13.83, 13.85, 13.86, 13.88, 13.89 \\
+	 \hline
+	 Bark & 100 & 11.60, 11.60, 11.60, 11.60, 11.60 \\
+	 \hline
+	 Constant-Q & 500 & 35.62, 35.62, 35.62, 35.62, 35.62 \\
+	 \hline
+	 Variable-Q (+15 Hz) & 500 & 35.64, 35.64, 35.64, 35.64, 35.64 \\
+	 \hline
+	 mel & 500 & 69.97, 69.98, 70.00, 70.02, 70.03 \\
+	 \hline
+	 Bark & 500 & 58.49, 58.49, 58.49, 58.49, 58.49 \\
 	 \hline
 \end{tabular}
-	\caption{NSGT scale frequencies for 100 bins and 20-22050 Hz}
-	\label{table:nsgtfreqs100}
-\end{table}
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l| }
-	 \hline
-	 Scale & First 10 Q factors & Last 10 Q factors  \\
-	 \hline
-	 \hline
-	 Constant-Q & b & c \\
-	 \hline
-	 Variable-Q & b & c \\
-	 \hline
-	 mel & b & c \\
-	 \hline
-	 Bark & b & c \\
-	 \hline
-\end{tabular}
-	\caption{NSGT scale Q factors for 100 bins and 20-22050 Hz}
-	\label{table:nsgtqs100}
-\end{table}
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l| }
-	 \hline
-	 Scale & First 10 frequencies & Last 10 frequencies  \\
-	 \hline
-	 \hline
-	 Constant-Q & b & c \\
-	 \hline
-	 Variable-Q & e & f \\
-	 \hline
-	 mel & e & f \\
-	 \hline
-	 Bark & e & f \\
-	 \hline
-\end{tabular}
-	\caption{NSGT scale frequencies for 500 bins and 20-22050 Hz}
-	\label{table:nsgtfreqs500}
-\end{table}
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l| }
-	 \hline
-	 Scale & First 10 Q factors & Last 10 Q factors  \\
-	 \hline
-	 \hline
-	 Constant-Q & b & c \\
-	 \hline
-	 Variable-Q & b & c \\
-	 \hline
-	 mel & b & c \\
-	 \hline
-	 Bark & b & c \\
-	 \hline
-\end{tabular}
-	\caption{NSGT scale Q factors for 500 bins and 20-22050 Hz}
-	\label{table:nsgtqs500}
+	\caption{Different frequencies and Q factors for various NSGT scales, 20-22050 Hz}
+	\label{table:nsgtfreqsandqs}
 \end{table}
 
 \newpagefill

@@ -1,0 +1,155 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Boadilla}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{fancyvrb}
+\usepackage{soul}
+\usepackage{multicol}
+\usepackage{optparams}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning}
+\newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
+\usepackage{subfig}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+\addbibresource{citations.bib}
+\usepackage{pgfpages}
+\usepackage{xcolor}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+\setbeameroption{hide notes}
+\input{variables.tex}
+
+\title{xumx-sliCQ}
+\subtitle{sevagh's submission to the Music Demixing Challenge}
+\author{Sevag H.}
+\date{August 21, 2021}
+\setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+  \clearfield{isbn}%
+  \clearfield{title}%
+  \clearfield{url}%
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{inproceedings}{
+    \clearfield{booktitle}%
+}{}
+}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+	\frametitle{Who am I}
+	\begin{enumerate}
+		\item
+			Sevag H. (sevagh, my screen name, = first name + last initial)
+		\item
+			Electrical engineering background (B.Eng from McGill in 2014) -- first intro to signal processing
+		\item
+			Linux infrastructure engineer at Pandora (U.S. music streaming)
+		\item
+			Active open-source enthusiast on GitHub: \href{https://github.com/sevagh}{https://github.com/sevagh}
+			I write music-related code because I like music, and I like to practice coding in a domain that I personally care about, to stay motivated
+		\item
+			Current student in the Master of Arts, Music Technology program at McGill -- member of the Distributed Digital Music Archives \& Libraries lab: \href{https://ddmal.music.mcgill.ca/}{https://ddmal.music.mcgill.ca/} led by Prof. Ichiro Fujinaga. I chose grad school to have some guidance after hitting a limit in my self-learning
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{MDX challenge motivations}
+	Why did I choose to participate?
+	\begin{enumerate}
+		\item
+			I first looked at the median-filtering harmonic/percussive source separation\footfullcite{fitzgerald1} algorithm as preprocessing for joint pitch + beat tracking
+		\item
+			Since then, spent 1+ year studying music demixing (mostly from the perspective of time-frequency resolution)
+		\item
+			Timing of this competition coincided with my tentative thesis topic -- replace the STFT in Open-Unmix with a different time-frequency transform, and see if we can improve the results
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Improved demixing with multiple STFTs}
+	\begin{figure}[ht]
+		\vspace{-1em}
+		\centering
+		\subfloat[128-sample window]{\includegraphics[height=2.75cm]{./images-gspi/gspi_hamm_128.png}}
+		\hspace{0.5em}
+		\subfloat[16384-sample window]{\includegraphics[height=2.75cm]{./images-gspi/gspi_hamm_16384.png}}\\
+		\caption{STFT spectrograms of glockenspiel}
+		\vspace{-1em}
+	\end{figure}
+	Music has conflicting requirements in the STFT; it needs long windows in the low frequency region for a high frequency resolution, because bass notes lay the harmonic basis, and short windows in the high frequency region for transients (timbre and rhythm)\footfullcite{doerflerphd}\\
+	Multi-STFT HPSS\footfullcite{driedger}, different-sized time-frequency filters on one STFT\footfullcite{plumbley2}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Improved HPSS with the constant-Q transform}
+	\begin{figure}[ht]
+		\vspace{-1em}
+		\centering
+		\subfloat[12 bins-per-octave]{\includegraphics[height=2.75cm]{./images-gspi/glock_cqt12.png}}
+		\hspace{1em}
+		\subfloat[48 bins-per-octave]{\includegraphics[height=2.75cm]{./images-gspi/glock_cqt48.png}}
+		\caption{CQT spectrograms of glockenspiel}
+		\vspace{-1em}
+	\end{figure}
+	The Constant-Q transform\footcite{jbrown} was designed to analyze music on the 12-tone Western pitch scale, using long windows in low frequency regions and short windows in high frequency regions, with approximate inverse\footfullcite{klapuricqt}\\
+	CQT HPSS\footfullcite{fitzgerald2}, CQT music demixing\footfullcite{bettermusicsep}
+\end{frame}
+
+\begin{frame}
+	\frametitle{My approach -- the sliCQ Transform}
+	\begin{enumerate}
+	\item
+		Nonstationary Gabor Transform\footcite{balazs} and the realtime variant the sliCQ transform\footcite{invertiblecqt} are time-frequency transforms built from frame theory, which is a mathematical technique for computing ``redundant, stable way[s] of representing a signal''\footfullcite{framesintro}
+	\item
+		The CQT is the motivating application for the NSGT and sliCQT. However, they can be used to implement a perfectly invertible TFR with any (monotonically increasing) frequency scale, by applying an STFT with a window size that varies with time. It uses the familiar Fourier coefficients, and supports constant-Q/Western pitch scale, mel, Bark, ERBlets,\footfullcite{variableq1} etc.
+	\item
+		We can define any frequency scale suitable for the application or nature of the input signal
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{What didn't work -- the matrix form of the sliCQT}
+\end{frame}
+
+\begin{frame}
+	\frametitle{My impressions on the competition}
+ ``It is definitely a great environment to push the limit, had it been for a paper, I would have stopped sooner.'' -- defossez
+\end{frame}
+
+\end{document}

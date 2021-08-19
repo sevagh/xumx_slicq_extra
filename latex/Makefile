@@ -39,6 +39,11 @@ ch5-dev: ch5
 ch5: tex_fname="ch5_conclusion.tex"
 ch5: texpdf
 
+mdx-presentation-dev: export LATEXMK_FLAGS="-pvc"
+mdx-presentation-dev: mdx-presentation
+mdx-presentation: tex_fname="mdx_townhall_aug21.tex"
+mdx-presentation: texpdf
+
 all: report
 
 clean:
