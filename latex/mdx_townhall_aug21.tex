@@ -124,61 +124,52 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{My approach part 1 -- sliCQ Transform}
+	\frametitle{My approach -- sliCQT}
 	\begin{enumerate}
 	\item
-		Gabor\footcite{gabor1946} wrote the first published use of the short-time Fourier transform.\footcite{dictionary} Nonstationary Gabor transform\footcite{balazs} and the realtime sliCQ transform\footcite{invertiblecqt, slicq, variableq1} are built from frame theory, a mathematical technique for finding ``redundant, stable way[s] of representing a signal''\footcite{framesintro} -- STFT-like operation but with windows that vary with time
-	\item
-		CQT is the motivation for the NSGT/sliCQT, but they can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.), and output the familiar Fourier coefficients with perfect inverse
+		Nonstationary Gabor transform\footcite{balazs} and the realtime sliCQ transform\footcite{invertiblecqt, slicq, variableq1} are STFT-like operations but with windows that can vary with time. CQT is the motivation for the NSGT/sliCQT, but they can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.), and output the familiar Fourier coefficients with perfect inverse
 	\item
 		Goal: use the sliCQT to choose optimal time-frequency resolutions per frequency and boost spectral models past waveform models\footfullcite{demucs}
 	\end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]
-	\frametitle{sliCQT configuration for xumx-sliCQ}
 	\begin{figure}[ht]
 		\centering
-		\includegraphics[height=3cm]{./images-gspi/gspi_xumx_slicq_params.png}
-		\caption{sliCQT spectrogram of glockenspiel}
+		\vspace{-0.5em}
+		\includegraphics[height=2.5cm]{./images-gspi/gspi_xumx_slicq_params.png}
+		\vspace{-0.5em}
+		\caption{sliCQT: 262-bin Bark scale, 32.9--22050 Hz, 18060/4514 sllen/trlen}
+		\vspace{-0.5em}
 	\end{figure}
-	PyTorch/GPU-capable fork: \url{https://github.com/sevagh/nsgt}
-	\begin{verbatim}
-	$ python examples/spectrogram.py \
-		 --scale bark --bins 262 --fmin 32.9 \
-		 --fmax 22050 --sllen 18060 --trlen 4514  --plot ./gspi.wav
-	\end{verbatim}
-	Settings were chosen from my parameter search for xumx-sliCQ; read more here: \url{https://github.com/sevagh/xumx-sliCQ/blob/main/docs/slicq_params.md}
 \end{frame}
 
 \begin{frame}
-	\frametitle{My approach part 2 -- xumx-sliCQ, a variant of Open-Unmix}
-	\begin{itemize}
-		\item
-			xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}
-		\item
-			Even if not using the Bi-LSTM\footcite{umx} of Open-Unmix, using the template \url{https://github.com/sigsep/open-unmix-pytorch} gives you a full ecosystem for spectral demixing including MUSDB18-HQ loader, BSS evaluator, and a post-processing Wiener-EM step
-		\item
-			Replaces the STFT with sliCQT, and uses convolutional architectures\footfullcite{plumbley1, plumbley2} instead of Bi-LSTM (time-frequency 2D convolutional filters, applicable to any spectral transform)
-		\item
-			Adds CrossNet-Open-Unmix (aka X-UMX) features\footcite{xumx} including combining all 4 targets with multi-target and cross-domain (time and frequency) loss
-	\end{itemize}
+	\frametitle{My approach -- xumx-sliCQ}
+	\begin{enumerate}
+	\item
+		xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}, PyTorch fork of NSGT/sliCQ: \url{https://github.com/sevagh/nsgt}
+	\item
+		Drops the Bi-LSTM,\footcite{umx} but relies on the Open-Unmix PyTorch template as a spectral demixing ``framework''
+	\item
+		Replaces the STFT with sliCQT, uses a convolutional architecture,\footfullcite{plumbley2} and adds CrossNet-Open-Unmix (X-UMX)\footcite{xumx} combined model and loss
+\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-1em}
+		\includegraphics[height=3cm]{./images-blockdiagrams/xumx_slicq_system.png}
+		\caption{xumx-sliCQ network architecture}
+		\vspace{-1em}
+	\end{figure}
 \end{frame}
 
 \begin{frame}
 	\frametitle{What worked vs. didn't work}
-	\begin{enumerate}
-		\item
-			sliCQT has a matrix form with zero-padding
-		\item
-			Bad neural network convergence and demixing results from the matrix form -- different frequency bins have a different temporal frame rate
-		\item
-			Switched to using the ragged form, and applying convolutional layers to grouped frequency bins
-	\end{enumerate}
+	sliCQT has a matrix form with zero-padding; poor neural network convergence/demixing results from the matrix form, because different frequency bins have a different temporal frame rate. Ragged form:
 	\begin{figure}[ht]
 		\centering
-		\includegraphics[width=10cm]{./images-blockdiagrams/slicq_shape.png}\\
-		\caption{sliCQT ragged shape for one slice of the time-domain waveform}
+		\includegraphics[height=3.5cm]{./images-blockdiagrams/slicq_shape.png}\\
+		\vspace{0.25em}
+		\hrule
+		\vspace{0.25em}
+		\includegraphics[height=3cm]{./images-blockdiagrams/xumx_slicq_pertarget.png}
 	\end{figure}
 \end{frame}
 
@@ -186,9 +177,9 @@
 	\frametitle{Competition results}
 	\begin{enumerate}
 	\item
-		Luck-based and undisciplined approach with random network architectures -- consider it a ``proof-of-concept'' of sliCQT demixing
+		Luck-based approach with network copied from STFT models
 	\item
-		Invitation to demixing researchers: more rigorous, data-driven approaches to the sliCQT parameter search and network architecture might produce a good result
+		Invitation to demixing researchers: more rigorous, data-driven approaches to the sliCQT parameter search and network architectures might produce a good result
 	\end{enumerate}
 	\begin{figure}[ht]
 		\centering
@@ -211,9 +202,9 @@
 	 \item
 		 I could have paid more attention to what my peers were doing, or used a different baseline, but after the first Town Hall I decided I want to see how far I could go with the sliCQT + UMX
 	 \item
-		 GitLab submission process worked better than I expected, submissions were easy, and the containers had important deep learning Python libraries already installed -- minimal conda/pip/Python issues
+		 GitLab submission process worked well, submissions were easy, and the containers had important Python libraries already installed
 	 \item
-		 I got the impression that success was more about data than clever coding. I should improve my machine learning skills for the 2022 competition
+		 I look forward to the 2022 competition
 	\end{enumerate}
 \end{frame}
 
