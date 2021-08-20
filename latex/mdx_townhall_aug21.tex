@@ -77,79 +77,144 @@
 		\item
 			Sevag H. (sevagh, my screen name, = first name + last initial)
 		\item
-			Electrical engineering background (B.Eng from McGill in 2014) -- first intro to signal processing
-		\item
-			Linux infrastructure engineer at Pandora (U.S. music streaming)
+			Electrical engineering background, Linux infrastructure engineer at Pandora (U.S. music streaming service)
 		\item
 			Active open-source enthusiast on GitHub: \href{https://github.com/sevagh}{https://github.com/sevagh}
-			I write music-related code because I like music, and I like to practice coding in a domain that I personally care about, to stay motivated
+			I write music-related code because I like to code and I like music
 		\item
-			Current student in the Master of Arts, Music Technology program at McGill -- member of the Distributed Digital Music Archives \& Libraries lab: \href{https://ddmal.music.mcgill.ca/}{https://ddmal.music.mcgill.ca/} led by Prof. Ichiro Fujinaga. I chose grad school to have some guidance after hitting a limit in my self-learning
+			Current student in the Master of Arts, Music Technology program at McGill -- member of the Distributed Digital Music Archives \& Libraries lab: \href{https://ddmal.music.mcgill.ca/}{https://ddmal.music.mcgill.ca/} led by Prof. Ichiro Fujinaga
 	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{MDX challenge motivations}
-	Why did I choose to participate?
+	Why did I choose to participate in the MDX challenge?
 	\begin{enumerate}
 		\item
 			I first looked at the median-filtering harmonic/percussive source separation\footfullcite{fitzgerald1} algorithm as preprocessing for joint pitch + beat tracking
 		\item
-			Since then, spent 1+ year studying music demixing (mostly from the perspective of time-frequency resolution)
+			Fascinated by music demixing since, from the signal processing perspective of time-frequency resolution and realtime performance
 		\item
-			Timing of this competition coincided with my tentative thesis topic -- replace the STFT in Open-Unmix with a different time-frequency transform, and see if we can improve the results
+			Timing of competition coincided with tentative thesis -- replace the STFT in Open-Unmix with a different time-frequency transform
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Improved demixing with multiple STFTs}
-	\begin{figure}[ht]
-		\vspace{-1em}
-		\centering
-		\subfloat[128-sample window]{\includegraphics[height=2.75cm]{./images-gspi/gspi_hamm_128.png}}
-		\hspace{0.5em}
-		\subfloat[16384-sample window]{\includegraphics[height=2.75cm]{./images-gspi/gspi_hamm_16384.png}}\\
-		\caption{STFT spectrograms of glockenspiel}
-		\vspace{-1em}
-	\end{figure}
-	Music has conflicting requirements in the STFT; it needs long windows in the low frequency region for a high frequency resolution, because bass notes lay the harmonic basis, and short windows in the high frequency region for transients (timbre and rhythm)\footfullcite{doerflerphd}\\
-	Multi-STFT HPSS\footfullcite{driedger}, different-sized time-frequency filters on one STFT\footfullcite{plumbley2}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Improved HPSS with the constant-Q transform}
-	\begin{figure}[ht]
-		\vspace{-1em}
-		\centering
-		\subfloat[12 bins-per-octave]{\includegraphics[height=2.75cm]{./images-gspi/glock_cqt12.png}}
-		\hspace{1em}
-		\subfloat[48 bins-per-octave]{\includegraphics[height=2.75cm]{./images-gspi/glock_cqt48.png}}
-		\caption{CQT spectrograms of glockenspiel}
-		\vspace{-1em}
-	\end{figure}
-	The Constant-Q transform\footcite{jbrown} was designed to analyze music on the 12-tone Western pitch scale, using long windows in low frequency regions and short windows in high frequency regions, with approximate inverse\footfullcite{klapuricqt}\\
-	CQT HPSS\footfullcite{fitzgerald2}, CQT music demixing\footfullcite{bettermusicsep}
-\end{frame}
-
-\begin{frame}
-	\frametitle{My approach -- the sliCQ Transform}
+	\frametitle{Improved HPSS}
 	\begin{enumerate}
 	\item
-		Nonstationary Gabor Transform\footcite{balazs} and the realtime variant the sliCQ transform\footcite{invertiblecqt} are time-frequency transforms built from frame theory, which is a mathematical technique for computing ``redundant, stable way[s] of representing a signal''\footfullcite{framesintro}
+		Multi-STFT HPSS.\footfullcite{driedger} In spectral demixing/source separation, window size of STFT matters, one size does not fit all\footfullcite{tftradeoff1, tftradeoff2}
 	\item
-		The CQT is the motivating application for the NSGT and sliCQT. However, they can be used to implement a perfectly invertible TFR with any (monotonically increasing) frequency scale, by applying an STFT with a window size that varies with time. It uses the familiar Fourier coefficients, and supports constant-Q/Western pitch scale, mel, Bark, ERBlets,\footfullcite{variableq1} etc.
+		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footfullcite{cqtransient}
 	\item
-		We can define any frequency scale suitable for the application or nature of the input signal
+		Music must be analyzed with long windows/$\uparrow \Delta f$ in the low frequencies for the harmonic basis of the bass notes, and short windows/$\uparrow \Delta t$ in the high frequency region for detecting transients\footfullcite{doerflerphd}
+	\item
+		CQT HPSS.\footfullcite{fitzgerald2} Constant-Q transform\footcite{jbrown} analyzes music on the 12-tone Western pitch scale; long windows in low frequencies, and short windows in high frequencies. Approximate inverse\footfullcite{klapuricqt} in librosa
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}
-	\frametitle{What didn't work -- the matrix form of the sliCQT}
+	\frametitle{CQT vs. STFT spectrograms}
+	\begin{figure}[ht]
+		\centering
+		\subfloat[CQT, 12 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt12.png}}
+		\subfloat[CQT, 24 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt24.png}}
+		\subfloat[CQT, 48 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt48.png}}\\
+		\vspace{-0.5em}
+		\subfloat[STFT, window = 256]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft256.png}}
+		\subfloat[STFT, window = 1024]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft1024.png}}
+		\subfloat[STFT, window = 4096]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft4096.png}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{My approach part 1 -- sliCQ Transform}
+	\begin{enumerate}
+	\item
+		Gabor\footcite{gabor1946} wrote the first published use of the short-time Fourier transform.\footcite{dictionary} Nonstationary Gabor transform\footcite{balazs} and the realtime sliCQ transform\footcite{invertiblecqt, slicq, variableq1} are built from frame theory, a mathematical technique for finding ``redundant, stable way[s] of representing a signal''\footcite{framesintro} -- STFT-like operation but with windows that vary with time
+	\item
+		CQT is the motivation for the NSGT/sliCQT, but they can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.), and output the familiar Fourier coefficients with perfect inverse
+	\item
+		Goal: use the sliCQT to choose optimal time-frequency resolutions per frequency and boost spectral models past waveform models\footfullcite{demucs}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{sliCQT configuration for xumx-sliCQ}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[height=3cm]{./images-gspi/gspi_xumx_slicq_params.png}
+		\caption{sliCQT spectrogram of glockenspiel}
+	\end{figure}
+	PyTorch/GPU-capable fork: \url{https://github.com/sevagh/nsgt}
+	\begin{verbatim}
+	$ python examples/spectrogram.py \
+		 --scale bark --bins 262 --fmin 32.9 \
+		 --fmax 22050 --sllen 18060 --trlen 4514  --plot ./gspi.wav
+	\end{verbatim}
+	Settings were chosen from my parameter search for xumx-sliCQ; read more here: \url{https://github.com/sevagh/xumx-sliCQ/blob/main/docs/slicq_params.md}
+\end{frame}
+
+\begin{frame}
+	\frametitle{My approach part 2 -- xumx-sliCQ, a variant of Open-Unmix}
+	\begin{itemize}
+		\item
+			xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}
+		\item
+			Even if not using the Bi-LSTM\footcite{umx} of Open-Unmix, using the template \url{https://github.com/sigsep/open-unmix-pytorch} gives you a full ecosystem for spectral demixing including MUSDB18-HQ loader, BSS evaluator, and a post-processing Wiener-EM step
+		\item
+			Replaces the STFT with sliCQT, and uses convolutional architectures\footfullcite{plumbley1, plumbley2} instead of Bi-LSTM (time-frequency 2D convolutional filters, applicable to any spectral transform)
+		\item
+			Adds CrossNet-Open-Unmix (aka X-UMX) features\footcite{xumx} including combining all 4 targets with multi-target and cross-domain (time and frequency) loss
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{What worked vs. didn't work}
+	\begin{enumerate}
+		\item
+			sliCQT has a matrix form with zero-padding
+		\item
+			Bad neural network convergence and demixing results from the matrix form -- different frequency bins have a different temporal frame rate
+		\item
+			Switched to using the ragged form, and applying convolutional layers to grouped frequency bins
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=10cm]{./images-blockdiagrams/slicq_shape.png}\\
+		\caption{sliCQT ragged shape for one slice of the time-domain waveform}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Competition results}
+	\begin{enumerate}
+	\item
+		Luck-based and undisciplined approach with random network architectures -- consider it a ``proof-of-concept'' of sliCQT demixing
+	\item
+		Invitation to demixing researchers: more rigorous, data-driven approaches to the sliCQT parameter search and network architecture might produce a good result
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=8cm]{./images-misc/leaderboard_header.png}\\
+		\vspace{-0.25em}
+		\includegraphics[width=8cm]{./images-misc/leaderboard_myplace.png}
+		\caption{Leaderboard A position of xumx-sliCQ}
+		\vspace{-1em}
+	\end{figure}
+
 \end{frame}
 
 \begin{frame}
 	\frametitle{My impressions on the competition}
- ``It is definitely a great environment to push the limit, had it been for a paper, I would have stopped sooner.'' -- defossez
+	\begin{enumerate}
+	\item
+	 ``It is definitely a great environment to push the limit, had it been for a paper, I would have stopped sooner.'' -- defossez
+	 \item
+		 There was a lot of active discussion on the board (I got help wherever I needed it) and everything felt set up for participants to succeed
+	 \item
+		 I could have paid more attention to what my peers were doing, or used a different baseline, but after the first Town Hall I decided I want to see how far I could go with the sliCQT + UMX
+	 \item
+		 GitLab submission process worked better than I expected, submissions were easy, and the containers had important deep learning Python libraries already installed -- minimal conda/pip/Python issues
+	 \item
+		 I got the impression that success was more about data than clever coding. I should improve my machine learning skills for the 2022 competition
+	\end{enumerate}
 \end{frame}
 
 \end{document}
