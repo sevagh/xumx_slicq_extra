@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-pympress presentation02.pdf
+pympress mdx_townhall_aug21.pdf
