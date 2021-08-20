@@ -75,7 +75,9 @@
 	\frametitle{Who am I}
 	\begin{enumerate}
 		\item
-			Electrical engineering background, Linux engineer at Pandora (U.S. music streaming service)
+			Electrical engineering background
+		\item
+			Linux engineer at Pandora (U.S. music streaming service)
 		\item
 			Active open-source enthusiast on GitHub: \href{https://github.com/sevagh}{https://github.com/sevagh}
 		\item
@@ -103,11 +105,11 @@
 	\item
 		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footfullcite{doerflerphd}
 	\item
-		Long window (4096) + short window (256) STFT in HPSS\footfullcite{driedger}
-	\item
-		CQT\footcite{jbrown} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+		window=4096 for harmonic, window=256 for percussive in HPSS\footfullcite{driedger}
 	\item
 		Constant-Q Transform (CQT) and multiple STFTs in HPSS\footfullcite{fitzgerald2}
+	\item
+		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
 	\end{enumerate}
 \end{frame}
 
@@ -122,7 +124,7 @@
 		\vspace{-0.5em}
 		\subfloat[CQT, 12 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt12.png}}
 		\subfloat[CQT, 24 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt24.png}}
-		\subfloat[CQT, 48 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt48.png}}\\
+		\subfloat[CQT, 48 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt48.png}}
 		\vspace{-0.5em}
 	\end{figure}
 \end{frame}
@@ -144,7 +146,7 @@
 	\item
 		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, realtime sliCQ Transform\footcite{invertiblecqt, slicq, variableq1}
 	\item
-		STFT-like operations with windows that vary with time
+		STFT-like transforms with windows that vary with time
 	\item
 		CQT motivates the NSGT/sliCQ, but can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.)
 	\item
