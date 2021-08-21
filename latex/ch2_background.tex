@@ -510,10 +510,26 @@ Details of the frequency scales used to generate the NSGT spectrograms are shown
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
-\todo[inline]{
-	slicq is the realtime variant\\
-	noninvertible overlap thing here
-}
+The NSGT processes the entire input signal at once. This cannot be used when the total input signal length is not known, or in cases where the input signal is received in smaller chunks from a realtime audio capture stream.
+
+For the realtime version of the NSGT, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). Since the NSGT is an STFT-like operator, where the window and overlap applied to the signal varies with time, the sliCQ Transform uses the terms \textit{slice length}, or $\mathit{sllen}$, and \textit{transition length}, \textit{transition area}, or $\mathit{trlen}$, defined in samples. The term \textit{slice} is used to distinguish the larger slices from the time-varying windows and overlaps applied to the signal \textit{within} the slice. The input signal is processed one slice at a time, and the transition area defines the maximum overlap between one slice and the next. The actual overlap varies $\in [0, \mathit{trlen}]$ as needed to support the desired frequency scale.
+
+The sliCQT outputs coefficients that are not identical to the NSGT -- we refer the reader to the papers by \textcite{invertiblecqt, slicq} for the interpretation of the respective output coefficients of the NSGT and sliCQT. For the purposes of this thesis, this difference is not a concern, it doesn't affect the use of the sliCQT as a general purpose time-frequency transform.
+
+Another difficulty with the sliCQT is that each slice has a 50\% or half overlap with the next. This is a non-invertible operation, but required to create a correct spectrogram. Figure \ref{fig:slicqoverlaps} demonstrates this issue. We'll also note that this noninvertible 50\% overlap has also been mentioned in the Essentia (\cite{essentia}) blog post which announced the addition of the sliCQ transform:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+
+\begin{quote}
+	we have implemented a framewise version of the algorithm that works on half-overlapped frames... [...] we have to overlap-add the spectrograms obtained for each frame. Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.
+\end{quote}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.48\textwidth]{./images-neural/spectrogram_nooverlap2.png}}
+	\hspace{0.15em}
+	\subfloat[50\%-overlap-add on adjacent slices]{\includegraphics[width=0.48\textwidth]{./images-neural/spectrogram_overlap2.png}}
+	\caption{sliCQT spectrograms demonstrating the 50\% overlap of adjacent slices}
+	\label{fig:slicqoverlaps}
+\end{figure}
 
 \newpagefill
 
