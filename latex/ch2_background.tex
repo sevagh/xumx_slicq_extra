@@ -512,11 +512,11 @@ Details of the frequency scales used to generate the NSGT spectrograms are shown
 
 The NSGT processes the entire input signal at once. This cannot be used when the total input signal length is not known, or in cases where the input signal is received in smaller chunks from a realtime audio capture stream.
 
-For the realtime version of the NSGT, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). Since the NSGT is an STFT-like operator, where the window and overlap applied to the signal varies with time, the sliCQ Transform uses the terms \textit{slice length}, or $\mathit{sllen}$, and \textit{transition length}, \textit{transition area}, or $\mathit{trlen}$, defined in samples. The term \textit{slice} is used to distinguish the larger slices from the time-varying windows and overlaps applied to the signal \textit{within} the slice. The input signal is processed one slice at a time, and the transition area defines the maximum overlap between one slice and the next. The actual overlap varies $\in [0, \mathit{trlen}]$ as needed to support the desired frequency scale.
+For the realtime version of the NSGT, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). Since the NSGT is an STFT-like operator, where the window and overlap applied to the signal varies with time, the sliCQ Transform uses the terms \textit{slice length}, or $\mathit{sllen}$, and \textit{transition length}, \textit{transition area}, or $\mathit{trlen}$, defined in samples. The term \textit{slice} is used to distinguish the larger slices from the time-varying windows and overlaps applied to the signal within the slice. The input signal is processed one slice at a time, and the transition area defines the maximum overlap between one slice and the next. The actual overlap is varied between 0--$\mathit{trlen}$ as needed to support the desired frequency scale.
 
-The sliCQT outputs coefficients that are not identical to the NSGT -- we refer the reader to the papers by \textcite{invertiblecqt, slicq} for the interpretation of the respective output coefficients of the NSGT and sliCQT. For the purposes of this thesis, this difference is not a concern, it doesn't affect the use of the sliCQT as a general purpose time-frequency transform.
+The sliCQT outputs coefficients that are not identical to the NSGT -- we refer the reader to the papers by \textcite{invertiblecqt, slicq} for the interpretation of the respective output coefficients of the NSGT and sliCQT. For the purposes of this thesis, this difference is not a concern, and it doesn't affect the use of the sliCQT as a general purpose time-frequency transform.
 
-Another difficulty with the sliCQT is that each slice has a 50\% or half overlap with the next. This is a non-invertible operation, but required to create a correct spectrogram. Figure \ref{fig:slicqoverlaps} demonstrates this issue. We'll also note that this noninvertible 50\% overlap has also been mentioned in the Essentia (\cite{essentia}) blog post which announced the addition of the sliCQ transform:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+Another difficulty with the sliCQT is that each slice has a 50\% or half overlap with the next. This is a non-invertible operation, but required to create a correct spectrogram. Figure \ref{fig:slicqoverlaps} demonstrates this issue. We'll also note that this noninvertible 50\% overlap has been mentioned on the Essentia (\cite{essentia}) website in the announcement for their inclusion of the sliCQ transform:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
 
 \begin{quote}
 	we have implemented a framewise version of the algorithm that works on half-overlapped frames... [...] we have to overlap-add the spectrograms obtained for each frame. Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.
@@ -526,22 +526,10 @@ Another difficulty with the sliCQT is that each slice has a 50\% or half overlap
 	\centering
 	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.48\textwidth]{./images-neural/spectrogram_nooverlap2.png}}
 	\hspace{0.15em}
-	\subfloat[50\%-overlap-add on adjacent slices]{\includegraphics[width=0.48\textwidth]{./images-neural/spectrogram_overlap2.png}}
+	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.48\textwidth]{./images-neural/spectrogram_overlap2.png}}
 	\caption{sliCQT spectrograms demonstrating the 50\% overlap of adjacent slices}
 	\label{fig:slicqoverlaps}
 \end{figure}
-
-\newpagefill
-
-\subsection{Machine learning and deep learning}
-\label{sec:ml}
-
-\ichfeedback{if i'm presenting a neural network, it's probably necessary to have this section?}
-
-\chaptertodo{
-	use MIR presentation introduction to machine and deep learning\\
-	mention signal processing, basis pursuit, etc., i.e. classic approximate/probabilistic signal processing
-}
 
 \newpagefill
 
@@ -550,7 +538,68 @@ Another difficulty with the sliCQT is that each slice has a 50\% or half overlap
 
 \subsubsection{Task motivation and definition}
 
-\todo[inline]{purposes and uses - why do we want to do this}
+Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track (\cite{musicsepintro1}). To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
+
+There are many motivations for performing this separation. \textcite{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
+channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix.''
+
+In the ISMIR 2021 Music Demixing Competition (MDX),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} audio source separation is described as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
+
+\begin{quote}
+	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
+\end{quote}
+
+A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of (\cite{musicsepintro1, musicsepsurvey}). Music demixing is the focus of this thesis, shown in figure \ref{fig:mixingdiagrams}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat{\includegraphics[height=4cm]{./images-mss/mixdemix.png}}
+	\caption{Diagram for music mixing and demixing (from ISMIR 2021 MDX)}
+	\label{fig:mixingdiagrams}
+\end{figure}
+
+\newpagefill
+
+\subsubsection{Computational approaches}
+
+Computational source separation has a long history (\cite{musicsepsurvey}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music source separation, the sources are known and fixed. Most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}). Independent Component Analysis (ICA) can be used to exploit spatial information of the sources, which can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources (\cite{musicsepsurvey, musicsepgood}). In the case of monoaural or stereo music, spatial information cannot be used. Sources are assumed to be sufficiently different from each other such that they can be extracted with time-frequency masks applied in the spectral domain. These methods include techniques like Kernel Additive Modeling (KAM) or Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}).
+
+\begin{itemize}
+	\item
+		Many music source separation algorithms (kernel additive module, nonnegative matrix factorization, and recent machine learning models) use the STFT spectrogram as input
+	\item
+		Sparsity of the sources is important -- e.g., drums are vertical lines in the spectrogram, guitar is horizontal lines, etc. \cite{musicsepgood} -- indicating sparser transforms might be a good idea (i.e. an NSGT which is less blurry has more sparsity)
+\end{itemize}
+
+\begin{figure}[ht]
+	\vspace{-1em}
+	\centering
+	\subfloat{\includegraphics[height=3.0cm]{./images-mss/mss1.png}}
+	\subfloat{\includegraphics[height=3.1cm]{./images-mss/mss2.png}}
+	\caption{MSS spectrogram sparsity}
+\label{fig:sepgood}
+\end{figure}
+
+
+
+More recently, data-driven approaches based on deep learning leapfrogged past approaches (\cite{sisec2018}). Open-Unmix was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
+
+Manipulating time-frequency resolution is a common strategy for improving spectrogram-based music source separation. \textcite{fitzgerald1, driedger} use multiple STFTs with different window sizes. \textcite{fitzgerald2, cqtseparation, bettermusicsep} replaced the STFT with the constant-Q transform. \textcite{plumbley2} used varying sizes of time and frequency filters applied to the STFT according to the constant-Q scale, to separate singing voice in music.
+
+
+\ichfeedback{spectral masking, NMF, machine learning, deep learning - i can lean on the machine learning introduction section right before}
+
+\todo[inline]{summary of approaches over the year e.g. nonnegative matrix factorization to machine learning to deep learning}
+
+\subsubsection{Machine learning and deep learning}
+\label{sec:ml}
+
+\ichfeedback{if i'm presenting a neural network, it's probably necessary to have this section?}
+
+\chaptertodo{
+	use MIR presentation introduction to machine and deep learning\\
+	mention signal processing, basis pursuit, etc., i.e. classic approximate/probabilistic signal processing
+}
 
 \subsubsection{Public datasets}
 
@@ -591,12 +640,6 @@ In the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measu
 
 	For this package, we enabled the option of having time invariant distortion filters, instead of necessarily taking them as varying over time as done in the previous versions of BSSEval. First, enabling this option significantly reduces the computational cost for evaluation because matching needs to be done only once for the whole signal. Second, it introduces much more dynamics in the evaluation, because time-varying matching filters turn out to over-estimate performance. Third, this makes matching more robust, because true sources are not silent throughout the whole recording, while they often were for short windows
 \end{quote}
-
-\subsubsection{Survey of computational approaches}
-
-\ichfeedback{spectral masking, NMF, machine learning, deep learning - i can lean on the machine learning introduction section right before}
-
-\todo[inline]{summary of approaches over the year e.g. nonnegative matrix factorization to machine learning to deep learning}
 
 \subsubsection{Time-frequency masking and oracle estimators}
 
