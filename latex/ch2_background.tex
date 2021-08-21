@@ -562,44 +562,101 @@ A common thread in survey papers is that the domains of speech enhancement and m
 
 \subsubsection{Computational approaches}
 
-Computational source separation has a long history (\cite{musicsepsurvey}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music source separation, the sources are known and fixed. Most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}). Independent Component Analysis (ICA) can be used to exploit spatial information of the sources, which can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources (\cite{musicsepsurvey, musicsepgood}). In the case of monoaural or stereo music, spatial information cannot be used. Sources are assumed to be sufficiently different from each other such that they can be extracted with time-frequency masks applied in the spectral domain. These methods include techniques like Kernel Additive Modeling (KAM) or Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}).
+Computational source separation has a history for at least 50 years (\cite{musicsepsurvey, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
 
-\begin{itemize}
-	\item
-		Many music source separation algorithms (kernel additive module, nonnegative matrix factorization, and recent machine learning models) use the STFT spectrogram as input
-	\item
-		Sparsity of the sources is important -- e.g., drums are vertical lines in the spectrogram, guitar is horizontal lines, etc. \cite{musicsepgood} -- indicating sparser transforms might be a good idea (i.e. an NSGT which is less blurry has more sparsity)
-\end{itemize}
+Among the earliest computational approaches for blind source separation is Independent Component Analysis (ICA)  (\cite{musicsepsurvey, musicsepgood, musicsepintro1}), which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. We refer the readers to \textcite{ica1, ica2} for ICA algorithms, and to \textcite{blind1, blind2} for a more in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
 \begin{figure}[ht]
-	\vspace{-1em}
 	\centering
-	\subfloat{\includegraphics[height=3.0cm]{./images-mss/mss1.png}}
-	\subfloat{\includegraphics[height=3.1cm]{./images-mss/mss2.png}}
-	\caption{MSS spectrogram sparsity}
+	\includegraphics[height=8cm]{./images-mss/positional.png}
+	\caption{Position-based source separation (\cite{musicsepgood})}
+\label{fig:icaposition}
+\end{figure}
+
+According to \textcite{musicsepintro1}, ICA techniques arose more typically for speech denoising (\cite{speechsep}), and they make assumptions that cannot be generalized easily to music:
+
+\begin{quote}
+	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, non-stationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are non-linearities in the mixing process (e.g., dynamic range compression).
+\end{quote}
+
+Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}).
+
+For cases where ICA cannot be applied, musical source models are more popular (\cite{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other such that they can be extracted with time-frequency masks applied in the spectral domain. \textcite{musicsepgood} emphasize that the \textit{sparsity} of the source's spectral representation is important. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Mixed spectrogram]{\includegraphics[height=4.75cm]{./images-mss/mss1.png}}
+	\subfloat[Source spectrograms]{\includegraphics[height=5cm]{./images-mss/mss2.png}}
+	\caption{Sparsity of different music sources in the spectral domain}
 \label{fig:sepgood}
 \end{figure}
 
+Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``selects a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel.'' A well-known example of a KAM-based music separation algorithm is \textcite{fitzgerald1}'s median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm. Figure \ref{fig:fitzhpss} shows the basic operation of the median filtering operator for HPSS.
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{./images-misc/hpss.png}
+	\caption{Median-filtering HPSS}
+	\label{fig:fitzhpss}
+\end{figure}
 
-More recently, data-driven approaches based on deep learning leapfrogged past approaches (\cite{sisec2018}). Open-Unmix was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite{musicsepgood}, NMF ``attempts to factorize a given non-negative matrix into two non-negative matrices,'' and it can be applied to the non-negative magnitude spectrogram of the mix, $M$ to separate sources with spectral weight matrices $W$ and time activation matrices $H$. We refer readers to \textcite{nmfpaper}'s paper on NMF techniques. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows KAM, NMF, and deep neural network-based spectral demixing.
 
-Manipulating time-frequency resolution is a common strategy for improving spectrogram-based music source separation. \textcite{fitzgerald1, driedger} use multiple STFTs with different window sizes. \textcite{fitzgerald2, cqtseparation, bettermusicsep} replaced the STFT with the constant-Q transform. \textcite{plumbley2} used varying sizes of time and frequency filters applied to the STFT according to the constant-Q scale, to separate singing voice in music.
+\begin{figure}[ht]
+	\centering
+	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/kamvnmf.png}}\\
+	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/mssdnn.png}}
+	\caption{Different techniques for spectral music demixing (\cite{musicsepgood})}
+	\label{fig:spectraldemix}
+\end{figure}
 
-
-\ichfeedback{spectral masking, NMF, machine learning, deep learning - i can lean on the machine learning introduction section right before}
-
-\todo[inline]{summary of approaches over the year e.g. nonnegative matrix factorization to machine learning to deep learning}
+\newpagefill
 
 \subsubsection{Machine learning and deep learning}
 \label{sec:ml}
 
-\ichfeedback{if i'm presenting a neural network, it's probably necessary to have this section?}
+Waveforms. Subband decomposition.
 
 \chaptertodo{
 	use MIR presentation introduction to machine and deep learning\\
 	mention signal processing, basis pursuit, etc., i.e. classic approximate/probabilistic signal processing
 }
+
+\subsubsection{Spectral demixing, time-frequency masking, and oracles}
+
+\ichfeedback{i think the idea of the oracle mask computed from ground truths is important enough to be in the section title}
+
+\ichfeedback{it will come up later in the thesis when choosing hyperparameters for the sliCQ}
+
+\subsubsection{Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX)}
+
+\chaptertodo{
+	\url{https://papers.nips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf}\\
+	use my RNN slides from MIR-presentations\\
+	UMX bi-LSTM comes from \url{https://www.researchgate.net/publication/335688695_Open-Unmix_-_A_Reference_Implementation_for_Music_Source_Separation}\\
+	more umx \url{https://hal.inria.fr/hal-02293689/document}\\
+	bi-LSTM here which comes from \url{https://www.researchgate.net/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending}\\
+	more here \url{https://ieeexplore.ieee.org/document/7952158}\\
+	more here \url{https://www.researchgate.net/profile/Yuki-Mitsufuji/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending/links/59ed4f844585151983ccdcba/Improving-music-source-separation-based-on-deep-neural-networks-through-data-augmentation-and-network-blending.pdf}\\
+	finally comes from here \url{https://www.semanticscholar.org/paper/Framewise-phoneme-classification-with-bidirectional-Graves-Schmidhuber/2f83f6e1afadf0963153974968af6b8342775d82}
+}
+
+ Open-Unmix was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
+
+ \textcite{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
+
+ \subsubsection{Convolutional denoising autoencoders}
+
+ While the discussed Open-Unmix model is based on a sequence-to-sequence LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}).
+
+ In particular, the CDAE networks of \textcite{plumbley1} and \textcite{plumbley2} give some simple and adaptable ideas for performing music demixing with 2D convolutional layers applied on time-frequency transforms.
+
+ \todo[inline]{plumbley's papers here and a bit of CNN theory}
+\textcite{plumbley2} used varying sizes of time and frequency filters applied to the STFT according to the constant-Q scale, to separate singing voice in music.
+
+\subsubsection{Open-source ecosystem}
+
+\todo[inline]{ecosystem here of umx, sigsep, sisec, nussl, asteroid, MDX, etc.}
 
 \subsubsection{Public datasets}
 
@@ -640,35 +697,5 @@ In the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measu
 
 	For this package, we enabled the option of having time invariant distortion filters, instead of necessarily taking them as varying over time as done in the previous versions of BSSEval. First, enabling this option significantly reduces the computational cost for evaluation because matching needs to be done only once for the whole signal. Second, it introduces much more dynamics in the evaluation, because time-varying matching filters turn out to over-estimate performance. Third, this makes matching more robust, because true sources are not silent throughout the whole recording, while they often were for short windows
 \end{quote}
-
-\subsubsection{Time-frequency masking and oracle estimators}
-
-\ichfeedback{i think the idea of the oracle mask computed from ground truths is important enough to be in the section title}
-
-\ichfeedback{it will come up later in the thesis when choosing hyperparameters for the sliCQ}
-
-\subsubsection{Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX)}
-
-\chaptertodo{
-	\url{https://papers.nips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf}\\
-	use my RNN slides from MIR-presentations\\
-	UMX bi-LSTM comes from \url{https://www.researchgate.net/publication/335688695_Open-Unmix_-_A_Reference_Implementation_for_Music_Source_Separation}\\
-	more umx \url{https://hal.inria.fr/hal-02293689/document}\\
-	bi-LSTM here which comes from \url{https://www.researchgate.net/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending}\\
-	more here \url{https://ieeexplore.ieee.org/document/7952158}\\
-	more here \url{https://www.researchgate.net/profile/Yuki-Mitsufuji/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending/links/59ed4f844585151983ccdcba/Improving-music-source-separation-based-on-deep-neural-networks-through-data-augmentation-and-network-blending.pdf}\\
-	finally comes from here \url{https://www.semanticscholar.org/paper/Framewise-phoneme-classification-with-bidirectional-Graves-Schmidhuber/2f83f6e1afadf0963153974968af6b8342775d82}
-
-}
-
- \textcite{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
-
- \subsubsection{Convolutional denoising autoencoders}
-
- While the discussed Open-Unmix model is based on a sequence-to-sequence LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}).
-
- In particular, the CDAE networks of \textcite{plumbley1} and \textcite{plumbley2} give some simple and adaptable ideas for performing music demixing with 2D convolutional layers applied on time-frequency transforms.
-
- \todo[inline]{plumbley's papers here and a bit of CNN theory}
 
 \end{document}
