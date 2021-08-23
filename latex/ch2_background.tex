@@ -79,7 +79,7 @@ Throughout this section, the description of the Fourier transform of acoustic si
 
 \newpagefill
 
-\subsubsection{Frequency analysis and the Fourier transform}
+\subsubsection{Frequency analysis and Fourier transforms (CTFT, DFT, FFT)}
 \label{sec:freqanal}
 
 The Fourier transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite{fourierhistory}). The Fourier transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier transform to music is described by \textcite{fouriermusic}, who state that
@@ -131,7 +131,7 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 \newpagefill
 
-\subsubsection{Joint time-frequency analysis -- the Gabor transform and the Short-time Fourier Transform (STFT)}
+\subsubsection{Joint time-frequency analysis with the Gabor Transform and Short-time Fourier Transform (STFT)}
 \label{sec:jointtfa}
 
 Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal}, \textcite[Chapter~10]{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...''
@@ -528,6 +528,38 @@ The sliCQT outputs coefficients that are not identical to the NSGT. We refer the
 
 \newpagefill
 
+\subsection{Machine learning and deep learning for music}
+\label{sec:ml}
+
+Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Many historical advances in digital signal processing, such as the Fast Fourier Transform (FFT), saw applications and huge advances in both speech and music processing (\cite{fiftyyears}), leading to music-related technology we take for granted today such as CDs, audio codecs like MP3, and more.
+
+The traditional field of signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of generalized function optimization, without being constrained to the field of signal processing, we refer to \textcite{introtoml}'s description on machine learning:
+
+\begin{quote}
+	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). Once such a mathematical model is determined, it is possible to predict the value of the desired variables by measuring the observables. [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
+\end{quote}
+
+According to \textcite{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we don't necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{./images-neural/dnn.png}
+	\caption{Deep neural network with hidden layers (\cite{introtodl})}
+	\label{fig:fcdn}
+\end{figure}
+
+\textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded don't always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' Machine learning and deep learning solutions have achieved great success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio and music applications (\cite{audiodeeplearning}) among others. This indicates that such data-driven approaches are very useful, despite being considered to fall short of general artificial intelligence (\cite{generalai}). 
+
+A key concept in machine learning and deep learning both is splitting the input data into a \textit{train} subset and a \textit{test} subset (\cite{introtoml}). The model uses the training data as input and the desired output. The network first makes a prediction using the training input based on its initial parameters to produce a predicted output. It then measures how correct its prediction was by using a \textit{loss function} to compare its output to the correct output, or \textit{ground truth}, from the training data. Contemporary machine learning is dependent on the field of optimization (\cite{boyd2004convex, mlopt1, mlopt2}) for the computation of the loss function and the parameter updates (\cite{sgd}). Finally, the performance of the network is measured on its ability to \textit{generalize} on data unseen during training, which is the test set (\cite{introtodl}), in a process called \textit{inference}.
+
+\textcite{audiodeeplearning} describe popular contemporary deep learning architectures that are useful for audio applications. They state that image-inspired network architectures from the field of computer vision, originally designed for 2D images have a spatial relationship between the $x$ and $y$ pixels in their signal, may not exactly fit audio waveforms, which have a strictly temporal relationship between the amplitude values $x$ and time samples $t$ in the 1D waveform. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains (\cite{audiodeeplearning}).
+
+Convolutional neural networks (CNNs) ``are based on convolving their input with learnable kernels'' (\cite{audiodeeplearning}). These are useful for both images and audio according to \textcite{cnns}, because ``the attractive feature of the CNN is its ability to exploit spatial or temporal correlation in data.'' For time series data, for which the audio waveform is an exemplar given the temporal evolution of its amplitude, recurrent neural networks (RNNs) are useful since the input sequence of data is introduced back into the network, hence the cyclic or recurrent connection, to predict outputs based on past and future values of the sequence (\cite{rnns}). RNNs are also one of several network architectures that can be used in sequence-to-sequence, or seq2seq, models (\cite{seq2seqs}).
+
+Finally, we note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}).
+
+\newpagefill
+
 \subsection{Music source separation}
 \label{sec:musicsep}
 
@@ -606,16 +638,6 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 \end{figure}
 
 \newpagefill
-
-\subsubsection{Machine learning and deep learning}
-\label{sec:ml}
-
-Waveforms. Subband decomposition.
-
-\chaptertodo{
-	use MIR presentation introduction to machine and deep learning\\
-	mention signal processing, basis pursuit, etc., i.e. classic approximate/probabilistic signal processing
-}
 
 \subsubsection{Time-frequency masking and oracle estimators}
 
