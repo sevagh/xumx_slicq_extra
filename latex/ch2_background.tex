@@ -110,7 +110,7 @@ The Fourier transform is a complex-valued function of $\omega$, which is the var
 
 The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively (\cite{discretebook}).
 
-In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). However, starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten}). Refer to figure \ref{fig:bigo} to see the differences in the expected running times of the FFT over the naive implementation.
+In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). However, starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten, fiftyyears}). Refer to figure \ref{fig:bigo} to see the differences in the expected running times of the FFT over the naive implementation.
 
 \begin{figure}[ht]
 	\centering
@@ -123,8 +123,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=\textwidth]{./images-gspi/gspi_dft.png}}\\
-	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=\textwidth]{./images-gspi/gspi_dft_bigger.png}}
+	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.9\textwidth]{./images-gspi/gspi_dft.png}}\\
+	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.9\textwidth]{./images-gspi/gspi_dft_bigger.png}}
 	\caption{DFT of the Glockenspiel waveform. Note the richer frequency information in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
@@ -248,6 +248,7 @@ We close this section with a quote from \textcite{doerflersouls} on the powerful
 \newpagefill
 
 \subsubsection{Constant-Q Transform (CQT)}
+\label{sec:cqt}
 
 \textcite{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low frequency region, and with a high time resolution in the high frequency region (\cite{doerflerphd, cqtransient}). 
 
@@ -528,15 +529,13 @@ The sliCQT outputs coefficients that are not identical to the NSGT. We refer the
 
 \newpagefill
 
-\subsection{Machine learning and deep learning for music}
+\subsection{Machine learning and deep learning for music signals}
 \label{sec:ml}
 
-Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Many historical advances in digital signal processing, such as the Fast Fourier Transform (FFT), saw applications and huge advances in both speech and music processing (\cite{fiftyyears}), leading to music-related technology we take for granted today such as CDs, audio codecs like MP3, and more.
-
-The traditional field of signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of generalized function optimization, without being constrained to the field of signal processing, we refer to \textcite{introtoml}'s description on machine learning:
+Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to \textcite{introtoml}'s description of machine learning:
 
 \begin{quote}
-	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). Once such a mathematical model is determined, it is possible to predict the value of the desired variables by measuring the observables. [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
+	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
 \end{quote}
 
 According to \textcite{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we don't necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
@@ -548,15 +547,73 @@ According to \textcite{introtodl}, deep learning ``is the subfield of machine le
 	\label{fig:fcdn}
 \end{figure}
 
-\textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded don't always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' Machine learning and deep learning solutions have achieved great success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio and music applications (\cite{audiodeeplearning}) among others. This indicates that such data-driven approaches are very useful, despite being considered to fall short of general artificial intelligence (\cite{generalai}). 
+\textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded don't always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
 
-A key concept in machine learning and deep learning both is splitting the input data into a \textit{train} subset and a \textit{test} subset (\cite{introtoml}). The model uses the training data as input and the desired output. The network first makes a prediction using the training input based on its initial parameters to produce a predicted output. It then measures how correct its prediction was by using a \textit{loss function} to compare its output to the correct output, or \textit{ground truth}, from the training data. Contemporary machine learning is dependent on the field of optimization (\cite{boyd2004convex, mlopt1, mlopt2}) for the computation of the loss function and the parameter updates (\cite{sgd}). Finally, the performance of the network is measured on its ability to \textit{generalize} on data unseen during training, which is the test set (\cite{introtodl}), in a process called \textit{inference}.
+We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite{mldspmix}, both domain-specific analytic knowledge and machine learning in conjunction with one another should be considered in the study of acoustic signals (also shown in figure \ref{fig:dspmlmix}):
 
-\textcite{audiodeeplearning} describe popular contemporary deep learning architectures that are useful for audio applications. They state that image-inspired network architectures from the field of computer vision, originally designed for 2D images have a spatial relationship between the $x$ and $y$ pixels in their signal, may not exactly fit audio waveforms, which have a strictly temporal relationship between the amplitude values $x$ and time samples $t$ in the 1D waveform. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains (\cite{audiodeeplearning}).
+\begin{quote}
+	Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained.
+\end{quote}
 
-Convolutional neural networks (CNNs) ``are based on convolving their input with learnable kernels'' (\cite{audiodeeplearning}). These are useful for both images and audio according to \textcite{cnns}, because ``the attractive feature of the CNN is its ability to exploit spatial or temporal correlation in data.'' For time series data, for which the audio waveform is an exemplar given the temporal evolution of its amplitude, recurrent neural networks (RNNs) are useful since the input sequence of data is introduced back into the network, hence the cyclic or recurrent connection, to predict outputs based on past and future values of the sequence (\cite{rnns}). RNNs are also one of several network architectures that can be used in sequence-to-sequence, or seq2seq, models (\cite{seq2seqs}).
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{./images-neural/dspmlmix.jpg}
+	\caption{Mixed analytical and data-driven approaches}
+	\label{fig:dspmlmix}
+\end{figure}
 
-Finally, we note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}).
+A key concept in machine learning is splitting the input data into a \textit{train} subset and a \textit{test} subset (\cite{introtoml}). The model uses the training data as input and the desired output, and makes a first  prediction using the training input based on its initial parameters. It then measures how correct its prediction was by using a \textit{loss function} to compare its output to the desired (or \textit{ground truth}) output. Contemporary machine learning is dependent on the field of optimization (\cite{boyd2004convex, mlopt1, mlopt2}) for the computation of the loss function and the parameter updates (\cite{sgd}). The performance of the network is measured by its ability to \textit{generalize} on data unseen during training (i.e. the test set) in a process called \textit{inference}.
+
+\textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that image-inspired network architectures from the field of computer vision, originally designed for 2D images, where pixels are related spatially, may not exactly fit audio waveforms, where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains (\cite{audiodeeplearning}).
+
+\newpagefill
+
+\subsubsection{Convolutional Neural Networks (CNN)}
+
+Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' (\cite{audiodeeplearning}). These are useful for both images and audio according to \textcite{cnns}, because ``the attractive feature of the CNN is its ability to exploit spatial or temporal correlation in data.'' Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel \textit{slides} over the pixels of the input image.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat{\includegraphics[width=0.48\textwidth]{./images-neural/sliding_conv_1.png}}
+	\hspace{0.15em}
+	\subfloat{\includegraphics[width=0.48\textwidth]{./images-neural/sliding_conv_2.png}}
+	\caption{$3 \times 3$ convolution kernel sliding over patches of input pixels}
+	\label{fig:cnnbasic}
+\end{figure}
+
+From \textcite{audiocnn2}'s paper, the network architecture and feature map for an audio CNN is shown, where the extracted feature map is visualized in the spectral domain.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[CNN architecture for audio waveforms]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn.png}}\\
+	\subfloat[Visualization of audio spectral features learned by each layer]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn2.png}}
+	\caption{Feature maps in a typical audio CNN}
+	\label{fig:audiocnn}
+\end{figure}
+
+Finally, we note that for audio applications, both 1D convolutions (also referred to as temporal convolutions) applied directly to the audio waveform and 2D convolutions applied to time-frequency transforms (most commonly the STFT) are both used (\cite{tcn, 2dconv}).
+
+\subsubsection{Recurrent Neural Networks (RNN)}
+
+For time series data, for which the audio waveform is an exemplar given the temporal evolution of its amplitude, recurrent neural networks (RNNs) are useful since the input sequence of data is introduced back into the network with a cyclic or recurrent connection, and outputs are predicted based on past (or future, if the network is bi-directional) values of the sequence (\cite{rnns}). RNNs are also used commonly in sequence-to-sequence, or seq2seq, models (\cite{seq2seqs}).
+
+\textcite{rnnoise} describes different RNN variants, including the LSTM (\cite{lstm1}) and GRU (\cite{gru1}) for their audio noise suppression model, RNNoise:\footnote{\url{https://jmvalin.ca/demo/rnnoise/}}
+
+\begin{quote}
+	Recurrent neural networks (RNN) are very important [...] because they make it possible to model time sequences instead of just considering input and output frames independently. [...] RNNs were heavily limited in their ability because they could not hold information for a long period of time [...] [These] problems were solved by the invention of gated units, such as the Long Short-Term Memory (LSTM), the Gated Recurrent Unit (GRU), and their many variants.
+\end{quote}
+
+Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an illustration of the additional complexity in the gated LSTM and GRU units, which allow them to surpass the simple RNN.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Regular RNN with cyclic connections to past data (\cite{birnn})]{\includegraphics[width=0.48\textwidth]{./images-neural/simple_rnn.png}}
+	\hspace{0.1em}
+	\subfloat[Bi-directional LSTM with cyclic connections to past and future data (\cite{birnn})]{\includegraphics[width=0.48\textwidth]{./images-neural/birnn.png}}\\
+	\subfloat[Different recurrent units (\cite{lstmrnngru})]{\includegraphics[width=0.65\textwidth]{./images-neural/gates.png}}
+	\caption{RNN diagrams}
+	\label{fig:rnndiags}
+\end{figure}
 
 \newpagefill
 
@@ -654,7 +711,7 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or ha
 
 The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is applied to and computed from magnitude spectrograms (\cite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}). Discarding the phase of the complex STFT is a choice made for simplicity, but the phase may be important for source separation applications (\cite{ditchphase}).
 
-To illustrate the calculation of the oracle mask, let us describe a simple case of a mixed song consisting of a vocal and drum track. We also need to have access to the isolated source recordings from which the mixed song was created.
+To illustrate the calculation of the oracle mask, let us describe a simple case of a mixed song consisting of a vocal and drum track. We assume that we have access to the isolated source recordings of vocals and drums, as well as the mix.
 
 We start by denoting the waveforms $x_{v}[n]$ and $x_{d}[n]$ for the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, let's say that we want our algorithm or network to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
 
@@ -690,33 +747,33 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 
 \subsubsection{Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX)}
 
-\chaptertodo{
-	\url{https://papers.nips.cc/paper/2014/file/a14ac55a4f27472c5d894ec1c3c743d2-Paper.pdf}\\
-	use my RNN slides from MIR-presentations\\
-	UMX bi-LSTM comes from \url{https://www.researchgate.net/publication/335688695_Open-Unmix_-_A_Reference_Implementation_for_Music_Source_Separation}\\
-	more umx \url{https://hal.inria.fr/hal-02293689/document}\\
-	bi-LSTM here which comes from \url{https://www.researchgate.net/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending}\\
-	more here \url{https://ieeexplore.ieee.org/document/7952158}\\
-	more here \url{https://www.researchgate.net/profile/Yuki-Mitsufuji/publication/315100151_Improving_music_source_separation_based_on_deep_neural_networks_through_data_augmentation_and_network_blending/links/59ed4f844585151983ccdcba/Improving-music-source-separation-based-on-deep-neural-networks-through-data-augmentation-and-network-blending.pdf}\\
-	finally comes from here \url{https://www.semanticscholar.org/paper/Framewise-phoneme-classification-with-bidirectional-Graves-Schmidhuber/2f83f6e1afadf0963153974968af6b8342775d82}
-}
+Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
 
- Open-Unmix was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
+In UMX, a deep neural network is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture is a variant of a sequence2sequence model. Open-Unmix uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} the architecture of UMX and one of its predecessors.
 
- \textcite{umx}'s deep learning model for music source separation is intended to be a near state-of-the-art, open implementation based on the open MUSDB18 and MUSDB18-HQ datasets and designed to foster source separation research \cite{musdb18, musdb18hq}. A deep neural network is used to estimate the magnitude spectrograms of the sources given a mixed song as an input. The sources are the same as the four stems per track in MUSDB18: drums, vocals, bass, other. Finally, the estimate is used to compute a soft mask.
+\begin{figure}[ht]
+	\centering
+	\subfloat[Open-Unmix Bi-LSTM architecture]{\includegraphics[width=0.8\textwidth]{./images-neural/umx.png}}\\
+	\subfloat[Simple DNN architecture for MSS]{\includegraphics[width=0.8\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
+	\caption{Architecture of Open-Unmix (\cite{umx}) and one of its simpler predecessors (\cite{umxorig1})}
+	\label{fig:umxes}
+\end{figure}
 
- \subsubsection{Convolutional denoising autoencoders}
+\textcite{xumx} combined the 4 separate target networks into a single model to apply the loss functions and optimizations jointly across all 4 targets, rather than optimizing each one separately. The model is named CrossNet-Open-Unmix (X-UMX). It also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients in UMX.
 
- While the discussed Open-Unmix model is based on a sequence-to-sequence LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}).
+\subsubsection{Convolutional denoising autoencoders}
 
- In particular, the CDAE networks of \textcite{plumbley1} and \textcite{plumbley2} give some simple and adaptable ideas for performing music demixing with 2D convolutional layers applied on time-frequency transforms.
+While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}). The architectures are shown in figure \ref{fig:cdaes}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT.
 
- \todo[inline]{plumbley's papers here and a bit of CNN theory}
-\textcite{plumbley2} used varying sizes of time and frequency filters applied to the STFT according to the constant-Q scale, to separate singing voice in music.
+\begin{figure}[ht]
+	\centering
+	\subfloat[Simple CDAE]{\includegraphics[width=\textwidth]{./images-neural/cdae_1.png}}\\
+	\subfloat[Different sizes of time and frequency filter by frequency band]{\includegraphics[width=0.7\textwidth]{./images-neural/cdae_2.png}}
+	\caption{Various convolutional architectures for music source separation}
+	\label{fig:cdaes}
+\end{figure}
 
-\subsubsection{Open-source ecosystem}
-
-\todo[inline]{ecosystem here of umx, sigsep, sisec, nussl, asteroid, MDX, etc.}
+We'll note that each of the papers gives us different ideas with how to adapt STFT-based convolutional models to fit the sliCQT. The model introduced in \textcite{plumbley1} shows a simple case of a 2D time and frequency filter applied to the STFT, which can be applied to any time-frequency transform. The model introduced in \textcite{plumbley2} varies the size of time and frequency filter to fit the constant-Q transform, which as discussed in section \ref{sec:cqt} analyzes music with higher frequency resolution in the low frequency region, and higher time resolution in the high frequency region.
 
 \subsubsection{Public datasets}
 
@@ -757,5 +814,20 @@ In the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measu
 
 	For this package, we enabled the option of having time invariant distortion filters, instead of necessarily taking them as varying over time as done in the previous versions of BSSEval. First, enabling this option significantly reduces the computational cost for evaluation because matching needs to be done only once for the whole signal. Second, it introduces much more dynamics in the evaluation, because time-varying matching filters turn out to over-estimate performance. Third, this makes matching more robust, because true sources are not silent throughout the whole recording, while they often were for short windows
 \end{quote}
+
+\subsubsection{Open-source ecosystem}
+
+There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub\footnote{\url{https://github.com/}} to provide tools, tutorials, and implementations for source separation. Of note are:
+
+\begin{tight_enumerate}
+	\item
+		SigSep,\footnote{\url{https://github.com/sigsep}} which contains many tools, including \textcite{umx}'s Open-Unmix model, \textcite{musdb18, musdb18hq}'s MUSDB18 dataset loaders, and \textcite{bss}'s BSS evaluation metrics
+	\item
+		nussl,\footnote{\url{https://github.com/nussl}} from \textcite{nussl}, which contains a library with many algorithms for music and speech separation
+	\item
+		Asteroid,\footnote{\url{https://github.com/asteroid-team}} from \textcite{asteroid}, another source separation toolkit
+\end{tight_enumerate}
+
+The author of this thesis owes a debt of gratitude to these projects. Without such community-focused efforts, the field of music demixing would be less approachable for beginners.
 
 \end{document}
