@@ -8,14 +8,15 @@ sigsep-mus-eval optimization in oracle section\\
 Describe open-unmix-pytorch (LSTM vs. gh template)\\
 Summarize CDAE papers (should be simple)\\
 }
+\subsection{Hypothesis}
 
-The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ transform (\cite{slicq}) was named xumx-sliCQ, and is the subject and main result of this thesis. The following methodology section will cover how xumx-sliCQ was written step-by-step.
+The proposed adaptation of Open-Unmix (UMX) (\cite{umx}) to use the sliCQ Transform (sliCQT) (\cite{invertiblecqt, slicq}) was named xumx-sliCQ, and is the subject and main result of this thesis. The following methodology section will cover how xumx-sliCQ was written step-by-step.
 
-\subsection{Thesis hypothesis}
+Manipulating time-frequency resolution is one strategy for improving spectral music source separation. Open-Unmix uses a fixed time-frequency resolution from the STFT with a window size of 4096. \textcite{fitzgerald1, driedger} use multiple STFTs with different window sizes, and \textcite{fitzgerald2, cqtseparation, bettermusicsep} replaced the STFT with the constant-Q transform.
 
-Manipulating time-frequency resolution is a common strategy for improving spectral music source separation. \textcite{fitzgerald1, driedger} use multiple STFTs with different window sizes. \textcite{fitzgerald2, cqtseparation, bettermusicsep} replaced the STFT with the constant-Q transform. 
+Open-Unmix is a deep neural network which uses the STFT to estimate 4 targets: bass, vocals, drums, and other. It is the hypothesis and hope of this thesis that using a sliCQT spectrogram, which can contain more musical information than the STFT from its adaptive time-frequency resolution, will allow the Open-Unmix network to perform music demixing more effectively.
 
-\subsection{NSGT Python library}
+\subsection{PyTorch NSGT and sliCQT}
 
 The starting point for the sliCQ transform used in this paper is the Python reference library\footnote{\url{https://github.com/grrrr/nsgt}} for the NSGT (\cite{slicq}) and sliCQ transform. It was forked to my own GitHub profile,\footnote{\url{https://github.com/sevagh/nsgt}} where modifications were made to support its use in GPU deep learning, and to add some extra features such as new frequency scales.
 
