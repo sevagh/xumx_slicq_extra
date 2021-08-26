@@ -22,9 +22,7 @@ xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, al
 \subsection{Choosing a sliCQT for music demixing}
 \label{sec:slicqparamsrch}
 
-The initial exploration is on whether the sliCQT is suitable for music demixing with magnitude spectrogram masking, since this is how Open-Unmix works, using the STFT for the spectrogram implementation.
-
-A simple approach is to experiment with the sliCQT replacing the STFT inside oracle mask estimators, which were described in \ref{sec:masksandoracles}. If the oracle experiments show promising results, such as the sliCQT oracle performance surpassing STFT oracle performance, it's a good first step towards replacing the STFT with the sliCQT in a neural network.
+The initial exploration is on whether the sliCQT is suitable as an STFT replacement for music demixing with magnitude spectrogram masking, since this is how Open-Unmix works. A simple approach is to experiment with the sliCQT replacing the STFT inside oracle mask estimators, which were described in \ref{sec:masksandoracles}. If the oracle experiments show promising results, such as the sliCQT oracle performance surpassing STFT oracle performance, it's a good first step towards replacing the STFT with the sliCQT in a neural network.
 
 To recap, the oracle mask is a perfect time-frequency mask which is computed from ground-truth training data. The oracle is used to give an idea of the upper limit of audio quality from an algorithm or model for music demixing. The mask is typically applied to the magnitude transform (\cite{umx}), and the phase is discarded.
 
@@ -43,7 +41,7 @@ In this parameter exploration, the sliCQT does not need to run on the GPU -- tha
 
 \textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex and invertible time-frequency transforms with Fourier coefficients
 
-As shown in section \ref{masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \ref{equation:irm1}:
+As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \ref{equation:irm1}:
 \begin{align}\tag{1}\label{equation:irm1}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n]), X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), |X_{\text{source}}| = \text{abs}(X_{\text{source}})\\
@@ -89,12 +87,7 @@ This is the first estimate of the mix-phase inversion strategy, and doesn't assu
 
 The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT.
 
-\subsubsection{MPI oracle parameter search}
-
-\chaptertodo{
-	bayesian failed idea\\
-	random iterations
-}
+\subsubsection{Frequency scale additions to the NSGT/sliCQT}
 
 \subsubsection{Optimizing BSS metrics}
 
@@ -102,10 +95,15 @@ The mix-phase inversion oracle (MPI) score is the target we will choose to maxim
 as does museval: sigsep-mus-eval optimization in oracle section
 }
 
-\subsubsection{Frequency scale additions to the NSGT/sliCQT}
-
 \chaptertodo{
 slice length and freq scales section goes to the parameter search
+}
+
+\subsubsection{MPI oracle parameter search testbench}
+
+\chaptertodo{
+	bayesian failed idea\\
+	random iterations
 }
 
 \subsection{PyTorch GPU support for NSGT/sliCQT}
