@@ -3,34 +3,112 @@
 
 \section{Methodology}
 
-\chaptertodo{
-Summarize CDAE papers (should be simple)\\
-slice length and freq scales section goes to the parameter search\\
-as does museval: sigsep-mus-eval optimization in oracle section\\
-}
+\subsection{sliCQT music demixing network design}
 
-\subsection{Hypothesis and objectives}
+The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ Transform (sliCQT) (\cite{invertiblecqt, slicq}) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} and is the subject and main result of this thesis.
 
-The proposed adaptation of Open-Unmix (UMX) (\cite{umx}) to use the sliCQ Transform (sliCQT) (\cite{invertiblecqt, slicq}) was named xumx-sliCQ, and is the subject and main result of this thesis. The following methodology section will cover how xumx-sliCQ was written step-by-step.
+Open-Unmix (\cite{umx}) has a reference implementation released as an open-source Python codebase for general music demixing,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch (\cite{pytorch}) for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader (\cite{musdb18hq}) and BSS metrics evaluator (\cite{bss}), both necessary components for this thesis.
 
-Manipulating time-frequency resolution is one strategy for improving spectral music source separation. Open-Unmix uses a fixed time-frequency resolution from the STFT with a window size of 4096. \textcite{fitzgerald1, driedger} use multiple STFTs with different window sizes, and \textcite{fitzgerald2, cqtseparation, bettermusicsep} replaced the STFT with the constant-Q transform.
-
-Open-Unmix (UMX) is a deep neural network which uses a bi-directional LSTM network to estimate the magnitude STFTs for 4 targets: bass, vocals, drums, and other. It is the hypothesis of this thesis that using a sliCQT spectrogram, which can contain more musical information than the STFT from its adaptive time-frequency resolution, will allow the Open-Unmix network to perform music demixing more effectively.
-
-Open-Unmix is a published academic paper (\cite{umx}), but it can also be considered an open-source framework for music demixing. The project on GitHub\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} uses PyTorch (\cite{pytorch}), a GPU-capable deep learning and numerical computation library for Python. It also conveniently includes a MUSDB18-HQ data loader (\cite{musdb18hq}) and BSS metrics evaluator (\cite{bss}), which are the dataset and evaluation metrics for music demixing being considered in this thesis.
-
-xumx-sliCQ will be based on this template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this section will be focused on the Python and PyTorch implementation details of xumx-sliCQ. There are three requirements to make the thesis objective possible:
-
+xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ. The following tasks are required and will be described in each section of the chapter respectively:
 \begin{tight_enumerate}
-	\item
-		PyTorch implementation of the sliCQT, in section \ref{sec:torchslicq}
 	\item
 		Parameter selection for the sliCQT, in section \ref{sec:slicqparamsrch}
 	\item
-		Use the sliCQT in Open-Unmix, in section \ref{sec:slicqumx}
+		PyTorch implementation of the sliCQT, in section \ref{sec:torchslicq}
+	\item
+		Using the sliCQT with selected parameters in Open-Unmix, in section \ref{sec:slicqumx}
 \end{tight_enumerate}
 
-\subsection{PyTorch NSGT and sliCQT}
+\subsection{Choosing a sliCQT for music demixing}
+\label{sec:slicqparamsrch}
+
+The initial exploration is on whether the sliCQT is suitable for music demixing with magnitude spectrogram masking, since this is how Open-Unmix works, using the STFT for the spectrogram implementation.
+
+A simple approach is to experiment with the sliCQT replacing the STFT inside oracle mask estimators, which were described in \ref{sec:masksandoracles}. If the oracle experiments show promising results, such as the sliCQT oracle performance surpassing STFT oracle performance, it's a good first step towards replacing the STFT with the sliCQT in a neural network.
+
+To recap, the oracle mask is a perfect time-frequency mask which is computed from ground-truth training data. The oracle is used to give an idea of the upper limit of audio quality from an algorithm or model for music demixing. The mask is typically applied to the magnitude transform (\cite{umx}), and the phase is discarded.
+
+In this parameter exploration, the sliCQT does not need to run on the GPU -- that step is important in the deep learning network, which comes later. Therefore, we only require the following components to build the oracle testbench:
+
+\begin{tight_enumerate}
+	\item
+		Reference NSGT/sliCQ (\cite{invertiblecqt}) library,\footnote{\url{https://github.com/grrrr/nsgt}} based on numpy and scipy, popular CPU-based Python numerical computation libraries (\cite{numpy, scipy})
+	\item
+		Python MUSDB18-HQ (\cite{musdb18hq}) loader library\footnote{\url{https://github.com/sigsep/sigsep-mus-db}}
+	\item
+		Python BSS metrics (\cite{bss}) evaluator library\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/}} by the SigSep community
+\end{tight_enumerate}
+
+\subsubsection{Mix-phase inversion (MPI) oracle}
+
+\textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex and invertible time-frequency transforms with Fourier coefficients
+
+As shown in section \ref{masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \ref{equation:irm1}:
+\begin{align}\tag{1}\label{equation:irm1}
+	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n]), X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), |X_{\text{source}}| = \text{abs}(X_{\text{source}})\\
+	\nonumber & \text{IRM1}_{\text{source}} = \frac{|X_{\text{source}}|^{1}}{|X_{\text{mix}}|^{1}}\\
+	\nonumber & \hat{X}_{\text{source, IRM1}} = X_{\text{mix}} \cdot \text{IRM1}_{\text{source}}\\
+	\nonumber & \hat{x}_{\text{source, IRM1}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, IRM1}})
+\end{align}
+
+Similar to the IRM1 calculation, let's examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let's call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \ref{equation:softneural}:
+\begin{align}\tag{2}\label{equation:softneural}
+	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}})\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}})\\
+	\nonumber & \text{EstRatioMask}_{\text{source}} = \frac{{|X_{\text{source}}|_{\text{est}}}^{1}}{|X_{\text{mix}}|^{1}}\\
+	\nonumber & \hat{X}_{\text{source, est}} = X_{\text{mix}} \cdot \text{EstRatioMask}_{\text{source}}\\
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
+\end{align}
+
+This is the soft mask output of Open-Unmix, which is supported by one of the configuration options. However, by default Open-Unmix prefers to use the estimated magnitude and the phase of the mixture, over soft masks. The source waveform is estimated using the source magnitude spectrogram and mix phase spectrogram, and show in equations \ref{equation:mpineural}:
+\begin{align}\tag{3}\label{equation:mpineural}
+	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}})\\
+	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \measuredangle{X_{\text{mix}}}\\
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
+\end{align}
+
+In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. I discussed the idea of the mix-phase inversion oracle here\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/issues/83}} and here\footnote{\url{https://discourse.aicrowd.com/t/oracle-baselines/6211/4?u=sevagh}} with Stefan Uhlich and Fabian-Robert St{\"o}ter, authors of Open-Unmix.
+
+There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle (\cite{noisyphase1, noisyphase2}), which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
+
+Let's write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \ref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \ref{equation:mpioracle}:
+\begin{align}\tag{4}\label{equation:mpioracle}
+	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
+	\nonumber & X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
+	\nonumber & |X_{\text{source}}| = \text{abs}(X_{\text{source}}), \measuredangle{X_{\text{source}}} = \text{angle}(X_{\text{source}})\\
+	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \measuredangle{X_{\text{mix}}}\\
+	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, MPI}})
+\end{align}
+
+This is the first estimate of the mix-phase inversion strategy, and doesn't assume further post-processing of the estimates. It gives us the idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
+
+The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT.
+
+\subsubsection{MPI oracle parameter search}
+
+\chaptertodo{
+	bayesian failed idea\\
+	random iterations
+}
+
+\subsubsection{Optimizing BSS metrics}
+
+\chaptertodo{
+as does museval: sigsep-mus-eval optimization in oracle section
+}
+
+\subsubsection{Frequency scale additions to the NSGT/sliCQT}
+
+\chaptertodo{
+slice length and freq scales section goes to the parameter search
+}
+
+\subsection{PyTorch GPU support for NSGT/sliCQT}
 \label{sec:torchslicq}
 
 The starting point for the sliCQ transform used in this paper is the Python reference library\footnote{\url{https://github.com/grrrr/nsgt}} for the NSGT (\cite{slicq}) and sliCQ transform. It was forked to my own GitHub profile,\footnote{\url{https://github.com/sevagh/nsgt}} where modifications were made to support its use in GPU deep learning, and to add some extra features such as new frequency scales.
@@ -81,6 +159,7 @@ In my fork of the NSGT library, two additional frequency scales were added:
 
 \todo[inline]{intention to support minimum slice length support, Bark scale, VQ scale}
 
+
 \subsubsection{PyTorch optimizations}
 
 \todo[inline]{explain how this is necessary for neural networks and deep learning}
@@ -92,67 +171,6 @@ In my fork of the NSGT library, two additional frequency scales were added:
 \subsubsection{Grouping frequency bins by time resolution}
 
 \todo[inline]{call it the ragged transform}
-
-\subsection{Choosing sliCQ parameters with oracle estimators}
-\label{sec:slicqparamsrch}
-
-The first experiment to run is to discover which configuration of the NSGT has the potential to surpass the maximum performance of time-frequency masking using the STFT spectrogram. This should indicate whether substituting the NSGT in Open-Unmix is worthwhile.
-
-\subsubsection{Mix-phase oracle}
-
-Given ground truth data, such as what is available in MUSDB18, we have available to us the individually recorded sources for each track. From this, we can compute the ideal or oracle masks::
-
-\begin{flalign}
-	\nonumber \text{given: } & x_{\text{drums}}, x_{\text{vocals}}, x_{\text{bass}}, x_{\text{other}}\\
-	\nonumber & x_{\text{mix}} = \sum{x}\\
-	\nonumber & \hat{X} = \text{STFT}(x), \text{complex-valued}\\
-	\nonumber & |\hat{X}|^{\alpha} = \text{magnitude STFT of } x \text{ raised to } \alpha \text{ power, real-valued}\\
-	\nonumber & \text{Mask}_{\text{source}} = \frac{|\hat{X}|_{\text{source}}^{\alpha}}{\sum{|\hat{X}|^{\alpha}}}\\
-	\nonumber & \hat{Y}_{\text{source}} = \text{Mask}_{\text{source}} * \hat{X}_{\text{mix}}\\
-	\nonumber & y = \text{ISTFT}(\hat{Y})\\
-	\nonumber & y = \text{ideal estimate of } x
-\end{flalign}
-
-Finally, using these pairs of $x, y$, we can get the maximum possible BSS metrics of any algorithm or model based on time-frequency masking. This is the methodology used to find the so-called oracle estimator or oracle mask, which represents the maximum possible performance of any algorithm or model for music source separation that uses spectrogram masking (CITE UMX, etc.).
-
-Approaching or surpassing the ideal mask performance is a common benchmark in source separation literature. \todo{weak} Demucs talks about it but doesn't achieve it.
-
-\subsubsection{sliCQ parameter search}
-
-The sliCQ transform has several configurable parameters. Their choices and considered value ranges are described in tables \ref{table:slicqfreqparam} and \ref{table:slicqotherparam}. Parameter ranges were considered from various CQT and NSGT papers. \textcite{invertiblecqt} provides sliCQ parameter ideas for the minimum frequency and bins: they varied the minimum frequency between 10.0--130.0 Hz ($\xi_{\text{min}} \in [10.0, 130.0]$) and bins-per-octave from 12 to 192 ($B \in [12, 192]$).
-
-Bins-per-octave applies the Western pitch scale by using multiples of 12 frequency bins, corresponding to the 12-tone scale. The total number of frequency bins from the bins-per-octave can be computed from the following formula (\cite{invertiblecqt}):
-\begin{flalign}
-	K = \text{integer}([B*\log_{2}(\frac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1])
-\end{flalign}
-
-The min and max of 12--192 bins-per-octave therefore corresponds to the total number of frequency bins 122--1941. In the case of other frequency scales, the total number of bins is controlled directly -- 12 Mel bins results in a 12-bin transform output (or 13 with the DC bin, 0 Hz, added). For that reason, in this thesis the octave scale with the bins-per-octave argument is not used. Instead, the logarithmic scale is used directly for output frequency bin control. The result is still the constant-Q transform, except removed from 12-tone pitch scale analogy.
-
-\begin{table}[ht]
-	\centering
-\begin{tabular}{ |l|l|l| }
-	 \hline
-	 Parameter & Values & Notes \\
-	 \hline
-	 \hline
-	 Frequency scale & \makecell[l]{ Constant-Q \\ Variable-Q \\ Mel \\ Bark } & \\
-	 \hline
-	 Minimum frequency (Hz) & 10.0 -- 130.0 & \\
-	 \hline
-	 Maximum frequency (Hz) & 22050.0 & Fixed to Nyquist for performance reasons \\
-	 \hline
-	 Frequency bins & 10 -- 300 & Constrain sliCQ transform size \\
-	 \hline
-	 Slice length & Auto & Minimum to support frequency scale \\
-	 \hline
-\end{tabular}
-	\caption{Frequency scale parameters for the sliCQ transform}
-	\label{table:slicqfreqparam}
-\end{table}
-
-\subsubsection{Random grid search}
-
-\textcite{randomgrid} know what they're talking about
 
 \subsection{Open-Unmix with the sliCQ transform}
 \label{sec:slicqumx}

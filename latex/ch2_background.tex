@@ -697,6 +697,7 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 \newpagefill
 
 \subsection{Time-frequency masking and oracle estimators}
+\label{sec:masksandoracles}
 
 Surveys on speech (\cite{speechmask}) and music separation (\cite{musicmask}) indicate that the majority of source separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
@@ -709,7 +710,7 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or ha
 	\label{fig:masks}
 \end{figure}
 
-The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is applied to and computed from magnitude spectrograms (\cite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}). Discarding the phase of the complex STFT is a choice made for simplicity, but the phase may be important for source separation applications (\cite{ditchphase}).
+The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms (\cite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}). Discarding the phase of the complex STFT is a choice made for simplicity, but the phase may be important for source separation applications (\cite{ditchphase}).
 
 To illustrate the calculation of the oracle mask, let us describe a simple case of a mixed song consisting of a vocal and drum track. We assume that we have access to the isolated source recordings of vocals and drums, as well as the mix.
 
