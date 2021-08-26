@@ -109,7 +109,7 @@ slice length and freq scales section goes to the parameter search
 \subsection{PyTorch GPU support for NSGT/sliCQT}
 \label{sec:torchslicq}
 
-The starting point for the sliCQ transform used in this paper is the Python reference library\footnote{\url{https://github.com/grrrr/nsgt}} for the NSGT (\cite{slicq}) and sliCQ transform. It was forked to my own GitHub profile,\footnote{\url{https://github.com/sevagh/nsgt}} where modifications were made to support its use in GPU deep learning, and to add some extra features such as new frequency scales.
+The starting point for the sliCQ Transform used in this paper is the Python reference library\footnote{\url{https://github.com/grrrr/nsgt}} for the NSGT (\cite{slicq}) and sliCQ Transform. It was forked to my own GitHub profile,\footnote{\url{https://github.com/sevagh/nsgt}} where modifications were made to support its use in GPU deep learning, and to add some extra features such as new frequency scales.
 
 \subsubsection{Matrix and ragged forms}
 
@@ -126,7 +126,7 @@ ragged difficult to work with but:
 	perfect reconstruction of the original signal from its trans-
 	form coefficients. Thirdly, CQT produces a data structure
 	that is more difficult to work with than the time-frequency
-	matrix (spectrogram) obtained by using short-time Fourier
+	matrix (spectrogram) obtained by using Short-Time Fourier
 	transform in successive time frames. The last problem is
 	due to the fact that in CQT, the time resolution varies for
 	different frequency bins, in effect meaning that the ”sam-
@@ -170,14 +170,14 @@ In my fork of the NSGT library, two additional frequency scales were added:
 
 \todo[inline]{call it the ragged transform}
 
-\subsection{Open-Unmix with the sliCQ transform}
+\subsection{Open-Unmix with the sliCQ Transform}
 \label{sec:slicqumx}
 
 \todo[inline]{incorporate my sparsity hypothesis/justification for nsgt}
 
 \todo[inline]{better hope umx shines here}
 
-\subsubsection{Working with the ragged sliCQ transform}
+\subsubsection{Working with the ragged sliCQ Transform}
 
 \ichfeedback{describe here how frequency bins are grouped by the same time-resolution, to produce a list of ``blocks'' of time-frequency coefficients}
 
