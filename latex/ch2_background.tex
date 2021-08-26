@@ -278,7 +278,7 @@ This first CQT implementation was not designed to be invertible, until \textcite
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} (\cite{essentia}), LTFAT,\footnote{\url{https://ltfat.org/}} (\cite{ltfat}) and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} (\cite{librosa}) still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
-Let's consider spectrogram plots generated from the CQ-NSGT from the MATLAB Wavelet Toolbox using the \Verb#cqt# function compared with the standard STFT spectrogram using the \Verb#spectrogram# function in MATLAB,\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}}. Various plots of the STFT spectrogram vs. CQT spectrogram are shown in figure \ref{fig:cqtvstft}. The bins-per-octave parameter controls the frequency resolution -- more bins-per-octave gives us a finer frequency discrimination.
+Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft}, generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.
 
 \begin{figure}[ht]
 	\centering
@@ -288,7 +288,7 @@ Let's consider spectrogram plots generated from the CQ-NSGT from the MATLAB Wave
 	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft1024.png}}\\
 	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt48.png}}
 	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft4096.png}}
-	\caption{Spectrograms of the glockenspiel signal. Note how the CQT displays more frequencies, or musical information, than the STFT for all frequency resolutions.}
+	\caption{Spectrograms of the glockenspiel signal, showing how the CQT displays more musical information than the STFT for all frequency resolutions}
 	\label{fig:cqtvstft}
 \end{figure}
 
