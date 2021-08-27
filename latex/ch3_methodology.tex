@@ -4,21 +4,120 @@
 \section{Methodology}
 \label{sec:methodology}
 
-\subsection{sliCQT for music demixing}
-
 The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ Transform (sliCQT) (\cite{invertiblecqt, slicq}) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} and is the subject and main result of this thesis.
 
 Open-Unmix (\cite{umx}) has a reference implementation released as an open-source Python codebase for general music demixing,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch (\cite{pytorch}) for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader (\cite{musdb18hq}) and BSS metrics evaluator (\cite{bss}), both necessary components for this thesis.
 
-xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ. The following tasks are required and will be described in each section of the chapter respectively:
-\begin{tight_enumerate}
-	\item
-		Parameter selection for the sliCQT, in section \ref{sec:slicqparamsrch}
-	\item
-		PyTorch implementation of the sliCQT, in section \ref{sec:torchslicq}
-	\item
-		Using the sliCQT with selected parameters in Open-Unmix, in section \ref{sec:slicqumx}
-\end{tight_enumerate}
+xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library\footnote{\url{https://github.com/grrrr/nsgt}} which will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications to the NSGT/sliCQT library required for this thesis.
+
+\subsection{Improving the NSGT/sliCQT reference library}
+\label{sec:improvelib}
+
+\subsubsection{New frequency scales}
+
+The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank (\cite{variableq1}). The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed.
+
+The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. Recall from section \ref{sec:cqt} that to compute the total bins from the bins-per-octave setting of the CQ-NSGT, we can use $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies.
+
+In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or sliCQT) with a manually-defined octave scale. One can use the logarithmic scale for more direct control over the total bins. The difference is shown in listing \ref{code:octvlog}. The resulting frequency scale is plotted in figure \ref{fig:octvlog}.
+
+\begin{figure}[h]
+  \centering
+ \begin{minipage}{\textwidth}
+  \centering
+\setlength\partopsep{-\topsep}
+\begin{inputminted}[linenos,breaklines,frame=single,firstline=4,lastline=16]{text}{./scripts/fscale.py}
+\end{inputminted}
+ \subfloat{(a) Code snippet defining octave and log scales}
+ \vspace{1em}
+ \end{minipage}
+ \begin{minipage}{\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|\$ python scripts/fscale.py 3 # invoke script for bpo=3|
+|bpo: 3, bins: 21, len(oct): 21, len(log): 21|
+\end{minted}
+ \subfloat{(b) Output printed by above}
+ \end{minipage}
+  \captionof{listing}{Octave and log scales for the NSGT}
+  \label{code:octvlog}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-freqscales/log_vs_oct.png}
+	\caption{Frequency bins for the octave and log scales, annotated with their nearest musical note}
+	\label{fig:octvlog}
+\end{figure}
+
+To supplement the octave and log scale, the variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/master/nsgt/fscale.py\#L105}}
+
+The variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite{variableq1} provide the motivation for the variable-Q scale:
+\begin{quote}
+	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
+\end{quote}
+
+Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1} provides the following equations in \ref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
+\begin{align}\tag{5}\label{equation:variablebw}
+	\nonumber & B_{k} = \alpha f_{k} + \gamma\\
+	\nonumber & \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
+\end{align}
+
+\textcite{variableq2} use the same equations. The effect this has is to widen the low frequency bands significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but Q-factors that are still constant in the high frequency bins. Figure \ref{fig:vq} shows the constant-Q/log, and variable-Q scales for different values of the frequency offset $\gamma$.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-freqscales/vqlog.png}
+	\caption{Frequency bins and Q factors for the constant-Q/log and variable-Q scales}
+	\label{fig:vq}
+\end{figure}
+
+The next frequency scale added was the Bark psychoacoustic scale, to complement the included mel scale. One of the possible formulas used to approximate the Bark frequency from the Hz frequency is the following (\cite{barktan}):
+\begin{align}
+	\nonumber & f_{\text{bark}} = 6 \cdot arcsinh(\frac{f_{\text{Hz}}}{600})
+\end{align}
+
+\subsubsection{Slice utilities}
+
+\subsubsection{Matrix and ragged forms}
+
+\chaptertodo{
+	first describe the reference library's generator-based design for ragged and matrix\\
+}
+
+NSGT/sliCQ (\cite{invertiblecqt}) library,\footnote{\url{https://github.com/grrrr/nsgt}} based on numpy and scipy, popular CPU-based Python numerical computation libraries (\cite{numpy, scipy})\\
+ragged difficult to work with but:
+
+\textcite{klapuricqt}
+\begin{quote}
+	There are at least three reasons why the CQT has not
+	widely replaced the DFT in audio signal processing. Firstly,
+	it is computationally more intensive than the DFT. Sec-
+	ondly, the CQT lacks an inverse transform that would allow
+	perfect reconstruction of the original signal from its trans-
+	form coefficients. Thirdly, CQT produces a data structure
+	that is more difficult to work with than the time-frequency
+	matrix (spectrogram) obtained by using Short-Time Fourier
+	transform in successive time frames. The last problem is
+	due to the fact that in CQT, the time resolution varies for
+	different frequency bins, in effect meaning that the ”sam-
+	pling” of different frequency bins is not synchronized. In
+	this paper, we propose solutions to these three problems.
+\end{quote}
+
+\chaptertodo{
+	Intent to group frequency bins by time resolution\\
+	call it the ragged transform
+}
+
+\subsubsection{PyTorch GPU optimization}
+\label{sec:torchslicq}
+
+\chaptertodo{
+	explain how this is necessary for neural networks and deep learning\\
+	describe optimizations done here\\
+	describe optimizations case by case or line by line?\\
+}
 
 \subsection{Choosing sliCQT parameters}
 \label{sec:slicqparamsrch}
@@ -27,11 +126,9 @@ The initial exploration is on whether the sliCQT is suitable as an STFT replacem
 
 To recap, the oracle mask is a perfect time-frequency mask which is computed from ground-truth training data. The oracle is used to give an idea of the upper limit of audio quality from an algorithm or model for music demixing. The mask is typically applied to the magnitude transform (\cite{umx}), and the phase is discarded.
 
-In this parameter exploration, the sliCQT does not need to run on the GPU -- that step is important in the deep learning network, which comes later. Therefore, we only require the following components to build the oracle testbench:
+In this parameter exploration, we require the following components to build the oracle testbench:
 
 \begin{tight_enumerate}
-	\item
-		Reference NSGT/sliCQ (\cite{invertiblecqt}) library,\footnote{\url{https://github.com/grrrr/nsgt}} based on numpy and scipy, popular CPU-based Python numerical computation libraries (\cite{numpy, scipy})
 	\item
 		Python MUSDB18-HQ (\cite{musdb18hq}) loader library\footnote{\url{https://github.com/sigsep/sigsep-mus-db}}
 	\item
@@ -88,69 +185,10 @@ This is the first estimate of the mix-phase inversion strategy, and doesn't assu
 
 The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT.
 
-\subsubsection{New frequency scales}
-
-The time and frequency resolution of the NSGT and sliCQT in the reference library are defined by their frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank (\cite{variableq1}). The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. Recall from section \ref{sec:cqt} that to compute the total bins from the bins-per-octave setting of the CQ-NSGT, we can use $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies.
-
-In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or sliCQT) with a manually-defined octave scale. One can use the logarithmic scale for more direct control over the total bins. The difference is shown in listing \ref{code:octvlog}. The resulting frequency scale is plotted in figure \ref{fig:octvlog}.
-
-\begin{figure}[h]
-  \centering
- \begin{minipage}{\textwidth}
-  \centering
-\setlength\partopsep{-\topsep}
-\begin{inputminted}[linenos,breaklines,frame=single,firstline=4,lastline=16]{text}{./scripts/fscale.py}
-\end{inputminted}
- \subfloat{(a) Code snippet defining octave and log scales}
- \vspace{1em}
- \end{minipage}
- \begin{minipage}{\textwidth}
-  \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
-|\$ python scripts/fscale.py 3 # invoke script for bpo=3|
-|bpo: 3, bins: 21, len(oct): 21, len(log): 21|
-\end{minted}
- \subfloat{(b) Output printed by above}
- \end{minipage}
-  \captionof{listing}{Octave and log scales for the NSGT}
-  \label{code:octvlog}
-\end{figure}
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-freqscales/log_vs_oct.png}
-	\caption{Frequency bins for the octave and log scales, annotated with their nearest musical note}
-	\label{fig:octvlog}
-\end{figure}
-
-To supplement the octave and log scale, the variable-Q scale (\cite{variableq1, variableq2}) was added in my fork of the NSGT libary.\footnote{\url{https://github.com/sevagh/nsgt/blob/master/nsgt/fscale.py\#L105}} This fork contains all of the contributions to the NSGT/sliCQT library from this thesis.
-
-The variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite{variableq1} provide the motivation for the variable-Q scale:
-\begin{quote}
-	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
-\end{quote}
-
-Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1} provides the following equations in \ref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
-\begin{align}\tag{5}\label{equation:variablebw}
-	\nonumber & B_{k} = \alpha f_{k} + \gamma\\
-	\nonumber & \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
-\end{align}
-
-\textcite{variableq2} use the same equations. The effect this has is to widen the low frequency bands significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} uses $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center band increases, the effect of the small offset becomes negligible. This results in a widening of the Q factors in the lower frequency bands. Figure \ref{fig:vq} shows the constant-Q/log, and variable-Q scales for different values of the frequency offset $\gamma$.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-freqscales/vqlog.png}
-	\caption{Frequency bins and Q factors for the constant-Q/log and variable-Q scales}
-	\label{fig:vq}
-\end{figure}
-
-\subsubsection{Slice utilities}
-
-\subsubsection{Optimizing BSS metrics}
+\subsubsection{GPU-accelerated BSS evaluation}
 
 \chaptertodo{
-as does museval: sigsep-mus-eval optimization in oracle section
+ 	sigsep-mus-eval optimization in oracle section
 }
 
 \subsubsection{MPI oracle parameter search testbench}
@@ -160,68 +198,6 @@ as does museval: sigsep-mus-eval optimization in oracle section
 	random iterations\\
 	seed per fscale but without results here
 }
-
-\subsection{PyTorch GPU support for NSGT/sliCQT}
-\label{sec:torchslicq}
-
-\subsubsection{Matrix and ragged forms}
-
-\todo[inline]{first describe the reference library's generator-based design for ragged and matrix}
-
-ragged difficult to work with but:
-
-\textcite{klapuricqt}
-\begin{quote}
-	There are at least three reasons why the CQT has not
-	widely replaced the DFT in audio signal processing. Firstly,
-	it is computationally more intensive than the DFT. Sec-
-	ondly, the CQT lacks an inverse transform that would allow
-	perfect reconstruction of the original signal from its trans-
-	form coefficients. Thirdly, CQT produces a data structure
-	that is more difficult to work with than the time-frequency
-	matrix (spectrogram) obtained by using Short-Time Fourier
-	transform in successive time frames. The last problem is
-	due to the fact that in CQT, the time resolution varies for
-	different frequency bins, in effect meaning that the ”sam-
-	pling” of different frequency bins is not synchronized. In
-	this paper, we propose solutions to these three problems.
-\end{quote}
-
-\subsubsection{Overlapping slices and plotting sliCQ spectrograms}
-
-\ichfeedback{overlap-add 50\% slice business here too, showing its non-invertible, use Essentia to support argument, justifying how i need to add a final convolutional layer to grow by 50\%}
-
-\todo[inline]{overlap essentia stuff: \url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
-
-\todo[inline]{show slicq overlap and plotting code from library}
-
-\subsubsection{Frequency scales and slice length selection}
-
-The reference library contains the octave and log scales, which are used for creating a constant-Q transform with logarithmic frequency spacing deriving from the 12-tone Western pitch scale. It also includes the Mel psychoacoustic scale.
-
-In my fork of the NSGT library, two additional frequency scales were added:
-
-\begin{enumerate}
-	\item
-		Bark psychoacoustic scale
-	\item
-		Variable-Q scale (\cite{variableq1,variableq2})
-\end{enumerate}
-
-\todo[inline]{intention to support minimum slice length support, Bark scale, VQ scale}
-
-
-\subsubsection{PyTorch optimizations}
-
-\todo[inline]{explain how this is necessary for neural networks and deep learning}
-
-\todo[inline]{describe optimizations done here}
-
-\todo[inline]{describe optimizations case by case or line by line?}
-
-\subsubsection{Grouping frequency bins by time resolution}
-
-\todo[inline]{call it the ragged transform}
 
 \subsection{Open-Unmix with the sliCQ Transform}
 \label{sec:slicqumx}
