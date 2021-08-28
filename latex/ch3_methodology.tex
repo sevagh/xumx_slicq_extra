@@ -50,7 +50,7 @@ In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or
 	\label{fig:octvlog}
 \end{figure}
 
-To supplement the octave and log scale, the variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/master/nsgt/fscale.py\#L105}}
+To supplement the octave and log scale, the variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}}
 
 The variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite{variableq1} provide the motivation for the variable-Q scale:
 \begin{quote}
@@ -72,12 +72,97 @@ Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (
 	\label{fig:vq}
 \end{figure}
 
-The next frequency scale added was the Bark psychoacoustic scale, to complement the included mel scale. One of the possible formulas used to approximate the Bark frequency from the Hz frequency is the following (\cite{barktan}):
+The next frequency scale added was the Bark psychoacoustic scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L207}} to complement the included mel scale. We used one of the possible formulas used to convert between Bark and Hz frequencies (\cite{barktan}) and vice versa, sometimes colloquially called the ``Barktan formula''\footnote{\url{https://ccrma.stanford.edu/~jos/bbt/Optimal_Frequency_Warpings.html}}:
 \begin{align}
-	\nonumber & f_{\text{bark}} = 6 \cdot arcsinh(\frac{f_{\text{Hz}}}{600})
+	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh(\frac{f_{\text{Hz}}}{600}), f_{\text{Hz}} = 600 \cdot sinh(\frac{f_{\text{Bark}}}{6})
 \end{align}
 
-\subsubsection{Slice utilities}
+To plot the mel and Bark filterbanks, we prefer to use librosa which has some additional utilities for plotting mel filterbanks (\cite{librosa}). Bark support was added with the same Barktan equations above, again in my own fork of librosa.\footnote{\url{https://github.com/sevagh/librosa/commit/695ecc61d0622c4abf41afda77c571dd58e9b9fd}} The resulting frequency scales (constructed from librosa or the forked NSGT library) are equivalent, since the mel to Hz and bark to Hz are identical. Figure \ref{fig:melbarkbands} shows the filterbanks visualized by librosa.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-freqscales/melbarks.png}
+	\caption{librosa visualization of triangular filterbanks, nfft=512}
+	\label{fig:melbarkbands}
+\end{figure}
+
+Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-factors from the NSGT library for 12 total mel or Bark bands.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-freqscales/melbarkpitchesqs.png}
+	\caption{Mel and Bark frequency curves and Q-factors from the NSGT library}
+	\label{fig:melbarkfsandqs}
+\end{figure}
+
+\newpagefill
+
+\subsubsection{Automatic slice length picker}
+
+An important addition to the sliced version of the NSGT, or the sliCQT, is to automatically suggest an appropriate slice length and transition area for a given frequency scale. In the sliced transform, the slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal is processed slice-wise to fit the desired frequency scale of analysis. The slicing and transition windows are shown in figure \ref{fig:slicqtukeys}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.55\textwidth]{./images-misc/slicq_windows.png}
+	\caption{50\% overlapping Tukey windows for splitting the input signal with the slice length and transition area. N is the slice length and M is the variable overlap $\in [0, \text{transition\_area}]$ (\cite{slicq})}
+	\label{fig:slicqtukeys}
+\end{figure}
+
+Choosing too small of a slice length to achieve the desired high frequency resolution, which necessitates longer windows than the slice can support will result in a warning from the NSGT library which says ``Q-factor too high for frequencies ...'' where it lists the unsupported frequency bins. This resulted in confusion from several users\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}}, who were trying to guess (incorrectly) what the right slice length was for their desired frequency scale.
+
+The warning code was adapted to instead suggest the minimum slice length and transition area for a given frequency scale\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}}. The code for the suggested slice and transition lengths is shown in listing \ref{lst:suggestedsllen}. The resulting usability improvement in the NSGT library is demonstrated in listing \ref{code:slicenoslice}.
+
+\begin{figure}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|f,q = self() # get the frequency bins and q-factors for scale|
+|# sample rate is input as 'sr'|
+|Ls = int(np.ceil(max((q*8.*sr)/f)))|
+|# make sure its divisible by 4|
+|Ls = Ls + -Ls \% 4|
+|sllen = Ls|
+|trlen = sllen//4|
+|trlen = trlen + -trlen \% 2 # make trlen divisible by 2|
+|return sllen, trlen|
+\end{minted}
+  \captionof{listing}{Suggested slice and transition lengths for the sliCQT}
+  \label{lst:suggestedsllen}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+ \begin{minipage}{\textwidth}
+  \centering
+\setlength\partopsep{-\topsep}
+\begin{inputminted}[linenos,breaklines,frame=single]{python}{./scripts/slicenoslice.py}
+\end{inputminted}
+ \subfloat{(a) Code snippet for NSGT and sliCQT with slice and transition lengths}
+ \vspace{1em}
+ \end{minipage}
+ \begin{minipage}{\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+|\$ python scripts/slicenoslice.py|
+|/home/sevagh/repos/nsgt/nsgt/nsgfwin\_sl.py:66: UserWarning: Q-factor too high for frequencies 82.41,90.81,100.07,110.27,121.52,133.91,147.56,162.61,179.18,...|
+|  warn("Q-factor too high for frequencies \%s"\%",".join("\%.2f"\%fi for fi in f[q >= qneeded]))|
+|suggested sllen, trlen: 22040 5510|
+\end{minted}
+ \subfloat{(b) Output printed by above}
+ \end{minipage}
+  \captionof{listing}{Suggested slice and transition lengths based on the desired frequency scale}
+  \label{code:slicenoslice}
+\end{figure}
+
+\newpagefill
+
+\subsubsection{PyTorch GPU optimization}
+\label{sec:torchslicq}
+
+\chaptertodo{
+	explain how this is necessary for neural networks and deep learning\\
+	describe optimizations done here\\
+	describe optimizations case by case or line by line?\\
+}
 
 \subsubsection{Matrix and ragged forms}
 
@@ -110,14 +195,13 @@ ragged difficult to work with but:
 	call it the ragged transform
 }
 
-\subsubsection{PyTorch GPU optimization}
-\label{sec:torchslicq}
+\subsubsection{Slice overlap-add utility}
 
-\chaptertodo{
-	explain how this is necessary for neural networks and deep learning\\
-	describe optimizations done here\\
-	describe optimizations case by case or line by line?\\
-}
+The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file.
+
+In fact, this function was included in the original project, but in the example spectrogram code.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/examples/spectrogram.py\#L19}} We believe that due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility should be included in the core of the library. Finally, in the spectrogram example of the forked library, the new \Verb#overlap_add_slicq# function is imported from the core library and used to generate a good spectrogram.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py\#L19}}
+
+Figure \ref{fig:spectrograms} shows
 
 \subsection{Choosing sliCQT parameters}
 \label{sec:slicqparamsrch}
