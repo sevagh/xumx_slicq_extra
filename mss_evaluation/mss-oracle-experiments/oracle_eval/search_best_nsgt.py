@@ -3,6 +3,7 @@ import os
 import musdb
 import itertools
 import museval
+import cupy
 from functools import partial
 import numpy as np
 import random
@@ -15,6 +16,7 @@ from bayes_opt.event import Events
 from shared import TFTransform 
 from oracle import ideal_mask_fbin, ideal_mask, ideal_mixphase, slicq_svd, ideal_mask_mixphase_per_coef
 
+from tqdm import tqdm
 import scipy
 from scipy.signal import stft, istft
 
@@ -47,8 +49,8 @@ class TrackEvaluator:
         else:
             raise ValueError(f'unsupported oracle {oracle}')
 
-    def eval_control(self, window_size=4096):
-        all_bsses, single_score = self.oracle(control=True, stft_window=window_size)
+    def eval_control(self, window_size=4096, eval_dir=None):
+        all_bsses, single_score = self.oracle(control=True, stft_window=window_size, eval_dir=eval_dir)
         print(all_bsses)
         return single_score
 
@@ -64,7 +66,7 @@ class TrackEvaluator:
     def eval_bark(self, fmin=20.0, fmax=22050, bins=12):
         return self.oracle(scale='bark', fmin=fmin, fmax=fmax, bins=bins, control=False)
 
-    def oracle(self, scale='cqlog', fmin=20.0, fmax=22050, bins=12, gamma=25, control=False, stft_window=4096):
+    def oracle(self, scale='cqlog', fmin=20.0, fmax=22050, bins=12, gamma=25, control=False, stft_window=4096, eval_dir=None):
         bins = int(bins)
 
         med_sdrs = []
@@ -78,11 +80,11 @@ class TrackEvaluator:
 
         tf = TFTransform(44100, transform_type, stft_window, scale, fmin, fmax, bins, gamma)
 
-        for track in self.tracks:
-            #print(f'track: {track.name}')
+        for track in tqdm(self.tracks):
+            print(f'track: {track.name}')
             N = track.audio.shape[0]
 
-            _, bss_scores_obj = self.oracle_func(track, tf, eval_dir=None, fast_eval=(not control))
+            _, bss_scores_obj = self.oracle_func(track, tf, eval_dir=eval_dir, fast_eval=(not control))
 
             if control:
                 bss_scores_objs.append(bss_scores_obj)
@@ -153,7 +155,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--control-window-sizes',
         type=str,
-        default='1024,2048,4096,8192,16384',
+        default='256,512,1024,1536,2048,3072,4096,8192,16384',
         help='comma-separated window sizes of stft to evaluate'
     )
     parser.add_argument(
@@ -211,6 +213,12 @@ if __name__ == '__main__':
         help='bayesian optimization iterations',
     )
     parser.add_argument(
+        '--cuda-device',
+        type=int,
+        default=0,
+        help='which cuda device to run cupy bss eval on',
+    )
+    parser.add_argument(
         '--optimization-random',
         type=int,
         default=1,
@@ -222,8 +230,18 @@ if __name__ == '__main__':
         type=str,
         help='directory to store optimization logs',
     )
+    parser.add_argument(
+        '--eval-dir',
+        default=None,
+        type=str,
+        help='directory to store evaluations',
+    )
 
     args = parser.parse_args()
+
+    cuda_dev = args.cuda_device % 2
+    print(f'globally setting cuda device to: {cuda_dev}')
+    cupy.cuda.runtime.setDevice(cuda_dev)
 
     random.seed(args.random_seed)
 
@@ -266,7 +284,11 @@ if __name__ == '__main__':
     if args.control:
         for window_size in [int(x) for x in args.control_window_sizes.split(',')]:
             print(f'evaluating control stft {window_size}')
-            print('median SDR (no accompaniment): {0}'.format(t.eval_control(window_size=window_size)))
+            print('median SDR (no accompaniment): {0}'.format(
+                t.eval_control(
+                    window_size=window_size, eval_dir=os.path.join(args.eval_dir, f'{args.oracle}-{window_size}')
+                )
+            ))
         sys.exit(0)
 
     if args.fscale == 'vqlog':

@@ -73,7 +73,7 @@ class TFTransform:
 
     def backward(self, X, len_x):
         if not self.nsgt:
-            return torch.tensor(istft(X, nperseg=self.nperseg, noverlap=self.noverlap)[1].T.astype(np.float32), device="cpu")
+            return torch.tensor(istft(X, nperseg=self.nperseg, noverlap=self.noverlap)[1].T.astype(np.float32)[:len_x, :], device="cpu")
         else:
             return self.nsgt.backward(X, len_x).T
 

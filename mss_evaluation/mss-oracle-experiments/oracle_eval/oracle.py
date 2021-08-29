@@ -26,10 +26,10 @@ from shared import fast_sdr
 
 
 def ideal_mask_mixphase_per_coef(track, tf, eval_dir=None, dur=None, start=None, fast_eval=None):
-    if dur:
-        track.chunk_duration = dur
-    if start:
-        track.chunk_start = start
+    #if dur:
+    #    track.chunk_duration = dur
+    #if start:
+    #    track.chunk_start = start
 
     _, bss_scores1 = ideal_mask(track, tf, binary_mask=False, alpha=1, fast_eval=True)
     _, bss_scores2 = ideal_mixphase(track, tf, fast_eval=True)
@@ -103,7 +103,7 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, 
         Yj = np.multiply(X, Mask)
 
         # invert to time domain
-        target_estimate = tf.backward(Yj, N)
+        target_estimate = tf.backward(Yj, N).to("cpu").numpy().astype(np.float32)
 
         # set this as the source estimate
         estimates[name] = target_estimate
@@ -128,14 +128,14 @@ def ideal_mask(track, tf, alpha=2, binary_mask=False, theta=0.5, eval_dir=None, 
         fft_cache.set_memsize(-1)
 
     bss_scores = None
-    if not fast_eval:
-        bss_scores = museval.eval_mus_track(
-            track,
-            estimates,
-            output_dir=eval_dir,
-        )
-    else:
-        bss_scores = fast_sdr(track, estimates)
+    #if not fast_eval:
+    bss_scores = museval.eval_mus_track(
+        track,
+        estimates,
+        output_dir=eval_dir,
+    )
+    #else:
+    #    bss_scores = fast_sdr(track, estimates)
 
     return estimates, bss_scores
 
@@ -145,10 +145,10 @@ def ideal_mixphase(track, tf, eval_dir=None, fast_eval=False, dur=None, start=No
     ideal performance of magnitude from estimated source + phase of mix
     which is the default umx strategy for separation
     """
-    if dur:
-        track.chunk_duration = dur
-    if start:
-        track.chunk_start = start
+    #if dur:
+    #    track.chunk_duration = dur
+    #if start:
+    #    track.chunk_start = start
 
     N = track.audio.shape[0]
 
@@ -188,7 +188,7 @@ def ideal_mixphase(track, tf, eval_dir=None, fast_eval=False, dur=None, start=No
         Yj = source_mag * mix_phase
 
         # invert to time domain
-        target_estimate = tf.backward(Yj, N)
+        target_estimate = tf.backward(Yj, N).to("cpu").numpy().astype(np.float32)
 
         # set this as the source estimate
         estimates[name] = target_estimate
@@ -227,10 +227,10 @@ def ideal_mixphase(track, tf, eval_dir=None, fast_eval=False, dur=None, start=No
 
 
 def ideal_mask_fbin(track, tf, dur=None, start=None, eval_dir=None, fast_eval=False, mbin=False):
-    if dur:
-        track.chunk_duration = dur
-    if start:
-        track.chunk_start = start
+    #if dur:
+    #    track.chunk_duration = dur
+    #if start:
+    #    track.chunk_start = start
 
     N = track.audio.shape[0]
 
@@ -277,7 +277,7 @@ def ideal_mask_fbin(track, tf, dur=None, start=None, eval_dir=None, fast_eval=Fa
             Yj = torch.multiply(X, Mask[..., None])
 
         # invert to time domain
-        target_estimate = tf.backward(Yj, N)
+        target_estimate = tf.backward(Yj, N).to("cpu").numpy().astype(np.float32)
 
         # set this as the source estimate
         estimates[name] = target_estimate
@@ -315,10 +315,10 @@ def ideal_mask_fbin(track, tf, dur=None, start=None, eval_dir=None, fast_eval=Fa
 
 
 def slicq_svd(track, tf, dur=None, start=None, eval_dir=None, fast_eval=False):
-    if dur:
-        track.chunk_duration = dur
-    if start:
-        track.chunk_start = start
+    #if dur:
+    #    track.chunk_duration = dur
+    #if start:
+    #    track.chunk_start = start
 
     N = track.audio.shape[0]
 
@@ -368,7 +368,7 @@ def slicq_svd(track, tf, dur=None, start=None, eval_dir=None, fast_eval=False):
         Yj = torch.multiply(X, Mask)
 
         # invert to time domain
-        target_estimate = tf.backward(Yj, N)
+        target_estimate = tf.backward(Yj, N).to("cpu").numpy().astype(np.float32)
 
         # set this as the source estimate
         estimates[name] = target_estimate

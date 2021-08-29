@@ -10,8 +10,11 @@ export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ
 
 mkdir -p "${expdir}"
 
-# evaluate control stfts with irm1
-$pybin "${scriptdir}/search_best_nsgt.py" --control --oracle='irm1' --n-random-tracks=3 #&> "${expdir}"/controls_out_irm1.txt
+argument_list="--oracle=irm1
+--oracle=irm2
+--oracle=ibm1
+--oracle=ibm2
+--oracle=mpi"
 
-# evaluate control stfts with mpi
-$pybin "${scriptdir}/search_best_nsgt.py" --control --oracle='mpi' --n-random-tracks=3 #&> "${expdir}"/controls_out_mpi.txt
+# limit to 2
+echo "${argument_list}" | parallel --jobs=2 --colsep ' ' --ungroup $pybin "${scriptdir}/search_best_nsgt.py" --control --eval-dir="${expdir}" --cuda-device={#}
