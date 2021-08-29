@@ -238,6 +238,7 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
+    print(args)
 
     cuda_dev = args.cuda_device % 2
     print(f'globally setting cuda device to: {cuda_dev}')
@@ -283,7 +284,7 @@ if __name__ == '__main__':
 
     if args.control:
         for window_size in [int(x) for x in args.control_window_sizes.split(',')]:
-            print(f'evaluating control stft {window_size}')
+            print(f'evaluating control stft {window_size} for oracle {args.oracle}')
             print('median SDR (no accompaniment): {0}'.format(
                 t.eval_control(
                     window_size=window_size, eval_dir=os.path.join(args.eval_dir, f'{args.oracle}-{window_size}')
