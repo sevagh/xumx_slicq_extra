@@ -1,0 +1,37 @@
+-for f in f_slices:
+-    Ls = len(f)
+-
+-    ft = fft(f)
+-
+-    if temp0 is None:
+-        temp0 = torch.empty(maxLg, dtype=ft.dtype)
+-
+-    if nn > Ls:
+-        ft = torch.concatenate((ft, torch.zeros(nn-Ls, dtype=ft.dtype)))
+-
+-    c = [] # Initialization of the result
+-
+-    for mii,_,gi1,gi2,win_range,Lg,col in loopparams:
+-        temp = temp0[:col*mii]
+-
+-        t1 = temp[:(Lg+1)//2]
+-        t1[:] = gi1  # if mii is odd, this is of length mii-mii//2
+-        t2 = temp[-(Lg//2):]
+-        t2[:] = gi2  # if mii is odd, this is of length mii//2
+-
+-        ftw = ft[win_range]
+-        t2 *= ftw[:Lg//2]
+-        t1 *= ftw[Lg//2:]
+-
+-        temp[(Lg+1)//2:-(Lg//2)] = 0  # clear gap (if any)
+-
+-        if col > 1:
+-            temp = torch.sum(temp.reshape((mii,-1)), axis=1)
+-        else:
+-            temp = temp.clone()
+-
+-        c.append(temp)
+-
+-    y = list(mmap(ifft,c))
+-
+-    yield y

@@ -511,19 +511,26 @@ Details of the frequency scales used to generate the NSGT spectrograms are shown
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
-The NSGT processes the entire input signal at once. In cases where the input signal is processed in smaller chunks, such as realtime streaming, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). The sliCQ Transform uses the terms \textit{slice length} and \textit{transition area}, analogous to the window and overlap (or hop) of the STFT, to distinguish the larger slice-wise processing from the use of time-varying windows within the slice.
+The NSGT processes the entire input signal at once. In cases where the input signal is processed in smaller chunks, such as realtime streaming, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). The slicing operation is shown in figure \ref{fig:slicqtukeys}.
 
-The sliCQT outputs coefficients that are not identical to the NSGT. We refer the reader to the papers by \textcite{invertiblecqt, slicq} for the interpretation of the respective output coefficients of the NSGT and sliCQT. For the purposes of this thesis, this difference is not a concern. Another aspect of the sliCQT different from the NSGT is that slices have a half-overlap with adjacent slices. This is a non-invertible operation. Figure \ref{fig:slicqoverlaps} demonstrates this issue. We'll also note that this trait of the sliCQ has also been mentioned on the Essentia (\cite{essentia}) announcement for their addition of the sliCQ Transform:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.55\textwidth]{./images-misc/slicq_windows.png}
+	\caption{Slicing the input signal with 50\% overlapping Tukey windows. N is the slice length and M is the transition area (\cite{slicq})}
+	\label{fig:slicqtukeys}
+\end{figure}
+
+Slices have a 50\% overlap with adjacent slices. The noninvertibility of the half-overlap-add makes it only useful as a forward operation. Figure \ref{fig:slicqoverlaps} demonstrates this issue. This trait of the sliCQT has also been mentioned by in the Essentia project's implementation:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
 
 \begin{quote}
-	we have implemented a framewise version of the algorithm that works on half-overlapped frames... [...] we have to overlap-add the spectrograms obtained for each frame. Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.
+	[...] we have to overlap-add the spectrograms obtained for each frame. Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.
 \end{quote}
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Adjacent slices placed side-by-side. Note the incorrect doubling of the duration]{\includegraphics[width=\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
 	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=\textwidth]{./images-gspi/gspi_overlap_proper.png}}
-	\caption{sliCQT spectrograms demonstrating the half-overlap of adjacent slices for the glockenspiel signal}
+	\caption{sliCQT spectrograms demonstrating the slice half-overlap}
 	\label{fig:slicqoverlaps}
 \end{figure}
 
@@ -549,7 +556,7 @@ According to \textcite{introtodl}, deep learning ``is the subfield of machine le
 
 \textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded don't always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
 
-We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite{mldspmix}, both domain-specific analytic knowledge and machine learning in conjunction with one another should be considered in the study of acoustic signals (also shown in figure \ref{fig:dspmlmix}):
+We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite{mldspmix}, analytic knowledge and machine learning should both be considered in the study of acoustic signals:
 
 \begin{quote}
 	Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained.
@@ -558,13 +565,13 @@ We also note that statistical signal processing techniques and machine and deep 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{./images-neural/dspmlmix.jpg}
-	\caption{Mixed analytical and data-driven approaches}
+	\caption{Mixed analytic and data-driven approaches}
 	\label{fig:dspmlmix}
 \end{figure}
 
-A key concept in machine learning is splitting the input data into a \textit{train} subset and a \textit{test} subset (\cite{introtoml}). The model uses the training data as input and the desired output, and makes a first  prediction using the training input based on its initial parameters. It then measures how correct its prediction was by using a \textit{loss function} to compare its output to the desired (or \textit{ground truth}) output. Contemporary machine learning is dependent on the field of optimization (\cite{boyd2004convex, mlopt1, mlopt2}) for the computation of the loss function and the parameter updates (\cite{sgd}). The performance of the network is measured by its ability to \textit{generalize} on data unseen during training (i.e. the test set) in a process called \textit{inference}.
+In machine learning,  the input data is typically split into a training set and a test set (\cite{introtoml}). The model makes predictions with its initial parameters using the training input. It measures how correct its prediction was by using a loss function to compare its predicted output to the training (or ground truth) output. Contemporary machine learning is dependent on the field of optimization (\cite{boyd2004convex, mlopt1, mlopt2}) for the loss function and parameter updates (\cite{sgd}). The performance of the network is measured by its ability to generalize on the test set, which was data not seen during training. There is sometimes a third validation set, which is also unseen during training and used to perform hyperparameter tuning (\cite{splitvaliddata}) which are the parameters of a machine learning model set by the user (\cite{introtodl}). The user tries to maximize the performance of the model on the validation set by modifying the hyperparameters.
 
-\textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that image-inspired network architectures from the field of computer vision, originally designed for 2D images, where pixels are related spatially, may not exactly fit audio waveforms, where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains (\cite{audiodeeplearning}).
+\textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that models from the field of computer vision, originally designed for 2D images where pixels are related spatially, may not exactly fit audio waveforms where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains (\cite{audiodeeplearning}).
 
 \newpagefill
 

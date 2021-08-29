@@ -1,0 +1,18 @@
+- g[kk-1] = np.ones(M[kk-1], dtype=g[kk-1].dtype)
++ g[kk-1] = torch.ones(M[kk-1], dtype=g[kk-1].dtype)
+
+- temp0 = np.empty(maxLg, dtype=ft.dtype)
++ temp0 = torch.empty(maxLg, dtype=ft.dtype)
+
+- ft = np.concatenate((ft, np.zeros(nn-Ls, dtype=ft.dtype)))
++ ft = torch.concatenate((ft, torch.zeros(nn-Ls, dtype=ft.dtype)))
+
+if col > 1:
+-    temp = np.sum(temp.reshape((mii,-1)), axis=1)
++    temp = torch.sum(temp.reshape((mii,-1)), axis=1)
+else:
+-    temp = temp.copy()
++    temp = temp.clone()
+
+- gd = [gi/np.fft.ifftshift(x[wi]) for gi,wi in zip(g,wins)]
++ gd = [gi/torch.fft.ifftshift(x[wi]) for gi,wi in zip(g,wins)]

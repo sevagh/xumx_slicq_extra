@@ -77,7 +77,7 @@ The next frequency scale added was the Bark psychoacoustic scale,\footnote{\url{
 	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh(\frac{f_{\text{Hz}}}{600}), f_{\text{Hz}} = 600 \cdot sinh(\frac{f_{\text{Bark}}}{6})
 \end{align}
 
-To plot the mel and Bark filterbanks, we prefer to use librosa which has some additional utilities for plotting mel filterbanks (\cite{librosa}). Bark support was added with the same Barktan equations above, again in my own fork of librosa.\footnote{\url{https://github.com/sevagh/librosa/commit/695ecc61d0622c4abf41afda77c571dd58e9b9fd}} The resulting frequency scales (constructed from librosa or the forked NSGT library) are equivalent, since the mel to Hz and bark to Hz are identical. Figure \ref{fig:melbarkbands} shows the filterbanks visualized by librosa.
+To plot the mel and Bark filterbanks, we prefer to use librosa which has some additional utilities for plotting mel filterbanks (\cite{librosa}). Bark support was added with the same Barktan equations above in my own fork of librosa.\footnote{\url{https://github.com/sevagh/librosa/commit/695ecc61d0622c4abf41afda77c571dd58e9b9fd}} The resulting frequency scales (constructed from librosa or the forked NSGT library) are equivalent, since the mel to Hz and bark to Hz are identical. Figure \ref{fig:melbarkbands} shows the filterbanks visualized by librosa. Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-factors from the NSGT library for 12 total mel or Bark bands.
 
 \begin{figure}[ht]
 	\centering
@@ -86,8 +86,6 @@ To plot the mel and Bark filterbanks, we prefer to use librosa which has some ad
 	\label{fig:melbarkbands}
 \end{figure}
 
-Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-factors from the NSGT library for 12 total mel or Bark bands.
-
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-freqscales/melbarkpitchesqs.png}
@@ -95,35 +93,21 @@ Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-fa
 	\label{fig:melbarkfsandqs}
 \end{figure}
 
-\newpagefill
-
 \subsubsection{Automatic slice length picker}
 
-An important addition to the sliced version of the NSGT, or the sliCQT, is to automatically suggest an appropriate slice length and transition area for a given frequency scale. In the sliced transform, the slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal is processed slice-wise to fit the desired frequency scale of analysis. The slicing and transition windows are shown in figure \ref{fig:slicqtukeys}.
+An addition made to the sliced version of the NSGT, or the sliCQT, was to automatically suggest an appropriate slice length and transition area for a given frequency scale. The slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal can be processed in smaller-sized chunks (or slices).
 
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.55\textwidth]{./images-misc/slicq_windows.png}
-	\caption{50\% overlapping Tukey windows for splitting the input signal with the slice length and transition area. N is the slice length and M is the variable overlap $\in [0, \text{transition\_area}]$ (\cite{slicq})}
-	\label{fig:slicqtukeys}
-\end{figure}
-
-Choosing too small of a slice length to achieve the desired high frequency resolution, which necessitates longer windows than the slice can support will result in a warning from the NSGT library which says ``Q-factor too high for frequencies ...'' where it lists the unsupported frequency bins. This resulted in confusion from several users\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}}, who were trying to guess (incorrectly) what the right slice length was for their desired frequency scale.
-
-The warning code was adapted to instead suggest the minimum slice length and transition area for a given frequency scale\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}}. The code for the suggested slice and transition lengths is shown in listing \ref{lst:suggestedsllen}. The resulting usability improvement in the NSGT library is demonstrated in listing \ref{code:slicenoslice}.
+Choosing an incorrect slice length which can't support the windows needed to support the desired frequency resolution will result in a warning from the NSGT library, creating confusion for users on how to pick a slice length.\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}} The warning code was adapted to suggest the minimum slice length and transition area for a given frequency scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}} and the code is shown in listing \ref{lst:suggestedsllen}. The resulting improvement in the NSGT library is shown in listing \ref{code:slicenoslice}.
 
 \begin{figure}[h]
   \centering
 \begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
 |f,q = self() # get the frequency bins and q-factors for scale|
-|# sample rate is input as 'sr'|
-|Ls = int(np.ceil(max((q*8.*sr)/f)))|
-|# make sure its divisible by 4|
+|Ls = int(np.ceil(max((q*8.*sr)/f))) # sr = sample rate|
 |Ls = Ls + -Ls \% 4|
 |sllen = Ls|
 |trlen = sllen//4|
 |trlen = trlen + -trlen \% 2 # make trlen divisible by 2|
-|return sllen, trlen|
 \end{minted}
   \captionof{listing}{Suggested slice and transition lengths for the sliCQT}
   \label{lst:suggestedsllen}
@@ -158,36 +142,58 @@ The warning code was adapted to instead suggest the minimum slice length and tra
 \subsubsection{PyTorch GPU optimization}
 \label{sec:torchslicq}
 
-\chaptertodo{
-	explain how this is necessary for neural networks and deep learning\\
-	describe optimizations done here\\
-	describe optimizations case by case or line by line?\\
+The reference NSGT/sliCQT library uses NumPy (\cite{numpy}), a CPU-based Python numerical computation library. To train deep neural networks efficiently, using PyTorch with GPU support is required (\cite{pytorch}). PyTorch, in addition to being a deep learning framework, is also a numerical computation library which implements a large amount of NumPy's functions (\cite{pytorch}).
+
+The \Verb#line_profiler#\footnote{\url{https://pypi.org/project/line-profiler/}} package prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout}, showing what the most costly functions of the reference forward transform are.
+
+The starting point of porting the library to the GPU is to simply replace all NumPy functions with their PyTorch equivalents. When refering to code changes, NumPy and PyTorch will be referred to as numpy and torch, their respective Python module names. The torch port to the NSGT/sliCQT can be viewed on GitHub through the commit browser, starting from the following commit.\footnote{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}} Figure \ref{fig:ghcommitbrowser} shows how to use the GitHub UI to examine the code changes made in each commit.
+
+\afterpage{
+\begin{figure}[!ht]
+	\centering
+	\subfloat[GitHub commit browser]{\includegraphics[width=0.75\textwidth]{./images-misc/ghcommitbrowser.png}}\\
+	\subfloat[View file and line changes in each commit]{\includegraphics[width=0.75\textwidth]{./images-misc/ghcommitsingle.png}}
+	\caption{How to browse the individual steps of the torch port\protect\footnotemark}
+	\label{fig:ghcommitbrowser}
+\end{figure}
+\footnotetext{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}}
 }
+
+An excerpt of the change is shown in listing \ref{code:firstdiff}. 
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single]{text}{./diffs/diff1.txt}
+\end{inputminted}
+  \caption{Example changes of porting from numpy to torch}
+  \label{code:firstdiff}
+\end{listing}
+
+Next, the list and generator for the forward operation of the transform, which is one of the performance hotspots, are converted to a preallocated tensor, shown in listings \ref{code:seconddiff1} and \ref{code:seconddiff2}. The significant commit which introduced this change is here.\footnote{\url{https://github.com/sevagh/nsgt/commit/49a70d112ba4091d271a9438a8c38cf380ce62b4}}
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single]{text}{./diffs/diff2_1.txt}
+\end{inputminted}
+  \caption{For-loop and generator-based design of the forward NSGT}
+  \label{code:seconddiff1}
+\end{listing}
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single]{text}{./diffs/diff2_2.txt}
+\end{inputminted}
+  \caption{Torch tensor conversion of the forward NSGT}
+  \label{code:seconddiff2}
+\end{listing}
+
+\newpagefill
 
 \subsubsection{Matrix and ragged forms}
 
-\chaptertodo{
-	first describe the reference library's generator-based design for ragged and matrix\\
-}
-
-NSGT/sliCQ (\cite{invertiblecqt}) library,\footnote{\url{https://github.com/grrrr/nsgt}} based on numpy and scipy, popular CPU-based Python numerical computation libraries (\cite{numpy, scipy})\\
-ragged difficult to work with but:
-
 \textcite{klapuricqt}
 \begin{quote}
-	There are at least three reasons why the CQT has not
-	widely replaced the DFT in audio signal processing. Firstly,
-	it is computationally more intensive than the DFT. Sec-
-	ondly, the CQT lacks an inverse transform that would allow
-	perfect reconstruction of the original signal from its trans-
-	form coefficients. Thirdly, CQT produces a data structure
-	that is more difficult to work with than the time-frequency
-	matrix (spectrogram) obtained by using Short-Time Fourier
-	transform in successive time frames. The last problem is
-	due to the fact that in CQT, the time resolution varies for
-	different frequency bins, in effect meaning that the ”sam-
-	pling” of different frequency bins is not synchronized. In
-	this paper, we propose solutions to these three problems.
+	CQT produces a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized.
 \end{quote}
 
 \chaptertodo{
@@ -276,6 +282,10 @@ The mix-phase inversion oracle (MPI) score is the target we will choose to maxim
 }
 
 \subsubsection{MPI oracle parameter search testbench}
+
+The splitting of a dataset into training, test, and validation sets was covered in section \ref{sec:ml}. To recap, the training set is used by the model to make predictions from the input and comparing its predicted output to the ground truth training output. The test set must be unseen during training, and the model's performance is tested on this set at the end of each training iteration (also called epoch) to show the generalization performance of the network. The validation set is also a set of data unseen in training, which can be used for the hyperparameter search.
+
+In Open-Unmix, the STFT window size is set to 4096 by default (with a 1024 overlap), and it is a hyperparameter of the network. Therefore, the sliCQT parameters should equivalently be considered a hyperparameter in xumx-sliCQ. The MPI oracle testbench should use the predefined validation set of MUSDB18-HQ, which consists of 14 tracks.
 
 \chaptertodo{
 	bayesian failed idea\\
