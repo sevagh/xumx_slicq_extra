@@ -66,15 +66,18 @@ class TrackEvaluator:
     def eval_bark(self, fmin=20.0, fmax=22050, bins=12):
         return self.oracle(scale='bark', fmin=fmin, fmax=fmax, bins=bins, control=False)
 
-    def oracle(self, scale='cqlog', fmin=20.0, fmax=22050, bins=12, gamma=25, control=False, stft_window=4096, eval_dir=None):
+    def oracle(self, scale='cqlog', fmin=20.0, fmax=22050, bins=12, gamma=25, control=False, stft_window=4096, eval_dir=None, transform_type_user=None):
         bins = int(bins)
 
         med_sdrs = []
         bss_scores_objs = []
 
-        transform_type = "nsgt"
-        if control:
-            transform_type = "stft"
+        if transform_type_user is None:
+            transform_type = "nsgt"
+            if control:
+                transform_type = "stft"
+        else:
+            transform_type = transform_type_user
 
         bss_scores_objs = []
 
@@ -157,6 +160,17 @@ if __name__ == '__main__':
         type=str,
         default='256,512,1024,1536,2048,3072,4096,8192,16384',
         help='comma-separated window sizes of stft to evaluate'
+    )
+    parser.add_argument(
+        '--fixed-slicqt',
+        action='store_true',
+        help='evaluate fixed slicqt (no param search)'
+    )
+    parser.add_argument(
+        '--fixed-slicqt-param',
+        type=str,
+        default='cqlog,20,20.0',
+        help='comma-separated scale, bins, fmin, optionally gamma'
     )
     parser.add_argument(
         '--bins',
@@ -291,6 +305,26 @@ if __name__ == '__main__':
                 )
             ))
         sys.exit(0)
+
+    if args.fixed_slicqt:
+        slicqt_args = args.fixed_slicqt_param.split(',')
+        print(f'evaluating fixed slicqt {slicqt_args} for oracle {args.oracle}')
+        scale, bins, fmin = slicqt_args
+        fmin = float(fmin)
+        bins = int(bins)
+        print('median SDR (no accompaniment): {0}'.format(
+            t.oracle(
+                scale=scale,
+                fmin=fmin,
+                fmax=22050,
+                bins=bins,
+                control=True,
+                eval_dir=os.path.join(args.eval_dir, f'{args.oracle}-{scale}-{bins}-{fmin:.1f}'),
+                transform_type_user='nsgt',
+            )
+        ))
+        sys.exit(0)
+
 
     if args.fscale == 'vqlog':
         optimize(t.eval_vqlog, pbounds_vqlog, "vqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir, randstate=args.random_seed)

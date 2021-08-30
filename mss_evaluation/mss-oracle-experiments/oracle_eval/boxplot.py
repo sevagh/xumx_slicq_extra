@@ -13,7 +13,7 @@ import gc
 import itertools
 
 #controls = ['irm1-s1024', 'irm1-s4096', 'irm1-s16384'] 
-controls = ['mpi-s4096']
+controls = ['mpi-4096', 'irm1-4096']
 
 
 def save_boxplot(pandas_in, pdf_out, single=False):
@@ -93,7 +93,7 @@ def save_boxplot(pandas_in, pdf_out, single=False):
                     data=df.loc[(df['target'] == target) & (df['metric'] == metric)],
                     orient='h',
                     order=methods_by_sdr[::-1],
-                    hue_order=[True, False],
+                    hue_order=[False, True],
                     showfliers=False,
                     notch=True,
                 )

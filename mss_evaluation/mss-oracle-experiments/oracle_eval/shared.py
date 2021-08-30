@@ -51,10 +51,7 @@ class TFTransform:
 
             if sllen is None or trlen is None:
                 # use slice length required to support desired frequency scale/q factors
-                sllen = scl.suggested_sllen(fs)
-                trlen = sllen//4
-                trlen = trlen + -trlen % 2 # make trlen divisible by 2
-
+                sllen, trlen = scl.suggested_sllen_trlen(fs)
                 print(f'auto-selected {sllen=}, {trlen=}')
             else:
                 print(f'using supplied {sllen=}, {trlen=}')
@@ -62,19 +59,24 @@ class TFTransform:
             self.sllen = sllen
             self.nsgt = NSGT_sliced(scl, sllen, trlen, fs, real=True, matrixform=True, multichannel=True, reducedform=True, device="cpu")
             self.name = f'n{fscale}-{fbins}-{fmin:.2f}-{sllen}'
+            print(self.name)
         else:
             self.name = f's{window}'
 
     def forward(self, audio):
         if not self.nsgt:
+            print('forward stft')
             return torch.tensor(stft(audio.T, nperseg=self.nperseg, noverlap=self.noverlap)[-1].astype(np.complex64), device="cpu")
         else:
-            return self.nsgt.forward((torch.tensor(audio.T.copy(), device="cpu"), ))
+            print('forward nsgt')
+            return self.nsgt.forward((torch.tensor(audio.T.copy(), device="cpu"),))
 
     def backward(self, X, len_x):
         if not self.nsgt:
+            print('backward stft')
             return torch.tensor(istft(X, nperseg=self.nperseg, noverlap=self.noverlap)[1].T.astype(np.float32)[:len_x, :], device="cpu")
         else:
+            print('backward nsgt')
             return self.nsgt.backward(X, len_x).T
 
 

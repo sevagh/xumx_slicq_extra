@@ -8,12 +8,13 @@ The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ Transform (s
 
 Open-Unmix (\cite{umx}) has a reference implementation released as an open-source Python codebase for general music demixing,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch (\cite{pytorch}) for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader (\cite{musdb18hq}) and BSS metrics evaluator (\cite{bss}), both necessary components for this thesis.
 
-xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library\footnote{\url{https://github.com/grrrr/nsgt}} which will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications to the NSGT/sliCQT library required for this thesis.
+xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library\footnote{\url{https://github.com/grrrr/nsgt}} which will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications required for this thesis.
 
 \subsection{Improving the NSGT/sliCQT reference library}
 \label{sec:improvelib}
 
 \subsubsection{New frequency scales}
+\label{sec:freqscales}
 
 The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank (\cite{variableq1}). The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed.
 
@@ -139,12 +140,16 @@ Choosing an incorrect slice length which can't support the windows needed to sup
 
 \newpagefill
 
-\subsubsection{PyTorch GPU optimization}
+\subsubsection{GPU-accelerated NSGT/sliCQT with PyTorch}
 \label{sec:torchslicq}
 
 The reference NSGT/sliCQT library uses NumPy (\cite{numpy}), a CPU-based Python numerical computation library. To train deep neural networks efficiently, using PyTorch with GPU support is required (\cite{pytorch}). PyTorch, in addition to being a deep learning framework, is also a numerical computation library which implements a large amount of NumPy's functions (\cite{pytorch}).
 
-The \Verb#line_profiler#\footnote{\url{https://pypi.org/project/line-profiler/}} package prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout}, showing what the most costly functions of the reference forward transform are.
+The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout}, showing what the most costly functions of the reference forward transform are.
+
+\chaptertodo{
+	actually put this excerpt in
+}
 
 The starting point of porting the library to the GPU is to simply replace all NumPy functions with their PyTorch equivalents. When refering to code changes, NumPy and PyTorch will be referred to as numpy and torch, their respective Python module names. The torch port to the NSGT/sliCQT can be viewed on GitHub through the commit browser, starting from the following commit.\footnote{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}} Figure \ref{fig:ghcommitbrowser} shows how to use the GitHub UI to examine the code changes made in each commit.
 
@@ -275,23 +280,34 @@ This is the first estimate of the mix-phase inversion strategy, and doesn't assu
 
 The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT.
 
-\subsubsection{GPU-accelerated BSS evaluation}
-
-\chaptertodo{
- 	sigsep-mus-eval optimization in oracle section
-}
-
 \subsubsection{MPI oracle parameter search testbench}
 
 The splitting of a dataset into training, test, and validation sets was covered in section \ref{sec:ml}. To recap, the training set is used by the model to make predictions from the input and comparing its predicted output to the ground truth training output. The test set must be unseen during training, and the model's performance is tested on this set at the end of each training iteration (also called epoch) to show the generalization performance of the network. The validation set is also a set of data unseen in training, which can be used for the hyperparameter search.
 
-In Open-Unmix, the STFT window size is set to 4096 by default (with a 1024 overlap), and it is a hyperparameter of the network. Therefore, the sliCQT parameters should equivalently be considered a hyperparameter in xumx-sliCQ. The MPI oracle testbench should use the predefined validation set of MUSDB18-HQ, which consists of 14 tracks.
+In Open-Unmix, the STFT window size is set to 4096 by default (with a 1024 overlap), and it is a hyperparameter of the network. Therefore, the sliCQT parameters should equivalently be considered a hyperparameter in xumx-sliCQ. The MPI oracle testbench should use the predefined validation set of MUSDB18-HQ, which consists of 14 tracks. sliCQT parameters should be selected and be evaluated on their MPI score using BSS metrics for the 14 validation tracks.
+
+The performance of the IRM1 (soft magnitude mask) and MPI (mixed-phase inversion) oracles will be shown for the best (and worst) sliCQT parameters, alongside different STFT window sizes. The intent is to show how the window size and time-frequency resolution of the STFT and sliCQT affect music demixing results per target (\cite{tftradeoff1}).
+
+According to \textcite{randomgrid}, 60 iterations of random grid will find a statistically good set of hyperparameters in a case where an exhaustive grid search is impossible. The strategy chosen was to choose random hyperparameters for 60 iterations and select the highest MPI score, because an exhaustive grid search of the possible NSGT/sliCQT parameters would be too large. 
+
+The random search is done for across 4 interesting frequency scales shown in section \ref{sec:freqscales}: the constant-Q or log scale, the variable-Q scale (log scale with offset), and the two psychoacoustic mel and Bark scales, and fmin between 10-130.0 hz and this and that\todo{finish this ofc}
 
 \chaptertodo{
-	bayesian failed idea\\
-	random iterations\\
-	seed per fscale but without results here
+	seed per fscale but without results here\\
+	describe why we limited by sllen 44100, 1-second processing, etc. (cite from demucs or cdae)
 }
+
+\subsubsection{GPU-accelerated BSS metrics with CuPy}
+
+During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows the line-profiler output of an evaluation of the IRM1 oracle mask with the STFT, using a window size of 4096, on the 14 MUSDB18-HQ validation tracks.
+
+\chaptertodo{
+	line profiler showing slow bss eval
+}
+
+The bottlenecks of the library use NumPy (\cite{numpy}) and SciPy (\cite{scipy}) operations, which are both Python numerical computation libraries which run on the the CPU. The CuPy (\cite{cupy}) library provides replacement functions of NumPy and SciPy which run on CUDA (\cite{cuda}), the compute framework for NVIDIA GPUs. This allows for acceleration of numerical operations through GPU parallelization.
+
+Note that although PyTorch (\cite{pytorch}) also uses CUDA and was used in the neural network of this thesis, for this specific BSS evaluation library, CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
 
 \subsection{Open-Unmix with the sliCQ Transform}
 \label{sec:slicqumx}
