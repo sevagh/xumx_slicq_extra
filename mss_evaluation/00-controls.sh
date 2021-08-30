@@ -25,11 +25,11 @@ params=(
 #"--oracle=mpi --control-window-sizes=8192"
 #"--oracle=irm1 --control-window-sizes=16384"
 #"--oracle=mpi --control-window-sizes=16384"
-"--oracle=irm1 --fixed-slicqt-param=bark,262,32.9"
-"--oracle=mpi --fixed-slicqt-param=bark,262,32.9"
+#"--oracle=irm1 --fixed-slicqt-param=bark,262,32.9"
+#"--oracle=mpi --fixed-slicqt-param=bark,262,32.9"
 "--oracle=irm1 --fixed-slicqt-param=cqlog,142,129.7"
 "--oracle=mpi --fixed-slicqt-param=cqlog,142,129.7"
 )
 
 # limit to 2
-parallel --jobs=2 --colsep=' ' --ungroup $pybin "${scriptdir}/search_best_nsgt.py" --fixed-slicqt --eval-dir="${expdir}" --cuda-device={#} {} ::: "${params[@]}" 
+parallel --jobs=1 --colsep=' ' --ungroup $pybin "${scriptdir}/search_best_nsgt.py" --fixed-slicqt --eval-dir="${expdir}" --cuda-device={#} {} ::: "${params[@]}" 

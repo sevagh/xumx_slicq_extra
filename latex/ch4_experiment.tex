@@ -4,23 +4,29 @@
 \section{Experiment}
 \label{sec:experiment}
 
+\subsection{Performance benchmarks for GPU accelerations}
+
 \chaptertodo{
-do boxplot for different sizes of STFT vs. chosen sliCQ - with cupy thing\\
-selected spectrograms showing the sliCQ Transform vs. the STFT\\
-table of network learning parameters etc. from those repos (and scripts/train.py defaults)\\
+	cupy accel of sigsep-mus-eval\\
+	pytorch accel of nsgt/slicqt
 }
 
-\subsection{sliCQ Transform performance analysis}
+\subsection{sliCQT parameters with MPI oracle}
 
-\subsection{sliCQ Transform parameter search}
+\begin{figure}[ht]
+	\centering
+	\subfloat[Good sliCQT -- Bark, 262 bins, 32.9--22050 Hz]{\includegraphics[width=\textwidth]{./images-gspi/slicqt_good.png}}\\
+	\subfloat[Bad sliCQT -- Constant-Q/log, 142 bins, 129.7--22050 Hz]{\includegraphics[width=\textwidth]{./images-gspi/slicqt_bad.png}}
+	\caption{sliCQTs from the oracle MPI hyperparameter search}
+	\label{fig:bipolarslicqs}
+\end{figure}
 
-\subsubsection{Comparing different sliCQ and STFT configurations}
-
-\ichfeedback{I don't love the title here but what i mean is i want to pick, as we discussed, multiple STFT window sizes e.g. 512 1024 2048 4096 8192, and multiple sliCQ configurations e.g. Bark, Mel, 33Hz, 57Hz, 200 bins, 500 bins, 12 bins and contrast them all side by side - visual spectrograms, describe the time-frequency resolution, etc.}
-
-\ichfeedback{if you pick a bad scoring config, e.g. Constant-Q Log scale with 14 frequency bins and frequency limits 12.3 Hz -- 22050 Hz, you can get an oracle score of -7 dB SDR (completely terrible performance - i've seen it happen), and if you pick a good one, you get +8.9 dB SDR (surpassing the STFT)}
-
-\ichfeedback{it would be good to plot the magnitude and phase of the good and bad slicq. most likely the ``bad'' one is losing phase information when we ignore its phase. something must be controlling why a few hz in either direction is causing such a dramatic SDR difference}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.95\textwidth]{./images-bss/oracle_boxplot.pdf}
+	\caption{Boxplot for oracle mask evaluations}
+	\label{fig:oraclebssboxplot}
+\end{figure}
 
 \subsection{Neural network training}
 
@@ -61,8 +67,8 @@ The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{mus
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-bss/boxplot_full.png}
-	\caption{Boxplot of full MUSDB18-HQ test set evaluation of Open-Unmix vs. CrossNet-Open-Unmix vs. xumx-sliCQ}
+	\includegraphics[width=0.9\textwidth]{./images-bss/boxplot_full.pdf}
+	\caption{Boxplot of Open-Unmix vs. CrossNet-Open-Unmix vs. xumx-sliCQ}
 	\label{fig:bssboxplot}
 \end{figure}
 

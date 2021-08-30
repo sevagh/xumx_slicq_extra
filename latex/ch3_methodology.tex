@@ -147,9 +147,31 @@ The reference NSGT/sliCQT library uses NumPy (\cite{numpy}), a CPU-based Python 
 
 The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout}, showing what the most costly functions of the reference forward transform are.
 
-\chaptertodo{
-	actually put this excerpt in
-}
+\begin{listing}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   150                                               @profile
+   151                                               def forward(self, sig):
+   152                                                   'transform - s: iterable sequence of sequences'
+   153
+   154         1          4.0      4.0      0.0          sig = self.channelize(sig)
+   155
+   156                                                   # Compute the slices (zero-padded Tukey window version)
+   157         1          1.0      1.0      0.0          f_sliced = slicing(sig, self.sl_len, self.tr_area)
+   158
+   159         1      19481.0  19481.0     19.5          cseq = chnmap(self.fwd, f_sliced)
+   160
+   161         1      80658.0  80658.0     80.5          cseq = arrange(cseq, self.M, True)
+   162
+   163         1          3.0      3.0      0.0          cseq = self.unchannelize(cseq)
+   164
+   165         1          1.0      1.0      0.0          return cseq
+\end{minted}
+  \caption{Suggested slice and transition lengths based on the desired frequency scale}
+  \label{code:slicenoslice}
+\end{listing}
 
 The starting point of porting the library to the GPU is to simply replace all NumPy functions with their PyTorch equivalents. When refering to code changes, NumPy and PyTorch will be referred to as numpy and torch, their respective Python module names. The torch port to the NSGT/sliCQT can be viewed on GitHub through the commit browser, starting from the following commit.\footnote{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}} Figure \ref{fig:ghcommitbrowser} shows how to use the GitHub UI to examine the code changes made in each commit.
 

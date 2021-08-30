@@ -13,7 +13,8 @@ import gc
 import itertools
 
 #controls = ['irm1-s1024', 'irm1-s4096', 'irm1-s16384'] 
-controls = ['mpi-4096', 'irm1-4096']
+#controls = ['mpi-4096', 'irm1-4096']
+controls = []
 
 
 def save_boxplot(pandas_in, pdf_out, single=False):
@@ -128,10 +129,27 @@ def save_boxplot(pandas_in, pdf_out, single=False):
             "control",
             orient='h',
             order=methods_by_sdr[::-1],
-            hue_order=[True, False],
+            hue_order=[False, True],
             showfliers=False,
             notch=True
         ))
+
+        # Select which box you want to change    
+        for (row_val, col_val), ax in g.axes_dict.items():
+            #ax.artists[0].set_facecolor('magenta')
+            #ax.artists[1].set_facecolor('magenta')
+            ax.artists[2].set_facecolor('gold')
+            #ax.artists[3].set_facecolor('orangered')
+            #ax.artists[4].set_facecolor('cyan')
+            #ax.artists[8].set_facecolor('cyan')
+
+        name_to_color = {
+            'xumx-sliCQ':   'gold',
+        }
+
+        patches = [matplotlib.patches.Patch(color=v, label=k) for k,v in name_to_color.items()]
+        matplotlib.pyplot.legend(handles=patches, loc='center', bbox_to_anchor=(-1.5, -0.25), ncol=3)
+
         plt.setp(g.fig.texts, text="")
         g.set_titles(col_template="{col_name}", row_template="{row_name}")
 
