@@ -8,7 +8,7 @@ The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ Transform (s
 
 Open-Unmix (\cite{umx}) has a reference implementation released as an open-source Python codebase for general music demixing,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch (\cite{pytorch}) for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader (\cite{musdb18hq}) and BSS metrics evaluator (\cite{bss}), both necessary components for this thesis.
 
-xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python and with PyTorch code targeting the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library\footnote{\url{https://github.com/grrrr/nsgt}} which will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications required for this thesis.
+xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python, using PyTorch for the deep learning network to run on the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library\footnote{\url{https://github.com/grrrr/nsgt}} which will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications required for this thesis.
 
 \subsection{Improving the NSGT/sliCQT reference library}
 \label{sec:improvelib}
@@ -27,14 +27,14 @@ In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or
  \begin{minipage}{\textwidth}
   \centering
 \setlength\partopsep{-\topsep}
-\begin{inputminted}[linenos,breaklines,frame=single,firstline=4,lastline=16]{text}{./scripts/fscale.py}
+\begin{inputminted}[linenos,breaklines,frame=single,firstline=4,lastline=16,fontsize=\scriptsize]{text}{./scripts/fscale.py}
 \end{inputminted}
  \subfloat{(a) Code snippet defining octave and log scales}
  \vspace{1em}
  \end{minipage}
  \begin{minipage}{\textwidth}
   \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
 |\$ python scripts/fscale.py 3 # invoke script for bpo=3|
 |bpo: 3, bins: 21, len(oct): 21, len(log): 21|
 \end{minted}
@@ -58,13 +58,12 @@ The variable-Q scale is the same as the log or octave scales, except with a smal
 	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
 \end{quote}
 
-Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1} provides the following equations in \ref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
+Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provides the following equations in \ref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
 \begin{align}\tag{5}\label{equation:variablebw}
-	\nonumber & B_{k} = \alpha f_{k} + \gamma\\
-	\nonumber & \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
+	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
 
-\textcite{variableq2} use the same equations. The effect this has is to widen the low frequency bands significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but Q-factors that are still constant in the high frequency bins. Figure \ref{fig:vq} shows the constant-Q/log, and variable-Q scales for different values of the frequency offset $\gamma$.
+The is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes constant-Q in the high frequency bins. Figure \ref{fig:vq} shows the constant-Q/log, and variable-Q scales for different values of the frequency offset $\gamma$.
 
 \begin{figure}[ht]
 	\centering
@@ -78,14 +77,7 @@ The next frequency scale added was the Bark psychoacoustic scale,\footnote{\url{
 	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh(\frac{f_{\text{Hz}}}{600}), f_{\text{Hz}} = 600 \cdot sinh(\frac{f_{\text{Bark}}}{6})
 \end{align}
 
-To plot the mel and Bark filterbanks, we prefer to use librosa which has some additional utilities for plotting mel filterbanks (\cite{librosa}). Bark support was added with the same Barktan equations above in my own fork of librosa.\footnote{\url{https://github.com/sevagh/librosa/commit/695ecc61d0622c4abf41afda77c571dd58e9b9fd}} The resulting frequency scales (constructed from librosa or the forked NSGT library) are equivalent, since the mel to Hz and bark to Hz are identical. Figure \ref{fig:melbarkbands} shows the filterbanks visualized by librosa. Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-factors from the NSGT library for 12 total mel or Bark bands.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-freqscales/melbarks.png}
-	\caption{librosa visualization of triangular filterbanks, nfft=512}
-	\label{fig:melbarkbands}
-\end{figure}
+Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-factors from the NSGT library for 12 total mel or Bark bands.
 
 \begin{figure}[ht]
 	\centering
@@ -98,11 +90,12 @@ To plot the mel and Bark filterbanks, we prefer to use librosa which has some ad
 
 An addition made to the sliced version of the NSGT, or the sliCQT, was to automatically suggest an appropriate slice length and transition area for a given frequency scale. The slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal can be processed in smaller-sized chunks (or slices).
 
-Choosing an incorrect slice length which can't support the windows needed to support the desired frequency resolution will result in a warning from the NSGT library, creating confusion for users on how to pick a slice length.\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}} The warning code was adapted to suggest the minimum slice length and transition area for a given frequency scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}} and the code is shown in listing \ref{lst:suggestedsllen}. The resulting improvement in the NSGT library is shown in listing \ref{code:slicenoslice}.
+Choosing an incorrect slice length which can't support the windows needed to support the desired frequency resolution will result in a warning from the NSGT library, creating confusion for users on how to pick a slice length.\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}} The warning code was adapted to suggest the minimum slice length and transition area for a given frequency scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}} and the result is shown in listing \ref{code:slicenoslice}.
 
 \begin{figure}[h]
   \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+\begin{minipage}{\textwidth}
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
 |f,q = self() # get the frequency bins and q-factors for scale|
 |Ls = int(np.ceil(max((q*8.*sr)/f))) # sr = sample rate|
 |Ls = Ls + -Ls \% 4|
@@ -110,42 +103,37 @@ Choosing an incorrect slice length which can't support the windows needed to sup
 |trlen = sllen//4|
 |trlen = trlen + -trlen \% 2 # make trlen divisible by 2|
 \end{minted}
-  \captionof{listing}{Suggested slice and transition lengths for the sliCQT}
-  \label{lst:suggestedsllen}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
+ \subfloat{(a) Code for computing the minimum sllen and trlen}
+\vspace{1em}
+\end{minipage}
  \begin{minipage}{\textwidth}
   \centering
 \setlength\partopsep{-\topsep}
-\begin{inputminted}[linenos,breaklines,frame=single]{python}{./scripts/slicenoslice.py}
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{python}{./scripts/slicenoslice.py}
 \end{inputminted}
- \subfloat{(a) Code snippet for NSGT and sliCQT with slice and transition lengths}
+ \subfloat{(b) Code snippet for NSGT and sliCQT with slice and transition lengths}
  \vspace{1em}
  \end{minipage}
  \begin{minipage}{\textwidth}
   \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||]{text}
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
 |\$ python scripts/slicenoslice.py|
+|suggested sllen, trlen: 22040 5510|
 |/home/sevagh/repos/nsgt/nsgt/nsgfwin\_sl.py:66: UserWarning: Q-factor too high for frequencies 82.41,90.81,100.07,110.27,121.52,133.91,147.56,162.61,179.18,...|
 |  warn("Q-factor too high for frequencies \%s"\%",".join("\%.2f"\%fi for fi in f[q >= qneeded]))|
-|suggested sllen, trlen: 22040 5510|
 \end{minted}
- \subfloat{(b) Output printed by above}
+ \subfloat{(c) Output printed by above}
  \end{minipage}
   \captionof{listing}{Suggested slice and transition lengths based on the desired frequency scale}
   \label{code:slicenoslice}
 \end{figure}
-
-\newpagefill
 
 \subsubsection{GPU-accelerated NSGT/sliCQT with PyTorch}
 \label{sec:torchslicq}
 
 The reference NSGT/sliCQT library uses NumPy (\cite{numpy}), a CPU-based Python numerical computation library. To train deep neural networks efficiently, using PyTorch with GPU support is required (\cite{pytorch}). PyTorch, in addition to being a deep learning framework, is also a numerical computation library which implements a large amount of NumPy's functions (\cite{pytorch}).
 
-The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout} for the \Verb#forward# function of the sliced NSGT in the reference library.
+The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout} for the \Verb#forward# function of the sliced NSGT.
 
 \begin{listing}[h]
   \centering
@@ -170,7 +158,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
   \label{lst:profilerout}
 \end{listing}
 
-The starting point of porting the library to the GPU was to simply replace all NumPy functions with their PyTorch equivalents. When refering to code changes, NumPy and PyTorch will be referred to as numpy and torch, their respective Python module names. The torch port to the NSGT/sliCQT can be viewed on GitHub through the commit browser, starting from the following commit.\footnote{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}} Figure \ref{fig:ghcommitbrowser} shows how to use the GitHub UI to examine the code changes made in each commit.
+The starting point of porting the library to the GPU was to simply replace all NumPy functions with their PyTorch equivalents. When refering to code changes, NumPy and PyTorch will be referred to as numpy and torch, their respective Python module names. The torch port to the NSGT/sliCQT can be viewed on GitHub through the commit browser, starting from the following commit.\footnote{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}} Figure \ref{fig:ghcommitbrowser} shows how to use the GitHub UI to examine the code changes made in each commit. An excerpt of the change is shown in listing \ref{code:firstdiff}.
 
 \begin{figure}[!ht]
 	\centering
@@ -179,8 +167,6 @@ The starting point of porting the library to the GPU was to simply replace all N
 	\caption{How to browse the individual steps of the torch porting effort}
 	\label{fig:ghcommitbrowser}
 \end{figure}
-
-An excerpt of the change is shown in listing \ref{code:firstdiff}. 
 
 \begin{listing}[ht]
   \centering
@@ -200,27 +186,73 @@ Next, the list and generator for the forward operation of the transform, which i
   \label{code:seconddiff}
 \end{listing}
 
+In this section, only short excerpts of the torch port were shown, due to requiring to display hundreds of lines of code to show the full effort. Instead, since the workflow for how to use the GitHub UI for browsing the individual steps of the torch port was described in figure \ref{fig:ghcommitbrowser}, we leave it to the readers to visit the important commits made to the forked NSGT/sliCQT library to view the changes themselves. This list describes several important commits, in reverse chronological order:
+
+\begin{tight_enumerate}
+	\item
+		Supporting torch in the non-sliced NSGT:\\
+		{\scriptsize \url{https://github.com/sevagh/nsgt/commit/8d873f7dc8053c553664dcc5c0816eaf3e1ddae0}}
+	\item
+		 Optimizing the \Verb#arrange# function, which was shown in the example line-profiler output in listing \ref{lst:profilerout} to be a hotspot:\\
+		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/1b6e8976e9e667eab08abdbfdf2f29d2e29ca338}}
+	 \item
+		 Returning tensors (i.e. ndarrays or matrices) instead of generators:\\
+		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/1a5886bced951af132ab8659d30a565bcade87b2}}
+	 \item
+		 Optimizing the backward/inverse transform:\\
+		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/9552aa1eb0735e93ce91b648a5b7f629066693b3}}
+	 \item
+		 Adding a configurable device (CPU/GPU) to the sliCQT for finer user control:\\
+		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/2d41fe002d95e4dbd1cdb76ef24aa03c95cfbe46}}
+	 \item
+		 Optimizing the main loop of the forward transform:\\
+		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/49a70d112ba4091d271a9438a8c38cf380ce62b4}}
+	 \item
+		 Beginning the torch port of the sliced NSGT (or sliCQT):\\
+		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/ce9785d40d1053fcffc72115d5fbdcb28d44bf7c}}
+\end{tight_enumerate}
+
 \newpagefill
 
 \subsubsection{Matrix and ragged forms}
 
-\textcite{klapuricqt}
+Although the CQT implementation they are referencing is different from the NSGT, \textcite{klapuricqt} describe that
 \begin{quote}
-	CQT produces a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized.
+	[the] CQT produces a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized.
 \end{quote}
 
-\chaptertodo{
-	Intent to group frequency bins by time resolution\\
-	call it the ragged transform
-}
+This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in figure \ref{fig:raggedslicqt}. In the original list-based design of the library, a list of time-frequency coefficients per frequency bin is returned, and a parameter called \Verb#matrixform# ensures that each item in the list of time-frequency coefficients has the same length with zero-padding.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/nsgtf_loop.py\#L51}}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./images-misc/slicq_shape.png}
+	\caption{Illustration of the different time resolution per frequency bin of the NSGT}
+	\label{fig:raggedslicqt}
+\end{figure}
+
+After the port to torch, the matrix form in the forked NSGT/sliCQT library was simply a tensor where each row represented a frequency bin, and the total number of columns represented the maximum time resolution from the highest frequency bin. Every lower frequency bin had zero-padding applied to have a row of time coefficients with the same length as the highest frequency bin. The non-matrix form could be referred to the ragged or jagged form, from its non-rectangular shape.
+
+The following commit\footnote{\url{https://github.com/sevagh/nsgt/commit/4fb0f55350bc4c2a6fa254d9b7dfd51933ad5540}} introduced a better ragged/jagged form in the torch port. Just as shown in figure \ref{fig:raggedslicqt}, frequency bins that share the same time resolution are grouped together in a rectangular matrix. This results in a list of tensors or matrices, where each tensor contains a block of frequency bins that share the same time-frequency resolution, and thus have the same length of time coefficients. We avoid zero-padding and work with meaningful time coefficients in each frequency bin.
 
 \subsubsection{Slice overlap-add utility}
 
-The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file.
+In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqoverlaps} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
 
-In fact, this function was included in the original project, but in the example spectrogram code.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/examples/spectrogram.py\#L19}} We believe that due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility should be included in the core of the library. Finally, in the spectrogram example of the forked library, the new \Verb#overlap_add_slicq# function is imported from the core library and used to generate a good spectrogram.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py\#L19}}
+The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file. In fact, this function was included in the original project, but in the example spectrogram code.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/examples/spectrogram.py\#L19}} Also, the amount of overlap was not automatically inferred from the shape of the sliCQT output.
 
-Figure \ref{fig:spectrograms} shows
+We believe that due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility should be included in the core of the library. In the spectrogram example of the forked library, the new \Verb#overlap_add_slicq# function is imported from the core library.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py\#L19}} Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
+	\subfloat[sliCQT with minimum automatic sllen (6744) and 50\% overlap-add]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
+	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22050 Hz}
+	\label{fig:overlappedspectrograms}
+\end{figure}
+
+We note a few details. Firstly, the overlap-add procedure for the sliCQT is only defined for the matrix form, not the ragged form. Next, observe that there is a slight difference in the time axis duration between the NSGT and sliCQT, resulting from the slicing and overlap-add procedure.
+
+\newpagefill
 
 \subsection{Choosing sliCQT parameters}
 \label{sec:slicqparamsrch}

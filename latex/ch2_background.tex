@@ -508,6 +508,25 @@ Details of the frequency scales used to generate the NSGT spectrograms are shown
 
 \newpagefill
 
+Finally, recall the CQT spectrograms shown in figure \ref{fig:cqtvstft} in the previous section \ref{sec:cqt}. Figure \ref{fig:cqtdetails} shows additional detailed plots that can be generated with the MATLAB CQT (CQ-NSGT) function from the MATLAB Wavelet Toolbox,\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} showing more details of the varying windows of the underlying Nonstationary Gabor Transform process.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Center frequencies, 12 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_cf.png}}
+	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 12 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_gaborframe.png}}
+	\subfloat[Constant-Q ratio, 12 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_ratio.png}}\\
+	\subfloat[Center frequencies, 24 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_cf.png}}
+	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 24 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_gaborframe.png}}
+	\subfloat[Constant-Q ratio, 24 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_ratio.png}}\\
+	\subfloat[Center frequencies, 48 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_cf.png}}
+	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 48 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_gaborframe.png}}
+	\subfloat[Constant-Q ratio, 48 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_ratio.png}}\\
+	\caption{Additional NSGT information for the MATLAB CQT}
+	\label{fig:cqtdetails}
+\end{figure}
+
+\newpagefill
+
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
