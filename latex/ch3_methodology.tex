@@ -349,21 +349,17 @@ The bottlenecks of the library use NumPy (\cite{numpy}) and SciPy (\cite{scipy})
 
 Note that although PyTorch (\cite{pytorch}) also uses CUDA and was used in the neural network of this thesis, for this specific BSS evaluation library, CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
 
+\newpagefill
+
 \subsection{Open-Unmix with the sliCQ Transform}
 \label{sec:slicqumx}
 
-\todo[inline]{incorporate my sparsity hypothesis/justification for nsgt}
-
 \todo[inline]{better hope umx shines here}
 
-\subsubsection{Working with the ragged sliCQ Transform}
+\subsubsection{Incorporating CrossNet-Open-Unmix}
 
-\ichfeedback{describe here how frequency bins are grouped by the same time-resolution, to produce a list of ``blocks'' of time-frequency coefficients}
-
-\subsubsection{Convolutional neural network architecture}
+\subsubsection{Incorporating convolutional denoising autoencoders}
 
 \todo[inline]{grais and plumbley 2 papers can go here}
-
-\subsubsection{Improved loss functions from CrossNet-Open-Unmix}
 
 \end{document}
