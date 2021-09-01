@@ -653,7 +653,7 @@ Typical music recordings are mono or stereo mixtures, with multiple sound object
 There are many motivations for performing this separation. \textcite{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
 channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix.''
 
-In the ISMIR 2021 Music Demixing Competition (MDX),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} audio source separation is described as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
+In the ISMIR 2021 Music Demixing Challenge (MDX),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} audio source separation is described as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
 
 \begin{quote}
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
@@ -810,6 +810,7 @@ The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 data
 The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test split. Following the rules defined in the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} for a network to be considered trained only on MUSDB18-HQ, the predefined data splits must be used.
 
 \subsubsection{Evaluation measures}
+\label{sec:evalbss}
 
 The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. There are 4 distinct metrics that comprise BSS:
 

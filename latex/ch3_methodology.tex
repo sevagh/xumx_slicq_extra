@@ -87,6 +87,7 @@ Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-fa
 \end{figure}
 
 \subsubsection{Automatic slice length picker}
+\label{sec:autosllen}
 
 An addition made to the sliced version of the NSGT, or the sliCQT, was to automatically suggest an appropriate slice length and transition area for a given frequency scale. The slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal can be processed in smaller-sized chunks (or slices).
 
@@ -271,6 +272,7 @@ In this parameter exploration, we require the following components to build the 
 \end{tight_enumerate}
 
 \subsubsection{Mix-phase inversion (MPI) oracle}
+\label{sec:mpi}
 
 \textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex and invertible time-frequency transforms with Fourier coefficients
 
@@ -330,36 +332,151 @@ The performance of the IRM1 (soft magnitude mask) and MPI (mixed-phase inversion
 
 According to \textcite{randomgrid}, 60 iterations of random grid will find a statistically good set of hyperparameters in a case where an exhaustive grid search is impossible. The strategy chosen was to choose random hyperparameters for 60 iterations and select the highest MPI score, because an exhaustive grid search of the possible NSGT/sliCQT parameters would be too large. 
 
-The random search is done for across 4 interesting frequency scales shown in section \ref{sec:freqscales}: the constant-Q or log scale, the variable-Q scale (log scale with offset), and the two psychoacoustic mel and Bark scales, and fmin between 10-130.0 hz and this and that\todo{finish this ofc}
+The random search parameters are shown in table \ref{table:slicqparams}. Several decisions were made to limit the size of the parameter search.
 
-\chaptertodo{
-	seed per fscale but without results here\\
-	describe why we limited by sllen 44100, 1-second processing, etc. (cite from demucs or cdae)
-}
+The maximum bins were capped to 300 and the maximum slice length was capped to 44100 samples, which represents 1 second of music. This is a nice round number, and re-appears in several demixing papers (\cite{plumbley1, plumbley2, demucs}) as a good subsequence length to extract from a larger musical track. Although the NSGT/sliCQT can be configured to output thousands of frequency bins and use arbitrarily large slice lengths, larger sizes (and the corresponding large slice length) will lead to higher-dimension outputs that are more difficult to use in a neural network.
+
+The maximum frequency was capped to 22050 Hz, the Nyquist rate of the 44100 sample rate of MUSDB18-HQ. This is for performance reasons -- the NSGT/sliCQT automatically adds additional frequency bins for the DC (0 Hz) and Nyquist ($\sfrac{f_{s}}{2} \text{ Hz}$) frequencies if they are missing from the user-specified scale, and having two large, adjacent upper frequency bins (e.g. say that the user sets 17000 Hz, and 22050 Hz is the automatically-added Nyquist) creates a very performance-intensive transform with huge dimensionality which does not fit on the GPU of the test machine (with 12GB of memory).
+
+The minimum frequency range (10.0--130.0 Hz) was inspired by one of the sliCQT papers (\cite{slicq}) which demonstrated the sliCQT with those frequency ranges.
+
+The slice length and transition length were automatically picked for the randomly selected frequency scale, making use of the new feature whose addition was described in section \ref{sec:autosllen}.
+
+\begin{table}[ht]
+	\centering
+\begin{tabular}{ |l|l|l|l| }
+	 \hline
+	 Scale & Bins & Minimum frequency (Hz) & Additional params \\
+	 \hline
+	 \hline
+	 Constant-Q/log & 10--300 & 10.0--130.0 & n/a \\
+	 \hline
+	 Variable-Q & 10--300 & 10.0--130.0 & Offset = 10.0--130.0 Hz \\
+	 \hline
+	 \hline
+	 mel & 10--300 & 10.0--130.0 & n/a \\
+	 \hline
+	 Bark & 10--300 & 10.0--130.0 & n/a \\
+	 \hline
+\end{tabular}
+	\caption{Parameter ranges for the sliCQT hyperparameter search}
+	\label{table:slicqparams}
+\end{table}
+
+The maximized metric is the median SDR score across the 4 targets of the 14 validation tracks of MUSDB18-HQ. The SDR is a score in dB which commonly is the single evaluation metric that summarizes the global performance of a music demixing system, which was described as part of the total set of BSS metrics in section \ref{sec:evalbss}, and which was the objective metric used to rank demixing systems in the ISMIR 2021 Music Demixing Competition.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
+
+\newpagefill
 
 \subsubsection{GPU-accelerated BSS metrics with CuPy}
 
-During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows the line-profiler output of an evaluation of the IRM1 oracle mask with the STFT, using a window size of 4096, on the 14 MUSDB18-HQ validation tracks.
+During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows some of the line-profiler output of the IRM1 oracle mask with the STFT, using a window size of 4096, on 1 out of the 14 MUSDB18-HQ validation tracks, with the \Verb#@profile# annotation placed on the BSS inner computation functions.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/blob/master/museval/metrics.py\#L512-L601}}
 
-\chaptertodo{
-	line profiler showing slow bss eval
-}
+\begin{listing}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
+   527         2    2217873.0 1108936.5     14.7      sf = scipy.fftpack.fft(reference_sources, n=n_fft, axis=2)
 
-The bottlenecks of the library use NumPy (\cite{numpy}) and SciPy (\cite{scipy}) operations, which are both Python numerical computation libraries which run on the the CPU. The CuPy (\cite{cupy}) library provides replacement functions of NumPy and SciPy which run on CUDA (\cite{cuda}), the compute framework for NVIDIA GPUs. This allows for acceleration of numerical operations through GPU parallelization.
+   538        46    1513499.0  32902.2     10.0          ssf = sf[j, c2] * np.conj(sf[i, c1])
 
-Note that although PyTorch (\cite{pytorch}) also uses CUDA and was used in the neural network of this thesis, for this specific BSS evaluation library, CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
+   539        46   10838284.0 235614.9     71.8          ssf = np.real(scipy.fftpack.ifft(ssf))
+
+   574        12    4278634.0 356552.8     12.2      sef = scipy.fftpack.fft(estimated_source, n=n_fft)
+
+   582       104   24634279.0 236868.1     70.0          ssef = np.real(scipy.fftpack.ifft(ssef))
+
+   591        24    2432539.0 101355.8      6.9          C = np.linalg.solve(G + eps*np.eye(G.shape[0]), D).reshape(
+\end{minted}
+  \caption{Some of the slowest lines in the BSS metrics evaluation}
+  \label{lst:slowbssprofile}
+\end{listing}
+
+The bottlenecks of the library use NumPy (\cite{numpy}) and SciPy (\cite{scipy}) operations, which are both Python numerical computation libraries that run on the CPU. The CuPy (\cite{cupy}) library provides replacement functions of NumPy and SciPy which run on CUDA (\cite{cuda}), the compute framework for NVIDIA GPUs. This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch (\cite{pytorch}) also uses CUDA and was used in an earlier section \ref{sec:torchslicq}, for the BSS evaluation library CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
+
+Similar to the NSGT/sliCQT library, the modifications made to the museval library were stored in my forked copy of the repository.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval/commit/f3b7540faddc8d2b1bc91cecaf05fd20d96df7c6}} The replacement of the NumPy or SciPy function is as simple as using the CuPy equivalent, taking special care about GPU out-of-memory errors. The code listing \ref{code:thirddiff} shows an example of the CuPy replacement of one of the slow computations discovered by the profiler.
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{text}{./diffs/diff3.txt}
+\end{inputminted}
+  \caption{Example of porting SciPy to CuPy with an out-of-memory fallback}
+  \label{code:thirddiff}
+\end{listing}
 
 \newpagefill
 
 \subsection{Open-Unmix with the sliCQ Transform}
 \label{sec:slicqumx}
 
-\todo[inline]{better hope umx shines here}
+First, we will look at incorporating CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) ideas with Open-Unmix. Since X-UMX and UMX are both based on the STFT spectrogram, the general model will stay the same even if we replace the STFT with the sliCQT.
+
+As mentioned, Open-Unmix (\cite{umx}) has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based. X-UMX has an open-source implementation available as well,\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} which uses a different deep learning framework than PyTorch. Therefore part of the methodology of this thesis involves incorporating the X-UMX ideas inside the PyTorch version of UMX.
+
+After the X-UMX modifications are described, we will look at which parts of Open-Unmix need to incorporate the PyTorch implementation of the sliCQT that was described in section \ref{sec:torchslicq}.\footnote{\url{https://github.com/sevagh/nsgt}} Finally, the convolutional denoising autoencoder model architectures of \textcite{plumbley1, plumbley2}  will be described, along with how they might be applied to the sliCQT.
 
 \subsubsection{Incorporating CrossNet-Open-Unmix}
 
-\subsubsection{Incorporating convolutional denoising autoencoders}
+CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) is a further development on Open-Unmix which improves the music demixing performance without adding any additional trainable parameters. All 4 target models are trained simultaneously instead of separately, which allows for loss functions that consider multiple targets. However, it requires more compute resources for training, since the GPU needs to store and train 4 independent target models simultaneously instead of separately.
 
-\todo[inline]{grais and plumbley 2 papers can go here}
+For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than 4 independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of Open-Unmix.
+
+In Open-Unmix, the loss function is only for the single target being trained, and only applied by the mean squared error (MSE) function on the magnitude STFT coefficients, making it a loss of the frequency domain. The MSE loss of the magnitude STFT is computed from the following equation, where $Y$ represents the ground truth magnitude STFT, $\hat{Y}$ represents the network estimate, and there are $n$ total elements in the STFT matrix:
+\begin{align}
+	\nonumber & \text{MSE}(Y, \hat{Y}) = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i})^{2}}
+\end{align}
+
+The loss function of X-UMX is first modified to include a multi-domain loss (MDL), which refers to the existing frequency-domain loss (spectrogram MSE) in addition to a new time-domain loss. The time-domain loss is in fact the SDR score from the BSS metrics which we have seen before. Recall the equations from section \ref{sec:mpi} on the mixed-phase inversion (MPI) oracle that show how the magnitude STFT of the Open-Unmix neural network is converted back to the time-domain waveform estimate for a target (or source):
+\begin{align}
+	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{Open-Unmix}(x_{\text{mix}})\\
+	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \measuredangle{X_{\text{mix}}}\\
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}})
+\end{align}
+
+We can use these equations in the loss function to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In xumx-sliCQ, we use \textcite{auraloss}'s auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR, \cite{roux2018sdr}) loss function for time-domain audio waveforms. According to \textcite{roux2018sdr}, SI-SDR compared to the original SDR is ``in a simpler, more robust measure, called scale-invariant SDR (SI-SDR).''
+
+We'll call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is computed as follows:
+\begin{align}
+	\nonumber & \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)
+\end{align}
+
+There are 14 MSE loss combinations made from the 4 targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. The equations \ref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
+\begin{align}\tag{5}\label{equation:cl}
+	\nonumber & \text{mse\_loss}_{1} = \text{MSE}(|\text{STFT}(\hat{x}_{1})|, |\text{STFT}(x_{1})|)\\
+	\nonumber & \text{mse\_loss}_{2} = \text{MSE}(|\text{STFT}(\hat{x}_{1} + \hat{x}_{2})|, |\text{STFT}(x_{1} + x_{2}|))\\
+	\nonumber & \text{(... repeat for 14 combinations)}\\
+	\nonumber & \text{mse\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{mse\_loss}_{n}}
+\end{align}
+
+For the time-domain loss, the same 14 combinations of the combination targets are considered, shown in the equations \ref{equation:mdl}, where $x$ represents the time-domain waveform, the subscript represents the target:
+\begin{align}\tag{6}\label{equation:mdl}
+	\nonumber & \text{sdr\_loss}_{1} = \text{SI-SDR}(\hat{x}_{1}, x_{1})\\
+	\nonumber & \text{sdr\_loss}_{2} = \text{SI-SDR}(\hat{x}_{1} + \hat{x}_{2}, x_{1} + x_{2})\\
+	\nonumber & \text{(... repeat for 14 combinations)}\\
+	\nonumber & \text{sdr\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{sdr\_loss}_{n}}
+\end{align}
+
+As a last step, the time-domain loss is multiplied by a mixing coefficient, $\alpha$, before adding it to the frequency-domain loss to create the total loss function:
+\begin{align}
+	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
+\end{align}
+
+ A visualization of the multi-domain loss (MDL) and combination loss (CL) for 4 targets is shown in figure \ref{fig:xumxlosses}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Multi-domain loss (MDL)]{\includegraphics[width=0.75\textwidth]{./images-neural/xumx1.png}}\\
+	\subfloat[Combination loss (CL)]{\includegraphics[width=0.75\textwidth]{./images-neural/xumx2.png}}
+	\caption{Loss functions of X-UMX (\cite{xumx})}
+	\label{fig:xumxlosses}
+\end{figure}
+
+One last note is that the data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4})$ in training, where $y_{1-4}$ are the ground-truth waveforms of all 4 isolated targets.
+
+\newpagefill
+
+\subsubsection{Replacing the STFT with the sliCQT}
+
+\subsubsection{Incorporating convolutional denoising autoencoders}
 
 \end{document}

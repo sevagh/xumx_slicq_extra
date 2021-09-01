@@ -1,0 +1,6 @@
+- sef = scipy.fftpack.fft(estimated_source, n=n_fft)
+
++ try:
++     sef = cupy.asnumpy(cupyx.scipy.fft.rfft(cupy.asarray(estimated_source, dtype=np.float32), n=n_fft))
++ except cupy.cuda.memory.OutOfMemoryError:
++     sef = scipy.fft.rfft(estimated_source, n=n_fft)
