@@ -216,6 +216,7 @@ In this section, only short excerpts of the torch port were shown, due to requir
 \newpagefill
 
 \subsubsection{Matrix and ragged forms}
+\label{sec:matrixvragged}
 
 Although the CQT implementation they are referencing is different from the NSGT, \textcite{klapuricqt} describe that
 \begin{quote}
@@ -235,7 +236,69 @@ After the port to torch, the matrix form in the forked NSGT/sliCQT library was s
 
 The following commit\footnote{\url{https://github.com/sevagh/nsgt/commit/4fb0f55350bc4c2a6fa254d9b7dfd51933ad5540}} introduced a better ragged/jagged form in the torch port. Just as shown in figure \ref{fig:raggedslicqt}, frequency bins that share the same time resolution are grouped together in a rectangular matrix. This results in a list of tensors or matrices, where each tensor contains a block of frequency bins that share the same time-frequency resolution, and thus have the same length of time coefficients. We avoid zero-padding and work with meaningful time coefficients in each frequency bin.
 
+There is a provided example script, \Verb#ragged_vs_matrix.py#,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/ragged_vs_matrix.py}} which shows how to work with the ragged or jagged form instead of the matrix. Listing \ref{code:raggedvmatrix} shows an example and the printed output for the matrix and ragged forms.
+
+\begin{figure}[h]
+  \centering
+ \begin{minipage}{\textwidth}
+  \centering
+\setlength\partopsep{-\topsep}
+\begin{minted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{python}
+if args.matrixform:
+    print(f'NSGT-sliCQ matrix shape: {c.shape}')
+else:
+    print(f'NSGT-sliCQ jagged shape:')
+    freq_idx = 0
+    for i, C_block in enumerate(c):
+        freq_start = freq_idx
+        freq_idx += C_block.shape[2]
+        print(f'\tblock {i}, f {freq_start}: {C_block.shape}')
+\end{minted}
+ \subfloat{(a) Code snippet showing the matrix and ragged forms}
+ \vspace{1em}
+ \end{minipage}
+ \begin{minipage}{\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
+|\$ python examples/ragged\_vs\_matrix.py --scale bark --bins 20 --fmin 20 --fmax 22050 --matrixform ./gspi.wav|
+|NSGT-sliCQ matrix shape: torch.Size([401, 2, 21, 264])|
+|recon error (mse): 1.087067076355197e-07|
+\end{minted}
+ \subfloat{(b) Output printed by above for the matrix form}
+ \vspace{1em}
+ \end{minipage}
+\begin{minipage}{\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
+|\$ python examples/ragged\_vs\_matrix.py --scale bark --bins 20 --fmin 20 --fmax 22050 ./gspi.wav|
+|NSGT-sliCQ jagged shape:|
+|        block 0, f 0: torch.Size([401, 2, 8, 16])|
+|        block 1, f 8: torch.Size([401, 2, 1, 20])|
+|        block 2, f 9: torch.Size([401, 2, 1, 24])|
+|        block 3, f 10: torch.Size([401, 2, 1, 32])|
+|        block 4, f 11: torch.Size([401, 2, 1, 40])|
+|        block 5, f 12: torch.Size([401, 2, 1, 48])|
+|        block 6, f 13: torch.Size([401, 2, 1, 60])|
+|        block 7, f 14: torch.Size([401, 2, 1, 76])|
+|        block 8, f 15: torch.Size([401, 2, 1, 96])|
+|        block 9, f 16: torch.Size([401, 2, 1, 120])|
+|        block 10, f 17: torch.Size([401, 2, 1, 152])|
+|        block 11, f 18: torch.Size([401, 2, 1, 188])|
+|        block 12, f 19: torch.Size([401, 2, 1, 236])|
+|        block 13, f 20: torch.Size([401, 2, 1, 264])|
+|recon error (mse): 1.087067076355197e-07|
+\end{minted}
+ \subfloat{(c) Output printed by above for the ragged form}
+ \vspace{1em}
+ \end{minipage}
+  \captionof{listing}{Matrix and ragged forms of a sliCQT using 20-22050 Hz on the Bark scale with 20 frequency bins}
+  \label{code:raggedvmatrix}
+\end{figure}
+
+Note the shape of the matrix form is $401 \text{ slices} \times 2 \text{ channels} \times 21 \text{ frequency bins} \times 264 \text{ time coefficents}$. The shape of the first matrix in the ragged form is $401 \text{ slices} \times 2 \text{ channels} \times 8 \text{ frequency bins} \times 16 \text{ time coefficents}$. This is the lowest time-frequency resolution of this sliCQT, with only outputs 16 time coefficients, shared by the first 8 frequency bins. In the matrix form, these 16 values are padded up to 264 to fit the maximum time resolution. The total summed frequency bins of the list of matrices in the ragged form is 21, leading to an identical transform. Also note the identical reconstruction error from both forms.
+
 \subsubsection{Slice overlap-add utility}
+\label{sec:slicqola}
 
 In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqoverlaps} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
 
@@ -477,6 +540,83 @@ One last note is that the data loader of Open-Unmix returns a single target at a
 
 \subsubsection{Replacing the STFT with the sliCQT}
 
+Continuing from the previous statement, the data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. Also, the returned estimate of Open-Unmix is the estimated source waveform $\hat{y}$. However, during most of the steps between the loading of the time-domain waveforms and the return of the estimated time-domain waveform, the STFT is used to transform the audio into the time-frequency or spectral domain.
+
+The MUSDDB18-HQ data loader is the starting point of the neural network, and the important training and inference steps are as follows:
+
+\begin{tight_enumerate}
+	\item
+		The data loader is instantiated,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L222}} ready to return $(x, y)$ pairs of waveforms for every training example.
+	\item
+		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \textcite{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing.''
+	\item
+		The $(x, y)$ pairs have their magnitude STFT taken in the training loop\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}}. The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean})$, where the std and mean are from the data whitening step.
+	\item
+		The whitened $|X|$ is used as an input to the neural network layers, which as mentioned in section \ref{sec:umx} is a bi-directional LSTM.
+	\item
+		The estimate of the neural network is $|\hat{Y}|$. The loss function is $\text{MSE}(|Y|, |\hat{Y}|)$, and this is used as the optimization target for the parameter updates.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L34}}
+	\item
+		This process is repeated until the network is fully trained (i.e. the loss stops improving), and 4 independent networks are each trained on the 4 MUSDB18-HQ sources (vocals, drums, bass, other) respectively.
+	\item
+		The inference step of the neural network is when Open-Unmix loads all 4 independently trained networks to create time-domain estimates of the sources.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/model.py\#L258}}
+	\item
+		For a given mixed waveform $x$, Open-Unmix estimates $|Y_{1}|, |Y_{2}|, |Y_{3}|, |Y_{4}|$ for each source. Then, a process called Wiener filtering and expectation maximization is applied (\cite{umxorig1, wiener2, wiener3, wiener4}).\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L338}} First the mix-phase inversion is used to come up with the first waveform estimate $y_{1}, y_{2}, y_{3}, y_{4}$. Then, the iterative Wiener expectation maximization process uses the 4 target STFT spectrograms in an iterative procedure to refine the estimates.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L154}}
+\end{tight_enumerate}
+
+To summarize, the STFT is used to compute magnitude spectrogram statistics from the training data and to create a magnitude spectrogram from the training examples. The magnitude spectrogram or magnitude STFT is the input and output of the bi-directional LSTM. Then, the magnitude STFT estimates from the 4 target models are considered together to perform an iterative refinement in the spectral domain, while also going back to the time-domain waveform with the iSTFT and the mix-phase inversion.
+
+These are are the places in the Open-Unmix PyTorch template where the STFT must be replaced with the sliCQT. Moreover, it was mentioned that the ragged sliCQT will be used, which is a list of time-frequency matrices for frequency bins that share the same time resolution, and not a single rectangular matrix like the STFT. This arises from the different temporal frame rates of each frequency bin which is the desire of the NSGT/sliCQT (or CQT). This means that all of the operations which expect a single rectangular real-valued matrix of the STFT returns need to be modified to work on a list of matrices instead.
+
+Figure \ref{fig:xumxslicq} shows the proposed modification to the basic Open-Unmix architecture, which shows where the sliCQT is used. It also shows how the 4 models are trained together to apply the X-UMX loss functions.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_system_compressed.png}
+	\caption{Block diagram of xumx-sliCQ architecture}
+	\label{fig:xumxslicq}
+\end{figure}
+
+In section \ref{sec:matrixvragged}, we saw that to use the ragged sliCQT one must simply loop over the list of matrices where each matrix (or block) contains at least 1 frequency bin that share a specific time-frequency resolution. A simple example of the STFT to sliCQT conversion is the custom MSE loss function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/loss.py\#L8}} shown in listing \ref{code:simplemse}.
+
+\begin{listing}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{python}
+|def \_custom\_mse\_loss(pred\_magnitude, target\_magnitude):|
+|    loss = 0|
+|    for i in range(len(target\_magnitude)):|
+|        loss += torch.mean((pred\_magnitude[i] - target\_magnitude[i])**2)|
+|    return loss/len(target\_magnitude)|
+\end{minted}
+  \caption{Modified MSE loss for the ragged sliCQT}
+  \label{code:simplemse}
+\end{listing}
+
+The MSE for the STFT is applied on the whole matrix. For the ragged sliCQT, we simply sum the MSE loss of each matrix in the list of matrices.
+
+In the similar style as the simple example above, we can perform the STFT to ragged sliCQT conversion in the previously highlighted parts of xumx-sliCQ:
+
+\begin{tight_enumerate}
+	\item
+		The \Verb#get_statistics# function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/train.py\#L102}} is modified to return a list of standard deviations and means, where each entry of the list corresponds to the standard deviation and mean of the respective matrix in the ragged sliCQT. Note that the sliCQT is overlap-added before computing its statistics. Recall in sections \ref{sec:theoryslicqt} and \ref{sec:slicqola} that the 50\% overlap of adjacent slices was necessary for a meaningful spectrogram. The same applies in the xumx-sliCQ neural network, where the input to the neural network is the overlap-added sliCQT.
+	\item
+		The neural network is modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16000 Hz by default), which lets the part of the STFT above 16000 Hz to pass through the network unmodified, to improve the demixing performance. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16000 Hz passes through untouched.
+	\item
+		Within each sub-network, or \Verb#OpenUnmixTimeBucket#, the implementation is very similar to the STFT-based Open-Unmix. The $i$th block from the list of magnitude sliCQT $|X|$ of the mixed-song waveform $x$ , or $|X_{i}|$, is the input to the network, and it is overlap-added to produce a 2D time-frequency matrix. Then, the 2D time-frequency matrix can be used just like an STFT, as an input to an LSTM or any other neural network layer. The caveat is that the overlap-add procedure is non-invertible, as mentioned, and the original transform shape is needed to synthesize an audio waveform. This means that the neural network must first learn how to estimate an overlap-added magnitude estimate, $|\hat{Y}_{i, \text{overlap-added}}|$. Then, it needs to estimate the non-overlap-added version: $|\hat{Y}_{i}| = \text{inverse-overlap-add}(|\hat{Y}_{i, \text{overlap-added}}|)$. In the network, this is achieved with a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers 3 time coefficients to produce 6 time coefficients, which is in essence a learnable inverse operation of the 50\% overlap procedure.
+	\item
+		After the \Verb#OpenUnmix# class creates a list of estimated sliCQT buckets $|\hat{Y}_{i}|$ which are gathered back into the full ragged list of matrices in the final magnitude sliCQT spectrogram estimate, $|\hat{Y}|$, the Wiener expectation maximization step needs to be applied. This was approached in two ways in xumx-sliCQ, controlled by a parameter named \Verb#stft_wiener#: either the first estimate is taken from the sliCQT and the Wiener-EM step is applied on the STFT,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L301}} or the first estimate and Wiener-EM step is done on the sliCQT.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L380}} Each strategy results in a different music demixing quality, which will be discussed in section \ref{sec:experiment}. A further improvement to the performance of the Wiener-EM step on the sliCQT was done by zero-padding the ragged sliCQT to apply the Wiener-EM on a single rectangular matrix.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L389-L404}} Note that this is different from the native matrix form of the sliCQT, and only used in the Wiener-EM step. In the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}, due to the strict time limits of the evaluation testbench, the sliCQT Wiener-EM could not be used and the STFT Wiener-EM was necessary to reduce the computation time.
+\end{tight_enumerate}
+
 \subsubsection{Incorporating convolutional denoising autoencoders}
+
+The convolutional denoising autoencoder models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. In the early experiments, they showed more promising results than the bi-LSTM model. The bi-LSTM model was first adapted to work on each time bucket of the ragged list of the sliCQT, but the longest time resolution (highest frequency bin) was prohibitively slow. The convolutional models are a simple way of defining 2D time-frequency filters that slide over the different time buckets of the ragged sliCQT. The diagram in figure \ref{fig:cdaeslicqt} shows how the convolutional layers are applied to the ragged sliCQT.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget.png}
+	\caption{Block diagram of the individual convolutional blocks of xumx-sliCQ}
+	\label{fig:cdaeslicqt}
+\end{figure}
+
+The exact parameters and configuration of the convolutional layers will be further described in section \ref{sec:experiment}.
 
 \end{document}
