@@ -2,7 +2,7 @@
 
 pybin="/home/sevagh/venvs/thesis/bin/python3"
 #expdir="exp-00-controls"
-expdir="exp-04-trained-models"
+expdir="exp-04-trained-models-with-controls"
 scriptdir="./mss-oracle-experiments/oracle_eval"
 
 export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ

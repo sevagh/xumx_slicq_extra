@@ -11,6 +11,8 @@
 	pytorch accel of nsgt/slicqt
 }
 
+\newpagefill
+
 \subsection{sliCQT parameters with MPI oracle}
 
 \begin{figure}[ht]
@@ -28,7 +30,9 @@
 	\label{fig:oraclebssboxplot}
 \end{figure}
 
-\subsection{Neural network training}
+\newpagefill
+
+\subsection{Neural network architecture and training}
 
 The training parameters of xumx-sliCQ were kept similar to Open-Unmix and CrossNet-Open-Unmix:
 
@@ -42,6 +46,8 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 	\caption{Tensorboard loss curves for xumx-sliCQ, 1000 epochs}
 	\label{fig:networkloss}
 \end{figure}
+
+\newpagefill
 
 \subsection{Demixing results}
 
@@ -72,10 +78,16 @@ The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{mus
 	\label{fig:bssboxplot}
 \end{figure}
 
+\newpagefill
+
+\subsubsection{Wiener-EM with the STFT and sliCQT}
+
+\newpagefill
+
 \subsection{Inference performance analysis}
 
-\subsection{ISMIR 2021 Music Demixing Challenge}
-
-\ichfeedback{i know this shouldn't be a core part of the thesis, but it's still fun to describe?}
+\chaptertodo{
+	use ISMIR 2021 Music Demixing Challenge timeout rules
+}
 
 \end{document}

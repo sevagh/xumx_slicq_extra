@@ -135,10 +135,10 @@ def save_boxplot(pandas_in, pdf_out, single=False):
         ))
 
         # Select which box you want to change    
-        for (row_val, col_val), ax in g.axes_dict.items():
+        #for (row_val, col_val), ax in g.axes_dict.items():
             #ax.artists[0].set_facecolor('magenta')
             #ax.artists[1].set_facecolor('magenta')
-            ax.artists[2].set_facecolor('gold')
+            #ax.artists[2].set_facecolor('gold')
             #ax.artists[3].set_facecolor('orangered')
             #ax.artists[4].set_facecolor('cyan')
             #ax.artists[8].set_facecolor('cyan')

@@ -261,7 +261,8 @@ if __name__ == '__main__':
     random.seed(args.random_seed)
 
     # initiate musdb
-    mus = musdb.DB(subsets='train', split='valid', is_wav=True)
+    #mus = musdb.DB(subsets='train', split='valid', is_wav=True)
+    mus = musdb.DB(subsets='test', is_wav=True)
 
     max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
 
