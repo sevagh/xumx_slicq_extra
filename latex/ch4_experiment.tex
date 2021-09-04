@@ -4,12 +4,105 @@
 \section{Experiment}
 \label{sec:experiment}
 
+The hardware and software specifications of the computer which produced the results in this section are as follows:
+\begin{tight_enumerate}
+	\item
+		Motherboard: Gigabyte Aorus X570 Elite Wifi
+	\item
+		CPU: AMD Ryzen 5950X
+	\item
+		Memory: 64GB DDR4
+	\item
+		Storage: 1TB ADATA SX8200PNP NVMe
+	\item
+		GPUs: NVIDIA RTX 3080 Ti (12GB VRAM) and NVIDIA RTX 2070 Super (8GB VRAM)
+	\item
+		OS: Fedora 34 Workstation Edition, 64-bit
+	\item
+		Linux kernel version: 5.133.10-200
+	\item
+		NVIDIA driver version: 470.63.01
+	\item
+		NVIDIA CUDA toolkit version: 11.4
+\end{tight_enumerate}
+
+The Python environments used were designed to be reproducible with pip requirements.txt files or Conda environment files bundled with the source code:
+
+\begin{tight_enumerate}
+	\item
+		Pip file for oracles, trained model evaluations, boxplot creation, and performance benchmarks:\\
+		\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/requirements-cupy.txt}
+	\item
+		Conda environment file for the NSGT/sliCQT PyTorch implementation:\\
+		\url{https://github.com/sevagh/nsgt/blob/main/conda-env.yml}
+	\item
+		Conda environment file for the xumx-sliCQ neural network:\\
+		\href{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}
+\end{tight_enumerate}
+
+The repositories associated with this thesis are as follows:
+\begin{tight_enumerate}
+	\item
+		xumx-sliCQ neural network:\\
+		\url{https://github.com/sevagh/xumx-sliCQ}
+	\item
+		NSGT/sliCQT PyTorch fork:\\
+		\url{https://github.com/sevagh/nsgt}
+	\item
+		museval (BSS metrics evaluation) CuPy fork:\\
+		\url{https://github.com/sevagh/sigsep-mus-eval}
+	\item
+		LaTeX files and scripts for generating this thesis, including all plots and results:\\
+		\url{https://gitlab.com/sevagh/xumx_slicq_extra}
+	\item
+		Submissions made to the ISMIR 2021 Music Demixing Challenge:\\
+		\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}
+\end{tight_enumerate}
+
+The author of this thesis takes code availability and reproducibility seriously. Please contact me if you encounter any errors, discrepancies, or difficulties with reproducing any of the results:
+\begin{tight_enumerate}
+	\item
+		Academic e-mail: sevag.hanssian@mail.mcgill.ca
+	\item
+		Personal e-mail: sevagh+thesis@pm.me
+\end{tight_enumerate}
+
 \subsection{Performance benchmarks for GPU accelerations}
 
-\chaptertodo{
-	cupy accel of sigsep-mus-eval\\
-	pytorch accel of nsgt/slicqt
-}
+\subsubsection{Faster BSS metrics with CuPy}
+
+The first testbench is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the forked copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. The benchmark script can be viewed here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}} For the 14 validation tracks of MUSDB18-HQ, it creates a random estimate (using \Verb#numpy.randn# to create an audio signal), and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA RTX 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
+
+The results were that the regular BSS metrics evaluation on the CPU took 1485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec (\cite{sisec2016}, \cite{sisec2018}). Also, note the passing regression test in listing \ref{lst:regressionout}, showing that the library is working correctly with the speedup.
+
+\begin{listing}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
+(museval-cupy) sevagh:sigsep-mus-eval \$ py.test tests/test_regression.py -vs
+===================================================== test session starts =====================================================
+platform linux -- Python 3.9.6, pytest-6.2.4, py-1.10.0, pluggy-0.13.1 -- /home/sevagh/venvs/museval-cupy/bin/python
+cachedir: .pytest_cache
+rootdir: /home/sevagh/repos/sigsep-mus-eval, configfile: setup.cfg
+collected 4 items
+
+tests/test_regression.py::test_aggregate[Music Delta - 80s Rock]     time         target metric     score                   track
+[...]
+Aggrated Scores (median over frames, median over tracks)
+vocals          ==> SDR: -15.622  SIR:   9.165  ISR:  -8.476  SAR:  -7.327
+accompaniment   ==> SDR: -13.290  SIR: -18.765  ISR:  -0.322  SAR:  -7.427
+
+PASSED
+tests/test_regression.py::test_track_scores[Music Delta - 80s Rock] PASSED
+tests/test_regression.py::test_random_estimate[Music Delta - 80s Rock] PASSED
+tests/test_regression.py::test_one_estimate[Music Delta - 80s Rock] PASSED
+\end{minted}
+  \caption{Passing regression test output for the CuPy GPU speedup}
+  \label{lst:regressionout}
+\end{listing}
+
+\newpagefill
+
+\subsubsection{Faster NSGT/sliCQT with PyTorch}
 
 \newpagefill
 
