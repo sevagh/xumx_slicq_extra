@@ -27,7 +27,7 @@ The sliCQT chosen by one run of the script that produced the best median SDR use
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-Finally, the full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is around the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are dramatically worse for the bad sliCQT.
+Finally, the full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are dramatically worse for the bad sliCQT.
 
 \begin{figure}[ht]
 	\centering
@@ -42,7 +42,7 @@ Finally, the full oracle evaluation on both of these sliCQT parameters are shown
 
 The training parameters of xumx-sliCQ were kept similar to Open-Unmix and CrossNet-Open-Unmix:
 
-The training curves can be seen in figure \ref{fig:networkloss}. These were taken from Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard}} which is a visual web component of the Tensorflow deep learning framework (\cite{tensorflow, tensorflowsoft}) that is also compatible with PyTorch. It was used to visualize the loss curves of xumx-sliCQ during training.
+The training curves can be seen in figure \ref{fig:networkloss}. These were taken from Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard}} which is a visual web component of the Tensorflow deep learning framework (\cite{tensorflow}) that is also compatible with PyTorch. It was used to visualize the loss curves of xumx-sliCQ during training.
 
 \begin{figure}[ht]
 	\centering
@@ -57,7 +57,7 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 
 \subsection{Demixing results}
 
-The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{musdb18hq}) dataset's test split, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label.
+The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label.
 
 \begin{table}[ht]
 	\centering
@@ -153,9 +153,5 @@ To maximize result reproducibility, even though table \ref{table:bsseval} descri
 
 \subsection{Model size and inference performance}
 \label{sec:inferenceperf}
-
-\chaptertodo{
-	use ISMIR 2021 Music Demixing Challenge timeout rules
-}
 
 \end{document}

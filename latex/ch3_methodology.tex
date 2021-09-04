@@ -8,7 +8,7 @@ The proposed adaptation of Open-Unmix (\cite{umx}) to use the sliCQ Transform (s
 
 Open-Unmix (\cite{umx}) has a reference implementation released as an open-source Python codebase for general music demixing,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch (\cite{pytorch}) for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader (\cite{musdb18hq}) and BSS metrics evaluator (\cite{bss}), both necessary components for this thesis.
 
-xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python, using PyTorch for the deep learning network to run on the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library\footnote{\url{https://github.com/grrrr/nsgt}} which will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications required for this thesis.
+xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python, using PyTorch for the deep learning network to run on the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ, including improvements or changes made to the reference NSGT/sliCQT Python library.\footnote{\url{https://github.com/grrrr/nsgt}} External projects will be forked to my GitHub account\footnote{\url{https://github.com/sevagh/nsgt}} to contain all of the modifications required for this thesis.
 
 \subsection{Improving the NSGT/sliCQT reference library}
 \label{sec:improvelib}
@@ -16,7 +16,7 @@ xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, al
 \subsubsection{New frequency scales}
 \label{sec:freqscales}
 
-The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank (\cite{variableq1}). The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed.
+The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank (\cite{variableq1}). The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed, like the frequency offset parameter of the Variable-Q scale shown in section \ref{sec:theorynsgt}.
 
 The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. Recall from section \ref{sec:cqt} that to compute the total bins from the bins-per-octave setting of the CQ-NSGT, we can use $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies.
 
@@ -51,11 +51,11 @@ In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or
 	\label{fig:octvlog}
 \end{figure}
 
-To supplement the octave and log scale, the variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}}
+To supplement the Constant-Q scales (octave and log), the Variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}}
 
-The variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite{variableq1} provide the motivation for the variable-Q scale:
+The Variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite{variableq1} provide the motivation for the Variable-Q scale:
 \begin{quote}
-	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
+	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
 \end{quote}
 
 Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provides the following equations in \ref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
@@ -63,12 +63,12 @@ Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (
 	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
 
-The is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes constant-Q in the high frequency bins. Figure \ref{fig:vq} shows the constant-Q/log, and variable-Q scales for different values of the frequency offset $\gamma$.
+The is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. Figure \ref{fig:vq} shows the Constant-Q/log, and Variable-Q scales for different values of the frequency offset $\gamma$.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-freqscales/vqlog.png}
-	\caption{Frequency bins and Q factors for the constant-Q/log and variable-Q scales}
+	\caption{Frequency bins and Q factors for the Constant-Q/log and Variable-Q scales}
 	\label{fig:vq}
 \end{figure}
 
@@ -89,9 +89,7 @@ Figure \ref{fig:melbarkfsandqs} shows the mel and Bark frequency scales and Q-fa
 \subsubsection{Automatic slice length picker}
 \label{sec:autosllen}
 
-An addition made to the sliced version of the NSGT, or the sliCQT, was to automatically suggest an appropriate slice length and transition area for a given frequency scale. The slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal can be processed in smaller-sized chunks (or slices).
-
-Choosing an incorrect slice length which can't support the windows needed to support the desired frequency resolution will result in a warning from the NSGT library, creating confusion for users on how to pick a slice length.\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}} The warning code was adapted to suggest the minimum slice length and transition area for a given frequency scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}} and the result is shown in listing \ref{code:slicenoslice}.
+An addition made to the sliced version of the NSGT, or the sliCQT, was to automatically suggest an appropriate slice length and transition area for a given frequency scale. The slice length and transition area, as mentioned in section \ref{sec:theoryslicqt}, define how the input signal can be processed in smaller-sized chunks (or slices). Choosing an incorrect slice length which cannot support the windows needed to support the desired frequency resolution will result in a warning from the NSGT library, creating confusion for users on how to pick a slice length.\footnote{\url{https://github.com/grrrr/nsgt/issues/18}, \url{https://github.com/grrrr/nsgt/issues/24}} The warning code was adapted to suggest the minimum slice length and transition area for a given frequency scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}} and the result is shown in listing \ref{code:slicenoslice}.
 
 \begin{figure}[h]
   \centering
@@ -187,15 +185,12 @@ Next, the list and generator for the forward operation of the transform, which i
   \label{code:seconddiff}
 \end{listing}
 
-In this section, only short excerpts of the torch port were shown, due to requiring to display hundreds of lines of code to show the full effort. Instead, since the workflow for how to use the GitHub UI for browsing the individual steps of the torch port was described in figure \ref{fig:ghcommitbrowser}, we leave it to the readers to visit the important commits made to the forked NSGT/sliCQT library to view the changes themselves. This list describes several important commits, in reverse chronological order:
+In this section, only short excerpts of the torch port were shown, due to requiring to display hundreds of lines of code to show the full effort. Instead, the workflow for how to use the GitHub UI for browsing the individual steps of the torch port was described in figure \ref{fig:ghcommitbrowser}. This list describes several important commits:
 
 \begin{tight_enumerate}
 	\item
 		Supporting torch in the non-sliced NSGT:\\
 		{\scriptsize \url{https://github.com/sevagh/nsgt/commit/8d873f7dc8053c553664dcc5c0816eaf3e1ddae0}}
-	\item
-		 Optimizing the \Verb#arrange# function, which was shown in the example line-profiler output in listing \ref{lst:profilerout} to be a hotspot:\\
-		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/1b6e8976e9e667eab08abdbfdf2f29d2e29ca338}}
 	 \item
 		 Returning tensors (i.e. ndarrays or matrices) instead of generators:\\
 		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/1a5886bced951af132ab8659d30a565bcade87b2}}
@@ -348,7 +343,7 @@ As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle
 	\nonumber & \hat{x}_{\text{source, IRM1}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, IRM1}})
 \end{align}
 
-Similar to the IRM1 calculation, let's examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let's call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \ref{equation:softneural}:
+Similar to the IRM1 calculation, let us examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let us call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \ref{equation:softneural}:
 \begin{align}\tag{2}\label{equation:softneural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}})\\
@@ -371,7 +366,7 @@ In other words, the magnitude of the isolated source is combined with the phase,
 
 There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle (\cite{noisyphase1, noisyphase2}), which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
 
-Let's write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \ref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \ref{equation:mpioracle}:
+Let us write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \ref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \ref{equation:mpioracle}:
 \begin{align}\tag{4}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
@@ -381,7 +376,7 @@ Let's write out the equations for the MPI oracle derived from the mixed-phase ne
 	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
-This is the first estimate of the mix-phase inversion strategy, and doesn't assume further post-processing of the estimates. It gives us the idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
+This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It gives us the idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
 
 The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT.
 
@@ -499,7 +494,7 @@ The loss function of X-UMX is first modified to include a multi-domain loss (MDL
 
 We can use these equations in the loss function to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In xumx-sliCQ, we use \textcite{auraloss}'s auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR, \cite{roux2018sdr}) loss function for time-domain audio waveforms. According to \textcite{roux2018sdr}, SI-SDR compared to the original SDR is ``in a simpler, more robust measure, called scale-invariant SDR (SI-SDR).''
 
-We'll call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is computed as follows:
+We will call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is computed as follows:
 \begin{align}
 	\nonumber & \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)
 \end{align}
@@ -552,7 +547,7 @@ The MUSDDB18-HQ data loader is the starting point of the neural network, and the
 	\item
 		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \textcite{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing.''
 	\item
-		The $(x, y)$ pairs have their magnitude STFT taken in the training loop\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}}. The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean})$, where the std and mean are from the data whitening step.
+		The $(x, y)$ pairs have their magnitude STFT taken in the training loop.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}} The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean})$, where the std and mean are from the data whitening step.
 	\item
 		The whitened $|X|$ is used as an input to the neural network layers, which as mentioned in section \ref{sec:umx} is a bi-directional LSTM.
 	\item
@@ -601,7 +596,7 @@ In the similar style as the simple example above, we can perform the STFT to rag
 	\item
 		The \Verb#get_statistics# function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/train.py\#L102}} is modified to return a list of standard deviations and means, where each entry of the list corresponds to the standard deviation and mean of the respective matrix in the ragged sliCQT. Note that the sliCQT is overlap-added before computing its statistics. Recall in sections \ref{sec:theoryslicqt} and \ref{sec:slicqola} that the 50\% overlap of adjacent slices was necessary for a meaningful spectrogram. The same applies in the xumx-sliCQ neural network, where the input to the neural network is the overlap-added sliCQT.
 	\item
-		The neural network is modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16000 Hz by default), which lets the part of the STFT above 16000 Hz to pass through the network unmodified, to improve the demixing performance. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16000 Hz passes through untouched.
+		The neural network is modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16000 Hz by default), which lets the part of the STFT above 16000 Hz to pass through the network unmodified. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16000 Hz passes through untouched.
 	\item
 		Within each sub-network, or \Verb#OpenUnmixTimeBucket#, the implementation is very similar to the STFT-based Open-Unmix. The $i$th block from the list of magnitude sliCQT $|X|$ of the mixed-song waveform $x$ , or $|X_{i}|$, is the input to the network, and it is overlap-added to produce a 2D time-frequency matrix. Then, the 2D time-frequency matrix can be used just like an STFT, as an input to an LSTM or any other neural network layer. The caveat is that the overlap-add procedure is non-invertible, as mentioned, and the original transform shape is needed to synthesize an audio waveform. This means that the neural network must first learn how to estimate an overlap-added magnitude estimate, $|\hat{Y}_{i, \text{overlap-added}}|$. Then, it needs to estimate the non-overlap-added version: $|\hat{Y}_{i}| = \text{inverse-overlap-add}(|\hat{Y}_{i, \text{overlap-added}}|)$. In the network, this is achieved with a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers 3 time coefficients to produce 6 time coefficients, which is in essence a learnable inverse operation of the 50\% overlap procedure.
 	\item
@@ -610,7 +605,7 @@ In the similar style as the simple example above, we can perform the STFT to rag
 
 \subsubsection{Incorporating convolutional denoising autoencoders}
 
-The convolutional denoising autoencoder models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. In the early experiments, they showed more promising results than the bi-LSTM model. The bi-LSTM model was first adapted to work on each time bucket of the ragged list of the sliCQT, but the longest time resolution (highest frequency bin) was prohibitively slow. The convolutional models are a simple way of defining 2D time-frequency filters that slide over the different time buckets of the ragged sliCQT. The diagram in figure \ref{fig:cdaeslicqt} shows how the convolutional layers are applied to the ragged sliCQT.
+The convolutional denoising autoencoder models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. In the early experiments, they showed more promising results than the bi-LSTM model. The bi-LSTM model was first adapted to work on each time bucket of the ragged list of the sliCQT, but the longest time resolution (highest frequency bin) was prohibitively slow in both training and inference. Convolutional layers are a simple way of defining 2D time-frequency filters that slide over the 2D time-frequency matrices that correspond to different time buckets of the ragged sliCQT. The diagram in figure \ref{fig:cdaeslicqt} shows how the convolutional layers are applied to the ragged sliCQT.
 
 \begin{figure}[ht]
 	\centering

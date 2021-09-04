@@ -7,17 +7,7 @@
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
 
-\textcite[Chapter~2]{discretebook} define a signal as a term which
-
-\begin{quote}
-	conveys information about the state or behavior of a physical system... [S]ignals are synthesized for the purpose of communicating information between humans or between humans and machines... Signals are represented mathematically as functions of one or more independent variables. For example, a speech signal is represented mathematically as a function of time, and a photographic image is represented as a brightness function of two spatial variables.
-\end{quote}
-
-\textcite[Chapter~2]{moore} describes the more specific case of sound, or audio signals, as follows:
-
-\begin{quote}
-	Sound originates from the vibration of an object. This vibration is impressed upon the surrounding medium (usually air) as a pattern of changes in pressure
-\end{quote}
+\textcite[Chapter~2]{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system.'' Some examples of signals are a 2-dimensional image, which is a function of pixel brightness of two spatial variables, and a speech signal, which is a function of time. \textcite[Chapter~2]{moore} describes the more specific case of sound, or audio signals, as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure.''
 
 The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
 
@@ -29,11 +19,11 @@ The waveform is defined as the function of pressure variation plotted against ti
 	\label{fig:discretecontinuous}
 \end{figure}
 
-\newpagefill
+Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Periodic points on the continuous time axis of the waveform have their values taken, or are \textit{sampled}. The amplitude values of the waveform at these sampled points is \textit{quantized} to find the closest digital number (\cite[Chapter~2]{melbook}). Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
 
-Continuous-time signals are converted into discrete-time representations by two processes: \textit{sampling}, or considering periodic points on the continuous time axis throughout the waveform, and the \textit{quantization} of the amplitude values of the waveform at those points to find the closest digital number (\cite[Chapter~2]{melbook}). The sampling process is controlled by the sampling period $T \text{ seconds}$, or the sampling (or sample) rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity with which time values are considered. The amplitude quantization process is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
+First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
 
-First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency. The diagram in figure \ref{fig:aliasing} shows the phenomenon of \textit{undersampling}, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately (\cite[Chapter~4]{dspfirst}). We refer the readers to the chapter in the textbook for a more full description of challenges in signal sampling.
+Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation (\cite[Chapter~4]{dspfirst}). The diagram in figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately. We refer the readers to the full chapter in the textbook for a more full description of challenges in signal sampling.
 
 \begin{figure}[ht]
 	\centering
@@ -55,8 +45,6 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 	\label{fig:adccircuit}
 \end{figure}
 
-\newpagefill
-
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
 
@@ -68,7 +56,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 
 Throughout this section, the description of the Fourier Transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
 
-\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal contains 262144 samples, and is sampled with a rate of 44100 Hz, meaning the total duration is $\sfrac{262144}{44100} \approx$ 5.94 seconds.
+\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44100 Hz.
 
 \begin{figure}[ht]
 	\centering
@@ -76,8 +64,6 @@ Throughout this section, the description of the Fourier Transform of acoustic si
 	\caption{Glockenspiel waveform}
 	\label{fig:glockwaveform}
 \end{figure}
-
-\newpagefill
 
 \subsubsection{Frequency analysis and Fourier Transforms (CTFT, DFT, FFT)}
 \label{sec:freqanal}
@@ -94,9 +80,9 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
 \end{align}
 
-$X(j\omega)$ is referred to by \textcite{dspfirst} as the frequency-domain representation of the signal $x(t)$, as the equation \ref{equation:ictft} defines the signal $x(t)$ as a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
+\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \ref{equation:ictft} defines the signal $x(t)$ in terms of a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
 
-As discussed in section \ref{sec:timedomain}, signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform (shown previously in equations \ref{equation:ctft} and \ref{equation:ictft}), and is defined by the pair of equations \ref{equation:dtft} and \ref{equation:idtft} (\cite[Chapter~12]{melbook}):
+Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform (shown previously in equations \ref{equation:ctft} and \ref{equation:ictft}), and is defined by the pair of equations \ref{equation:dtft} and \ref{equation:idtft} (\cite[Chapter~12]{melbook}):
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
@@ -110,7 +96,9 @@ The Fourier Transform is a complex-valued function of $\omega$, which is the var
 
 The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively (\cite{discretebook}).
 
-In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). However, starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten, fiftyyears}). Refer to figure \ref{fig:bigo} to see the differences in the expected running times of the FFT over the naive implementation.
+According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take 1 time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). 
+
+Starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten, fiftyyears}). Refer to figure \ref{fig:bigo} to see the differences in the expected running times of the FFT over the naive implementation.
 
 \begin{figure}[ht]
 	\centering
@@ -123,8 +111,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.9\textwidth]{./images-gspi/gspi_dft.png}}\\
-	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.9\textwidth]{./images-gspi/gspi_dft_bigger.png}}
+	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/gspi_dft.png}}\\
+	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/gspi_dft_bigger.png}}
 	\caption{DFT of the Glockenspiel waveform. Note the richer frequency information in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
@@ -146,7 +134,7 @@ According to \textcite{korpel}, ``Gabor came to the conclusion that the difficul
 
 Gabor derived the principal of time-frequency uncertainty from Heisenberg's uncertainty principle in quantum physics, which states that ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' (\cite{hallm, heisenberg1927}). Gabor's time-frequency uncertainty principle states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ as the \textit{logon}, or smallest possible unit of time-frequency information.
 
-Let's start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \ref{equation:delta}:
+Let us start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \ref{equation:delta}:
 \begin{flalign}\label{equation:delta}
 \delta[n] = \begin{cases}
 	1 \text{\hspace{1em}} n = 0\\
@@ -154,9 +142,9 @@ Let's start with a description of the time-domain unit impulse signal or sequenc
 \end{cases}
 \end{flalign}
 
-The impulse is a useful signal, as it is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0. The mathematical notation is that of the Kronecker delta function'' (\cite[Chapter~5]{dspfirst}). Note the Kronecker delta function is the discrete equivalent of the Dirac delta function (\cite[Chapter~2]{melbook}). Contrast this with the DFT spectrum of a signal that is only non-zero at the 0 Hz (or DC) frequency component, which is a ``cosine signal with zero frequency'' (\cite[Chapter~3]{dspfirst}).
+The impulse is a useful signal, as it is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0. The mathematical notation is that of the Kronecker delta function'' (\cite[Chapter~5]{dspfirst}). Note the Kronecker delta function is the discrete equivalent of the Dirac delta function (\cite[Chapter~2]{melbook}). Contrast this with the DFT spectrum of a signal that is only nonzero at the 0 Hz (or DC) frequency component, which is a ``cosine signal with zero frequency'' (\cite[Chapter~3]{dspfirst}).
 
-Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-component DFT, and these two in fact demonstrate the mutually exclusive formulations of time and frequency. The unit impulse, which has a single non-zero value in the time domain, has an infinite extent in the frequency domain. Conversely, the DC-component DFT has a single non-zero value in the frequency domain, but has an infinite extent in the time domain. Figure \ref{fig:gaborfirst}(b) shows the intuition of the time-frequency tradeoff as a choice of signal length. The sine wave's periodicity is more apparent over longer periods of time $\Delta t$, but the detail of the individual sample values become lost.
+Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-component DFT, and these two in fact demonstrate the mutually exclusive formulations of time and frequency. The unit impulse, which has a single nonzero value in the time domain, has an infinite extent in the frequency domain. Conversely, the DC-component DFT has a single nonzero value in the frequency domain, but has an infinite extent in the time domain. Figure \ref{fig:gaborfirst}(b) shows the intuition of the time-frequency tradeoff as a choice of signal length. The periodicity of the sine wave is more apparent over longer periods of time $\Delta t$, but the detail of the individual sample values become lost.
 
 \begin{figure}[ht]
 	\centering
@@ -167,7 +155,7 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 	\label{fig:gaborfirst}
 \end{figure}
 
-The result of the time-frequency uncertainty principle is a property of the use of the Fourier Transform to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a consequence of the Fourier Transform, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite{psycho2} describes one of these experiments:
+The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a property of the Fourier Transform and not a fundamental physical limitation, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite{psycho2} describes one of these experiments:
 
 \begin{quote}
 	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen (DL) for a tone pulse of duration d. [...]  It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...]
@@ -250,11 +238,11 @@ We close this section with a quote from \textcite{doerflersouls} on the powerful
 \subsubsection{Constant-Q Transform (CQT)}
 \label{sec:cqt}
 
-\textcite{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low frequency region, and with a high time resolution in the high frequency region (\cite{doerflerphd, cqtransient}). 
+\textcite{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region (\cite{doerflerphd, cqtransient}). 
 
-The constant-Q transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
+The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
-The name ``constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the constant-Q transform, and the different window sizes used for each frequency bin of interest. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
@@ -270,11 +258,11 @@ The name ``constant-Q'' refers to the constant ratio of the frequency being anal
 
 This first CQT implementation was not designed to be invertible, until \textcite{klapuricqt} introduced an algorithm for an approximate inverse of the CQT back to the time-domain waveform, with an inversion error of $\approx 10^{-3}$. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
-\textcite{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale (\cite{westernpitch1, westernpitch2}).
+\textcite{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the Constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale with equal temperament (\cite{westernpitch1, westernpitch2}).
 
-\textcite{invertiblecqt} implemented the constant-Q transform with Nonstationary Gabor frames (\cite{balazs}), which allowed for perfect reconstruction for the first time. This is also called the CQ-NSGT, or constant-Q Nonstationary Gabor Transform. The next section, \ref{sec:theorynsgt}, will cover the NSGT in detail, but for now we shall continue with how the NSGT led to improved implementations of the CQT.
+\textcite{invertiblecqt} implemented the Constant-Q Transform with Nonstationary Gabor frames (\cite{balazs}), which allowed for perfect reconstruction for the first time. This is also called the CQ-NSGT, or Constant-Q Nonstationary Gabor Transform. The next section, \ref{sec:theorynsgt}, will cover the NSGT in detail, but for now we shall continue with how the NSGT led to improved implementations of the CQT.
 
-\textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale. The formula given is $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
+\textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced Constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the Variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale. The formula given is $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} (\cite{essentia}), LTFAT,\footnote{\url{https://ltfat.org/}} (\cite{ltfat}) and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} (\cite{librosa}) still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
@@ -297,7 +285,7 @@ Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft
 \subsubsection{Nonstationary Gabor Transform (NSGT)}
 \label{sec:theorynsgt}
 
-The section on the Nonstationary Gabor Transform begins with \textcite{doerflerphd}, who analyzed music with multiple Gabor dictionaries (i.e. STFTs). Figure \ref{fig:dorflertradeoff} shows the time-frequency tradeoff of the short and long window STFT analyses of the glockenspiel signal for its transient and tonal characteristics, and how two Gabor dictionaries combined gives us the ability to analyze either the transient or tonal aspects with a more appropriate resolution.
+\textcite{doerflerphd} analyzed music with multiple Gabor dictionaries (i.e. STFTs). Figure \ref{fig:dorflertradeoff} shows the time-frequency tradeoff of the short and long window STFT analyses of the glockenspiel signal for its transient and tonal characteristics, and how two Gabor dictionaries combined gives us the ability to analyze either the transient or tonal aspects with a more appropriate resolution.
 
 \begin{figure}[ht]
 	\centering
@@ -330,7 +318,7 @@ These requirements lead to invertibility of the frame operator and therefore to 
 	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case
 \end{quote}
 
-To derive the NSGT, let's recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \ref{equation:stationarygab}:
+To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \ref{equation:stationarygab}:
 \begin{align} \tag{10}\label{equation:stationarygab}
 g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
 \end{align}
@@ -367,7 +355,7 @@ To describe equation \ref{equation:irregulartime}, Balazs states:
 		[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.
 \end{quote}
 
-For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass function with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$:
+For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$:
 \begin{align}\tag{15}\label{equation:irregularfrequency}
 	h_{m,n}(t) = h_{m}(t - na_{m}), m,n \in \mathbb{Z}
 \end{align}
@@ -383,19 +371,19 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
-As a final note, we believe that the general NSGT is more interesting to study than the CQ-NSGT (constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
+The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows.
 
-Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library which has a spectrogram script. My modifications to the library will be described further in sections \ref{sec:methodology} and \ref{sec:experiment}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, constant-Q, and variable-Q, using a frequency range of 20--22050 Hz. For the variable-Q scale, the fixed frequency offset applied is 15 Hz. 20 Hz is the accepted lowest frequency of human hearing (\cite{moore}), and 22050 Hz is the Nyquist frequency (or maximum supported signal frequency) of the common sample rate, 44100 Hz. In practice, the minimum and maximum frequencies are also useful parameters that can be customized to fit the type of signal or application.
+We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
-Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
+Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22050 Hz. 20 Hz is the accepted lowest frequency of human hearing (\cite{moore}), and 22050 Hz is the Nyquist frequency (or maximum signal frequency) of the MUSDB18-HQ sample rate 44100 Hz. In practice, the minimum and maximum frequencies can be also customized for the signal under study. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT, constant-Q scale, 100 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_cqlog_100.png}}\\
-	\subfloat[NSGT, constant-Q scale, 500 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}\\
-	\subfloat[NSGT, variable-Q scale, 100 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_vqlog_100.png}}\\
-	\subfloat[NSGT, variable-Q scale, 500 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_vqlog_500.png}}
-	\caption{Spectrograms of the glockenspiel signal using the NSGT with a low (100 bins) and high (500 bins) frequency resolution and the constant- and variable-Q scales. The frequency range for each shown scale is 20--22050 Hz, and there is an offset of 15 Hz per band for the variable-Q scale}
+	\subfloat[NSGT, Constant-Q scale, 100 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_cqlog_100.png}}\\
+	\subfloat[NSGT, Constant-Q scale, 500 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}\\
+	\subfloat[NSGT, Variable-Q scale, 100 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_vqlog_100.png}}\\
+	\subfloat[NSGT, Variable-Q scale, 500 bins]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_vqlog_500.png}}
+	\caption{Spectrograms of the glockenspiel signal using the NSGT with a low (100 bins) and high (500 bins) frequency resolution and the constant- and Variable-Q scales. The frequency range for each shown scale is 20--22050 Hz, and there is an offset of 15 Hz per band for the Variable-Q scale}
 	\label{fig:bunchansgts1}
 \end{figure}
 
@@ -530,7 +518,7 @@ Finally, recall the CQT spectrograms shown in figure \ref{fig:cqtvstft} in the p
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
-The NSGT processes the entire input signal at once. In cases where the input signal is processed in smaller chunks, such as realtime streaming, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). The slicing operation is shown in figure \ref{fig:slicqtukeys}.
+The NSGT processes the entire input signal at once. In cases where the input signal must be processed in fixed-size chunks, such as realtime streaming, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). The slicing operation is shown in figure \ref{fig:slicqtukeys}.
 
 \begin{figure}[ht]
 	\centering
@@ -539,7 +527,7 @@ The NSGT processes the entire input signal at once. In cases where the input sig
 	\label{fig:slicqtukeys}
 \end{figure}
 
-Slices have a 50\% overlap with adjacent slices. The noninvertibility of the half-overlap-add makes it only useful as a forward operation. Figure \ref{fig:slicqoverlaps} demonstrates this issue. This trait of the sliCQT has also been mentioned by in the Essentia project's implementation:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+Slices have a 50\% overlap with adjacent slices. The noninvertibility of the half-overlap-add makes it only useful as a forward operation. Figure \ref{fig:slicqoverlaps} demonstrates this issue. This trait of the sliCQT has also been mentioned by in its implementation in the Essentia project:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
 
 \begin{quote}
 	[...] we have to overlap-add the spectrograms obtained for each frame. Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.
@@ -564,7 +552,7 @@ Music signals are a form of acoustic signal, and the domain of music signal proc
 	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
 \end{quote}
 
-According to \textcite{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we don't necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
+According to \textcite{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we do not necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
 
 \begin{figure}[ht]
 	\centering
@@ -573,7 +561,7 @@ According to \textcite{introtodl}, deep learning ``is the subfield of machine le
 	\label{fig:fcdn}
 \end{figure}
 
-\textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded don't always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
+\textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
 
 We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite{mldspmix}, analytic knowledge and machine learning should both be considered in the study of acoustic signals:
 
@@ -691,7 +679,7 @@ According to \textcite{musicsepintro1}, ICA techniques arose more typically for 
 
 Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}).
 
-For cases where ICA cannot be applied, musical source models are more popular (\cite{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other such that they can be extracted with time-frequency masks applied in the spectral domain. \textcite{musicsepgood} emphasize that the \textit{sparsity} of the source's spectral representation is important. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
+For cases where ICA cannot be applied, musical source models are more popular (\cite{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other, or sparse in their spectral representation (\cite{musicsepgood}), such that they can be extracted with time-frequency masks applied in the spectral domain. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
 
 \begin{figure}[ht]
 	\centering
@@ -740,7 +728,7 @@ The oracle mask, or oracle estimator, is a perfect time-frequency mask which is 
 
 To illustrate the calculation of the oracle mask, let us describe a simple case of a mixed song consisting of a vocal and drum track. We assume that we have access to the isolated source recordings of vocals and drums, as well as the mix.
 
-We start by denoting the waveforms $x_{v}[n]$ and $x_{d}[n]$ for the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, let's say that we want our algorithm or network to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
+We start by denoting the waveforms $x_{v}[n]$ and $x_{d}[n]$ for the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, let us say that we want our algorithm or network to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
 
 Given the following operations to get the STFTs of the mix and two sources, we seek to calculate various interesting oracle masks:
 \begin{align}
@@ -749,7 +737,7 @@ Given the following operations to get the STFTs of the mix and two sources, we s
 	\nonumber X_{d} &= \text{STFT}(x_{d}[n]), |X_{d}| = \text{abs}(X_{d})
 \end{align}
  
-\textcite{sisec2018} report the performance of 5 oracles, called IRM1, IRM2, IBM1, IBM2, and the MWF (multichannel Wiener filter). The first 4 are more relevant to stereo music, which is the case considered in this thesis. The ``I'' is for Ideal, ``R|B'' denotes a Ratio vs. Binary mask, ``M'' is for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to -- the magnitude spectrogram raised to the 1st power is simply itself, while one raised to the 2nd power is the power spectrogram.
+\textcite{sisec2018} report the performance of 5 oracles, called IRM1, IRM2, IBM1, IBM2, and the MWF (multichannel Wiener filter). The first 4 are more relevant to stereo music, which is the case considered in this thesis. The ``I'' is for Ideal, ``R|B'' denotes a Ratio vs. Binary mask, ``M'' is for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the magnitude spectrogram raised to the 1st power remains unchanged, while one raised to the 2nd power is the power spectrogram.
 
 The oracles for the vocal source (and the same equations apply to the drum track) are computed thus, noting that a typical default value for $\theta$ is 0.5:
 \begin{align}
@@ -801,7 +789,7 @@ While the discussed Open-Unmix model is based on sequence2sequence ideas with a 
 	\label{fig:cdaes}
 \end{figure}
 
-We'll note that each of the papers gives us different ideas with how to adapt STFT-based convolutional models to fit the sliCQT. The model introduced in \textcite{plumbley1} shows a simple case of a 2D time and frequency filter applied to the STFT, which can be applied to any time-frequency transform. The model introduced in \textcite{plumbley2} varies the size of time and frequency filter to fit the constant-Q transform, which as discussed in section \ref{sec:cqt} analyzes music with higher frequency resolution in the low frequency region, and higher time resolution in the high frequency region.
+We will note that each of the papers gives us different ideas with how to adapt STFT-based convolutional models to fit the sliCQT. The model introduced in \textcite{plumbley1} shows a simple case of a 2D time and frequency filter applied to the STFT, which can be applied to any time-frequency transform. The model introduced in \textcite{plumbley2} varies the size of time and frequency filter to fit the Constant-Q Transform, which as discussed in section \ref{sec:cqt} analyzes music with higher frequency resolution in the low frequency region, and higher time resolution in the high frequency region.
 
 \subsubsection{Public datasets}
 
