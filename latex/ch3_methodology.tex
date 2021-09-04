@@ -332,7 +332,7 @@ In this parameter exploration, we require the following components to build the 
 \subsubsection{Mix-phase inversion (MPI) oracle}
 \label{sec:mpi}
 
-\textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex and invertible time-frequency transforms with Fourier coefficients
+\textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex-valued, invertible time-frequency transforms with Fourier coefficients
 
 As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \ref{equation:irm1}:
 \begin{align}\tag{1}\label{equation:irm1}
@@ -428,7 +428,7 @@ The maximized metric is the median SDR score across the 4 targets of the 14 vali
 
 \subsubsection{GPU-accelerated BSS metrics with CuPy}
 
-During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows some of the line-profiler output of the IRM1 oracle mask with the STFT, using a window size of 4096, on 1 out of the 14 MUSDB18-HQ validation tracks, with the \Verb#@profile# annotation placed on the BSS inner computation functions.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/blob/master/museval/metrics.py\#L512-L601}}
+During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows some of the line-profiler output of the IRM1 oracle mask with the STFT, using a window size of 4096, on 1 out of the 14 MUSDB18-HQ validation tracks, with the \Verb#@profile# decorator placed on the BSS inner computation functions.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/blob/master/museval/metrics.py\#L512-L601}}
 
 \begin{listing}[h]
   \centering
