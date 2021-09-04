@@ -19,7 +19,7 @@ xumx_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
 xumx_slicq_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../vendor/xumx-sliCQ/pretrained-model')
 
 
-def pretrained_model(track, model, eval_dir=None, is_xumx=False):
+def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass=False):
     N = track.audio.shape[0]
 
     if not is_xumx:
@@ -35,15 +35,22 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False):
         # assign to dict for eval
         estimates = {}
         accompaniment_source = 0
+
+        drums_pos = 2
+        bass_pos = 1
+        if swap_drums_bass:
+            drums_pos = 1
+            bass_pos = 2
+
         for name, source in track.sources.items():
 
             # set this as the source estimate
             if name == 'vocals':
                 estimates[name] = target_estimates[0, ...].detach().cpu().numpy().T
             elif name == 'bass':
-                estimates[name] = target_estimates[1, ...].detach().cpu().numpy().T
+                estimates[name] = target_estimates[bass_pos, ...].detach().cpu().numpy().T
             elif name == 'drums':
-                estimates[name] = target_estimates[2, ...].detach().cpu().numpy().T
+                estimates[name] = target_estimates[drums_pos, ...].detach().cpu().numpy().T
             elif name == 'other':
                 estimates[name] = target_estimates[3, ...].detach().cpu().numpy().T
 
@@ -116,8 +123,13 @@ if __name__ == '__main__':
             'xumx': xumx_separator_sony(
                 model_path=xumx_pretrained_path
             ),
-            'slicq': xumx_slicq_separator(
-                xumx_slicq_pretrained_path
+            'slicq-wslicq': xumx_slicq_separator(
+                xumx_slicq_pretrained_path,
+                slicq_wiener=True,
+            ),
+            'slicq-wstft': xumx_slicq_separator(
+                xumx_slicq_pretrained_path,
+                slicq_wiener=False,
             ),
     }
 
@@ -131,7 +143,8 @@ if __name__ == '__main__':
                 track,
                 loaded_models[model],
                 eval_dir=est_path,
-                is_xumx=(model == 'xumx')
+                is_xumx=(model == 'xumx'),
+                swap_drums_bass=('slicq' in model)
             )
 
             gc.collect()

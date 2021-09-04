@@ -386,6 +386,7 @@ This is the first estimate of the mix-phase inversion strategy, and doesn't assu
 The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT.
 
 \subsubsection{MPI oracle parameter search testbench}
+\label{sec:mpiparam}
 
 The splitting of a dataset into training, test, and validation sets was covered in section \ref{sec:ml}. To recap, the training set is used by the model to make predictions from the input and comparing its predicted output to the ground truth training output. The test set must be unseen during training, and the model's performance is tested on this set at the end of each training iteration (also called epoch) to show the generalization performance of the network. The validation set is also a set of data unseen in training, which can be used for the hyperparameter search.
 
@@ -539,6 +540,7 @@ One last note is that the data loader of Open-Unmix returns a single target at a
 \newpagefill
 
 \subsubsection{Replacing the STFT with the sliCQT}
+\label{sec:replacestft}
 
 Continuing from the previous statement, the data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. Also, the returned estimate of Open-Unmix is the estimated source waveform $\hat{y}$. However, during most of the steps between the loading of the time-domain waveforms and the return of the estimated time-domain waveform, the STFT is used to transform the audio into the time-frequency or spectral domain.
 

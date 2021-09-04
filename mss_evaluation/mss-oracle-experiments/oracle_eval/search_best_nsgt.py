@@ -250,6 +250,12 @@ if __name__ == '__main__':
         type=str,
         help='directory to store evaluations',
     )
+    parser.add_argument(
+        '--split',
+        type=str,
+        default='valid',
+        help='musdb data split'
+    )
 
     args = parser.parse_args()
     print(args)
@@ -260,9 +266,14 @@ if __name__ == '__main__':
 
     random.seed(args.random_seed)
 
+    mus = None
     # initiate musdb
-    #mus = musdb.DB(subsets='train', split='valid', is_wav=True)
-    mus = musdb.DB(subsets='test', is_wav=True)
+    if args.split == 'valid':
+        mus = musdb.DB(subsets='train', split='valid', is_wav=True)
+    elif args.split == 'test':
+        mus = musdb.DB(subsets='test', is_wav=True)
+    else:
+        raise ValueError(f'musdb18 data split {args.split} unsupported')
 
     max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
 

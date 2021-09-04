@@ -15,17 +15,23 @@
 
 \subsection{sliCQT parameters with MPI oracle}
 
+The random hyperparameter search was done to maximize the median SDR score of the MPI oracle across all 4 targets for 60 iterations. The search script is available here,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/slicq_explore.py}} and there is also some additional documentation related to the parameter search in the code repository.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/docs/slicq_params.md}} The background and parameter range decisions for the search was discussed in \ref{sec:mpiparam}. For demonstration purposes, the inverse SDR score ($-1.0*\text{SDR}$) was maximized in a second search, to find a ``bad'' sliCQT. Repeating the parameter search yields slightly different sliCQT configurations due to the randomness, which is controlled by a script parameter for the random seed.
+
+The sliCQT chosen by one run of the script that produced the best median SDR used 262 bins on the Bark scale between 32.9--22050 Hz, called the ``good sliCQT.'' This is the sliCQT used in the final neural network, xumx-sliCQ. The sliCQT params chosen by the inverse SDR maximization which produced the worst median SDR, or the ``bad sliCQT,'' used 142 bins on the Constant-Q or logarithmic scale between 129.7--22050 Hz. Figure \ref{fig:bipolarslicqs} shows the sliCQT magnitude spectrograms.
+
 \begin{figure}[ht]
 	\centering
 	\subfloat[Good sliCQT -- Bark, 262 bins, 32.9--22050 Hz]{\includegraphics[width=\textwidth]{./images-gspi/slicqt_good.png}}\\
 	\subfloat[Bad sliCQT -- Constant-Q/log, 142 bins, 129.7--22050 Hz]{\includegraphics[width=\textwidth]{./images-gspi/slicqt_bad.png}}
-	\caption{sliCQTs from the oracle MPI hyperparameter search}
+	\caption{sliCQTs from the MPI oracle hyperparameter search}
 	\label{fig:bipolarslicqs}
 \end{figure}
 
+Finally, the full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is around the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are dramatically worse for the bad sliCQT.
+
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.95\textwidth]{./images-bss/oracle_boxplot.pdf}
+	\includegraphics[width=\textwidth]{./images-bss/oracle_boxplot.pdf}
 	\caption{Boxplot for oracle mask evaluations}
 	\label{fig:oraclebssboxplot}
 \end{figure}
@@ -64,27 +70,89 @@ The BSSv4 scores for the demixing results, computed on the MUSDB18-HQ (\cite{mus
 	 \hline
 		\makecell[l]{CrossNet-Open-Unmix \\ \textcite{xumx}} & xumx & \url{https://github.com/sony/ai-research-code/tree/master/x-umx} & \url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5} (X-UMX) \\
 	 \hline
-		\makecell[l]{xumx-sliCQ \\ (this paper)} & sliCQ & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+		\makecell[l]{xumx-sliCQ \\ + sliCQT-Wiener-EM} & slicq-wslicq & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+	 \hline
+		\makecell[l]{xumx-sliCQ \\ + STFT-Wiener-EM} & slicq-wstft & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
 \end{tabular}
 	\caption{Evaluated pretrained models in the BSS boxplot}
 	\label{table:bsseval}
 \end{table}
 
+We discussed in section \ref{sec:replacestft} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener expectation maximization step that could be done with the sliCQT or the STFT. Both configurations were evaluated and shown in the boxplot to view the difference in music demixing quality.
+
+Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in listing \ref{lst:wienerem}, where 5 different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination,'' during my participation in the ISMIR 2021 Music Demixing Challenge.\footnote{\href{https://discourse.aicrowd.com/t/umx-iterative-wiener-expectation-maximization-for-non-stft-time-frequency-transforms/6191/3}\href{https://discourse.aicrowd.com/t/umx-iterative-wiener-expectation-maximization-for-non-stft-time-frequency-transforms/6191/6}} The evaluated configurations were:
+\begin{tight_enumerate}
+	\item
+		1 + 2 iterations of STFT-Wiener-EM
+	\item
+		1 + 2 iterations of ragged sliCQ-Wiener-EM
+	\item
+		1 iteration of zero-padded matrix sliCQ-Wiener-EM
+\end{tight_enumerate}
+
+\begin{listing}[h]
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
+1 iteration of STFT-Wiener-EM:
+    vocals          ==> SDR:   2.727  SIR:   7.992  ISR:   4.126  SAR:   2.082
+    drums           ==> SDR:   2.702  SIR:   1.920  ISR:   5.649  SAR:   1.765
+    bass            ==> SDR:   4.082  SIR:  10.806  ISR:   1.770  SAR:   2.128
+    other           ==> SDR:  -0.939  SIR:  -3.560  ISR:  11.802  SAR:   3.516
+
+    time: 3m41.839s
+
+1 iteration of ragged sliCQ-Wiener-EM:
+    vocals          ==> SDR:   2.754  SIR:   7.907  ISR:   4.166  SAR:   2.034
+    drums           ==> SDR:   2.885  SIR:   1.511  ISR:   5.872  SAR:   1.649
+    bass            ==> SDR:   4.134  SIR:  11.515  ISR:   1.349  SAR:   2.020
+    other           ==> SDR:  -0.891  SIR:  -3.382  ISR:  12.241  SAR:   3.458
+
+    time: 7m59.104s
+
+1 iteration of zero-padded matrix sliCQ-Wiener-EM:
+    vocals          ==> SDR:   2.753  SIR:   7.953  ISR:   4.158  SAR:   2.024
+    drums           ==> SDR:   2.864  SIR:   1.677  ISR:   5.835  SAR:   1.657
+    bass            ==> SDR:   4.140  SIR:  11.599  ISR:   1.350  SAR:   2.016
+    other           ==> SDR:  -0.893  SIR:  -3.391  ISR:  12.189  SAR:   3.448
+
+    time: 4m28.061s
+
+2 iterations of STFT-Wiener-EM:
+    vocals          ==> SDR:   2.368  SIR:   8.594  ISR:   4.081  SAR:   1.094
+    drums           ==> SDR:   2.669  SIR:   2.600  ISR:   6.071  SAR:   1.466
+    bass            ==> SDR:   3.892  SIR:  11.786  ISR:   1.576  SAR:   1.796
+    other           ==> SDR:  -1.620  SIR:  -3.501  ISR:  12.949  SAR:   2.977
+
+    time: 4m5.906s
+
+2 iterations of ragged sliCQ-Wiener-EM:
+    vocals          ==> SDR:   2.481  SIR:   8.152  ISR:   4.101  SAR:   1.173
+    drums           ==> SDR:   2.832  SIR:   1.770  ISR:   6.270  SAR:   1.372
+    bass            ==> SDR:   3.957  SIR:  12.244  ISR:   1.516  SAR:   1.809
+    other           ==> SDR:  -1.505  SIR:  -3.357  ISR:  13.263  SAR:   3.029
+
+    time: 12m55.510s
+\end{minted}
+  \caption{BSS results of various configurations of Wiener-EM post-processing}
+  \label{lst:wienerem}
+\end{listing}
+
+To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged list of matrices, with a slight difference in BSS metrics from the ragged form. The zero-padded sliCQ-Wiener-EM is the chosen implementation in the final model, with an option to also use the STFT-Wiener-EM. Both types of Wiener-EM with the sliCQ beat the STFT. Also, in both cases, 2 iterations were considerably worse than 1 iteration. The computation time of the inference step will be discussed in more detail in the next section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQ Wiener-EM.
+
+To maximize result reproducibility, even though table \ref{table:bsseval} describes how to download the pretrained models of UMX, X-UMX, and xumx-sliCQ from their respective hosted locations, all the pretrained models and code were copied in a separate public repository to generate the results above.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
+
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images-bss/boxplot_full.pdf}
-	\caption{Boxplot of Open-Unmix vs. CrossNet-Open-Unmix vs. xumx-sliCQ}
+	\caption{Boxplot of UMX, X-UMX, and xumx-sliCQ alongside the oracles}
 	\label{fig:bssboxplot}
 \end{figure}
 
 \newpagefill
 
-\subsubsection{Wiener-EM with the STFT and sliCQT}
-
-\newpagefill
-
-\subsection{Inference performance analysis}
+\subsection{Model size and inference performance}
+\label{sec:inferenceperf}
 
 \chaptertodo{
 	use ISMIR 2021 Music Demixing Challenge timeout rules

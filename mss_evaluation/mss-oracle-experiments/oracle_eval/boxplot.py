@@ -17,7 +17,7 @@ import itertools
 controls = []
 
 
-def save_boxplot(pandas_in, pdf_out, single=False):
+def save_boxplot(pandas_in, pdf_out, single=False, colors_legend=None):
     metrics = ['SDR', 'SIR', 'SAR', 'ISR']
     targets = ['vocals', 'drums', 'bass', 'other']
 
@@ -134,21 +134,40 @@ def save_boxplot(pandas_in, pdf_out, single=False):
             notch=True
         ))
 
-        # Select which box you want to change    
-        #for (row_val, col_val), ax in g.axes_dict.items():
-            #ax.artists[0].set_facecolor('magenta')
-            #ax.artists[1].set_facecolor('magenta')
-            #ax.artists[2].set_facecolor('gold')
-            #ax.artists[3].set_facecolor('orangered')
-            #ax.artists[4].set_facecolor('cyan')
-            #ax.artists[8].set_facecolor('cyan')
+        if colors_legend is not None:
+            if colors_legend == 'control':
+                for (row_val, col_val), ax in g.axes_dict.items():
+                    ax.artists[0].set_facecolor('magenta')
+                    ax.artists[1].set_facecolor('magenta')
+                    ax.artists[2].set_facecolor('orangered')
+                    ax.artists[3].set_facecolor('orangered')
+                    ax.artists[4].set_facecolor('cyan')
+                    ax.artists[8].set_facecolor('cyan')
 
-        name_to_color = {
-            'xumx-sliCQ':   'gold',
-        }
+                name_to_color = {
+                    'good-slicq': 'magenta',
+                    'bad-slicq': 'orangered',
+                    'control-stft': 'cyan',
+                }
 
-        patches = [matplotlib.patches.Patch(color=v, label=k) for k,v in name_to_color.items()]
-        matplotlib.pyplot.legend(handles=patches, loc='center', bbox_to_anchor=(-1.5, -0.25), ncol=3)
+                patches = [matplotlib.patches.Patch(color=v, label=k) for k,v in name_to_color.items()]
+                matplotlib.pyplot.legend(handles=patches, loc='center', bbox_to_anchor=(-1.5, -0.25), ncol=3)
+            elif colors_legend == 'pretrained':
+                for (row_val, col_val), ax in g.axes_dict.items():
+                    #ax.artists[0].set_facecolor('magenta')
+                    #ax.artists[1].set_facecolor('magenta')
+                    #ax.artists[2].set_facecolor('cyan')
+                    #ax.artists[3].set_facecolor('cyan')
+                    ax.artists[6].set_facecolor('gold')
+                    ax.artists[7].set_facecolor('darkviolet')
+
+                name_to_color = {
+                    'slicq-wslicq': 'gold',
+                    'slicq-wstft': 'darkviolet',
+                }
+
+                patches = [matplotlib.patches.Patch(color=v, label=k) for k,v in name_to_color.items()]
+                matplotlib.pyplot.legend(handles=patches, loc='center', bbox_to_anchor=(-1.5, -0.25), ncol=3)
 
         plt.setp(g.fig.texts, text="")
         g.set_titles(col_template="{col_name}", row_template="{row_name}")
@@ -181,6 +200,11 @@ if __name__ == '__main__':
         action='store_true',
         help='single boxplot per page'
     )
+    parser.add_argument(
+        '--colors-legend',
+        type=str,
+        help='color legend (control vs. full eval)',
+    )
 
     args = parser.parse_args()
-    save_boxplot(args.pandas_in, args.pdf_out, args.single)
+    save_boxplot(args.pandas_in, args.pdf_out, args.single, colors_legend=args.colors_legend)
