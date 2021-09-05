@@ -650,9 +650,7 @@ this is python
 \end{BVerbatim}
 \end{listing}
 
-The Python interpreter is widely distributed on most modern operating systems like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts (\cite{pythonscience}).
-
-Some important concepts from the Python language will appear in this thesis and will be described further in this section -- lists, generators, decorators, and random number generator seeding.
+The Python interpreter is widely distributed on most modern operating systems (OS) like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts (\cite{pythonscience}). Important concepts from the Python language that appear repeatedly in this thesis will be described in this section.
 
 The first is the list,\footnote{\url{https://docs.python.org/3/tutorial/datastructures.html\#more-on-lists}} which is a core datastructure of the language. The list in Python corresponds to the array data structure in computer science (\cite{skiena}). It allows for the construction of an ordered list of objects. For example, a discrete-time speech signal may be described by a list of its amplitude values, where the position in the list is the time sample $n$:
 
@@ -708,7 +706,7 @@ after
 
 Decorators are often used to simplify tasks like measuring a function's execution time, or CPU and memory footprint, which is intended to observe or measure but not modify the original function.\footnote{\url{https://pypi.org/project/line-profiler/, https://pypi.org/project/memory-profiler/}}
 
-The \Verb#random# module of Python contains a random number generator (RNG).\footnote{\url{https://docs.python.org/3/library/random.html}} The \Verb#seed# function initializes the random number generator. \footnote{\url{https://docs.python.org/3/library/random.html\#bookkeeping-functions}} This is because the RNG in Python is pseudorandom (\cite{pseudorng}), which means that given the same starting seed, the exact same sequence of numbers are generated deterministically. The random seed is usually a parameter to a script or Python program, such that the user can recreate the same RNG sequences for testing purposes by passing the same seed.
+The \Verb#random# module of Python contains a random number generator (RNG).\footnote{\url{https://docs.python.org/3/library/random.html}} The \Verb#seed# function initializes the random number generator,\footnote{\url{https://docs.python.org/3/library/random.html\#bookkeeping-functions}} which is in fact pseudorandom (\cite{pseudorng}). Pseudorandom means that given the same starting seed, the exact same sequence of numbers are generated deterministically. The seed is usually a parameter to a script or Python program, such that the user can recreate the same RNG sequences for testing purposes by using the same seed.
 
 \subsubsection{Numerical and machine learning libraries for Python}
 
@@ -728,9 +726,49 @@ float64
 \end{BVerbatim}
 \end{listing}
 
-The underlying values are stored in formats that allow for efficient numerical computations, which is why using NumPy ndarrays for math is preferred to using regular Python datastructures such as lists that are not designed for speed.
+The underlying values are stored in formats that allow for efficient numerical computations, which is why using NumPy ndarrays for numerical computation is preferred to using regular Python datastructures such as lists that are not designed for speed (\cite{ndarrayfast}).
 
-In PyTorch and Tensorflow (and in general machine learning), a similar concept to the ndarray is the tensor. The tensor originates from the field of physics (\cite{whatistensor}). The tensor is essentially the same as an ndarray, or n-dimensional array, and in fact, NumPy ndarrays and PyTorch and Tensorflow tensors are interchangeable.\footnote{\url{https://www.tensorflow.org/guide/tf_numpy}, \url{https://pytorch.org/tutorials/beginner/blitz/tensor_tutorial.html}}
+In PyTorch and Tensorflow (and in general machine learning), a similar concept to the ndarray is the tensor. The tensor originates from the field of physics (\cite{whatistensor}). The tensor is also an n-dimensional numerical array, and NumPy ndarrays are interchangeable with both PyTorch and Tensorflow tensors.\footnote{\url{https://www.tensorflow.org/guide/tf_numpy}, \url{https://pytorch.org/tutorials/beginner/blitz/tensor_tutorial.html}}
+
+Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example \Verb#torch.cos(x)# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning code supported by these libraries are represented as tensors.
+
+\subsubsection{Package managers for Python}
+
+To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates a clean, isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages installed from pip are published by the authors and maintainers on the public Python Package Index (PyPi).\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in listing \ref{lst:reqtxt}.
+
+\begin{listing}[ht]
+\centering
+\begin{BVerbatim}
+mir_eval==0.6
+tabulate==0.8.7
+numpy==1.19.4
+\end{BVerbatim}
+	\caption{Example pip requirements.txt file}
+	\label{lst:reqtxt}
+\end{listing}
+
+There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish their packages so that users can install them, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in listing \ref{lst:condayml}. Conda files can also support the pip syntax, since pip is a native Python tool. The user can combine the best of both worlds by using Conda and pip syntax simultaneously in their Conda environment file.
+
+\begin{listing}[ht]
+\centering
+\begin{BVerbatim}
+name: test-conda-env
+
+channels:
+  - default
+
+dependencies:
+  - python=3.9
+  - cudatoolkit=11
+  - pip
+  - pip:
+    - norbert>=0.2.0
+\end{BVerbatim}
+	\caption{Example Conda environment.yml file}
+	\label{lst:condayml}
+\end{listing}
+
+Pip is installed by default with Python, making it the simpler choice, while Conda is more powerful but needs to be installed separately in the user's OS. In different parts of the code accompanying this thesis, both pip and Conda files are used, and they will be shown to help the readers replicate the needed Python environments.
 
 \subsubsection{Version control and git}
 
