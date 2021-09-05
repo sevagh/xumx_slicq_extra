@@ -1,0 +1,54 @@
+$ ./examples/run_bench.sh
+matrixform
+torch 2070 super
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [04:21<00:00,  2.62s/it]
+total time: 2.62s
+torch cpu
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [05:10<00:00,  3.10s/it]
+total time: 3.10s
+torch 3080 ti
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [04:00<00:00,  2.40s/it]
+total time: 2.40s
+old nonmultithread
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [15:49<00:00,  9.50s/it]
+total time: 9.50s
+old multithread
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|██████████████████████████████████████████████████████████████████████████████████████| 100/100 [1:40:56<00:00, 60.56s/it]
+total time: 60.56s
+ragged
+torch 2070 super
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [04:12<00:00,  2.52s/it]
+total time: 2.52s
+torch cpu
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [03:05<00:00,  1.85s/it]
+total time: 1.85s
+torch 3080 ti
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [03:58<00:00,  2.38s/it]
+total time: 2.38s
+old nonmultithread
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+100%|████████████████████████████████████████████████████████████████████████████████████████| 100/100 [14:32<00:00,  8.73s/it]
+total time: 8.72s
+old multithread
+/home/sevagh/repos/nsgt/examples/nsgt_orig/fft.py:116: UserWarning: nsgt.fft falling back to numpy.fft
+  warn("nsgt.fft falling back to numpy.fft")
+ 70%|████████████████████████████████████████████████████████████▉                          | 70/100 [1:00:19<25:34, 51.15s/it]
+100%|██████████████████████████████████████████████████████████████████████████████████████| 100/100 [1:26:35<00:00, 51.95s/it]
+total time: 51.95s

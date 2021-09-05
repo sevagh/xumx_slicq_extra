@@ -169,7 +169,7 @@ The starting point of porting the library to the GPU was to simply replace all N
 
 \begin{listing}[ht]
   \centering
-\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{text}{./diffs/diff1.txt}
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{diff}{./diffs/diff1.txt}
 \end{inputminted}
   \caption{Simple examples of porting from numpy to torch}
   \label{code:firstdiff}
@@ -179,7 +179,7 @@ Next, the list and generator for the forward operation of the transform, which i
 
 \begin{listing}[ht]
   \centering
-\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{text}{./diffs/diff2.txt}
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{diff}{./diffs/diff2.txt}
 \end{inputminted}
   \caption{Excerpt of the conversion of lists, for loops, and generators of the forward NSGT to torch tensors and parallel matrix operations}
   \label{code:seconddiff}
@@ -456,7 +456,7 @@ Similar to the NSGT/sliCQT library, the modifications made to the museval librar
 
 \begin{listing}[ht]
   \centering
-\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{text}{./diffs/diff3.txt}
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{diff}{./diffs/diff3.txt}
 \end{inputminted}
   \caption{Example of porting SciPy to CuPy with an out-of-memory fallback}
   \label{code:thirddiff}

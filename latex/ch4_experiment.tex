@@ -71,7 +71,7 @@ The author of this thesis takes code availability and reproducibility seriously.
 
 \subsubsection{Faster BSS metrics with CuPy}
 
-The first testbench is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the forked copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. The benchmark script can be viewed here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}} For the 14 validation tracks of MUSDB18-HQ, it creates a random estimate (using \Verb#numpy.randn# to create an audio signal), and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA RTX 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
+The first benchmark script is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the forked copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. The benchmark script can be viewed here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}} For the 14 validation tracks of MUSDB18-HQ, it creates a random estimate (using \Verb#numpy.randn# to create an audio signal), and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA RTX 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
 
 The results were that the regular BSS metrics evaluation on the CPU took 1485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec (\cite{sisec2016}, \cite{sisec2018}). Also, note the passing regression test in listing \ref{lst:regressionout}, showing that the library is working correctly with the speedup.
 
@@ -103,6 +103,56 @@ tests/test_regression.py::test_one_estimate[Music Delta - 80s Rock] PASSED
 \newpagefill
 
 \subsubsection{Faster NSGT/sliCQT with PyTorch}
+
+The second benchmark script is for the PyTorch implementation of the NSGT/sliCQT library from section \ref{sec:torchslicq}. The forked copy of the library contains the PyTorch implementation,\footnote{\url{https://github.com/sevagh/nsgt}} and the benchmark scripts were added in the same repository.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/benchmark.py, https://github.com/sevagh/nsgt/blob/main/examples/run_bench.sh}} The benchmark does the forward and backward sliCQT using the Bark scale with 50 bins between 20--22050 Hz. The sliCQT is taken on a 3:54 minute mixed song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the smallest memory device being benchmarked, the NVIDIA 2070 Super. The computation time was measured and averaged across 100 iterations. The cost of the memory transfer of the song to the GPU was not included in the measurement. Tables \ref{table:nsgttorchresultsmatrix} and \ref{table:nsgttorchresultsragged} show the benchmark results for the matrix and ragged sliCQT respectively.
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{ |l|l|l|l| }
+	 \hline
+		NSGT library & Device & Time (s) \\
+	 \hline
+	 \hline
+		Original & CPU, multithreaded & 60.56  \\
+	 \hline
+		Original & CPU, single-threaded & 9.50  \\
+	 \hline
+		PyTorch & CPU & 3.10  \\
+	 \hline
+		PyTorch & GPU (2070 Super) & 2.62 \\
+	 \hline
+		PyTorch & GPU (3080 Ti) &  2.40 \\
+	 \hline
+\end{tabular}
+	\caption{Execution times for the matrix form of the forward + backward sliCQT}
+	\label{table:nsgttorchresultsmatrix}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{ |l|l|l|l| }
+	 \hline
+		NSGT library & Device & Time (s) \\
+	 \hline
+	 \hline
+		Original & CPU, multithreaded & 51.95  \\
+	 \hline
+		Original & CPU, single-threaded & 8.72  \\
+	 \hline
+		PyTorch & GPU (2070 Super) & 2.52 \\
+	 \hline
+		PyTorch & GPU (3080 Ti) &  2.38 \\
+	 \hline
+		PyTorch & CPU & 1.85  \\
+	 \hline
+\end{tabular}
+	\caption{Execution times for the ragged form of the forward + backward sliCQT}
+	\label{table:nsgttorchresultsragged}
+\end{table}
+
+The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the design of the ragged transform, which is a list of tensors which each contains a bucket of frequency bins with the same time-frequency resolution, requires looping over lists which negates some of the benefits of GPU parallelism.
+
+Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a neural network with the deep learning features of PyTorch.
 
 \newpagefill
 
@@ -156,7 +206,7 @@ The BSSv4 scores for the demixing results, computed on the test set of the MUSDB
 	\centering
 	\begin{tabular}{ |l|l|p{4cm}|p{4cm}| }
 	 \hline
-	  Project & Boxplot label & Code repository & Pretrained model \\
+	  Project & Legend & Code repository & Pretrained model \\
 	 \hline
 	 \hline
 		\makecell[l]{Open-Unmix \\ \textcite{umx}} & umx & \url{https://github.com/sigsep/open-unmix-pytorch} & \url{https://zenodo.org/record/3370489} (UMX-HQ) \\
