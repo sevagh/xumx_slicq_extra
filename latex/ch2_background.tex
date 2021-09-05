@@ -747,7 +747,7 @@ numpy==1.19.4
 	\label{lst:reqtxt}
 \end{listing}
 
-There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish their packages so that users can install them, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in listing \ref{lst:condayml}. Conda files can also support the pip syntax, since pip is a native Python tool. The user can combine the best of both worlds by using Conda and pip syntax simultaneously in their Conda environment file.
+There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish and distribute their packages to users, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in listing \ref{lst:condayml}. Conda files can also support the pip syntax, since pip is a native Python tool. The user can combine the best of both worlds by using Conda and pip syntax simultaneously in their Conda environment file.
 
 \begin{listing}[ht]
 \centering
@@ -770,7 +770,9 @@ dependencies:
 
 Pip is installed by default with Python, making it the simpler choice, while Conda is more powerful but needs to be installed separately in the user's OS. In different parts of the code accompanying this thesis, both pip and Conda files are used, and they will be shown to help the readers replicate the needed Python environments.
 
-\subsubsection{Version control and git}
+\subsubsection{Version control systems and git}
+
+Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database (\cite{gitbook}). \textcite{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you screw things up or lose files, you can easily recover.''
 
 \subsubsection{Open-source software and GitHub}
 

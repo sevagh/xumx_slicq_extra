@@ -67,7 +67,7 @@ The author of this thesis takes code availability and reproducibility seriously.
 		Personal e-mail: sevagh+thesis@pm.me
 \end{tight_enumerate}
 
-\subsection{Performance benchmarks for GPU accelerations}
+\subsection{Benchmarks for GPU accelerations}
 
 \subsubsection{Faster BSS metrics with CuPy}
 
@@ -150,13 +150,11 @@ The second benchmark script is for the PyTorch implementation of the NSGT/sliCQT
 	\label{table:nsgttorchresultsragged}
 \end{table}
 
-The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the design of the ragged transform, which is a list of tensors which each contains a bucket of frequency bins with the same time-frequency resolution, requires looping over lists which negates some of the benefits of GPU parallelism.
-
-Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a neural network with the deep learning features of PyTorch.
+The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the ragged transform is a list of tensors. To perform operations on the ragged transform requires looping over the list which negates some of the benefits of GPU parallelism. Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance leapfrogs both.
 
 \newpagefill
 
-\subsection{sliCQT parameters with MPI oracle}
+\subsection{Best sliCQT parameters with MPI oracle}
 
 The random hyperparameter search was done to maximize the median SDR score of the MPI oracle across all 4 targets for 60 iterations. The search script is available here,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/slicq_explore.py}} and there is also some additional documentation related to the parameter search in the code repository.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/docs/slicq_params.md}} The background and parameter range decisions for the search was discussed in \ref{sec:mpiparam}. For demonstration purposes, the inverse SDR score ($-1.0*\text{SDR}$) was maximized in a second search, to find a ``bad'' sliCQT. Repeating the parameter search yields slightly different sliCQT configurations due to the randomness, which is controlled by a script parameter for the random seed.
 
@@ -181,7 +179,9 @@ Finally, the full oracle evaluation on both of these sliCQT parameters are shown
 
 \newpagefill
 
-\subsection{Neural network architecture and training}
+\subsection{xumx-sliCQ neural network}
+
+\subsubsection{Network architecture and training}
 
 The training parameters of xumx-sliCQ were kept similar to Open-Unmix and CrossNet-Open-Unmix:
 
@@ -198,7 +198,7 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 
 \newpagefill
 
-\subsection{Demixing results}
+\subsubsection{Music demixing results}
 
 The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label.
 
@@ -283,7 +283,7 @@ Note that the default number of iterations for the Wiener-EM step is one, in UMX
 
 To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged list of matrices, with a slight difference in BSS metrics from the ragged form. The zero-padded sliCQ-Wiener-EM is the chosen implementation in the final model, with an option to also use the STFT-Wiener-EM. Both types of Wiener-EM with the sliCQ beat the STFT. Also, in both cases, 2 iterations were considerably worse than 1 iteration. The computation time of the inference step will be discussed in more detail in the next section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQ Wiener-EM.
 
-To maximize result reproducibility, even though table \ref{table:bsseval} describes how to download the pretrained models of UMX, X-UMX, and xumx-sliCQ from their respective hosted locations, all the pretrained models and code were copied in a separate public repository to generate the results above.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
+To maximize result reproducibility, even though table \ref{table:bsseval} describes how to download the pretrained models of UMX, X-UMX, and xumx-sliCQ from their respective hosted locations, all the pretrained models and code were mirrored in a separate public repository to generate the results above.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 
 \begin{figure}[ht]
 	\centering
@@ -294,7 +294,7 @@ To maximize result reproducibility, even though table \ref{table:bsseval} descri
 
 \newpagefill
 
-\subsection{Neural network size and inference performance}
+\subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
 
 \end{document}

@@ -7,6 +7,7 @@ import torch
 import museval
 import numpy as np
 import random
+import time
 from warnings import warn
 
 from openunmix.utils import load_separator as umx_separator
@@ -20,6 +21,8 @@ xumx_slicq_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file
 
 
 def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass=False):
+    start = time.time()
+
     N = track.audio.shape[0]
 
     if not is_xumx:
@@ -68,6 +71,8 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass
 
         estimates['accompaniment'] = estimates['drums'] + estimates['bass'] + estimates['other']
 
+    end = time.time()
+
     gc.collect()
 
     print(f'bss evaluation to store in {eval_dir}')
@@ -79,7 +84,7 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass
 
     print(bss_scores)
 
-    return estimates, bss_scores
+    return estimates, bss_scores, end-start
 
 
 if __name__ == '__main__':
@@ -133,21 +138,30 @@ if __name__ == '__main__':
             ),
     }
 
-    for track in tqdm.tqdm(mus.tracks[args.track_offset:]):
-        for model in (['xumx', 'umx', 'slicq'] if not args.model else [args.model]):
-            print(f'evaluating track {track.name} with model {model}')
-            est_path = os.path.join(args.eval_dir, f'{model}') if args.eval_dir else None
-            aud_path = os.path.join(args.audio_dir, f'{model}') if args.audio_dir else None
+    tot = 0.
+    pbar = tqdm.tqdm(mus.tracks[args.track_offset:])
+    tot_tracks = len(pbar)
 
-            est, _ = pretrained_model(
-                track,
-                loaded_models[model],
-                eval_dir=est_path,
-                is_xumx=(model == 'xumx'),
-                swap_drums_bass=('slicq' in model)
-            )
+    for track in pbar:
+        print(f'evaluating track {track.name} with model {args.model}')
+        est_path = os.path.join(args.eval_dir, f'{args.model}') if args.eval_dir else None
+        aud_path = os.path.join(args.audio_dir, f'{args.model}') if args.audio_dir else None
 
-            gc.collect()
+        est, _, time_taken = pretrained_model(
+            track,
+            loaded_models[args.model],
+            eval_dir=est_path,
+            is_xumx=(args.model == 'xumx'),
+            swap_drums_bass=('slicq' in args.model)
+        )
+        print(f'time {time_taken} s for song {track.name}')
 
-            if args.audio_dir:
-                mus.save_estimates(est, track, aud_path)
+        tot += time_taken
+
+        gc.collect()
+
+        if args.audio_dir:
+            mus.save_estimates(est, track, aud_path)
+
+    print(f'total time for 50 track evaluation: {tot}')
+    print(f'time averaged per track: {tot/tot_tracks}')
