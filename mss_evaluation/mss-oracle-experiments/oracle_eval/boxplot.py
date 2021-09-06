@@ -17,7 +17,7 @@ import itertools
 controls = []
 
 
-def save_boxplot(pandas_in, pdf_out, single=False, colors_legend=None):
+def save_boxplot(pandas_in, pdf_out, single=False, colors_legend=None, print_median_only=False):
     metrics = ['SDR', 'SIR', 'SAR', 'ISR']
     targets = ['vocals', 'drums', 'bass', 'other']
 
@@ -38,9 +38,17 @@ def save_boxplot(pandas_in, pdf_out, single=False, colors_legend=None):
     pandas.set_option('display.max_columns', None)  
     pandas.set_option('display.max_rows', None)  
 
-    print(df[(df.metric == "SDR")].groupby(
-        ['method', 'target', 'metric']
-    ).median('time'))
+    #print(df[(df.metric == "SDR")].groupby(
+    #    ['method', 'target', 'metric']
+    #).median('time'))
+
+    print('median sdr:\n{0}'.format(
+            df[(df.metric == "SDR") & (df.target != 'accompaniment')].groupby(
+            ['method']
+            ).median('time')))
+
+    if print_median_only:
+        sys.exit(0)
 
     # Get sorting keys (sorted by median of SDR:vocals)
     df_sort_by = df[
@@ -201,10 +209,15 @@ if __name__ == '__main__':
         help='single boxplot per page'
     )
     parser.add_argument(
+        '--print-median-only',
+        action='store_true',
+        help='only print the median sdr'
+    )
+    parser.add_argument(
         '--colors-legend',
         type=str,
         help='color legend (control vs. full eval)',
     )
 
     args = parser.parse_args()
-    save_boxplot(args.pandas_in, args.pdf_out, args.single, colors_legend=args.colors_legend)
+    save_boxplot(args.pandas_in, args.pdf_out, args.single, colors_legend=args.colors_legend, print_median_only=args.print_median_only)

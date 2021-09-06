@@ -8,10 +8,6 @@ from functools import partial
 import numpy as np
 import random
 import argparse
-from bayes_opt import BayesianOptimization, SequentialDomainReductionTransformer
-from bayes_opt.util import load_logs
-from bayes_opt.logger import JSONLogger
-from bayes_opt.event import Events
 
 from shared import TFTransform 
 from oracle import ideal_mask_fbin, ideal_mask, ideal_mixphase, slicq_svd, ideal_mask_mixphase_per_coef
@@ -173,40 +169,10 @@ if __name__ == '__main__':
         help='comma-separated scale, bins, fmin, optionally gamma'
     )
     parser.add_argument(
-        '--bins',
-        type=str,
-        default='10,2000',
-        help='comma-separated range of bins to evaluate'
-    )
-    parser.add_argument(
-        '--fmins',
-        type=str,
-        default='10,130',
-        help='comma-separated range of fmin to evaluate'
-    )
-    #parser.add_argument(
-    #    '--fmaxes',
-    #    type=str,
-    #    default='14000,22050',
-    #    help='comma-separated range of fmax to evaluate'
-    #)
-    parser.add_argument(
-        '--gammas',
-        type=str,
-        default='0,100',
-        help='comma-separated range of gamma to evaluate'
-    )
-    parser.add_argument(
         '--oracle',
         type=str,
         default='irm1',
         help='type of oracle to compute (choices: irm1, irm2, ibm1, ibm2, mpi)'
-    )
-    parser.add_argument(
-        '--fscale',
-        type=str,
-        default='vqlog',
-        help='nsgt frequency scale (choices: vqlog, cqlog, mel, bark)'
     )
     parser.add_argument(
         '--n-random-tracks',
@@ -221,22 +187,10 @@ if __name__ == '__main__':
         help='rng seed to pick the same random 5 songs'
     )
     parser.add_argument(
-        '--optimization-iter',
-        type=int,
-        default=2,
-        help='bayesian optimization iterations',
-    )
-    parser.add_argument(
         '--cuda-device',
         type=int,
         default=0,
         help='which cuda device to run cupy bss eval on',
-    )
-    parser.add_argument(
-        '--optimization-random',
-        type=int,
-        default=1,
-        help='bayesian optimization random iterations',
     )
     parser.add_argument(
         '--logdir',
@@ -287,25 +241,6 @@ if __name__ == '__main__':
 
     t = TrackEvaluator(tracks, oracle=args.oracle)
 
-    bins = tuple([int(x) for x in args.bins.split(',')])
-    fmins = tuple([float(x) for x in args.fmins.split(',')])
-    #fmaxes = tuple([float(x) for x in args.fmaxes.split(',')])
-    gammas = tuple([float(x) for x in args.gammas.split(',')])
-    print(f'Parameter ranges to evaluate:\n\tbins: {bins}\n\tfmins: {fmins}\n\tgammas: {gammas}')
-
-    pbounds_vqlog = {
-        'bins': bins,
-        'fmin': fmins,
-        #'fmax': fmaxes,
-        'gamma': gammas,
-    }
-
-    pbounds_other = {
-        'bins': bins,
-        'fmin': fmins,
-        #'fmax': fmaxes,
-    }
-
     print('oracle: {0}'.format(args.oracle))
 
     if args.control:
@@ -337,14 +272,5 @@ if __name__ == '__main__':
         ))
         sys.exit(0)
 
-
-    if args.fscale == 'vqlog':
-        optimize(t.eval_vqlog, pbounds_vqlog, "vqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir, randstate=args.random_seed)
-    elif args.fscale == 'cqlog':
-        optimize(t.eval_cqlog, pbounds_other, "cqlog", args.optimization_iter, args.optimization_random, logdir=args.logdir, randstate=args.random_seed)
-    elif args.fscale == 'mel':
-        optimize(t.eval_mel, pbounds_other, "mel", args.optimization_iter, args.optimization_random, logdir=args.logdir, randstate=args.random_seed)
-    elif args.fscale == 'bark':
-        optimize(t.eval_bark, pbounds_other, "bark", args.optimization_iter, args.optimization_random, logdir=args.logdir, randstate=args.random_seed)
-    else:
-        raise ValueError(f'unsupported frequency scale {args.fscale}')
+    if not args.control or args.fixed_slicqt:
+        print('specify one of --control or --fixed-slicqt')

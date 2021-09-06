@@ -168,7 +168,7 @@ The sliCQT chosen by one run of the script that produced the best median SDR use
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-Finally, the full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are dramatically worse for the bad sliCQT.
+Finally, the full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
 
 \begin{figure}[ht]
 	\centering
@@ -199,23 +199,24 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 \newpagefill
 
 \subsubsection{Music demixing results}
+\label{sec:demixresults}
 
-The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label.
+The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets.
 
 \begin{table}[ht]
 	\centering
-	\begin{tabular}{ |l|l|p{4cm}|p{4cm}| }
+	\begin{tabular}{ |p{2.5cm}|l|l|p{3.5cm}|p{3.5cm}| }
 	 \hline
-	  Project & Legend & Code repository & Pretrained model \\
+		Project & Legend & SDR & Code repository & Pretrained model \\
 	 \hline
 	 \hline
-		\makecell[l]{Open-Unmix \\ \textcite{umx}} & umx & \url{https://github.com/sigsep/open-unmix-pytorch} & \url{https://zenodo.org/record/3370489} (UMX-HQ) \\
+		CrossNet-Open-Unmix & xumx & 5.54 & \url{https://github.com/sony/ai-research-code/tree/master/x-umx} & \url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5} \\
 	 \hline
-		\makecell[l]{CrossNet-Open-Unmix \\ \textcite{xumx}} & xumx & \url{https://github.com/sony/ai-research-code/tree/master/x-umx} & \url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5} (X-UMX) \\
+		Open-Unmix & umx & 4.64 & \url{https://github.com/sigsep/open-unmix-pytorch} & \url{https://zenodo.org/record/3370489} \\
 	 \hline
-		\makecell[l]{xumx-sliCQ \\ + sliCQT-Wiener-EM} & slicq-wslicq & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+		\makecell[l]{xumx-sliCQ \\ sliCQT-WEM} & slicq-wslicq & 3.71 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
-		\makecell[l]{xumx-sliCQ \\ + STFT-Wiener-EM} & slicq-wstft & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+		\makecell[l]{xumx-sliCQ \\ STFT-WEM} & slicq-wstft & 3.60 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
 \end{tabular}
 	\caption{Evaluated pretrained models in the BSS boxplot}
@@ -283,7 +284,7 @@ Note that the default number of iterations for the Wiener-EM step is one, in UMX
 
 To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged list of matrices, with a slight difference in BSS metrics from the ragged form. The zero-padded sliCQ-Wiener-EM is the chosen implementation in the final model, with an option to also use the STFT-Wiener-EM. Both types of Wiener-EM with the sliCQ beat the STFT. Also, in both cases, 2 iterations were considerably worse than 1 iteration. The computation time of the inference step will be discussed in more detail in the next section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQ Wiener-EM.
 
-To maximize result reproducibility, even though table \ref{table:bsseval} describes how to download the pretrained models of UMX, X-UMX, and xumx-sliCQ from their respective hosted locations, all the pretrained models and code were mirrored in a separate public repository to generate the results above.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
+To maximize result reproducibility, all the pretrained models and code were downloaded from the public hosted locations shown in table \ref{table:bsseval} and stored in a separate public repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 
 \begin{figure}[ht]
 	\centering
@@ -296,5 +297,35 @@ To maximize result reproducibility, even though table \ref{table:bsseval} descri
 
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
+
+The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} was one of the 3 compared neural networks as shown in table \ref{table:bsseval} in section \ref{sec:demixresults}. The weights are for a PyTorch model, and it was only trained on MUSDB18-HQ. The size on disk of the model weights for the 4 targets combined is 137 MB.
+
+The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} is for the NNabla (\cite{nnabla}) deep learning framework. The file containing trained weights for the combined 4 targets is 136 MB, almost the same as the size of the UMX PyTorch weights.
+
+The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model}} is 28 MB, making xumx-sliCQ the smallest network from the comparison.
+
+To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs (\cite{deepcpuinf, deepcpuinf2}). The time to perform the separation of a mixed song into 4 stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. The music demixing result generation script from the previous section \ref{sec:demixresults} was simply adapted to add timing measurements. Note that X-UMX was omitted from the comparison, since it runs on NNabla, a different deep learning framework than PyTorch.
+
+Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the sliCQT-Wiener-EM and STFT-Wiener-EM post-processing steps were measured.
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{ |l|l|l| }
+	 \hline
+		Model & Device & Time (s) \\
+	 \hline
+	 \hline
+		UMX & CPU & 27.26  \\
+	 \hline
+		xumx-sliCQ, STFT-WEM & CPU & 55.59  \\
+	 \hline
+		xumx-sliCQ, sliCQT-WEM & CPU & 104.54  \\
+	 \hline
+\end{tabular}
+	\caption{Execution times for the inference of the models}
+	\label{table:infperf}
+\end{table}
+
+xumx-sliCQ is slower in its inference performance than UMX. Overall, xumx-sliCQ is smaller on disk, which is an advantage over UMX, but it executes \textasciitilde2x slower than UMX with the STFT-Wiener-EM step while producing lower BSS metrics in the music demixing task. xumx-sliCQ with the sliCQT-Wiener-EM step is slower still, at almost \textasciitilde4x slower than UMX and \textasciitilde2x slower for a negligible (\textasciitilde0.1 dB) boost in the median SDR score.
 
 \end{document}

@@ -1,0 +1,315 @@
+sevagh:mss_evaluation $ ./04-umx-models.sh
++ pybin=/home/sevagh/venvs/thesis/bin/python3
++ expdir=exp-04-trained-models-for-timing
++ scriptdir=./mss-oracle-experiments/oracle_eval
++ export MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ/
++ MUSDB_PATH=/home/sevagh/TRAINING-MUSIC/MUSDB18-HQ/
++ export MUSDB_MAX_TRACKS=10
++ MUSDB_MAX_TRACKS=10
++ mkdir -p exp-04-trained-models-for-timing
++ /home/sevagh/venvs/thesis/bin/python3 ./mss-oracle-experiments/oracle_eval/trained_models.py --eval_dir=exp-04-trained-models-for-timing/ --model=umx
+2021-09-06 05:28:15,216 [nnabla][INFO]: Initializing CPU extension...
+  0%|                                                                                                   | 0/10 [00:00<?, ?it/s]evaluating track AM Contra - Heart Peripheral with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   4.481  SIR:   8.355  ISR:  10.107  SAR:   5.768
+bass            ==> SDR:  -4.358  SIR:  -6.324  ISR:   5.340  SAR:   5.093
+other           ==> SDR:   0.364  SIR:   1.676  ISR:   0.977  SAR:  -1.125
+vocals          ==> SDR:   7.805  SIR:  15.146  ISR:  15.411  SAR:   8.684
+accompaniment   ==> SDR:  14.340  SIR:  23.451  ISR:  21.864  SAR:  15.503
+
+time 23.911247491836548 s for song AM Contra - Heart Peripheral
+ 10%|█████████                                                                                  | 1/10 [01:11<10:46, 71.85s/it]evaluating track Al James - Schoolboy Facination with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   3.622  SIR:   2.522  ISR:   7.676  SAR:   1.771
+bass            ==> SDR:   5.317  SIR:  12.075  ISR:   3.682  SAR:   2.640
+other           ==> SDR:   1.763  SIR:  -0.703  ISR:   9.524  SAR:   1.855
+vocals          ==> SDR:   6.235  SIR:  14.014  ISR:  10.591  SAR:   5.984
+accompaniment   ==> SDR:   8.091  SIR:  11.368  ISR:  17.699  SAR:   9.115
+
+time 23.2781822681427 s for song Al James - Schoolboy Facination
+ 20%|██████████████████▏                                                                        | 2/10 [02:18<09:08, 68.55s/it]evaluating track Angels In Amplifiers - I'm Alright with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   5.249  SIR:   7.756  ISR:  10.005  SAR:   4.399
+bass            ==> SDR:   3.982  SIR:   9.450  ISR:   1.931  SAR:   1.929
+other           ==> SDR:   5.143  SIR:   3.715  ISR:   8.644  SAR:   3.317
+vocals          ==> SDR:   8.199  SIR:  16.982  ISR:  17.933  SAR:   8.361
+accompaniment   ==> SDR:  12.083  SIR:  22.114  ISR:  20.870  SAR:  12.777
+
+time 21.01871967315674 s for song Angels In Amplifiers - I'm Alright
+ 30%|███████████████████████████▎                                                               | 3/10 [03:12<07:15, 62.25s/it]evaluating track Arise - Run Run Run with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   2.321  SIR: -19.209  ISR:  14.843  SAR:   0.043
+bass            ==> SDR:   2.450  SIR:   6.564  ISR: -13.375  SAR:   0.442
+other           ==> SDR:   1.035  SIR: -20.980  ISR:   1.464  SAR:  -0.015
+vocals          ==> SDR:   2.986  SIR:  11.014  ISR:  16.612  SAR:   3.790
+accompaniment   ==> SDR:  12.948  SIR:  25.803  ISR:  19.311  SAR:  13.633
+
+time 25.462764024734497 s for song Arise - Run Run Run
+ 40%|████████████████████████████████████▍                                                      | 4/10 [04:21<06:28, 64.72s/it]evaluating track BKS - Bulldozer with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   9.435  SIR:   0.824  ISR:  16.058  SAR:   2.860
+bass            ==> SDR:   6.538  SIR:  23.361  ISR: -12.226  SAR:   0.164
+other           ==> SDR:   4.029  SIR: -10.596  ISR:   9.366  SAR:   0.213
+vocals          ==> SDR:   2.465  SIR:  11.439  ISR:  12.194  SAR:   2.274
+accompaniment   ==> SDR:  15.248  SIR:  23.557  ISR:  23.361  SAR:  15.436
+
+time 37.71595501899719 s for song BKS - Bulldozer
+ 50%|█████████████████████████████████████████████▌                                             | 5/10 [06:05<06:34, 78.94s/it]evaluating track BKS - Too Much with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   6.817  SIR: -11.371  ISR:  12.425  SAR:   0.247
+bass            ==> SDR:   9.296  SIR:   9.574  ISR:  -5.817  SAR:   0.554
+other           ==> SDR:   4.014  SIR:  -4.046  ISR:   8.277  SAR:   0.792
+vocals          ==> SDR:   8.994  SIR:  18.021  ISR:  20.311  SAR:   9.890
+accompaniment   ==> SDR:  13.153  SIR:  25.100  ISR:  22.230  SAR:  13.876
+
+time 25.51637315750122 s for song BKS - Too Much
+ 60%|██████████████████████████████████████████████████████▌                                    | 6/10 [07:09<04:55, 73.92s/it]evaluating track Ben Carrigan - We'll Talk About It All Tonight with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   6.766  SIR:  14.275  ISR:  13.456  SAR:   7.157
+bass            ==> SDR:   6.718  SIR:  11.227  ISR:  15.023  SAR:   7.672
+other           ==> SDR:   3.452  SIR:   7.577  ISR:   8.672  SAR:   4.519
+vocals          ==> SDR:   3.481  SIR:  13.551  ISR:   8.098  SAR:   3.085
+accompaniment   ==> SDR:  10.772  SIR:  14.122  ISR:  23.563  SAR:  12.937
+
+time 29.080510139465332 s for song Ben Carrigan - We'll Talk About It All Tonight
+ 70%|███████████████████████████████████████████████████████████████▋                           | 7/10 [08:17<03:35, 71.87s/it]evaluating track Bobby Nobody - Stitch Up with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   5.456  SIR:  12.131  ISR:  11.166  SAR:   5.137
+bass            ==> SDR:   5.676  SIR:   6.869  ISR:  13.000  SAR:   7.570
+other           ==> SDR:   2.902  SIR:   8.148  ISR:   5.381  SAR:   2.153
+vocals          ==> SDR:   6.967  SIR:  15.758  ISR:  17.624  SAR:   7.180
+accompaniment   ==> SDR:  12.126  SIR:  22.098  ISR:  21.563  SAR:  12.713
+
+time 25.95330500602722 s for song Bobby Nobody - Stitch Up
+ 80%|████████████████████████████████████████████████████████████████████████▊                  | 8/10 [09:23<02:20, 70.21s/it]evaluating track Buitraker - Revo X with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   9.871  SIR:   5.965  ISR:  13.749  SAR:   5.764
+bass            ==> SDR:   6.196  SIR:   8.773  ISR:   0.680  SAR:   3.084
+other           ==> SDR:   3.862  SIR:   0.518  ISR:   7.717  SAR:   1.838
+vocals          ==> SDR:   2.525  SIR:   6.026  ISR:   9.044  SAR:   2.781
+accompaniment   ==> SDR:  11.646  SIR:  17.770  ISR:  17.690  SAR:  13.778
+
+time 31.718355178833008 s for song Buitraker - Revo X
+ 90%|█████████████████████████████████████████████████████████████████████████████████▉         | 9/10 [10:41<01:12, 72.44s/it]evaluating track Carlos Gonzalez - A Place For Us with model umx
+bss evaluation to store in exp-04-trained-models-for-timing/umx
+drums           ==> SDR:   4.159  SIR:  11.630  ISR:   9.024  SAR:   3.997
+bass            ==> SDR:  -1.249  SIR:   1.390  ISR:   5.219  SAR:  -0.280
+other           ==> SDR:   4.750  SIR:   8.619  ISR:  13.605  SAR:   5.385
+vocals          ==> SDR:   4.818  SIR:  14.106  ISR:  10.053  SAR:   4.264
+accompaniment   ==> SDR:   8.128  SIR:  12.005  ISR:  18.359  SAR:   8.708
+
+time 28.971471548080444 s for song Carlos Gonzalez - A Place For Us
+100%|██████████████████████████████████████████████████████████████████████████████████████████| 10/10 [11:59<00:00, 71.92s/it]
+total time for 50 track evaluation: 272.6268835067749
+time averaged per track: 27.26268835067749
++ /home/sevagh/venvs/thesis/bin/python3 ./mss-oracle-experiments/oracle_eval/trained_models.py --eval_dir=exp-04-trained-models-for-timing/ --model=slicq-wslicq
+2021-09-06 05:40:24,612 [nnabla][INFO]: Initializing CPU extension...
+  0%|                                                                                                   | 0/10 [00:00<?, ?it/s]evaluating track AM Contra - Heart Peripheral with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   3.930  SIR:   8.810  ISR:   6.519  SAR:   5.847
+bass            ==> SDR:  -4.861  SIR:  -5.665  ISR:   6.639  SAR:   6.193
+other           ==> SDR:   0.348  SIR:  -1.541  ISR:   1.419  SAR:   2.100
+vocals          ==> SDR:   5.895  SIR:  13.361  ISR:   9.629  SAR:   7.209
+accompaniment   ==> SDR:  12.948  SIR:  15.880  ISR:  20.559  SAR:  15.627
+
+time 93.72661185264587 s for song AM Contra - Heart Peripheral
+ 10%|█████████                                                                                 | 1/10 [02:14<20:09, 134.37s/it]evaluating track Al James - Schoolboy Facination with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   2.764  SIR:   1.190  ISR:   5.123  SAR:   1.669
+bass            ==> SDR:   4.493  SIR:   8.489  ISR:   2.645  SAR:   2.996
+other           ==> SDR:   0.449  SIR:  -2.729  ISR:   9.316  SAR:   3.053
+vocals          ==> SDR:   3.411  SIR:  11.551  ISR:   5.053  SAR:   3.556
+accompaniment   ==> SDR:   5.152  SIR:   5.774  ISR:  17.975  SAR:  10.481
+
+time 88.08316040039062 s for song Al James - Schoolboy Facination
+ 20%|██████████████████                                                                        | 2/10 [04:17<17:04, 128.04s/it]evaluating track Angels In Amplifiers - I'm Alright with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   3.618  SIR:   4.892  ISR:   6.062  SAR:   2.661
+bass            ==> SDR:   3.053  SIR:   8.481  ISR:  -0.964  SAR:   1.606
+other           ==> SDR:   4.334  SIR:   0.295  ISR:   7.393  SAR:   2.585
+vocals          ==> SDR:   6.322  SIR:  12.787  ISR:  10.579  SAR:   7.264
+accompaniment   ==> SDR:  10.169  SIR:  14.851  ISR:  17.583  SAR:  12.023
+
+time 77.67947578430176 s for song Angels In Amplifiers - I'm Alright
+ 30%|███████████████████████████                                                               | 3/10 [06:04<13:47, 118.22s/it]evaluating track Arise - Run Run Run with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   0.391  SIR: -15.274  ISR:   7.759  SAR:   0.177
+bass            ==> SDR:   2.890  SIR:   4.944  ISR: -12.995  SAR:   0.651
+other           ==> SDR:   0.786  SIR: -11.839  ISR:   1.215  SAR:   0.100
+vocals          ==> SDR:   2.942  SIR:   8.078  ISR:   6.941  SAR:   4.514
+accompaniment   ==> SDR:  13.241  SIR:  16.157  ISR:  20.768  SAR:  16.096
+
+time 94.67199039459229 s for song Arise - Run Run Run
+ 40%|████████████████████████████████████                                                      | 4/10 [08:15<12:20, 123.44s/it]evaluating track BKS - Bulldozer with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   7.568  SIR:   0.860  ISR:  10.594  SAR:   2.875
+bass            ==> SDR:   5.536  SIR:  20.698  ISR: -13.072  SAR:   0.149
+other           ==> SDR:   3.046  SIR: -12.403  ISR:   8.247  SAR:   0.212
+vocals          ==> SDR:   1.190  SIR:   5.833  ISR:   6.603  SAR:   2.702
+accompaniment   ==> SDR:  12.568  SIR:  16.907  ISR:  19.562  SAR:  14.774
+
+time 154.33844995498657 s for song BKS - Bulldozer
+ 50%|█████████████████████████████████████████████                                             | 5/10 [11:43<12:48, 153.65s/it]evaluating track BKS - Too Much with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   4.548  SIR: -12.608  ISR:   6.550  SAR:   0.157
+bass            ==> SDR:   7.487  SIR:   7.228  ISR:  -5.942  SAR:   0.690
+other           ==> SDR:   2.972  SIR:  -4.620  ISR:   7.997  SAR:   1.128
+vocals          ==> SDR:   7.500  SIR:  15.312  ISR:  12.649  SAR:   9.141
+accompaniment   ==> SDR:  11.408  SIR:  16.619  ISR:  19.818  SAR:  13.978
+
+time 92.76292395591736 s for song BKS - Too Much
+ 60%|██████████████████████████████████████████████████████                                    | 6/10 [13:47<09:35, 143.80s/it]evaluating track Ben Carrigan - We'll Talk About It All Tonight with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   5.403  SIR:  13.733  ISR:   8.826  SAR:   6.362
+bass            ==> SDR:   5.201  SIR:   8.393  ISR:  13.947  SAR:   6.903
+other           ==> SDR:   2.874  SIR:   4.247  ISR:   8.032  SAR:   6.088
+vocals          ==> SDR:   2.239  SIR:   9.790  ISR:   4.806  SAR:   2.386
+accompaniment   ==> SDR:   9.180  SIR:  10.841  ISR:  22.240  SAR:  15.687
+
+time 107.65781450271606 s for song Ben Carrigan - We'll Talk About It All Tonight
+ 70%|██████████████████████████████████████████████████████████████▉                           | 7/10 [16:07<07:07, 142.49s/it]evaluating track Bobby Nobody - Stitch Up with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   3.883  SIR:  10.702  ISR:   6.291  SAR:   4.268
+bass            ==> SDR:   3.983  SIR:   4.964  ISR:  13.540  SAR:   8.519
+other           ==> SDR:   2.254  SIR:   3.308  ISR:   4.461  SAR:   2.770
+vocals          ==> SDR:   5.021  SIR:  12.070  ISR:   9.063  SAR:   5.568
+accompaniment   ==> SDR:  10.115  SIR:  13.743  ISR:  19.809  SAR:  13.021
+
+time 103.32989978790283 s for song Bobby Nobody - Stitch Up
+ 80%|████████████████████████████████████████████████████████████████████████                  | 8/10 [18:27<04:43, 141.71s/it]evaluating track Buitraker - Revo X with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   8.095  SIR:   4.521  ISR:  10.249  SAR:   4.949
+bass            ==> SDR:   4.556  SIR:   6.451  ISR:   1.060  SAR:   3.941
+other           ==> SDR:   3.470  SIR:  -0.006  ISR:   7.120  SAR:   3.329
+vocals          ==> SDR:   2.393  SIR:   4.755  ISR:   4.800  SAR:   2.666
+accompaniment   ==> SDR:  11.599  SIR:  13.640  ISR:  19.303  SAR:  16.335
+
+time 122.58514738082886 s for song Buitraker - Revo X
+ 90%|█████████████████████████████████████████████████████████████████████████████████         | 9/10 [21:10<02:28, 148.21s/it]evaluating track Carlos Gonzalez - A Place For Us with model slicq-wslicq
+sliCQT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wslicq
+drums           ==> SDR:   3.780  SIR:  10.878  ISR:   6.661  SAR:   4.074
+bass            ==> SDR:  -3.568  SIR:  -4.140  ISR:   7.324  SAR:   1.891
+other           ==> SDR:   4.146  SIR:   7.486  ISR:  10.716  SAR:   5.973
+vocals          ==> SDR:   3.593  SIR:  11.573  ISR:   6.813  SAR:   3.933
+accompaniment   ==> SDR:   7.097  SIR:   8.451  ISR:  17.381  SAR:   9.776
+
+time 110.5757007598877 s for song Carlos Gonzalez - A Place For Us
+100%|█████████████████████████████████████████████████████████████████████████████████████████| 10/10 [23:44<00:00, 142.42s/it]
+total time for 50 track evaluation: 1045.41117477417
+time averaged per track: 104.54111747741699
+
++ /home/sevagh/venvs/thesis/bin/python3 ./mss-oracle-experiments/oracle_eval/trained_models.py --eval_dir=exp-04-trained-models-for-timing/ --model=slicq-wstft
+2021-09-06 06:04:20,138 [nnabla][INFO]: Initializing CPU extension...
+  0%|                                                                                                   | 0/10 [00:00<?, ?it/s]evaluating track AM Contra - Heart Peripheral with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   3.903  SIR:   8.182  ISR:   6.453  SAR:   6.128
+bass            ==> SDR:  -4.351  SIR:  -5.821  ISR:   6.627  SAR:   6.355
+other           ==> SDR:   0.391  SIR:  -1.739  ISR:   1.398  SAR:   2.176
+vocals          ==> SDR:   5.868  SIR:  12.741  ISR:   9.646  SAR:   7.172
+accompaniment   ==> SDR:  13.037  SIR:  15.681  ISR:  21.187  SAR:  15.794
+
+time 49.73775911331177 s for song AM Contra - Heart Peripheral
+ 10%|█████████                                                                                  | 1/10 [01:30<13:36, 90.73s/it]evaluating track Al James - Schoolboy Facination with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   2.663  SIR:   1.128  ISR:   4.911  SAR:   1.700
+bass            ==> SDR:   4.329  SIR:   8.057  ISR:   2.776  SAR:   3.099
+other           ==> SDR:   0.401  SIR:  -2.992  ISR:   8.941  SAR:   3.048
+vocals          ==> SDR:   3.434  SIR:  11.186  ISR:   5.049  SAR:   3.553
+accompaniment   ==> SDR:   5.117  SIR:   5.641  ISR:  18.029  SAR:  10.439
+
+time 46.384809732437134 s for song Al James - Schoolboy Facination
+ 20%|██████████████████▏                                                                        | 2/10 [02:53<11:29, 86.18s/it]evaluating track Angels In Amplifiers - I'm Alright with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   3.572  SIR:   4.733  ISR:   5.859  SAR:   2.748
+bass            ==> SDR:   2.975  SIR:   7.926  ISR:  -0.687  SAR:   1.692
+other           ==> SDR:   4.251  SIR:   0.121  ISR:   7.158  SAR:   2.631
+vocals          ==> SDR:   5.979  SIR:  12.083  ISR:  10.114  SAR:   7.115
+accompaniment   ==> SDR:   9.842  SIR:  14.094  ISR:  17.598  SAR:  12.063
+
+time 40.589693546295166 s for song Angels In Amplifiers - I'm Alright
+ 30%|███████████████████████████▎                                                               | 3/10 [04:03<09:10, 78.65s/it]evaluating track Arise - Run Run Run with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   0.479  SIR: -17.698  ISR:   7.037  SAR:   0.112
+bass            ==> SDR:   2.677  SIR:   4.187  ISR: -13.133  SAR:   0.850
+other           ==> SDR:   0.735  SIR: -15.424  ISR:   1.131  SAR:   0.058
+vocals          ==> SDR:   2.883  SIR:   7.795  ISR:   6.576  SAR:   4.547
+accompaniment   ==> SDR:  13.109  SIR:  15.828  ISR:  20.800  SAR:  16.279
+
+time 50.71787619590759 s for song Arise - Run Run Run
+ 40%|████████████████████████████████████▍                                                      | 4/10 [05:31<08:14, 82.44s/it]evaluating track BKS - Bulldozer with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   7.504  SIR:  -0.757  ISR:  10.405  SAR:   2.287
+bass            ==> SDR:   5.355  SIR:  19.890  ISR: -12.668  SAR:   0.165
+other           ==> SDR:   2.888  SIR: -12.080  ISR:   7.862  SAR:   0.233
+vocals          ==> SDR:   1.194  SIR:   5.024  ISR:   6.523  SAR:   2.514
+accompaniment   ==> SDR:  12.210  SIR:  16.590  ISR:  19.448  SAR:  14.623
+
+time 81.11361694335938 s for song BKS - Bulldozer
+ 50%|█████████████████████████████████████████████                                             | 5/10 [07:46<08:27, 101.41s/it]evaluating track BKS - Too Much with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   4.640  SIR: -11.151  ISR:   6.485  SAR:   0.230
+bass            ==> SDR:   7.618  SIR:   6.425  ISR:  -5.005  SAR:   0.963
+other           ==> SDR:   3.010  SIR:  -5.039  ISR:   7.598  SAR:   1.035
+vocals          ==> SDR:   7.451  SIR:  14.967  ISR:  12.614  SAR:   9.174
+accompaniment   ==> SDR:  11.373  SIR:  16.383  ISR:  20.098  SAR:  13.938
+
+time 49.491920709609985 s for song BKS - Too Much
+ 60%|██████████████████████████████████████████████████████▌                                    | 6/10 [09:10<06:21, 95.44s/it]evaluating track Ben Carrigan - We'll Talk About It All Tonight with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   5.223  SIR:  12.726  ISR:   8.544  SAR:   6.444
+bass            ==> SDR:   4.917  SIR:   7.820  ISR:  13.184  SAR:   6.871
+other           ==> SDR:   2.832  SIR:   4.060  ISR:   7.771  SAR:   6.236
+vocals          ==> SDR:   2.169  SIR:   9.438  ISR:   4.655  SAR:   2.280
+accompaniment   ==> SDR:   9.232  SIR:  10.742  ISR:  22.553  SAR:  15.926
+
+time 61.353123903274536 s for song Ben Carrigan - We'll Talk About It All Tonight
+ 70%|███████████████████████████████████████████████████████████████▋                           | 7/10 [10:45<04:46, 95.36s/it]evaluating track Bobby Nobody - Stitch Up with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   3.808  SIR:  10.334  ISR:   6.125  SAR:   4.518
+bass            ==> SDR:   3.893  SIR:   4.586  ISR:  13.492  SAR:   8.749
+other           ==> SDR:   2.301  SIR:   3.320  ISR:   4.396  SAR:   3.050
+vocals          ==> SDR:   4.984  SIR:  11.851  ISR:   8.932  SAR:   5.609
+accompaniment   ==> SDR:  10.061  SIR:  13.470  ISR:  19.917  SAR:  13.228
+
+time 51.51795697212219 s for song Bobby Nobody - Stitch Up
+ 80%|████████████████████████████████████████████████████████████████████████▊                  | 8/10 [12:13<03:06, 93.06s/it]evaluating track Buitraker - Revo X with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   7.957  SIR:   4.480  ISR:  10.104  SAR:   5.067
+bass            ==> SDR:   4.352  SIR:   6.034  ISR:   2.065  SAR:   4.042
+other           ==> SDR:   3.410  SIR:  -0.032  ISR:   6.819  SAR:   3.518
+vocals          ==> SDR:   2.371  SIR:   4.590  ISR:   4.740  SAR:   2.753
+accompaniment   ==> SDR:  11.542  SIR:  13.479  ISR:  19.745  SAR:  16.614
+
+time 66.43778157234192 s for song Buitraker - Revo X
+ 90%|█████████████████████████████████████████████████████████████████████████████████▉         | 9/10 [14:00<01:37, 97.43s/it]evaluating track Carlos Gonzalez - A Place For Us with model slicq-wstft
+STFT WIENER
+bss evaluation to store in exp-04-trained-models-for-timing/slicq-wstft
+drums           ==> SDR:   3.629  SIR:  10.189  ISR:   6.399  SAR:   4.072
+bass            ==> SDR:  -3.757  SIR:  -4.371  ISR:   6.991  SAR:   2.181
+other           ==> SDR:   4.088  SIR:   7.165  ISR:  10.409  SAR:   5.999
+vocals          ==> SDR:   3.661  SIR:  11.025  ISR:   6.738  SAR:   3.904
+accompaniment   ==> SDR:   7.131  SIR:   8.380  ISR:  17.050  SAR:   9.968
+
+time 58.597641706466675 s for song Carlos Gonzalez - A Place For Us
+100%|██████████████████████████████████████████████████████████████████████████████████████████| 10/10 [15:43<00:00, 94.39s/it]
+total time for 50 track evaluation: 555.9421803951263
+time averaged per track: 55.59421803951263

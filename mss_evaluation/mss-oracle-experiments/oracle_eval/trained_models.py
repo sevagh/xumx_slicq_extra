@@ -8,6 +8,7 @@ import museval
 import numpy as np
 import random
 import time
+import sys
 from warnings import warn
 
 from openunmix.utils import load_separator as umx_separator
@@ -114,11 +115,25 @@ if __name__ == '__main__':
         nargs='?',
         help='Folder where evaluation results are saved'
     )
+    parser.add_argument(
+        '--split',
+        type=str,
+        default='test',
+        help='musdb data split'
+    )
 
     args = parser.parse_args()
 
-    # initiate musdb with test tracks
-    mus = musdb.DB(subsets='test', is_wav=True)
+    mus = None
+    # initiate musdb
+    if args.split == 'valid':
+        mus = musdb.DB(subsets='train', split='valid', is_wav=True)
+    elif args.split == 'test':
+        mus = musdb.DB(subsets='test', is_wav=True)
+    else:
+        raise ValueError(f'musdb18 data split {args.split} unsupported')
+
+    max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
 
     loaded_models = {
             'umx': umx_separator(
@@ -139,7 +154,7 @@ if __name__ == '__main__':
     }
 
     tot = 0.
-    pbar = tqdm.tqdm(mus.tracks[args.track_offset:])
+    pbar = tqdm.tqdm(mus.tracks[args.track_offset:args.track_offset+max_tracks])
     tot_tracks = len(pbar)
 
     for track in pbar:
@@ -163,5 +178,5 @@ if __name__ == '__main__':
         if args.audio_dir:
             mus.save_estimates(est, track, aud_path)
 
-    print(f'total time for 50 track evaluation: {tot}')
+    print(f'total time for {tot_tracks} track evaluation: {tot}')
     print(f'time averaged per track: {tot/tot_tracks}')

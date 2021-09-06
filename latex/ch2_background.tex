@@ -19,7 +19,7 @@ The waveform is defined as the function of pressure variation plotted against ti
 	\label{fig:discretecontinuous}
 \end{figure}
 
-Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Periodic points on the continuous time axis of the waveform have their values taken, or are \textit{sampled}. The amplitude values of the waveform at these sampled points is \textit{quantized} to find the closest digital number (\cite[Chapter~2]{melbook}). Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
+Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Points on the continuous time axis of the waveform are \textit{sampled} periodically, and the amplitude values of the waveform at these sampled points are \textit{quantized} to find the closest digital number (\cite[Chapter~2]{melbook}). Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
 
 First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
 
@@ -150,7 +150,7 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 	\centering
 	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[height=5cm]{./images-tftheory/gabor13.png}}
 	\hspace{2em}
-	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the cost of temporally localized sample values]{\includegraphics[height=6.25cm]{./images-tftheory/gabor2.png}}
+	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[height=6.25cm]{./images-tftheory/gabor2.png}}
 	\caption{Time-frequency tradeoff intuitions (\cite{gabor2})}
 	\label{fig:gaborfirst}
 \end{figure}
@@ -496,7 +496,7 @@ Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different
 
 \newpagefill
 
-Finally, recall the CQT spectrograms shown in figure \ref{fig:cqtvstft} in the previous section \ref{sec:cqt}. Figure \ref{fig:cqtdetails} shows additional detailed plots that can be generated with the MATLAB CQT (CQ-NSGT) function from the MATLAB Wavelet Toolbox,\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} showing more details of the varying windows of the underlying Nonstationary Gabor Transform process.
+Finally, recall the CQT spectrograms shown in figure \ref{fig:cqtvstft} in the previous section \ref{sec:cqt}. Figure \ref{fig:cqtdetails} shows additional detailed plots that can be generated with the MATLAB CQT (CQ-NSGT) function from the MATLAB Wavelet Toolbox,\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} showing more information about the underlying Nonstationary Gabor Transform implementation.
 
 \begin{figure}[ht]
 	\centering
@@ -730,11 +730,11 @@ The underlying values are stored in formats that allow for efficient numerical c
 
 In PyTorch and Tensorflow (and in general machine learning), a similar concept to the ndarray is the tensor. The tensor originates from the field of physics (\cite{whatistensor}). The tensor is also an n-dimensional numerical array, and NumPy ndarrays are interchangeable with both PyTorch and Tensorflow tensors.\footnote{\url{https://www.tensorflow.org/guide/tf_numpy}, \url{https://pytorch.org/tutorials/beginner/blitz/tensor_tutorial.html}}
 
-Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example \Verb#torch.cos(x)# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning code supported by these libraries are represented as tensors.
+Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example \Verb#torch.cos()# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning constructs supported by these libraries are represented as tensors.
 
 \subsubsection{Package managers for Python}
 
-To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates a clean, isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages installed from pip are published by the authors and maintainers on the public Python Package Index (PyPi).\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in listing \ref{lst:reqtxt}.
+To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates a clean, isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages must be published by the authors and maintainers on the public Python Package Index (PyPi).\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in listing \ref{lst:reqtxt}.
 
 \begin{listing}[ht]
 \centering
@@ -768,7 +768,7 @@ dependencies:
 	\label{lst:condayml}
 \end{listing}
 
-Pip is installed by default with Python, making it the simpler choice, while Conda is more powerful but needs to be installed separately in the user's OS. In different parts of the code accompanying this thesis, both pip and Conda files are used, and they will be shown to help the readers replicate the needed Python environments.
+Pip is installed by default with Python, making it the simpler choice, while Conda is more powerful but needs to be installed separately in the user's OS. In different parts of the code accompanying this thesis, both pip and Conda files are used, and they will be shown to help the readers replicate the necessary Python environments.
 
 \subsubsection{Version control systems and git}
 

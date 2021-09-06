@@ -320,13 +320,15 @@ The initial exploration is on whether the sliCQT is suitable as an STFT replacem
 
 To recap, the oracle mask is a perfect time-frequency mask which is computed from ground-truth training data. The oracle is used to give an idea of the upper limit of audio quality from an algorithm or model for music demixing. The mask is typically applied to the magnitude transform (\cite{umx}), and the phase is discarded.
 
-In this parameter exploration, we require the following components to build the oracle testbench:
+In the parameter exploration, we require the following components to build the oracle testbench:
 
 \begin{tight_enumerate}
 	\item
 		Python MUSDB18-HQ (\cite{musdb18hq}) loader library\footnote{\url{https://github.com/sigsep/sigsep-mus-db}}
 	\item
 		Python BSS metrics (\cite{bss}) evaluator library\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/}} by the SigSep community
+	\item
+		Reference Python NSGT/sliCQT library\footnote{\url{https://github.com/grrrr/nsgt}}
 \end{tight_enumerate}
 
 \subsubsection{Mix-phase inversion (MPI) oracle}
@@ -469,7 +471,7 @@ Similar to the NSGT/sliCQT library, the modifications made to the museval librar
 
 First, we will look at incorporating CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) ideas with Open-Unmix. Since X-UMX and UMX are both based on the STFT spectrogram, the general model will stay the same even if we replace the STFT with the sliCQT.
 
-As mentioned, Open-Unmix (\cite{umx}) has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based. X-UMX has an open-source implementation available as well,\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} which uses a different deep learning framework than PyTorch. Therefore part of the methodology of this thesis involves incorporating the X-UMX ideas inside the PyTorch version of UMX.
+As mentioned, Open-Unmix (\cite{umx}) has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based. X-UMX has an open-source implementation available as well,\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} which uses NNabla (\cite{nnabla}), a different Python deep learning framework. Therefore part of the methodology of this thesis involves incorporating the X-UMX ideas inside the PyTorch version of UMX.
 
 After the X-UMX modifications are described, we will look at which parts of Open-Unmix need to incorporate the PyTorch implementation of the sliCQT that was described in section \ref{sec:torchslicq}.\footnote{\url{https://github.com/sevagh/nsgt}} Finally, the convolutional denoising autoencoder model architectures of \textcite{plumbley1, plumbley2}  will be described, along with how they might be applied to the sliCQT.
 
