@@ -297,7 +297,7 @@ Note the shape of the matrix form is $401 \text{ slices} \times 2 \text{ channel
 
 In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqoverlaps} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
 
-The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file. In fact, this function was included in the original project, but in the example spectrogram code.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/examples/spectrogram.py\#L19}} Also, the amount of overlap was not automatically inferred from the shape of the sliCQT output.
+The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file. This function was included in the original project in the example spectrogram code.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/examples/spectrogram.py\#L19}}
 
 We believe that due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility should be included in the core of the library. In the spectrogram example of the forked library, the new \Verb#overlap_add_slicq# function is imported from the core library.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py\#L19}} Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram.
 
@@ -309,7 +309,7 @@ We believe that due to necessity of the 50\% overlap to create a meaningful spec
 	\label{fig:overlappedspectrograms}
 \end{figure}
 
-We note a few details. Firstly, the overlap-add procedure for the sliCQT is only defined for the matrix form, not the ragged form. Next, observe that there is a slight difference in the time axis duration between the NSGT and sliCQT, resulting from the slicing and overlap-add procedure.
+We note a few details. Firstly, the overlap-add procedure for the matrix form of the sliCQT operates on the whole matrix, while for the ragged transform, it needs to be applied to each of the tensors in the list. Next, observe that there is a slight difference in the time axis duration between the NSGT and sliCQT, resulting from the slicing and overlap-add procedure.
 
 \newpagefill
 
@@ -533,7 +533,7 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 	\label{fig:xumxlosses}
 \end{figure}
 
-One last note is that the data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4})$ in training, where $y_{1-4}$ are the ground-truth waveforms of all 4 isolated targets.
+The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4})$ in training, where $y_{1-4}$ are the ground-truth waveforms of all 4 isolated targets.
 
 \newpagefill
 
@@ -563,7 +563,7 @@ The MUSDDB18-HQ data loader is the starting point of the neural network, and the
 		For a given mixed waveform $x$, Open-Unmix estimates $|Y_{1}|, |Y_{2}|, |Y_{3}|, |Y_{4}|$ for each source. Then, a process called Wiener filtering and expectation maximization is applied (\cite{umxorig1, wiener2, wiener3, wiener4}).\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L338}} First the mix-phase inversion is used to come up with the first waveform estimate $y_{1}, y_{2}, y_{3}, y_{4}$. Then, the iterative Wiener expectation maximization process uses the 4 target STFT spectrograms in an iterative procedure to refine the estimates.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L154}}
 \end{tight_enumerate}
 
-To summarize, the STFT is used to compute magnitude spectrogram statistics from the training data and to create a magnitude spectrogram from the training examples. The magnitude spectrogram or magnitude STFT is the input and output of the bi-directional LSTM. Then, the magnitude STFT estimates from the 4 target models are considered together to perform an iterative refinement in the spectral domain, while also going back to the time-domain waveform with the iSTFT and the mix-phase inversion.
+Let us recap where the STFT is used in the above steps. The STFT is used to compute magnitude spectrogram statistics from the training data. The magnitude STFT of the training waveform $x$ is taken and passed as an input to the bi-directional LSTM. Then, the output estimated magnitude STFT from the 4 target models are considered together to perform an iterative Wiener-EM refinement step in the STFT domain. Finally, the estimates are transformed into time-domain waveforms with the iSTFT and the mix-phase inversion.
 
 These are are the places in the Open-Unmix PyTorch template where the STFT must be replaced with the sliCQT. Moreover, it was mentioned that the ragged sliCQT will be used, which is a list of time-frequency matrices for frequency bins that share the same time resolution, and not a single rectangular matrix like the STFT. This arises from the different temporal frame rates of each frequency bin which is the desire of the NSGT/sliCQT (or CQT). This means that all of the operations which expect a single rectangular real-valued matrix of the STFT returns need to be modified to work on a list of matrices instead.
 
@@ -593,22 +593,60 @@ In section \ref{sec:matrixvragged}, we saw that to use the ragged sliCQT one mus
 
 The MSE for the STFT is applied on the whole matrix. For the ragged sliCQT, we simply sum the MSE loss of each matrix in the list of matrices.
 
-In the similar style as the simple example above, we can perform the STFT to ragged sliCQT conversion in the previously highlighted parts of xumx-sliCQ:
+The \Verb#get_statistics# function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/train.py\#L102}} for the data whitening step was modified to return a list of standard deviations and means, where each entry of the list corresponds to the standard deviation and mean of the respective matrix in the ragged sliCQT. Note that the sliCQT is overlap-added before computing its statistics. This change is shown in listing \ref{code:fourthdiff}. Recall in sections \ref{sec:theoryslicqt} and \ref{sec:slicqola} that the 50\% overlap of adjacent slices was necessary for a meaningful spectrogram. The sliCQT is almost always overlap-added before being used in xumx-sliCQ.
 
-\begin{tight_enumerate}
-	\item
-		The \Verb#get_statistics# function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/train.py\#L102}} is modified to return a list of standard deviations and means, where each entry of the list corresponds to the standard deviation and mean of the respective matrix in the ragged sliCQT. Note that the sliCQT is overlap-added before computing its statistics. Recall in sections \ref{sec:theoryslicqt} and \ref{sec:slicqola} that the 50\% overlap of adjacent slices was necessary for a meaningful spectrogram. The same applies in the xumx-sliCQ neural network, where the input to the neural network is the overlap-added sliCQT.
-	\item
-		The neural network is modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16000 Hz by default), which lets the part of the STFT above 16000 Hz to pass through the network unmodified. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16000 Hz passes through untouched.
-	\item
-		Within each sub-network, or \Verb#OpenUnmixTimeBucket#, the implementation is very similar to the STFT-based Open-Unmix. The $i$th block from the list of magnitude sliCQT $|X|$ of the mixed-song waveform $x$ , or $|X_{i}|$, is the input to the network, and it is overlap-added to produce a 2D time-frequency matrix. Then, the 2D time-frequency matrix can be used just like an STFT, as an input to an LSTM or any other neural network layer. The caveat is that the overlap-add procedure is non-invertible, as mentioned, and the original transform shape is needed to synthesize an audio waveform. This means that the neural network must first learn how to estimate an overlap-added magnitude estimate, $|\hat{Y}_{i, \text{overlap-added}}|$. Then, it needs to estimate the non-overlap-added version: $|\hat{Y}_{i}| = \text{inverse-overlap-add}(|\hat{Y}_{i, \text{overlap-added}}|)$. In the network, this is achieved with a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers 3 time coefficients to produce 6 time coefficients, which is in essence a learnable inverse operation of the 50\% overlap procedure.
-	\item
-		After the \Verb#OpenUnmix# class creates a list of estimated sliCQT buckets $|\hat{Y}_{i}|$ which are gathered back into the full ragged list of matrices in the final magnitude sliCQT spectrogram estimate, $|\hat{Y}|$, the Wiener expectation maximization step needs to be applied. This was approached in two ways in xumx-sliCQ, controlled by a parameter named \Verb#stft_wiener#: either the first estimate is taken from the sliCQT and the Wiener-EM step is applied on the STFT,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L301}} or the first estimate and Wiener-EM step is done on the sliCQT.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L380}} Each strategy results in a different music demixing quality, which will be discussed in section \ref{sec:experiment}. A further improvement to the performance of the Wiener-EM step on the sliCQT was done by zero-padding the ragged sliCQT to apply the Wiener-EM on a single rectangular matrix.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L389-L404}} Note that this is different from the native matrix form of the sliCQT, and only used in the Wiener-EM step. In the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}, due to the strict time limits of the evaluation testbench, the sliCQT Wiener-EM could not be used and the STFT Wiener-EM was necessary to reduce the computation time.
-\end{tight_enumerate}
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{diff}{./diffs/diff4.txt}
+\end{inputminted}
+  \caption{Modifying the data whitening step of Open-Unmix}
+  \label{code:fourthdiff}
+\end{listing}
 
-\subsubsection{Incorporating convolutional denoising autoencoders}
+The neural network was modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16000 Hz by default), which lets the part of the STFT above 16000 Hz to pass through the network unmodified. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16000 Hz passes through untouched. An excerpt of the neural network code is shown in listing \ref{code:raggedumx}.
 
-The convolutional denoising autoencoder models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. In the early experiments, they showed more promising results than the bi-LSTM model. The bi-LSTM model was first adapted to work on each time bucket of the ragged list of the sliCQT, but the longest time resolution (highest frequency bin) was prohibitively slow in both training and inference. Convolutional layers are a simple way of defining 2D time-frequency filters that slide over the 2D time-frequency matrices that correspond to different time buckets of the ragged sliCQT. The diagram in figure \ref{fig:cdaeslicqt} shows how the convolutional layers are applied to the ragged sliCQT.
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{python}{./scripts/openunmixbuckets.py}
+\end{inputminted}
+  \caption{OpenUnmix with a network per time bucket in the ragged sliCQT}
+  \label{code:raggedumx}
+\end{listing}
+
+Within each sub-network, or \Verb#OpenUnmixTimeBucket#, the implementation is similar to the STFT-based Open-Unmix. The $i$th block from the list of magnitude sliCQT $|X|$ of the mixed-song waveform $x$ , or $|X_{i}|$, is the input to the network, and it is overlap-added to produce a 2D time-frequency matrix. Then, the 2D time-frequency matrix can be used just like an STFT, as an input to an LSTM or any other neural network layer. An excerpt of the neural network code is shown in listing \ref{code:raggedumxoneblock}.  A necessary consideration in the network design is the non-invertibility of the overlap-add procedure, since the original transform shape is needed to synthesize an audio waveform. The neural network needs a strategy to compute a non-overlap-added estimate from the overlap-added mixed input spectrogram. This was achieved with an additional transpose convolutional layer, which will be covered in greater detail in the next section \ref{sec:convlayers}.
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{python}{./scripts/openunmixbucket.py}
+\end{inputminted}
+  \caption{Single network for one time bucket from the ragged sliCQT}
+  \label{code:raggedumxoneblock}
+\end{listing}
+
+After the \Verb#OpenUnmix# class outputs the estimates of the magnitude sliCQT for all 4 targets, the post-processing Wiener expectation maximization step needs to be applied. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the 4 target magnitude spectrograms.
+
+The approach in xumx-sliCQ was to add a boolean parameter named \Verb#slicq_wiener#. If \Verb#slicq_wiener# is set to False, the first waveform estimate is taken from the sliCQT and the Wiener-EM step is applied on the STFT,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L301}} shown in listing \ref{code:wienerstft}. If \Verb#slicq_wiener# is set to True, the Wiener-EM step is performed directly on the sliCQT.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L380}} The ragged sliCQT was zero-padded into a single rectangular matrix, allowing the original Wiener-EM code to be used (with minor modifications) for both the STFT and rectangular zero-padded sliCQT.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L389-L404}} The zero-padding operation is shown in listing \ref{code:wienerslicqt}. Each strategy results in a different music demixing quality and execution time, which will be discussed in section \ref{sec:experiment}. 
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{python}{./scripts/wiener_stft.py}
+\end{inputminted}
+  \caption{Using the STFT in the Wiener-EM post-processing step}
+  \label{code:wienerstft}
+\end{listing}
+
+\begin{listing}[ht]
+  \centering
+\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{python}{./scripts/wiener_slicqt.py}
+\end{inputminted}
+  \caption{Zero-padding the sliCQT for the Wiener-EM post-processing step}
+  \label{code:wienerslicqt}
+\end{listing}
+
+\subsubsection{Defining the convolutional layers}
+\label{sec:convlayers}
+
+The convolutional denoising autoencoder models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. In the early experiments, they showed more promising results than the bi-LSTM model. The bi-LSTM model was first adapted to work on each time bucket of the ragged list of the sliCQT, but the longest time resolution (highest frequency bin) was prohibitively slow in both training and inference. Convolutional layers are a simple way of defining 2D time-frequency filters that slide over the 2D time-frequency matrices that correspond to different time buckets of the ragged sliCQT. The diagram in figure \ref{fig:cdaeslicqt} shows how the convolutional layers should be applied to the ragged sliCQT.
 
 \begin{figure}[ht]
 	\centering
@@ -618,5 +656,8 @@ The convolutional denoising autoencoder models of \textcite{plumbley1, plumbley2
 \end{figure}
 
 The exact parameters and configuration of the convolutional layers will be further described in section \ref{sec:experiment}.
+
+\todo[inline]{fix this section, put more params here}
+In the network, this is achieved with a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers 3 time coefficients to produce 6 time coefficients, which is in essence a learnable inverse operation of the 50\% overlap procedure. 
 
 \end{document}

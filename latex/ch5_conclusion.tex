@@ -17,7 +17,7 @@ In early experiments, the neural networks were designed to use the matrix form o
 After the completion of this thesis, my opinions on the most promising future directions of research are:
 \begin{tight_enumerate}
 	\item
-		Incorporating the ideas from \textcite{variableq1}, including the rasterization/interpolation instead of zero-padding for the matrix form, into the PyTorch NSGT/sliCQT library\footnote{\url{https://github.com/sevagh/nsgt}}
+		Incorporating the ideas from \textcite{variableq1}, including the rasterization/interpolation instead of zero-padding for the matrix form, into the PyTorch NSGT/sliCQT library.\footnote{\url{https://github.com/sevagh/nsgt}}
 	\item
 		Picking sliCQT parameters by a different strategy than the mix-phase inversion (MPI) oracle. For example, there may be a sliCQT representation which a neural network can learn from more effectively, but doesn't score highly on the MPI oracle.
 	\item
@@ -46,10 +46,10 @@ During these projects, I gradually discovered the SigSep community\footnote{\url
 
 From around April 2021, I considered a tentative thesis topic where I looked for an alternative time-frequency transform to the STFT. The intention was to improve the results of an STFT-based neural network by simply swapping one time-frequency matrix with another. Open-Unmix was the natural starting point, for its open-source design and intention to be used as a base for future research.
 
-Coincidentally, the ISMIR 2021 Music Demixing Challenge (MDX) began in May.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}  ISMIR (International Society for Music Information Retrieval) 2021 is the upcoming conference for the leading organization for music information retrieval (MIR) research. The MDX is a digital contest for music demixing systems that ran between May--August 2021, with a hidden new dataset for music demixing (MXDB21) created in-house by Sony, one of the main sponsors. The competition was organized with the help of AICrowd,\footnote{\url{https://www.aicrowd.com/}} a platform for crowdsourced AI and data science competitions.
+Coincidentally, the ISMIR 2021 Music Demixing Challenge (MDX) began in May.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}  ISMIR (International Society for Music Information Retrieval) 2021 is the upcoming conference for the leading organization for music information retrieval (MIR) research. The MDX is a digital contest for music demixing systems that ran between May--August 2021, with a hidden new dataset for music demixing (MXDB21) created in-house by Sony, one of the main sponsors. The competition was organized with the help of AICrowd,\footnote{\url{https://www.aicrowd.com/}} a platform for crowdsourced AI challenges.
 
-Throughout the competition, I focused on submitting improved versions of my UMX/sliCQT experiments, making 38 total submissions by the end. The organization of the competition was excellent, and the motivational and helpful atmosphere allowed me to make more progress than I ever expected. I am grateful for it, and happy to have participated in it. Without it, this thesis would not have been possible.
+Throughout the competition, I focused on submitting improved versions of my UMX/sliCQT experiments, making 38 total submissions by the end. The organization of the competition was excellent, and the motivational and helpful atmosphere allowed me to make more progress than I ever expected. I am grateful for having participated in it, and without it this thesis would not have been possible.
 
-Finally, I'm pleased to announce that from my participation in the MDX, the creator of a royalty-free music project\footnote{\url{https://open.spotify.com/artist/7IYLENV1pGGPvL6wkyl7t5}} agreed to release the stems in the interest of music research as an open dataset\footnote{\url{https://github.com/OnAir-Music/OnAir-Music-Dataset}} licensed permissively under Creative Commons.
+Finally, I'm pleased to announce that during my participation in the MDX, a royalty-free music project\footnote{\url{https://open.spotify.com/artist/7IYLENV1pGGPvL6wkyl7t5}} agreed to release their stems as an open dataset\footnote{\url{https://github.com/OnAir-Music/OnAir-Music-Dataset}} for music research, licensed permissively under Creative Commons, to combat the restrictive landscape created by the digital millenium copyright act (DMCA).
 
 \end{document}

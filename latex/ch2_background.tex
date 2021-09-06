@@ -774,7 +774,35 @@ Pip is installed by default with Python, making it the simpler choice, while Con
 
 Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database (\cite{gitbook}). \textcite{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you screw things up or lose files, you can easily recover.''
 
+According to \textcite{gitbook}, version control systems are either centralized or distributed. In a distributed version control systems (DVCS), each person's copy of the code contains the full history of changes. This means that people can work on their own private copy of the code, and then sync changes with a central server, rather than depending on the central server for viewing the history like in a centralized version control system (CVCS). This allows people to work independently of the central server, until they are ready to sync changes back with the other collaborators.
+
+Git is a popular tool for DVCS written by Linus Torvalds, who is also known for having created Linux. How Git works is that it ``thinks of its data more like a series of snapshots of a miniature filesystem... every time you commit, or save the state of your project, Git basically takes a picture of what all your files look like at that moment and stores a reference to that snapshot. (\cite{gitbook})''  To work on a code project that uses git, first the project, or \textit{repository}, must be cloned to your local system. You make local changes and then commit them. Finally, you can push your commits back to the central server to share with the other collaborators, often with a descriptive message describing what you changed. Figure \ref{fig:git} shows how git tracks a file and how a git workflow should look.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[How git stores snapshots of files]{\includegraphics[height=3.3cm]{./images-misc/git.png}}
+	\hspace{0.1em}
+	\subfloat[Recommended git workflow]{\includegraphics[height=3.3cm]{./images-misc/git2.png}}
+	\caption{How git works}
+	\label{fig:git}
+\end{figure}
+
+All of the code for this thesis were stored in git repositories to keep track of historical changes. It conveniently allows the author to reference the git history to describe the evolution of the project and the incremental progress.
+
+\newpagefill
+
 \subsubsection{Open-source software and GitHub}
+
+\textcite{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form.'' Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
+
+\textcite{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects.'' GitHub contains tools for working with git repositories, including social elements for creating personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate to show code written for the thesis or code from third-party projects, such that the reader can view the true source code that is being described. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in figure \ref{fig:githubpytorch}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=6cm]{./images-misc/github.png}
+	\caption{GitHub's code browser showing a file from the PyTorch source code}
+	\label{fig:githubpytorch}
+\end{figure}
 
 \newpagefill
 
