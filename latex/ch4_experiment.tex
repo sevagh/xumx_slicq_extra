@@ -201,7 +201,7 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
-The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets. The benchmark scripts is available here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
+The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets. The evaluation script is stored here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
 
 \begin{table}[ht]
 	\centering
@@ -223,9 +223,9 @@ The BSSv4 scores for the demixing results, computed on the test set of the MUSDB
 	\label{table:bsseval}
 \end{table}
 
-We discussed in section \ref{sec:replacestft} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener expectation maximization step that could be done with the sliCQT or the STFT. Both configurations were evaluated and shown in the boxplot to view the difference in music demixing quality.
+We discussed in section \ref{sec:replacestft} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener expectation maximization step that could be done with the sliCQT or the STFT. Both configurations were evaluated and shown in the boxplot.
 
-Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in listing \ref{lst:wienerem}, where 5 different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination,'' during my participation in the ISMIR 2021 Music Demixing Challenge.\footnote{\href{https://discourse.aicrowd.com/t/umx-iterative-wiener-expectation-maximization-for-non-stft-time-frequency-transforms/6191/3}\href{https://discourse.aicrowd.com/t/umx-iterative-wiener-expectation-maximization-for-non-stft-time-frequency-transforms/6191/6}} The evaluated configurations were:
+Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in listing \ref{lst:wienerem}, where 5 different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.'' The evaluated configurations were:
 \begin{tight_enumerate}
 	\item
 		1 + 2 iterations of STFT-Wiener-EM

@@ -364,9 +364,7 @@ This is the soft mask output of Open-Unmix, which is supported by one of the con
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
 \end{align}
 
-In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. I discussed the idea of the mix-phase inversion oracle here\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/issues/83}} and here\footnote{\url{https://discourse.aicrowd.com/t/oracle-baselines/6211/4?u=sevagh}} with Stefan Uhlich and Fabian-Robert St{\"o}ter, authors of Open-Unmix.
-
-There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle (\cite{noisyphase1, noisyphase2}), which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
+In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle (\cite{noisyphase1, noisyphase2}), which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
 
 Let us write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \ref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \ref{equation:mpioracle}:
 \begin{align}\tag{4}\label{equation:mpioracle}
@@ -655,7 +653,7 @@ The convolutional denoising autoencoder (CDAE) models of \textcite{plumbley1, pl
 	\label{fig:cdaeslicqt}
 \end{figure}
 
-CDAEs are symmetric: a stack of convolutional layers in the encoder are applied to the input spectrogram to extract spectral audio features with sliding 2D (frequency filter, time filter) kernels. The corresponding reverse stack of transpose convolution (or deconvolution) layer in the decoder use the same size of filter (in reverse order) to grow the feature map back to the original spectrogram. For example, a 2-layer encoder/decoder might consist of the following layers: $\text{Conv}(11,42) \rightarrow \text{Conv}(3,5) \rightarrow \text{TransposeConv}(3,5) \rightarrow \text{TransposeConv}(11,42)$. Figure \ref{fig:convtranspose} shows how a convolutional and transpose convolutional or deconvolutional layer apply inverse operations.
+CDAEs are symmetric: a stack of convolutional layers in the encoder are applied to the input spectrogram to extract spectral audio features with sliding 2D (frequency filter, time filter) kernels. The corresponding reverse stack of transpose convolution (or deconvolution) layer in the decoder use the same size of filter (in reverse order) to grow the feature map back to the original spectrogram. For example, a 2-layer encoder/decoder might consist of the following layers: $\text{Conv}(11,42) \rightarrow \text{Conv}(3,5) \rightarrow \text{ConvTranspose}(3,5) \rightarrow \text{ConvTranspose}(11,42)$. Figure \ref{fig:convtranspose} shows how a convolutional and transpose convolutional or deconvolutional layer apply inverse operations.
 
 \begin{figure}[ht]
 	\centering
@@ -664,7 +662,7 @@ CDAEs are symmetric: a stack of convolutional layers in the encoder are applied 
 	\label{fig:convtranspose}
 \end{figure}
 
-\textcite{convguide} state that ``images, sound clips and many other similar kinds of data have an intrinsic structure,'' and share the following properties:
+To describe convolutional layers, \textcite{convguide} state that ``images, sound clips and many other similar kinds of data have an intrinsic structure,'' and share the following properties:
 
 \begin{tight_enumerate}
 	\item
@@ -675,7 +673,7 @@ CDAEs are symmetric: a stack of convolutional layers in the encoder are applied 
 		The channel axis is used to access different views of the data (e.g., the left and right channels of a stereo audio track)
 \end{tight_enumerate}
 
-The STFT and sliCQT of stereo (2-channel) music produce a 2-channel spectrogram, such that the total dimensions of the 2D time-frequency spectrogram are $\text{time} \times \text{frequency} \times \text{channel}$. The 2D convolution kernels slide across the spectrograms to learn a feature representation, and the number of output channels determines how many feature maps are created. Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT first has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer, which are reversed in the decoder layer, i.e.: $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$.
+The STFT and sliCQT of stereo (2-channel) music produce a 2-channel spectrogram, such that the total dimensions of the 2D time-frequency spectrogram are $\text{time} \times \text{frequency} \times \text{channel}$. The 2D convolution kernels slide across the spectrograms to learn a feature representation, and the number of output channels determines how many feature maps are created. Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$.
 
 The kernel parameters define the size and movement of the 2D convolution kernel in the time and frequency dimensions in each output channel. Besides the kernel size, the kernel has these additional parameters: stride, dilation, and padding (\cite{convguide}). Figure \ref{fig:convdiags} shows the behavior of these different kernel parameters. The stride is the amount by which the kernel moves; a stride larger than one implies \textit{subsampling}, because it dictates how much of the output is retained (\cite{convguide}). The dilation defines ``holes'' or gaps in the kernel to increase the receptive field (\cite{convguide}), which is a cheap way to increase the amount of data points considered in a feature map. The padding defines zeros concatenated to the beginning and end of an axis.
 
@@ -733,7 +731,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		Conv2d \makecell[l]{in=2\\out=25}, BN, ReLU & Conv2d \makecell[l]{in=25\\out=55}, BN, ReLU \\
 	 \hline
 \end{tabular}
-	\caption{Encoder layers}
+	\caption{CDAE encoder layers}
 	\label{table:convtable3}
 	\vspace{1em}
 \begin{tabular}{ |l|l|l|l|l| }
@@ -744,7 +742,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		ConvTranspose2d \makecell[l]{in=55\\out=25}, BN, ReLU & ConvTranspose2d \makecell[l]{in=25\\out=2}, BN, ReLU \\
 	 \hline
 \end{tabular}
-	\caption{Decoder layers}
+	\caption{CDAE decoder layers}
 	\label{table:convtable4}
 	\vspace{1em}
 \begin{tabular}{ |l| }
