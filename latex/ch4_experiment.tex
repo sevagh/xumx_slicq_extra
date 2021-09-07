@@ -168,7 +168,7 @@ The sliCQT chosen by one run of the script that produced the best median SDR use
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-Finally, the full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
+The full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
 
 \begin{figure}[ht]
 	\centering
@@ -201,7 +201,7 @@ The training curves can be seen in figure \ref{fig:networkloss}. These were take
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
-The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets.
+The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets. The benchmark scripts is available here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
 
 \begin{table}[ht]
 	\centering
