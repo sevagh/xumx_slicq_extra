@@ -1,0 +1,140 @@
+\documentclass[letter,12pt,notitlepage]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage{subfiles}
+\usepackage[left=4cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}
+\usepackage{xfrac}
+\usepackage{afterpage}
+\usepackage{todonotes}
+\usepackage{amsmath}
+\usepackage[titletoc,title]{appendix}
+\usepackage{amssymb}
+\usepackage{makecell}
+\usepackage{pdfpages}
+\usepackage{wrapfig}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{rotating}
+  
+\usepackage{minted}
+\usemintedstyle{github}
+\usepackage{subfig}
+\usepackage{titling}
+\usepackage[compatibility=false]{caption}
+\usepackage[parfill]{parskip}
+\setlength{\droptitle}{1cm}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage{setspace}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\usepackage[backend=biber,authordate,annotation]{biblatex-chicago}
+\addbibresource{citations.bib}
+\input{variables.tex}
+
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{tight_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{itemize}}
+
+\newlength{\mintednumbersep}
+\AtBeginDocument{%
+  \sbox0{\tiny00}%
+  \setlength\mintednumbersep{8pt}%
+  \addtolength\mintednumbersep{-\wd0}%
+}
+
+\newcommand{\ichfeedback}[1]{\todo[color=green!40,inline]{#1}}
+
+\newcommand{\chaptertodo}[1]{\todo[color=magenta!40,inline]{#1}}
+
+\newcommand{\newpagefill}{
+	\vfill
+	\clearpage
+}
+
+\title{\ThesisTitle}
+
+\author{\vspace{1em}\\Sevag Hanssian \\
+  McGill University \\
+ \small{\texttt{sevag.hanssian@mail.mcgill.ca}} \\
+ \small{\texttt{sevagh@protonmail.com}} \\\ \\\ \\
+ \small{Thesis for Master of Arts in Music Technology}\\
+ \small{Date TBD, 2021}}
+
+% nil out the auto date
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%\newpagefill
+%
+%\subfile{ch0_abstract_acknowledgement.tex}
+
+\newpagefill
+
+\tableofcontents
+
+\newpagefill
+
+\listoffigures
+
+\listoflistings
+
+\newpagefill
+
+%\subfile{ch1_introduction.tex}
+%
+%\newpagefill
+
+\setcounter{section}{1}
+\subfile{ch2_background.tex}
+
+\newpagefill
+%
+%\subfile{ch3_methodology.tex}
+%
+%\newpagefill
+%
+%\subfile{ch4_experiment.tex}
+%
+%\newpagefill
+%
+%\subfile{ch5_conclusion.tex}
+%
+%\newpagefill
+
+%\nocite{*}
+\section{References}
+\printbibliography[heading=none]
+
+%\newpagefill
+%
+%\begin{appendices}
+%
+%\section{Code availability and replicating the results}
+%\label{appendix:coderesultsrepro}
+%
+%\end{appendices}
+
+\end{document}

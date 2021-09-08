@@ -4,6 +4,9 @@ texpdf:
 	latexmk $(tex_fname) ${LATEXMK_FLAGS} 
 
 
+report-ch2: tex_fname="report_ch2.tex"
+report-ch2: texpdf
+
 report-dev: export LATEXMK_FLAGS="-pvc"
 report-dev: report
 report: tex_fname="report.tex"
