@@ -7,7 +7,7 @@
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
 
-\textcite[Chapter~2]{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system.'' Some examples of signals are a 2-dimensional image, which is a function of pixel brightness of two spatial variables, and a speech signal, which is a function of time. \textcite[Chapter~2]{moore} describes the more specific case of sound, or audio signals, as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure.''
+\textcite[Chapter~2]{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system.'' Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \textcite[Chapter~2]{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure.''
 
 The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
 
@@ -15,7 +15,7 @@ The waveform is defined as the function of pressure variation plotted against ti
 	\centering
 	\subfloat[Continuous-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/continuoustime.png}}\\
 	\subfloat[Discrete-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/discretetime.png}}
-	\caption{A continous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
+	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
 	\label{fig:discretecontinuous}
 \end{figure}
 
@@ -500,15 +500,15 @@ Finally, recall the CQT spectrograms shown in figure \ref{fig:cqtvstft} in the p
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Center frequencies, 12 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_cf.png}}
-	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 12 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_gaborframe.png}}
-	\subfloat[Constant-Q ratio, 12 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_ratio.png}}\\
-	\subfloat[Center frequencies, 24 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_cf.png}}
-	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 24 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_gaborframe.png}}
-	\subfloat[Constant-Q ratio, 24 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_ratio.png}}\\
-	\subfloat[Center frequencies, 48 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_cf.png}}
-	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 48 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_gaborframe.png}}
-	\subfloat[Constant-Q ratio, 48 bpo]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_ratio.png}}\\
+	\subfloat[Center frequencies, 12 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_cf.png}}
+	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 12 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_gaborframe.png}}
+	\subfloat[Constant-Q ratio, 12 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_ratio.png}}\\
+	\subfloat[Center frequencies, 24 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_cf.png}}
+	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 24 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_gaborframe.png}}
+	\subfloat[Constant-Q ratio, 24 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_ratio.png}}\\
+	\subfloat[Center frequencies, 48 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_cf.png}}
+	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 48 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_gaborframe.png}}
+	\subfloat[Constant-Q ratio, 48 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_ratio.png}}\\
 	\caption{Additional NSGT information for the MATLAB CQT}
 	\label{fig:cqtdetails}
 \end{figure}
@@ -849,7 +849,7 @@ Among the earliest computational approaches for blind source separation is Indep
 According to \textcite{musicsepintro1}, ICA techniques arose more typically for speech denoising (\cite{speechsep}), and they make assumptions that cannot be generalized easily to music:
 
 \begin{quote}
-	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, non-stationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are non-linearities in the mixing process (e.g., dynamic range compression).
+	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, nonstationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are nonlinearities in the mixing process (e.g., dynamic range compression).
 \end{quote}
 
 Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}).
@@ -873,7 +873,7 @@ Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\c
 	\label{fig:fitzhpss}
 \end{figure}
 
-Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite{musicsepgood}, NMF ``attempts to factorize a given non-negative matrix into two non-negative matrices,'' and it can be applied to the non-negative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; \textcite{nmfpaper}'s survey on NMF techniques covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; \textcite{nmfpaper}'s survey on NMF techniques covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
 \begin{figure}[ht]
 	\centering

@@ -170,12 +170,191 @@ The sliCQT chosen by one run of the script that produced the best median SDR use
 
 The full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{./images-bss/oracle_boxplot.pdf}
 	\caption{Boxplot for oracle mask evaluations}
 	\label{fig:oraclebssboxplot}
 \end{figure}
+
+\subsubsection{sliCQT dimensionality analysis}
+
+The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22050 Hz are automatically chosen to be 18060 and 4514 samples respectively.
+
+The input data to xumx-sliCQ was split into to sequences of a 1 second duration. The slice length of the chosen scale results in 1 second of audio containing 9 slices. Each slice consists of a number of time coefficients that varies with the frequency bin. The ragged transform contains 70 buckets of frequency bins grouped by their time resolution. Tables \ref{table:slicqdim1} and \ref{table:slicqdim2} show each bucket in the ragged transform with its original 3D shape ($\text{slice} \times \text{frequency} \times \text{time}$), and the flattened and overlap-added 2D shapes ($\text{time} \times \text{frequency}$).
+
+Note that the channel dimension is omitted from the table. There is one spectrogram for each channel of audio, resulting in an additional $(,2)$ dimension added to the sliCQT shape from the 2 channels of the stereo training data. The flattened shape is a result of concatenating the $\text{slice} \times \text{time}$ blocks together; e.g., to flatten $9 \times 10$ results in $90$. The overlap-add considers a $\sfrac{\text{time}}{2}$ overlap between each adjacent slice of size.
+
+It is instructive to compare the dimensionality of the chosen sliCQT parameters to the matrix form of the sliCQT, and to the STFT with a window size of 4096 and an overlap of 1024.
+
+The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{frequency} \times \text{time}$ shape of $9 \times 263 \times 292$, representing the same 9 slices for 1 second of audio as the ragged transform, and 263 frequency bins, which includes the 0--32.9 Hz bin added to the 262 we specified between 32.9--22050 Hz. The time coefficients are of length 292, which as shown in table \ref{table:slicqdim2} is the maximum time resolution of the highest frequency bin. The other frequency bins have some operations performed including zero-padding to fit the same dimension. The 2D $\text{frequency} \times \text{time}$ shapes are $263 \times 1022$ for the overlap-added spectrogram and $263 \times 1752$ for the flattened spectrogram.
+
+The STFT with a window of 4096 and overlap of 1024 results in a $\text{frequency} \times \text{time}$ transform of shape $2049 \times 40$, where 2049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4096}{2} + 1$. The 40 frames are computed from the signal length (or 44100 samples for 1s of audio), window size, and overlap as follows: $\text{floor}(\sfrac{44100-4096}{1024}) + 1 = 40$. Note the considerably smaller time coefficients of 40 frames representing 1 second of audio, which is uniform across all 2049 output frequencies.
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{ |l|l|l|l|l| }
+	 \hline
+		Block & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
+	 \hline
+	 \hline
+
+0 & 0 & (9,1,28) & (1,98) & (1,168) \\
+\hline
+1 & 1--86 & (9,86,16) & (86,56) & (86,96) \\
+\hline
+2 & 87--100 & (9,14,20) & (14,70) & (14,120) \\
+\hline
+3 & 101--111 & (9,11,24) & (11,84) & (11,144) \\
+\hline
+4 & 112--120 & (9,9,28) & (9,98) & (9,168) \\
+\hline
+5 & 121--128 & (9,8,32) & (8,112) & (8,192) \\
+\hline
+6 & 129--135 & (9,7,36) & (7,126) & (7,216) \\
+\hline
+7 & 136--141 & (9,6,40) & (6,140) & (6,240) \\
+\hline
+8 & 142--147 & (9,6,44) & (6,154) & (6,264) \\
+\hline
+9 & 148--152 & (9,5,48) & (5,168) & (5,288) \\
+\hline
+10 & 153--157 & (9,5,52) & (5,182) & (5,312) \\
+\hline
+11 & 158--161 & (9,4,56) & (4,196) & (4,336) \\
+\hline
+12 & 162--166 & (9,5,60) & (5,210) & (5,360) \\
+\hline
+13 & 167--169 & (9,3,64) & (3,224) & (3,384) \\
+\hline
+14 & 170--173 & (9,4,68) & (4,238) & (4,408) \\
+\hline
+15 & 174--177 & (9,4,72) & (4,252) & (4,432) \\
+\hline
+16 & 178--180 & (9,3,76) & (3,266) & (3,456) \\
+\hline
+17 & 181--183 & (9,3,80) & (3,280) & (3,480) \\
+\hline
+18 & 184--186 & (9,3,84) & (3,294) & (3,504) \\
+\hline
+19 & 187--189 & (9,3,88) & (3,308) & (3,528) \\
+\hline
+20 & 190--191 & (9,2,92) & (2,322) & (2,552) \\
+\hline
+21 & 192--194 & (9,3,96) & (3,336) & (3,576) \\
+\hline
+22 & 195--196 & (9,2,100) & (2,350) & (2,600) \\
+\hline
+23 & 197--199 & (9,3,104) & (3,364) & (3,624) \\
+\hline
+24 & 200--201 & (9,2,108) & (2,378) & (2,648) \\
+\hline
+25 & 202--203 & (9,2,112) & (2,392) & (2,672) \\
+\hline
+26 & 204--205 & (9,2,116) & (2,406) & (2,696) \\
+\hline
+27 & 206--207 & (9,2,120) & (2,420) & (2,720) \\
+\hline
+28 & 208--209 & (9,2,124) & (2,434) & (2,744) \\
+\hline
+29 & 210--211 & (9,2,128) & (2,448) & (2,768) \\
+\hline
+30 & 212--213 & (9,2,132) & (2,462) & (2,792) \\
+\hline
+31 & 214--215 & (9,2,136) & (2,476) & (2,816) \\
+\hline
+32 & 216--217 & (9,2,140) & (2,490) & (2,840) \\
+\hline
+33 & 218 & (9,1,144) & (1,504) & (1,864) \\
+\hline
+34 & 219--220 & (9,2,148) & (2,518) & (2,888) \\
+\hline
+35 & 221--222 & (9,2,152) & (2,532) & (2,912) \\
+\hline
+\end{tabular}
+	\caption{Dimensions of the forward ragged sliCQT, first 35 time buckets}
+	\label{table:slicqdim1}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{ |l|l|l|l|l| }
+	 \hline
+		Block & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
+	 \hline
+	 \hline
+36 & 223 & (9,1,156) & (1,546) & (1,936) \\
+\hline
+37 & 224--225 & (9,2,160) & (2,560) & (2,960) \\
+\hline
+38 & 226 & (9,1,164) & (1,574) & (1,984) \\
+\hline
+39 & 227--228 & (9,2,168) & (2,588) & (2,1008) \\
+\hline
+40 & 229 & (9,1,172) & (1,602) & (1,1032) \\
+\hline
+41 & 230--231 & (9,2,176) & (2,616) & (2,1056) \\
+\hline
+42 & 232 & (9,1,180) & (1,630) & (1,1080) \\
+\hline
+43 & 233 & (9,1,184) & (1,644) & (1,1104) \\
+\hline
+44 & 234--235 & (9,2,188) & (2,658) & (2,1128) \\
+\hline
+45 & 236 & (9,1,192) & (1,672) & (1,1152) \\
+\hline
+46 & 237 & (9,1,196) & (1,686) & (1,1176) \\
+\hline
+47 & 238 & (9,1,200) & (1,700) & (1,1200) \\
+\hline
+48 & 239--240 & (9,2,204) & (2,714) & (2,1224) \\
+\hline
+49 & 241 & (9,1,208) & (1,728) & (1,1248) \\
+\hline
+50 & 242 & (9,1,212) & (1,742) & (1,1272) \\
+\hline
+51 & 243 & (9,1,216) & (1,756) & (1,1296) \\
+\hline
+52 & 244 & (9,1,220) & (1,770) & (1,1320) \\
+\hline
+53 & 245 & (9,1,224) & (1,784) & (1,1344) \\
+\hline
+54 & 246 & (9,1,228) & (1,798) & (1,1368) \\
+\hline
+55 & 247--248 & (9,2,232) & (2,812) & (2,1392) \\
+\hline
+56 & 249 & (9,1,236) & (1,826) & (1,1416) \\
+\hline
+57 & 250 & (9,1,240) & (1,840) & (1,1440) \\
+\hline
+58 & 251 & (9,1,244) & (1,854) & (1,1464) \\
+\hline
+59 & 252 & (9,1,248) & (1,868) & (1,1488) \\
+\hline
+60 & 253 & (9,1,252) & (1,882) & (1,1512) \\
+\hline
+61 & 254 & (9,1,256) & (1,896) & (1,1536) \\
+\hline
+62 & 255 & (9,1,264) & (1,924) & (1,1584) \\
+\hline
+63 & 256 & (9,1,268) & (1,938) & (1,1608) \\
+\hline
+64 & 257 & (9,1,272) & (1,952) & (1,1632) \\
+\hline
+65 & 258 & (9,1,276) & (1,966) & (1,1656) \\
+\hline
+66 & 259 & (9,1,280) & (1,980) & (1,1680) \\
+\hline
+67 & 260 & (9,1,284) & (1,994) & (1,1704) \\
+\hline
+68 & 261 & (9,1,288) & (1,1008) & (1,1728) \\
+\hline
+69 & 262 & (9,1,292) & (1,1022) & (1,1752) \\
+\hline
+\end{tabular}
+	\caption{Dimensions of the forward ragged sliCQT, last 35 time buckets}
+	\label{table:slicqdim2}
+\end{table}
 
 \newpagefill
 
@@ -183,9 +362,9 @@ The full oracle evaluation on both of these sliCQT parameters are shown in the b
 
 \subsubsection{Learning parameters and training curves}
 
-The training parameters of xumx-sliCQ were kept similar to Open-Unmix and CrossNet-Open-Unmix:
+The learning hyperparameters of xumx-sliCQ were mostly kept the same to Open-Unmix and CrossNet-Open-Unmix. The training uses an Adam optimizer which runs for 1000 iterations (or epochs), with a learning rate of 0.001 and a weight decay of 0.00001. There is also an adaptive learning rate scheduler with a decay patience of 80 and a decay gamma of 0.3. A difference between the learning hyperparameters of X-UMX and UMX is that the network trains for the full 1000 epochs without any early stopping, which was also incorporated in xumx-sliCQ.
 
-The training curves can be seen in figure \ref{fig:networkloss}. These were taken from Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard}} which is a visual web component of the Tensorflow deep learning framework (\cite{tensorflow}) that is also compatible with PyTorch. It was used to visualize the loss curves of xumx-sliCQ during training.
+Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss (CL), with a mixing coefficient between the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0, but in xumx-sliCQ it is set to 0.1 to reflect the observed order of magnitude difference in the MSE loss of the STFT and the sliCQT. xumx-sliCQ reports 6,669,912 trainable parameters in total from the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package. The training curves can be seen in figure \ref{fig:networkloss}, visualized using Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a training visualization tool.
 
 \begin{figure}[ht]
 	\centering
