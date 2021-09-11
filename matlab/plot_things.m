@@ -1,7 +1,6 @@
 init;
 
-
-set(0, 'DefaultAxesFontSize', 20);
+set(0, 'DefaultAxesFontSize', 40);
 
 [sig, fs] = gspi;
 
@@ -81,12 +80,12 @@ t = (0.0:dT:duration-dT)';
 
 figure;
 spectrogram(sig,4096,1024,4096,fs,'yaxis');
-title('STFT, window=4096, overlap=1024','FontWeight','Normal');
+title('Magnitude STFT, window=4096, overlap=1024','FontWeight','Normal');
 colormap ltfat_inferno;
 
 
 figure;
 cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',48);
-title('CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
+title('Magnitude CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
 colormap ltfat_inferno;
 

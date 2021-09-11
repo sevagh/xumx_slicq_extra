@@ -28,9 +28,10 @@ The sliCQ Transform [@slicq], or sliCQT, is a realtime implementation of the Non
 
 \autoref{fig:spectrograms} shows a comparison of various spectrograms of a 5.94 second glockenspiel signal.^[<https://github.com/ltfat/ltfat/blob/master/signals/gspi.wav>] The spectrograms are generated using an STFT with the Open-Unmix default window size of 4096, the CQ-NSGT with 48 bins-per-octave, and the sliCQ Transform with 262 frequency bins in 32.9-22050 Hz on the Bark scale, which are the sliCQT parameters used in xumx-sliCQ.
 
-![](https://gitlab.com/sevagh/xumx_slicq_extra/-/raw/main/mdx-satellite-paper/static-assets/glock_stft4096.png){ width=49% } ![](https://gitlab.com/sevagh/xumx_slicq_extra/-/raw/main/mdx-satellite-paper/static-assets/glock_cqt48.png){ width=49% }
+![](./static-assets/glock_stft4096.png){ width=48% }\hspace{0.5em}![](./static-assets/glock_cqt48.png){ width=48% }
+\vspace{-0.65em}
 
-![Comparison of the musical information captured by STFT, CQT, and sliCQT spectrograms.\label{fig:spectrograms}](https://gitlab.com/sevagh/xumx_slicq_extra/-/raw/main/mdx-satellite-paper/static-assets/slicqt_bark_262_329hz.png){ width=100% }
+![STFT, CQT, and sliCQT magnitude spectrograms of the musical glockenspiel signal.\label{fig:spectrograms}](./static-assets/slicqt_bark_262_329hz.png){ width=54% }
 
 # Methodology
 
