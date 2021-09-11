@@ -1,5 +1,6 @@
 init;
 
+
 set(0, 'DefaultAxesFontSize', 20);
 
 [sig, fs] = gspi;
@@ -11,21 +12,21 @@ duration = siglen/fs;
 dT = 1/fs;
 t = (0.0:dT:duration-dT)';
 
-plot(t, sig);
-grid on;
-xlabel('time (s)');
-ylabel('amplitude');
-title('Glockenspiel waveform');
-
-N = 2048;
-y = fft(sig, N);                               % Compute DFT of x
-m = abs(y);                               % Magnitude
-y(m<1e-6) = 0;
-p = unwrap(angle(y));                     % Phase
-
-df=fs/N; %frequency resolution
-sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
-f=sampleIndex*df; %x-axis index converted to ordered frequencies
+% plot(t, sig);
+% grid on;
+% xlabel('time (s)');
+% ylabel('amplitude');
+% title('Glockenspiel waveform');
+% 
+% N = 2048;
+% y = fft(sig, N);                               % Compute DFT of x
+% m = abs(y);                               % Magnitude
+% y(m<1e-6) = 0;
+% p = unwrap(angle(y));                     % Phase
+% 
+% df=fs/N; %frequency resolution
+% sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
+% f=sampleIndex*df; %x-axis index converted to ordered frequencies
 
 % subplot(2,1,1)
 % plot(f,m)
@@ -73,7 +74,19 @@ f=sampleIndex*df; %x-axis index converted to ordered frequencies
 % spectrogram(sig,bigHamm,bigWin/2,bigWin*2,fs,"yaxis");
 % title("Glockenspiel, hammwin = 16384");
 
+% figure;
+% plot(hamming(2048)); hold on; plot(gausswin(2048)); legend('Hamming window', 'Gaussian window');
+% title('2048-point windows; Hamming vs. Gaussian');
+% xlim([0 2048]);[x, fs] = audioread('./static-assets/gspi.wav');
+
 figure;
-plot(hamming(2048)); hold on; plot(gausswin(2048)); legend('Hamming window', 'Gaussian window');
-title('2048-point windows; Hamming vs. Gaussian');
-xlim([0 2048]);
+spectrogram(sig,4096,1024,4096,fs,'yaxis');
+title('STFT, window=4096, overlap=1024','FontWeight','Normal');
+colormap ltfat_inferno;
+
+
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',48);
+title('CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
+colormap ltfat_inferno;
+
