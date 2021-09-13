@@ -60,7 +60,7 @@ Throughout this section, the description of the Fourier Transform of acoustic si
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.825\textwidth]{./images-gspi/gspi_time_domain.png}
+	\includegraphics[width=0.825\textwidth,trim={1cm 0.25cm 1cm 0.25cm},clip]{./images-gspi/glock_waveform.png}
 	\caption{Glockenspiel waveform}
 	\label{fig:glockwaveform}
 \end{figure}
@@ -111,8 +111,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/gspi_dft.png}}\\
-	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/gspi_dft_bigger.png}}
+	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_2048.png}}\\
+	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_262144.png}}
 	\caption{DFT of the Glockenspiel waveform. Note the richer frequency information in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
@@ -208,7 +208,7 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-tftheory/gaussianvshamming.png}
+	\includegraphics[width=0.8\textwidth]{./images-tftheory/hamming_vs_gauss.png}
 	\caption{2048-sample Hamming and Gaussian windows compared}
 	\label{fig:gaussvshamm}
 \end{figure}
@@ -217,13 +217,13 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_128.png}}
-	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_128.png}}\\
-	\subfloat[STFT, 2048-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_2048.png}}
-	\subfloat[Gabor transform, 2048-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_2048.png}}\\
-	\subfloat[STFT, 16384-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_hamm_16384.png}}
-	\subfloat[Gabor transform, 16384-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/gspi_gauss_16384.png}}
-	\caption{Visual comparison of the Hamming-window STFT and the Gaussian-window STFT (i.e. the Gabor transform), using the Glockenspiel signal}
+	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/glock_hamm_128.png}}
+	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/glock_gauss_128.png}}\\
+	\subfloat[STFT, 2048-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/glock_hamm_2048.png}}
+	\subfloat[Gabor transform, 2048-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
+	\subfloat[STFT, 16384-sample Hamming]{\includegraphics[width=0.5\textwidth]{./images-gspi/glock_hamm_16384.png}}
+	\subfloat[Gabor transform, 16384-sample Gaussian]{\includegraphics[width=0.5\textwidth]{./images-gspi/glock_gauss_16384.png}}
+	\caption{Visual comparison of the magnitude STFT spectrograms with the Hamming and Gaussian window}
 	\label{fig:stfts}
 \end{figure}
 
@@ -271,11 +271,11 @@ Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft
 \begin{figure}[ht]
 	\centering
 	\subfloat[CQT spectrogram, 12 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt12.png}}
-	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft256.png}}\\
+	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_256.png}}\\
 	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt24.png}}
-	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft1024.png}}\\
+	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_1024.png}}\\
 	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt48.png}}
-	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft4096.png}}
+	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_4096.png}}
 	\caption{Spectrograms of the glockenspiel signal, showing how the CQT displays more musical information than the STFT for all frequency resolutions}
 	\label{fig:cqtvstft}
 \end{figure}
