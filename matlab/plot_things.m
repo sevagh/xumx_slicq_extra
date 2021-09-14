@@ -2,6 +2,8 @@ init;
 
 set(0, 'DefaultAxesFontSize', 34);
 set(0,'DefaultFigureColormap', ltfat_inferno);
+dpiVar = 100;
+gcfPosition = [1 1 1920 1080];
 
 [sig, fs] = gspi;
 
@@ -18,9 +20,8 @@ grid on;
 xlabel('time (s)');
 ylabel('amplitude');
 title('Glockenspiel waveform','FontWeight','Normal');
-set(gcf, 'Position', get(0, 'Screensize'));
-saveas(gcf,"../latex/images-gspi/glock_waveform.png");
-
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_waveform.png","Resolution",dpiVar);
 
 N = 2048;
 y = fft(sig, N);                               % Compute DFT of x
@@ -45,8 +46,8 @@ title(sprintf('Phase DFT, %d points', N),'FontWeight','Normal');
 xlabel('frequency (Hz)');
 ylabel('\angle DFT');
 
-set(gcf, 'Position', get(0, 'Screensize'));
-saveas(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N));
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resolution",dpiVar);
 
 N = siglen;
 y = fft(sig, N);                               % Compute DFT of x
@@ -71,68 +72,109 @@ title(sprintf('Phase DFT, %d points', N),'FontWeight','Normal');
 xlabel('frequency (Hz)');
 ylabel('\angle DFT');
 
-set(gcf, 'Position', get(0, 'Screensize'));
-saveas(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N));
-% 
-% smallWin = 128;
-% midWin = 2048;
-% bigWin = 16384;
-% 
-% figure;
-% smallGauss=gausswin(smallWin);
-% spectrogram(sig,smallGauss,smallWin/2,smallWin*2,fs,"yaxis");
-% title("Glockenspiel, gausswin = 128",'FontWeight','Normal');
-% 
-% figure;
-% midGauss=gausswin(midWin);
-% spectrogram(sig,midGauss,midWin/2,midWin*2,fs,"yaxis");
-% title("Glockenspiel, gausswin = 2048",'FontWeight','Normal');
-% 
-% figure;
-% bigGauss=gausswin(bigWin);
-% spectrogram(sig,bigGauss,bigWin/2,bigWin*2,fs,"yaxis");
-% title("Glockenspiel, gausswin = 16384",'FontWeight','Normal');
-% 
-% figure;
-% smallHamm=hamming(smallWin);
-% spectrogram(sig,smallHamm,smallWin/2,smallWin*2,fs,"yaxis");
-% title("Glockenspiel, hammwin = 128",'FontWeight','Normal');
-% 
-% figure;
-% midHamm=hamming(midWin);
-% spectrogram(sig,midHamm,midWin/2,midWin*2,fs,"yaxis");
-% title("Glockenspiel, hammwin = 2048",'FontWeight','Normal');
-% 
-% figure;
-% bigHamm=hamming(bigWin);
-% spectrogram(sig,bigHamm,bigWin/2,bigWin*2,fs,"yaxis");
-% title("Glockenspiel, hammwin = 16384",'FontWeight','Normal');
-% 
-% figure;
-% plot(hamming(2048)); hold on; plot(gausswin(2048)); legend('Hamming window', 'Gaussian window');
-% title('2048-point windows; Hamming vs. Gaussian','FontWeight','Normal');
-% xlim([0 2048]);
-% 
-% figure;
-% spectrogram(sig,4096,1024,4096,fs,'yaxis');
-% title('Magnitude STFT, window=4096','FontWeight','Normal');
-% 
-% figure;
-% spectrogram(sig,1024,256,1024,fs,'yaxis');
-% title('Magnitude STFT, window=1024','FontWeight','Normal');
-% 
-% figure;
-% spectrogram(sig,256,64,256,fs,'yaxis');
-% title('Magnitude STFT, window=256','FontWeight','Normal');
-% 
-% figure;
-% cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',12);
-% title('Magnitude CQT/CQ-NSGT, 12 bins-per-octave','FontWeight','Normal');
-% 
-% figure;
-% cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',24);
-% title('Magnitude CQT/CQ-NSGT, 24 bins-per-octave','FontWeight','Normal');
-% 
-% figure;
-% cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',48);
-% title('Magnitude CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resolution",dpiVar);
+
+smallWin = 128;
+midWin = 2048;
+bigWin = 16384;
+
+figure;
+smallGauss=gausswin(smallWin);
+spectrogram(sig,smallGauss,smallWin/2,smallWin*2,fs,"yaxis");
+title("Glockenspiel, gausswin = 128",'FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_gauss_%d.png", smallWin),"Resolution",dpiVar);
+
+figure;
+midGauss=gausswin(midWin);
+spectrogram(sig,midGauss,midWin/2,midWin*2,fs,"yaxis");
+title("Glockenspiel, gausswin = 2048",'FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_gauss_%d.png", midWin),"Resolution",dpiVar);
+
+figure;
+bigGauss=gausswin(bigWin);
+spectrogram(sig,bigGauss,bigWin/2,bigWin*2,fs,"yaxis");
+title("Glockenspiel, gausswin = 16384",'FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_gauss_%d.png", bigWin),"Resolution",dpiVar);
+
+figure;
+smallHamm=hamming(smallWin);
+spectrogram(sig,smallHamm,smallWin/2,smallWin*2,fs,"yaxis");
+title("Glockenspiel, hammwin = 128",'FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_hamm_%d.png", smallWin),"Resolution",dpiVar);
+
+figure;
+midHamm=hamming(midWin);
+spectrogram(sig,midHamm,midWin/2,midWin*2,fs,"yaxis");
+title("Glockenspiel, hammwin = 2048",'FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_hamm_%d.png", midWin),"Resolution",dpiVar);
+
+figure;
+bigHamm=hamming(bigWin);
+spectrogram(sig,bigHamm,bigWin/2,bigWin*2,fs,"yaxis");
+title("Glockenspiel, hammwin = 16384",'FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,sprintf("../latex/images-gspi/glock_hamm_%d.png", bigWin),"Resolution",dpiVar);
+
+figure;
+plot(hamming(2048)); hold on; plot(gausswin(2048)); legend('Hamming window', 'Gaussian window');
+title('2048-point windows; Hamming vs. Gaussian','FontWeight','Normal');
+xlim([0 2048]);
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-tftheory/hamming_vs_gauss.png","Resolution",dpiVar);
+
+figure;
+spectrogram(sig,4096,1024,4096,fs,'yaxis');
+title('Magnitude STFT, window=4096','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_stft_4096.png","Resolution",dpiVar);
+
+figure;
+spectrogram(sig,1024,256,1024,fs,'yaxis');
+title('Magnitude STFT, window=1024','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_stft_1024.png","Resolution",dpiVar);
+
+figure;
+spectrogram(sig,256,64,256,fs,'yaxis');
+title('Magnitude STFT, window=256','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_stft_256.png","Resolution",dpiVar);
+
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',12);
+title('Magnitude CQT/CQ-NSGT, 12 bins-per-octave','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_cqt12.png","Resolution",dpiVar);
+
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',24);
+title('Magnitude CQT/CQ-NSGT, 24 bins-per-octave','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_cqt24.png","Resolution",dpiVar);
+
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',48);
+title('Magnitude CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_cqt48.png","Resolution",dpiVar);
+
+close all;
