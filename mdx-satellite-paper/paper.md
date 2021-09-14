@@ -22,7 +22,7 @@ From the time-frequency uncertainty principle [@gabor1946], the STFT of a signal
 
 # Background
 
-The STFT is computed by applying the Discrete Fourier Transform on fixed-size windows of the input signal. From both auditory and musical motivations, variable-size windows are preferred, with long windows in low frequency regions to capture detailed harmonic information with a high frequency resolution, and short windows in high frequency regions to capture transients with a high time resolution [@doerflerphd]. The sliCQ Transform (sliCQT) is a realtime implementation of @balazs's Nonstationary Gabor Transform (NSGT), a time-frequency transform with complex Fourier coefficients and perfect inverse using time-varying windows. An important application of the NSGT or sliCQT is to create an invertible implementation of @jbrown's Constant-Q Transform (CQT).
+The STFT is computed by applying the Discrete Fourier Transform on fixed-size windows of the input signal. From both auditory and musical motivations, variable-size windows are preferred, with long windows in low frequency regions to capture detailed harmonic information with a high frequency resolution, and short windows in high frequency regions to capture transients with a high time resolution [@doerflerphd]. The sliCQ Transform [sliCQT\; @slicq] is a realtime implementation of the Nonstationary Gabor Transform [NSGT\; @balazs], a time-frequency transform with complex Fourier coefficients and perfect inverse using time-varying windows. An important application of the NSGT or sliCQT is to create an invertible implementation of the Constant-Q Transform [CQT\; @jbrown].
 
 # Methodology
 
