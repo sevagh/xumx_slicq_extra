@@ -303,13 +303,14 @@ We believe that due to necessity of the 50\% overlap to create a meaningful spec
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
-	\subfloat[sliCQT with minimum automatic sllen (6744) and 50\% overlap-add]{\includegraphics[width=\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
+	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}
+	\hspace{0.1em}
+	\subfloat[sliCQT with minimum automatic sllen (6744) and 50\% overlap-add]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
 	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22050 Hz}
 	\label{fig:overlappedspectrograms}
 \end{figure}
 
-We note a few details. Firstly, the overlap-add procedure for the matrix form of the sliCQT operates on the whole matrix, while for the ragged transform, it needs to be applied to each of the tensors in the list. Next, observe that there is a slight difference in the time axis duration between the NSGT and sliCQT, resulting from the slicing and overlap-add procedure.
+The overlap-add procedure for the matrix form of the sliCQT operates on the whole matrix, and for the ragged transform, it needs to be applied to each of the tensors in the list.
 
 \newpagefill
 

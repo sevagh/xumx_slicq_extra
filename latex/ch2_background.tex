@@ -60,7 +60,7 @@ Throughout this section, the description of the Fourier Transform of acoustic si
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.825\textwidth]{./images-gspi/glock_waveform.png}
+	\includegraphics[width=0.725\textwidth]{./images-gspi/glock_waveform.png}
 	\caption{Glockenspiel waveform}
 	\label{fig:glockwaveform}
 \end{figure}
@@ -209,7 +209,7 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images-tftheory/hamming_vs_gauss.png}
-	\caption{2048-sample Hamming and Gaussian windows compared}
+	\caption{2048-sample Hamming and Gaussian windows}
 	\label{fig:gaussvshamm}
 \end{figure}
 
@@ -381,7 +381,7 @@ The NSGT coefficients for a signal of length $L$ are given by an FFT of length $
 
 We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
-Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22050 Hz. 20 Hz is the accepted lowest frequency of human hearing (\cite{moore}), and 22050 Hz is the Nyquist frequency (or maximum signal frequency) of the MUSDB18-HQ sample rate 44100 Hz. In practice, the minimum and maximum frequencies can be also customized for the signal under study. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
+Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
@@ -390,21 +390,15 @@ Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show several different
 	\subfloat[NSGT, Constant-Q scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}\\
 	\subfloat[NSGT, Variable-Q scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_vqlog_100.png}}
 	\hspace{0.1em}
-	\subfloat[NSGT, Variable-Q scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_vqlog_500.png}}
-	\caption{Spectrograms of the glockenspiel signal using the NSGT with a low (100 bins) and high (500 bins) frequency resolution and the constant- and Variable-Q scales. The frequency range for each shown scale is 20--22050 Hz, and there is an offset of 15 Hz per band for the Variable-Q scale}
-	\label{fig:bunchansgts1}
-\end{figure}
-
-\begin{figure}[ht]
-	\centering
+	\subfloat[NSGT, Variable-Q scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_vqlog_500.png}}\\
 	\subfloat[NSGT, mel scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_100.png}}
 	\hspace{0.1em}
 	\subfloat[NSGT, mel scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_500.png}}\\
 	\subfloat[NSGT, Bark scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_bark_100.png}}
 	\hspace{0.1em}
 	\subfloat[NSGT, Bark scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_bark_500.png}}\\
-	\caption{Spectrograms of the glockenspiel signal using the NSGT with a low (100 bins) and high (500 bins) frequency resolution and the mel and Bark psychoacoustic scales. The frequency range for each shown scale is 20--22050 Hz}
-	\label{fig:bunchansgts2}
+	\caption{Different NSGT spectrograms of the glockenspiel signal}
+	\label{fig:bunchansgts}
 \end{figure}
 
 \begin{table}[ht]
@@ -545,8 +539,9 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Adjacent slices placed side-by-side. Note the incorrect doubling of the duration]{\includegraphics[width=\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
-	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=\textwidth]{./images-gspi/gspi_overlap_proper.png}}
+	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_overlap_flatten.png}}
+	\hspace{0.1em}
+	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_overlap_proper.png}}
 	\caption{sliCQT spectrograms demonstrating the slice half-overlap}
 	\label{fig:slicqoverlaps}
 \end{figure}
