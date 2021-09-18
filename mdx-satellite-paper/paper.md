@@ -31,7 +31,7 @@ In music demixing, the oracle estimator represents the theoretical upper limit o
 \hat{X}_{\text{target}}(j\omega) = |X_{\text{target}}(j\omega)| \cdot \measuredangle{X_{\text{mix}}(j\omega)}, \hat{x}_{\text{target}}[n] = \text{iSTFT}(\hat{X}_{\text{target}}(j\omega))\\
 \end{equation}
 
-The sliCQT parameters were chosen by maximizing the median SDR across all 4 targets from the waveforms of noisy-phase oracle in a random grid search on the 14 validation tracks of MUDB18-HQ [@musdb18hq]. The chosen sliCQT parameters, using 262 frequency bins on the Bark scale in 32.9-22050 Hz, achieved 7.42 dB compared to the STFT with a window of 4096 and overlap of 1024 which achieved 6.23 dB.
+The sliCQT parameters were chosen by maximizing the median SDR across all 4 targets from the noisy-phase waveforms in a random grid search on the 14 validation tracks of MUDB18-HQ [@musdb18hq]. The chosen sliCQT parameters of 262 frequency bins on the Bark scale in 32.9-22050 Hz achieved 7.42 dB, which surpassed the 6.23 dB of the STFT using the Open-Unmix default window and overlap of 4096 and 1024 respectively.
 
 \autoref{fig:spectrograms} shows the magnitude STFT and sliCQT spectrograms of a glockenspiel signal.^[<https://github.com/ltfat/ltfat/blob/master/signals/gspi.wav>]
 

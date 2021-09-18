@@ -23,65 +23,65 @@ t = (0.0:dT:duration-dT)';
 % set(gcf, 'Position', gcfPosition);
 % exportgraphics(gcf,"../latex/images-gspi/glock_waveform.png","Resolution",dpiVar);
 
-N = 2048;
-y = fft(sig, N);                               % Compute DFT of x
-m = abs(y);                               % Magnitude
-y(m<1e-6) = 0;
-p = unwrap(angle(y));                     % Phase
-
-df=fs/N; %frequency resolution
-sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
-f=sampleIndex*df; %x-axis index converted to ordered frequencies
-
-figure;
-subplot(2,1,1)
-plot(f,m)
-title(sprintf('Magnitude DFT, %d points', N),'FontWeight','Normal');
-grid on;
-xlabel('frequency (Hz)');
-ylabel('|DFT|');
-set(gca, 'FontSize', 21); % smaller font on DFTs
-
-subplot(2,1,2)
-plot(f,p*180/pi)
-title(sprintf('Phase DFT, %d points', N),'FontWeight','Normal');
-grid on;
-xlabel('frequency (Hz)');
-ylabel('\angle DFT');
-
-set(gcf, 'Position', gcfPosition);
-set(gca, 'FontSize', 21); % smaller font on DFTs
-exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resolution",dpiVar);
-
-N = siglen;
-y = fft(sig, N);                               % Compute DFT of x
-m = abs(y);                               % Magnitude
-y(m<1e-6) = 0;
-p = unwrap(angle(y));                     % Phase
-
-df=fs/N; %frequency resolution
-sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
-f=sampleIndex*df; %x-axis index converted to ordered frequencies
-
-figure;
-subplot(2,1,1)
-plot(f,m)
-title(sprintf('Magnitude DFT, %d points', N),'FontWeight','Normal');
-grid on;
-xlabel('frequency (Hz)');
-ylabel('|DFT|');
-set(gca, 'FontSize', 21); % smaller font on DFTs
-
-subplot(2,1,2)
-plot(f,p*180/pi)
-title(sprintf('Phase DFT, %d points', N),'FontWeight','Normal');
-grid on;
-xlabel('frequency (Hz)');
-ylabel('\angle DFT');
-
-set(gcf, 'Position', gcfPosition);
-set(gca, 'FontSize', 21); % smaller font on DFTs
-exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resolution",dpiVar);
+% N = 2048;
+% y = fft(sig, N);                               % Compute DFT of x
+% m = abs(y);                               % Magnitude
+% y(m<1e-6) = 0;
+% p = unwrap(angle(y));                     % Phase
+% 
+% df=fs/N; %frequency resolution
+% sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
+% f=sampleIndex*df; %x-axis index converted to ordered frequencies
+% 
+% figure;
+% subplot(2,1,1)
+% plot(f,m)
+% title(sprintf('Magnitude DFT, %d points', N),'FontWeight','Normal');
+% grid on;
+% xlabel('frequency (Hz)');
+% ylabel('|DFT|');
+% set(gca, 'FontSize', 21); % smaller font on DFTs
+% 
+% subplot(2,1,2)
+% plot(f,p*180/pi)
+% title(sprintf('Phase DFT, %d points', N),'FontWeight','Normal');
+% grid on;
+% xlabel('frequency (Hz)');
+% ylabel('\angle DFT');
+% 
+% set(gcf, 'Position', gcfPosition);
+% set(gca, 'FontSize', 21); % smaller font on DFTs
+% exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resolution",dpiVar);
+% 
+% N = siglen;
+% y = fft(sig, N);                               % Compute DFT of x
+% m = abs(y);                               % Magnitude
+% y(m<1e-6) = 0;
+% p = unwrap(angle(y));                     % Phase
+% 
+% df=fs/N; %frequency resolution
+% sampleIndex = -N/2:N/2-1; %ordered index for FFT plot
+% f=sampleIndex*df; %x-axis index converted to ordered frequencies
+% 
+% figure;
+% subplot(2,1,1)
+% plot(f,m)
+% title(sprintf('Magnitude DFT, %d points', N),'FontWeight','Normal');
+% grid on;
+% xlabel('frequency (Hz)');
+% ylabel('|DFT|');
+% set(gca, 'FontSize', 21); % smaller font on DFTs
+% 
+% subplot(2,1,2)
+% plot(f,p*180/pi)
+% title(sprintf('Phase DFT, %d points', N),'FontWeight','Normal');
+% grid on;
+% xlabel('frequency (Hz)');
+% ylabel('\angle DFT');
+% 
+% set(gcf, 'Position', gcfPosition);
+% set(gca, 'FontSize', 21); % smaller font on DFTs
+% exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resolution",dpiVar);
 
 % smallWin = 128;
 % midWin = 2048;
@@ -135,14 +135,14 @@ exportgraphics(gcf,sprintf("../latex/images-gspi/glock_dft_%d.png", N),"Resoluti
 % set(gcf, 'Position', gcfPosition);
 % exportgraphics(gcf,sprintf("../latex/images-gspi/glock_hamm_%d.png", bigWin),"Resolution",dpiVar);
 
-figure;
-plot(hamming(2048)); hold on; plot(gausswin(2048)); legend('Hamming window', 'Gaussian window');
-title('2048-point windows; Hamming vs. Gaussian','FontWeight','Normal');
-xlim([-64 2048+64]);
-grid on;
-
-set(gcf, 'Position', gcfPosition);
-exportgraphics(gcf,"../latex/images-tftheory/hamming_vs_gauss.png","Resolution",dpiVar);
+% figure;
+% plot(hamming(2048)); hold on; plot(gausswin(2048)); legend('Hamming window', 'Gaussian window');
+% title('2048-point windows; Hamming vs. Gaussian','FontWeight','Normal');
+% xlim([-64 2048+64]);
+% grid on;
+% 
+% set(gcf, 'Position', gcfPosition);
+% exportgraphics(gcf,"../latex/images-tftheory/hamming_vs_gauss.png","Resolution",dpiVar);
 
 % figure;
 % spectrogram(sig,4096,1024,4096,fs,'yaxis');
@@ -165,25 +165,25 @@ exportgraphics(gcf,"../latex/images-tftheory/hamming_vs_gauss.png","Resolution",
 % set(gcf, 'Position', gcfPosition);
 % exportgraphics(gcf,"../latex/images-gspi/glock_stft_256.png","Resolution",dpiVar);
 % 
-% figure;
-% cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',12);
-% title('Magnitude CQT/CQ-NSGT, 12 bins-per-octave','FontWeight','Normal');
-% 
-% set(gcf, 'Position', gcfPosition);
-% exportgraphics(gcf,"../latex/images-gspi/glock_cqt12.png","Resolution",dpiVar);
-% 
-% figure;
-% cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',24);
-% title('Magnitude CQT/CQ-NSGT, 24 bins-per-octave','FontWeight','Normal');
-% 
-% set(gcf, 'Position', gcfPosition);
-% exportgraphics(gcf,"../latex/images-gspi/glock_cqt24.png","Resolution",dpiVar);
-% 
-% figure;
-% cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',48);
-% title('Magnitude CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
-% 
-% set(gcf, 'Position', gcfPosition);
-% exportgraphics(gcf,"../latex/images-gspi/glock_cqt48.png","Resolution",dpiVar);
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',12);
+title('Magnitude CQT/CQ-NSGT, 12 bins-per-octave','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_cqt12.png","Resolution",dpiVar);
+
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',24);
+title('Magnitude CQT/CQ-NSGT, 24 bins-per-octave','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_cqt24.png","Resolution",dpiVar);
+
+figure;
+cqt(sig,'SamplingFrequency',fs,'BinsPerOctave',48);
+title('Magnitude CQT/CQ-NSGT, 48 bins-per-octave','FontWeight','Normal');
+
+set(gcf, 'Position', gcfPosition);
+exportgraphics(gcf,"../latex/images-gspi/glock_cqt48.png","Resolution",dpiVar);
 
 close all;

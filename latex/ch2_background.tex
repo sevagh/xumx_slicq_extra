@@ -500,25 +500,6 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 
 \newpagefill
 
-Finally, recall the CQT spectrograms shown in figure \ref{fig:cqtvstft} in the previous section \ref{sec:cqt}. Figure \ref{fig:cqtdetails} shows additional detailed plots that can be generated with the MATLAB CQT (CQ-NSGT) function from the MATLAB Wavelet Toolbox,\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} showing more information about the underlying Nonstationary Gabor Transform implementation.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Center frequencies, 12 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_cf.png}}
-	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 12 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_gaborframe.png}}
-	\subfloat[Constant-Q ratio, 12 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt12_ratio.png}}\\
-	\subfloat[Center frequencies, 24 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_cf.png}}
-	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 24 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_gaborframe.png}}
-	\subfloat[Constant-Q ratio, 24 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt24_ratio.png}}\\
-	\subfloat[Center frequencies, 48 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_cf.png}}
-	\subfloat[Bandwidth of Gabor atom at the Nyquist rate, 48 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_gaborframe.png}}
-	\subfloat[Constant-Q ratio, 48 bins-per-octave]{\includegraphics[width=0.325\textwidth]{./images-gspi/glock_cqt48_ratio.png}}\\
-	\caption{Additional NSGT information for the MATLAB CQT}
-	\label{fig:cqtdetails}
-\end{figure}
-
-\newpagefill
-
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
@@ -821,7 +802,7 @@ Typical music recordings are mono or stereo mixtures, with multiple sound object
 There are many motivations for performing this separation. \textcite{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
 channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix.''
 
-In the ISMIR 2021 Music Demixing Challenge (MDX),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} audio source separation is described as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
+In \textcite{mdx21}'s ISMIR 2021 Music Demixing Challenge (MDX),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} audio source separation is described as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
 
 \begin{quote}
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
@@ -832,7 +813,7 @@ A common thread in survey papers is that the domains of speech enhancement and m
 \begin{figure}[ht]
 	\centering
 	\subfloat{\includegraphics[height=4cm]{./images-mss/mixdemix.png}}
-	\caption{Diagram for music mixing and demixing (from ISMIR 2021 MDX)}
+	\caption{Diagram for music mixing and demixing}
 	\label{fig:mixingdiagrams}
 \end{figure}
 
