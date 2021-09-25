@@ -13,7 +13,7 @@
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\textfraction}{0.1}
 \renewcommand{\floatpagefraction}{0.75}
-\usepackage[backend=biber,authordate,annotation,url=false]{biblatex-chicago}
+\usepackage[backend=biber,authordate,annotation,url=false,doi=false]{biblatex-chicago}
 \addbibresource{citations.bib}
 \input{variables.tex}
 
@@ -24,7 +24,7 @@
 }{\end{enumerate}}
 
 \title{\ThesisTitle}
-\author{Sevag Hanssian, sevag.hanssian@mail.mcgill.ca}
+\author{Sevag Hanssian}
 
 \begin{document}
 
@@ -32,32 +32,39 @@
 
 \section{Introduction / Motivation}
 
-Music source separation, or music demixing, is the task of decomposing a song into its constituent sources, which are typically isolated instruments (e.g., drums, bass, vocals). Music demixing algorithms commonly operate on the time-frequency representation of the song's waveform, computed with the Short-Time Fourier Transform (STFT). Due to the time-frequency uncertainty principle (\cite{gabor1946}), the STFT of a signal cannot be maximally precise in both time and frequency, and the tradeoff of time-frequency resolution can significantly affect music demixing results (\cite{tftradeoff1}). In this thesis, the sliCQT (\cite{slicq}), an STFT-like transform with varying time-frequency resolution, is explored as a replacement for the STFT in Open-Unmix (\cite{umx}), a state-of-the-art deep learning model for music demixing.
+Music source separation, or music demixing, is the task of decomposing an audio piece of music into its constituent sources, which are typically isolated instruments (e.g., drums, bass, and vocals). Music demixing algorithms commonly operate on the time-frequency representation of the song's waveform, computed with the Short-Time Fourier Transform (STFT) (\cite{musicsepgood}). Due to the time-frequency uncertainty principle (\cite{gabor1946}), the STFT of a signal cannot be maximally precise in both time and frequency, and the tradeoff of time-frequency resolution can significantly affect music demixing results (\cite{tftradeoff1}). In this thesis, the sliCQT (\cite{slicq}), an STFT-like transform with varying time-frequency resolution, is explored as a replacement for the STFT in a state-of-the-art deep learning model for music demixing.
 
-The STFT is computed by applying the discrete Fourier Transform on fixed-size windows of the input signal. \textcite{doerflerphd} suggests that from both auditory and musical motivations, musical signals should be analyzed with long windows in the low frequency regions to capture detailed harmonic information, and short windows in the high frequency regions to capture transients with sharp temporal localization. The sliCQ Transform, or sliCQT, is a realtime implementation of the Nonstationary Gabor Transform (NSGT) of \textcite{balazs}. The NSGT is an invertible time-frequency transform which applies the Fourier Transform on windows of the input signal that can be varied by frequency region. An important application of the NSGT and sliCQT is to implement the Constant-Q Transform (CQT) for music (\cite{jbrown}).
+The STFT is computed by applying the discrete Fourier Transform on fixed-size windows of the input signal. \textcite{doerflerphd} suggests that from both auditory and musical motivations, musical signals should be analyzed with long windows in the low-frequency regions to capture detailed harmonic information, and short windows in the high-frequency regions to capture transients with sharp temporal localization. The sliCQ Transform, or sliCQT, is a realtime implementation of the Nonstationary Gabor Transform (NSGT) of \textcite{balazs}. The NSGT is an invertible time-frequency transform that applies the Fourier Transform on windows of the input signal that can be varied by frequency region. An important application of the NSGT and sliCQT is to implement the Constant-Q Transform (CQT) for music (\cite{jbrown}).
 
-Machine learning models for music source separation have achieved recent success (\cite{sisec2018}), and the STFT is used by several of the top performers. \textcite{umx}'s Open-Unmix was released as a state-of-the-art baseline and reference implementation for music demixing based on the STFT and published as open-source software.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} In this thesis, Open-Unmix will be adapted to use the sliCQT in place of the STFT, and the proposed model should demonstrate a viable starting point for music demixing with the sliCQT.
+Machine learning models for music source separation have achieved recent success (\cite{sisec2018}), and the STFT is used by several of the top performers. Open-Unmix (\cite{umx}) was released as a state-of-the-art baseline and reference implementation for music demixing based on the STFT and published as open-source software.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} In this thesis, Open-Unmix will be adapted to use the sliCQT in place of the STFT to investigate the viability of using the sliCQT for music demixing.
 
 \section{Previous Work}
 
-Computational source separation has a long history (\cite{musicsepgood}), originating from the task of separating clean speech from background noise. Speech algorithms could not be generalized easily to music, and techniques more specific to music source separation were developed as a result (\cite{musicseptechniques1}). Accordingly, musical source models arose which try to exploit the characteristics of the sources in the STFT domain, such as Kernel Additive Modeling or Nonnegative Matrix Factorization (\cite{musicsepgood}). More recently, data-driven models based on machine learning surpassed previous approaches (\cite{sisec2018}). Open-Unmix was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music demixing with the STFT.
+Computational source separation has a long history (\cite{musicsepgood}), originating from the task of separating clean speech from background noise. Speech algorithms could not be generalized easily to music, and techniques more specific to music source separation were developed as a result (\cite{musicseptechniques1}). Accordingly, musical source models arose that try to exploit the characteristics of the sources in the STFT domain, such as Kernel Additive Modeling or Nonnegative Matrix Factorization (\cite{musicsepgood}).
 
-Manipulating time-frequency resolution is one possible strategy for improving music demixing with the STFT. \textcite{driedger} used multiple STFTs with different window sizes, \textcite{fitzgerald2} replaced the STFT with the CQT, and \textcite{wavelets} used a custom time-frequency transform based on wavelets.
+Model-based methods are ``prone to large errors and poor performance'' (\cite[13]{musicsepintro1}), and manipulating time-frequency resolution is one possible strategy to improve their results. \textcite{driedger} used multiple STFTs with different window sizes, \textcite{fitzgerald2} replaced the STFT with the CQT, and \textcite{wavelets} used a custom time-frequency transform based on wavelets. More recently, data-driven models based on machine learning surpassed previous approaches (\cite{sisec2018, musicsepintro1}).
 
 \section{Proposed Research / Methodology}
 
-The adaptation of Open-Unmix to use the sliCQT depends on several preliminary tasks. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use a GPU-capable deep learning framework. Next, sliCQT parameters must be chosen that can surpass the STFT in music source separation. Finally, Open-Unmix will be adapted to replace the sliCQT with the STFT, and the music demixing results will be compared with the original pre-trained model according to the SiSEC (Signal Separation Evaluation Campaign) methodologies (\cite{sisec2018}).
+The adaptation of Open-Unmix to use the sliCQT requires several preliminary tasks. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use a GPU-capable deep learning framework. Next, sliCQT parameters must be chosen to equal or surpass the STFT in music source separation. Finally, the code of the Open-Unmix model will be modified to replace the STFT with the sliCQT.
+
+The model will use the MUSDB18-HQ dataset (\cite{musdb18hq}) for both training and evaluation, to allow fair comparisons with Open-Unmix and other published models. The objective metric used will be the BSS (Blind Source Separation) eval metrics (\cite{bss}). The MUSDB18-HQ dataset and BSS eval metrics are standard for music demixing, and have been used in previous Signal Source Separation Evaluation Campaigns (SiSEC) (\cite{sisec2018}).
 
 \section{Contributions / Summary}
 
-In music demixing approaches that use the STFT, choosing the appropriate time-frequency resolution plays an important role. In this thesis, the sliCQT with varying time-frequency resolution is explored as a replacement for the STFT in a state-of-the-art deep learning model for music demixing, Open-Unmix. The resulting neural network could successfully perform the task of music demixing with BSS scores that were competitive with the reference Open-Unmix, using a \textasciitilde$5 \times$ smaller network.
+In music demixing approaches that use the STFT, choosing the appropriate time-frequency resolution plays an important role. In this thesis, the sliCQT with varying time-frequency resolution is explored as a replacement for the STFT in a state-of-the-art deep learning model for music demixing, Open-Unmix. It is hoped that the resulting neural network will demonstrate the viability of music demixing with the sliCQT.
 
 \vfill
 \clearpage %force a page break
 
 %\nocite{*}
+
+\begingroup
+\setstretch{1.0}
+\setlength\bibitemsep{0.15em}
 \printbibheading[title={References},heading=bibnumbered]
 \printbibliography[heading=none]
+\endgroup
 
 \vfill
 \clearpage %force a page break
