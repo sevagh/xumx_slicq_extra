@@ -7,32 +7,32 @@
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
 
-\textcite[Chapter~2]{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system.'' Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \textcite[Chapter~2]{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure.''
+\textcite[8]{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system.'' Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \textcite[2]{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure.''
 
-The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite[Chapter~2]{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite[Chapter~2]{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
+The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Continuous-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/continuoustime.png}}\\
 	\subfloat[Discrete-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/discretetime.png}}
-	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[Chapter~2]{discretebook})}
+	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ (\cite[10]{discretebook})}
 	\label{fig:discretecontinuous}
 \end{figure}
 
-Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Points on the continuous time axis of the waveform are \textit{sampled} periodically, and the amplitude values of the waveform at these sampled points are \textit{quantized} to find the closest digital number (\cite[Chapter~2]{melbook}). Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
+Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Points on the continuous time axis of the waveform are \textit{sampled} periodically, and the amplitude values of the waveform at these sampled points are \textit{quantized} to find the closest digital number (\cite{melbook}). Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
 
-First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite[Chapter~4]{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
+First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
 
-Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation (\cite[Chapter~4]{dspfirst}). The diagram in figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately. We refer the readers to the full chapter in the textbook for a more full description of challenges in signal sampling.
+Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation (\cite{dspfirst}). The diagram in figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately. We refer the readers to the full chapter in the textbook for a more full description of challenges in signal sampling.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{./images-tftheory/aliasing_undersampling.png}
-	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) from \textcite{dspfirst}}
+	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) (\cite[82]{dspfirst})}
 	\label{fig:aliasing}
 \end{figure}
 
-Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chapter~4]{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values.'' The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
+Second, the continuous amplitude needs to be quantized. Stated by \textcite[190]{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values.'' The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
 
 \begin{figure}[ht]
 	\centering
@@ -41,14 +41,14 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 	\subfloat[ADC details: sampler and quantizer]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
 	\vspace{0.1em}
 	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.85\textwidth]{./images-tftheory/adc3.png}}\\
-	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations (\cite[Chapter~4]{discretebook})}
+	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations (\cite[188, 190, 192]{discretebook})}
 	\label{fig:adccircuit}
 \end{figure}
 
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
 
-\textcite[Chapter~2B]{moore} states that
+\textcite[4]{moore} states that
 
 \begin{quote}
 	[a]lthough all sounds can be specified by their variation in pressure with time, it is often more convenient, and more meaningful, to specify them in a different way when the sounds are complex. This method is based on a theorem by Fourier, who proved that almost any complex waveform can be analyzed, or broken down, into a series of sinusoids with specific frequencies, amplitudes, and phases. This is done using a mathematical procedure called the Fourier Transform.
@@ -68,27 +68,27 @@ The Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox f
 \subsubsection{Frequency analysis and Fourier Transforms (CTFT, DFT, FFT)}
 \label{sec:freqanal}
 
-The Fourier Transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite{fourierhistory}). The Fourier Transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier Transform to music is described by \textcite{fouriermusic}, who state that
+The Fourier Transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite[54]{fourierhistory}). The Fourier Transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier Transform to music is described by \textcite[461]{fouriermusic}, who state that
 
 \begin{quote}
 	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string.
 \end{quote}
 
-The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \eqref{equation:ctft} and \eqref{equation:ictft} (\cite[Chapter~11]{dspfirst}):
+The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \eqref{equation:ctft} and \eqref{equation:ictft} (\cite[308]{dspfirst}):
 \begin{align}
 	X(j\omega) = \int_{-\infty}^{\infty}{x(t)e^{-j\omega t}\mathit{dt}} \tag{1}\label{equation:ctft} \\
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
 \end{align}
 
-\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \eqref{equation:ictft} defines the signal $x(t)$ in terms of a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
+\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \eqref{equation:ictft} defines the signal $x(t)$ in terms of a sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals. The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
 
-Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform (shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}), and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} (\cite[Chapter~12]{melbook}):
+Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} (\cite[289]{melbook}):
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
 \end{align}
 
-The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \eqref{equation:rect} or polar form in equation \eqref{equation:polar} (\cite[Chapter~2]{discretebook}):
+The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \eqref{equation:rect} or polar form in equation \eqref{equation:polar} (\cite[49]{discretebook}):
 \begin{align}
 	X(e^{j\omega}) = X_{\text{real}}(e^{j\omega}) + j X_{\text{imag}}(e^{j\omega}) \tag{5}\label{equation:rect} \\
 	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\measuredangle X(e^{j\omega})} \tag{6}\label{equation:polar}
@@ -115,19 +115,19 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 \subsubsection{Joint time-frequency analysis with the Gabor Transform and Short-time Fourier Transform (STFT)}
 \label{sec:jointtfa}
 
-Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal}, \textcite[Chapter~10]{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...''
+Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal}, \textcite[714]{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...''
 
-Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals (\cite{gabor1946}). Gabor quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier Transform:
+Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals (\cite{gabor1946}). \textcite[431]{gabor1946} quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier Transform:
 
 \begin{quote}
 	[t]he foregoing solutions [of the Fourier Transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren
 \end{quote}
 
-According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.''
+According to \textcite[3624]{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.''
 
-Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' \secondaryciteindirect{heisenberg1927}{hallm}. Gabor's time-frequency uncertainty principle states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ as the \textit{logon}, or smallest possible unit of time-frequency information.
+Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \textcite[432]{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.''. This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' (\cite[432]{gabor1946}).
 
-Let us start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \eqref{equation:delta}:
+Let us start with a description of the time-domain unit impulse signal or sequence (\cite[20]{melbook}) in equation \eqref{equation:delta}:
 \begin{flalign}\label{equation:delta}
 \delta[n] = \begin{cases}
 	1 \text{\hspace{1em}} n = 0\\
@@ -135,7 +135,7 @@ Let us start with a description of the time-domain unit impulse signal or sequen
 \end{cases}
 \end{flalign}
 
-The impulse is a useful signal, as it is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0. The mathematical notation is that of the Kronecker delta function'' (\cite[Chapter~5]{dspfirst}). Note the Kronecker delta function is the discrete equivalent of the Dirac delta function (\cite[Chapter~2]{melbook}). Contrast this with the DFT spectrum of a signal that is only nonzero at the 0 Hz (or DC) frequency component, which is a ``cosine signal with zero frequency'' (\cite[Chapter~3]{dspfirst}).
+The impulse is a useful signal, as it is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0. The mathematical notation is that of the Kronecker delta function'' (\cite[107]{dspfirst}). Note the Kronecker delta function is the discrete equivalent of the Dirac delta function (\cite[937]{melbook}). Contrast this with the DFT spectrum of a signal that is only nonzero at the 0 Hz (or DC) frequency component, which is a ``sinusoid of zero frequency'' (\cite[13]{dspfirst}).
 
 Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-component DFT, and these two in fact demonstrate the mutually exclusive formulations of time and frequency. The unit impulse, which has a single nonzero value in the time domain, has an infinite extent in the frequency domain. Conversely, the DC-component DFT has a single nonzero value in the frequency domain, but has an infinite extent in the time domain. Figure \ref{fig:gaborfirst}(b) shows the intuition of the time-frequency tradeoff as a choice of signal length. The periodicity of the sine wave is more apparent over longer periods of time $\Delta t$, but the detail of the individual sample values become lost.
 
@@ -144,23 +144,23 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[height=5cm]{./images-tftheory/gabor13.png}}
 	\hspace{2em}
 	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[height=6.25cm]{./images-tftheory/gabor2.png}}
-	\caption{Time-frequency tradeoff intuitions (\cite{gabor2})}
+	\caption{Time-frequency tradeoff intuitions (\cite[103, 106]{gabor2})}
 	\label{fig:gaborfirst}
 \end{figure}
 
-The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a property of the Fourier Transform and not a fundamental physical limitation, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite{psycho2} describes one of these experiments:
+The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a property of the Fourier Transform and not a fundamental physical limitation, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite[610]{psycho2} describes one of these experiments:
 
 \begin{quote}
 	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen (DL) for a tone pulse of duration d. [...]  It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...]
 \end{quote}
 
-More recently, according to \textcite{psycho1}:
+More recently, according to \textcite[4]{psycho1}:
 
 \begin{quote}
 	[w]e have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10.
 \end{quote}
 
-Note that these are not refutations of Gabor's ideas, but in fact a confirmation. \textcite{gabor1946} himself stated that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue.'' Nevertheless, if we choose to proceed with time-frequency analysis despite the limitations, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \textcite{gabor1946} asks:
+\textcite[4]{psycho1} go on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue.'' Nevertheless, if we choose to proceed with time-frequency analysis despite this limitation, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \textcite[435]{gabor1946} asks:
 
 \begin{quote}
 What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function
@@ -171,14 +171,14 @@ Gabor performed joint time-frequency analysis by multiplying overlapping, tempor
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)], G_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n}
 \end{flalign}
 
-where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform.
+where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform (\cite{dictionary}).
 
 The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equation \eqref{equation:stft}:
 \begin{flalign}\tag{8}\label{equation:stft}
 	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)], X_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as the COLA (constant overlap-add) constraint is respected (\cite{cola}). Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on a waveform.
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window (\cite{dictionary}). Note how similar equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as the COLA (constant overlap-add) constraint is respected (\cite{cola}). Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on a waveform.
 
 \begin{figure}[ht]
 	\centering
@@ -195,7 +195,7 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\centering
 	\subfloat[Pure time domain, pure frequency domain, and Gabor's time-frequency tiles of $\Delta t \Delta f = 1$]{\includegraphics[height=3.4cm]{./images-tftheory/gabor3.png}}\\
 	\subfloat[High frequency resolution vs. high time resolution]{\includegraphics[height=3.2cm]{./images-tftheory/gabor4.png}}
-	\caption{Different tiling of the time-frequency plane (\cite{gabordiagrams})}
+	\caption{Different tiling of the time-frequency plane (\cite[326, 327]{gabordiagrams})}
 	\label{fig:gabortf}
 \end{figure}
 
@@ -225,7 +225,7 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 	\label{fig:stfts}
 \end{figure}
 
-We close this section with a quote from \textcite{doerflersouls} on the powerful properties of the STFT:
+We close this section with a quote from \textcite[96]{doerflersouls} on the powerful properties of the STFT:
 
 \begin{quote}
        ... the STFT has at least three souls: it is the Fourier Transform of windowed portions of the signal, it is the convolution of the signal with modulated versions of the window and it is the scalar product of the signal with time-shifted modulated versions of the window. These three souls can be exploited in the applications, for the computation of the STFT and for its sampling ...
@@ -236,7 +236,7 @@ We close this section with a quote from \textcite{doerflersouls} on the powerful
 \subsubsection{Constant-Q Transform (CQT)}
 \label{sec:cqt}
 
-\textcite{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region (\cite{doerflerphd, cqtransient}). 
+\textcite[1]{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region (\cite{doerflerphd, cqtransient}). 
 
 The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
@@ -249,14 +249,14 @@ The name ``Constant-Q'' refers to the constant ratio of the frequency being anal
 	\centering
 	\subfloat[Properties of DFT, CQT]{\includegraphics[height=5.05cm]{./images-tftheory/dftvcqt.png}}
 	\hspace{0.5em}
-	\subfloat[Window sizes for CQT]{\includegraphics[height=5cm]{./images-tftheory/qwindowchanges.png}}
-	\caption{Various aspects of the original CQT (\cite{jbrown})}
+	\subfloat[First 12 window sizes for the CQT]{\includegraphics[height=5cm]{./images-tftheory/qwindowchanges.png}}
+	\caption{Various aspects of the original CQT (\cite[427, 428]{jbrown})}
 	\label{fig:jbrowncqt}
 \end{figure}
 
 This first CQT implementation was not designed to be invertible, until \textcite{klapuricqt} introduced an algorithm for an approximate inverse of the CQT back to the time-domain waveform, with an inversion error of $\approx 10^{-3}$. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
-\textcite{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the Constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale with equal temperament (\cite{westernpitch1, westernpitch2}).
+\textcite[1]{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the Constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale with equal temperament (\cite{westernpitch1, westernpitch2}).
 
 \textcite{invertiblecqt} implemented the Constant-Q Transform with Nonstationary Gabor frames (\cite{balazs}), which allowed for perfect reconstruction for the first time. This is also called the CQ-NSGT, or Constant-Q Nonstationary Gabor Transform. The next section, \ref{sec:theorynsgt}, will cover the NSGT in detail, but for now we shall continue with how the NSGT led to improved implementations of the CQT.
 
@@ -291,17 +291,17 @@ Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images-tftheory/tf_tradeoff_dorfler.png}
-	\caption{Time-frequency tradeoff for a glockenspiel signal (\cite{doerflerphd})}
+	\caption{Time-frequency tradeoff for a glockenspiel signal (\cite[20]{doerflerphd})}
 	\label{fig:dorflertradeoff}
 \end{figure}
 
-As summarized by \textcite{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions... The nonstationary Gabor frames [...] are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.'' In other words, a single Nonstationary Gabor transform can replace the need for multiple distinct Gabor transforms (or STFTs).
+As summarized by \textcite[2]{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions... The nonstationary Gabor frames [...] are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.'' In other words, a single Nonstationary Gabor transform can replace the need for multiple distinct Gabor transforms (or STFTs).
 
-\textcite{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began the ``fundamental shift from transforms to dictionaries for [...] signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.''
+\textcite[1049]{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began a ``fundamental move from transforms to dictionaries for [...] signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.''
 
 Using multiple transforms, such as using two Gabor transforms (or STFTs) with a small and large window for the transient and tonal properties of music, is also called an \textit{overcomplete} dictionary (\cite{dictionary}), where there is a lot of redundancy in the transform domain.
 
-The advantage of the CQT over such approaches is that it contains these desirable transform properties in one single transform. The NSGT is a time-frequency transform with varying time-frequency resolution, whose motivating application is the CQT (\cite{jaillet, balazs}). It is constructed from frame theory (\cite{frametheory}), which is a mathematical technique for computing ``redundant, stable way[s] of representing a signal'' (\cite{framesintro}). It can use nonuniform time and frequency spacing in its time-frequency analysis of a signal, and it has a perfect inverse operation, such that there is practically no reconstruction error.
+The advantage of the CQT over such approaches is that it contains these desirable transform properties in one single transform. The NSGT is a time-frequency transform with varying time-frequency resolution, whose motivating application is the CQT (\cite{jaillet, balazs}). It is constructed from frame theory (\cite{frametheory}), which is a mathematical technique for computing redundant, stable ways of representing a signal (\cite{framesintro}). The NSGT can use nonuniform time and frequency spacing in its time-frequency analysis of a signal, and it has a perfect inverse operation, such that there is practically no reconstruction error.
 
 The construction of nonstationary Gabor frames relies on three properties of the windows and time-frequency shift parameters used (\cite{balazs}):
 \begin{tight_itemize}
@@ -313,7 +313,7 @@ The construction of nonstationary Gabor frames relies on three properties of the
 		Adjacent windows overlap to avoid loss of information. At the same time, unnecessary overlap is undesirable. We assume that $0 < A \le \sum_{n \in \mathbb{Z}}|g_{n}(t)|^{2} \le B < \infty$, a.e. (almost everywhere), for some positive A and B
 \end{tight_itemize}
 
-These requirements lead to invertibility of the frame operator and therefore to perfect reconstruction. \textcite{balazs} continues on to say that
+These requirements lead to invertibility of the frame operator and therefore to perfect reconstruction. \textcite[1482]{balazs} continues on to say that
 
 \begin{quote}
 	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case
@@ -324,12 +324,12 @@ To derive the NSGT, let us recall the previously-seen definition of the Gabor tr
 g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
 \end{align}
 
-As stated by \textcite{adaptivecqt}, ``[w]e will indicate such a frame as \textit{stationary}, since the window used for time-frequency shifts does not change and the time-frequency shifts form a lattice of $a \times b$.'' Figure \ref{fig:uniformtflattice} shows the resulting uniform $a \times b$ tiling of the time-frequency plane.
+As stated by \textcite[3]{adaptivecqt}, ``[w]e will indicate such a frame as \textit{stationary}, since the window used for time-frequency shifts does not change and the time-frequency shifts form a lattice of $a \times b$.'' Figure \ref{fig:uniformtflattice} shows the resulting uniform $a \times b$ tiling of the time-frequency plane.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=6.25cm]{./images-tftheory/stationarygabor.png}
-	\caption{Uniform time-frequency resolution with the stationary Gabor transform}
+	\caption{Uniform time-frequency resolution of the stationary Gabor transform (\cite[3]{adaptivecqt})}
 	\label{fig:uniformtflattice}
 \end{figure}
 
@@ -350,13 +350,13 @@ For a resolution that changes with time, the Nonstationary Gabor atom is chosen 
 	g_{m,n}(t) &= g_{n}(t)e^{j2\pi m b_{n}t}, m,n \in \mathbb{Z}
 \end{align}
 
-To describe equation \eqref{equation:irregulartime}, Balazs states:
+\textcite[1485]{balazs} describe the system in equation \eqref{equation:irregulartime} further:
 
 \begin{quote}
 		[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.
 \end{quote}
 
-For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$:
+For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$ (\cite[1486]{balazs}):
 \begin{align}\tag{15}\label{equation:irregularfrequency}
 	h_{m,n}(t) = h_{m}(t - na_{m}), m,n \in \mathbb{Z}
 \end{align}
@@ -368,13 +368,13 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\subfloat[Gabor atoms that change with time]{\includegraphics[width=6.25cm]{./images-tftheory/irregulartime.png}}
 	\hspace{1em}
 	\subfloat[Gabor atoms that change with frequency]{\includegraphics[width=6.25cm]{./images-tftheory/irregularfrequency.png}}
-	\caption{Varying time-frequency sampling of the Nonstationary Gabor transform}
+	\caption{Varying time-frequency sampling of the Nonstationary Gabor transform (\cite[1485, 1487]{balazs})}
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
 The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows.
 
-We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite[Chapter~4]{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
+We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
 Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
 
@@ -527,24 +527,24 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 \subsection{Machine learning and deep learning for music signals}
 \label{sec:ml}
 
-Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to the description of machine learning by \textcite{introtoml}:
+Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to the description of machine learning by \textcite[105]{introtoml}:
 
 \begin{quote}
 	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
 \end{quote}
 
-According to \textcite{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we do not necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
+According to \textcite[1]{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we do not necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' (\cite[2]{introtodl}) to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{./images-neural/dnn.png}
-	\caption{Deep neural network with hidden layers (\cite{introtodl})}
+	\caption{Deep neural network with hidden layers (\cite[2]{introtodl})}
 	\label{fig:fcdn}
 \end{figure}
 
-\textcite{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
+\textcite[1]{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
 
-We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite{mldspmix}, analytic knowledge and machine learning should both be considered in the study of acoustic signals:
+We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite[3591]{mldspmix}, analytic knowledge and machine learning should both be considered in the study of acoustic signals:
 
 \begin{quote}
 	Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained.
@@ -553,7 +553,7 @@ We also note that statistical signal processing techniques and machine and deep 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.5\textwidth]{./images-neural/dspmlmix.jpg}
-	\caption{Mixed analytic and data-driven approaches}
+	\caption{Mixed analytic and data-driven approaches (\cite[3591]{mldspmix})}
 	\label{fig:dspmlmix}
 \end{figure}
 
