@@ -565,24 +565,26 @@ In machine learning,  the input data is typically split into a training set and 
 
 \subsubsection{Convolutional Neural Networks (CNN)}
 
-Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' (\cite{audiodeeplearning}). These are useful for both images and audio according to \textcite{cnns}, because ``the attractive feature of the CNN is its ability to exploit spatial or temporal correlation in data.'' Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel \textit{slides} over the pixels of the input image.
+Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' (\cite[3]{audiodeeplearning}). These are useful for both images and audio according because of their ability to exploit spatial or temporal correlation in data (\cite{cnns}). Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel \textit{slides} over the pixels of the input image.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat{\includegraphics[width=0.48\textwidth]{./images-neural/sliding_conv_1.png}}
 	\hspace{0.15em}
 	\subfloat{\includegraphics[width=0.48\textwidth]{./images-neural/sliding_conv_2.png}}
-	\caption{$3 \times 3$ convolution kernel sliding over patches of input pixels}
+	\caption{$3 \times 3$ convolution kernel sliding over patches of input pixels\protect\footnotemark}
 	\label{fig:cnnbasic}
 \end{figure}
+
+\footnotetext{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}
 
 The network architecture and feature map for an audio CNN is shown in figure \ref{fig:audiocnn}, where the extracted feature map is visualized in the spectral domain.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[CNN architecture for audio waveforms]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn.png}}\\
-	\subfloat[Visualization of audio spectral features learned by each layer]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn2.png}}
-	\caption{Feature maps in a typical audio CNN (\cite{audiocnn2})}
+	\subfloat[CNN architecture for audio waveforms ({\cite[7]{audiocnn2}})]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn.png}}\\
+	\subfloat[Audio spectral features learned by each layer ({\cite[4]{audiocnn3}})]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn2.png}}
+	\caption{Example of an audio CNN architecture and spectral feature maps}
 	\label{fig:audiocnn}
 \end{figure}
 
@@ -592,7 +594,7 @@ Finally, we note that for audio applications, both 1D convolutions (also referre
 
 For time series data, for which the audio waveform is an exemplar given the temporal evolution of its amplitude, recurrent neural networks (RNNs) are useful since the input sequence of data is introduced back into the network with a cyclic or recurrent connection, and outputs are predicted based on past (or future, if the network is bi-directional) values of the sequence (\cite{rnns}). RNNs are also used commonly in sequence-to-sequence, or seq2seq, models (\cite{seq2seqs}).
 
-\textcite{rnnoise} describes different RNN variants, including the LSTM (\cite{lstm1}) and GRU (\cite{gru1}) for their audio noise suppression model, RNNoise:\footnote{\url{https://jmvalin.ca/demo/rnnoise/}}
+In the audio noise suppression model RNNoise,\footnote{\url{https://jmvalin.ca/demo/rnnoise/}} the usefulness of the RNN and its LSTM (\cite{lstm1}) and GRU (\cite{gru1}) variants for audio are described:
 
 \begin{quote}
 	Recurrent neural networks (RNN) are very important [...] because they make it possible to model time sequences instead of just considering input and output frames independently. [...] RNNs were heavily limited in their ability because they could not hold information for a long period of time [...] [These] problems were solved by the invention of gated units, such as the Long Short-Term Memory (LSTM), the Gated Recurrent Unit (GRU), and their many variants.
@@ -602,10 +604,10 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Regular RNN with cyclic connections to past data (\cite{birnn})]{\includegraphics[width=0.48\textwidth]{./images-neural/simple_rnn.png}}
+	\subfloat[Regular RNN with cyclic connections to past data ({\cite[3]{birnn}})]{\includegraphics[width=0.47\textwidth]{./images-neural/simple_rnn.png}}
 	\hspace{0.1em}
-	\subfloat[Bi-directional LSTM with cyclic connections to past and future data (\cite{birnn})]{\includegraphics[width=0.48\textwidth]{./images-neural/birnn.png}}\\
-	\subfloat[Different recurrent units (\cite{lstmrnngru})]{\includegraphics[width=0.65\textwidth]{./images-neural/gates.png}}
+	\subfloat[Bi-directional LSTM with cyclic connections to past and future data ({\cite[3]{birnn}})]{\includegraphics[width=0.47\textwidth]{./images-neural/birnn.png}}\\
+	\subfloat[Different recurrent units ({\cite[7]{lstmrnngru}})]{\includegraphics[width=0.68\textwidth]{./images-neural/gates.png}}
 	\caption{RNN diagrams}
 	\label{fig:rnndiags}
 \end{figure}
@@ -753,18 +755,18 @@ Pip is installed by default with Python, making it the simpler choice, while Con
 
 \subsubsection{Version control systems and git}
 
-Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database (\cite{gitbook}). \textcite{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you screw things up or lose files, you can easily recover.''
+Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database (\cite{gitbook}). \textcite[1]{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you screw things up or lose files, you can easily recover.''
 
 According to \textcite{gitbook}, version control systems are either centralized or distributed. In a distributed version control systems (DVCS), each person's copy of the code contains the full history of changes. This means that people can work on their own private copy of the code, and then sync changes with a central server, rather than depending on the central server for viewing the history like in a centralized version control system (CVCS). This allows people to work independently of the central server, until they are ready to sync changes back with the other collaborators.
 
-Git is a popular tool for DVCS written by Linus Torvalds, who is also known for having created Linux. How Git works is that it ``thinks of its data more like a series of snapshots of a miniature filesystem... every time you commit, or save the state of your project, Git basically takes a picture of what all your files look like at that moment and stores a reference to that snapshot. (\cite{gitbook})''  To work on a code project that uses git, first the project, or \textit{repository}, must be cloned to your local system. You make local changes and then commit them. Finally, you can push your commits back to the central server to share with the other collaborators, often with a descriptive message describing what you changed. Figure \ref{fig:git} shows how git tracks a file and how a git workflow should look.
+Git is a popular tool for DVCS written by Linus Torvalds, who is also known for having created Linux. How Git works is that it ``thinks of its data more like a series of snapshots of a miniature filesystem... every time you commit, or save the state of your project, Git basically takes a picture of what all your files look like at that moment and stores a reference to that snapshot'' (\cite[6]{gitbook}). To work on a code project that uses git, first the project, or \textit{repository}, must be cloned to your local system. You make local changes and then commit them. Finally, you can push your commits back to the central server to share with the other collaborators, often with a descriptive message describing what you changed. Figure \ref{fig:git} shows how git tracks a file and how a git workflow should look.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[How git stores snapshots of files]{\includegraphics[height=3.3cm]{./images-misc/git.png}}
 	\hspace{0.1em}
 	\subfloat[Recommended git workflow]{\includegraphics[height=3.3cm]{./images-misc/git2.png}}
-	\caption{How git works}
+	\caption{How git works (\cite[6, 8]{gitbook})}
 	\label{fig:git}
 \end{figure}
 
@@ -774,9 +776,9 @@ All of the code for this thesis were stored in git repositories to keep track of
 
 \subsubsection{Open-source software and GitHub}
 
-\textcite{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form.'' Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
+\textcite[1]{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form.'' Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
 
-\textcite{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects.'' GitHub contains tools for working with git repositories, including social elements for creating personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate to show code written for the thesis or code from third-party projects, such that the reader can view the true source code that is being described. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in figure \ref{fig:githubpytorch}.
+\textcite[131]{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects.'' GitHub contains tools for working with git repositories, including social elements for creating personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate to show code written for the thesis or code from third-party projects, such that the reader can view the true source code that is being described. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in figure \ref{fig:githubpytorch}.
 
 \begin{figure}[ht]
 	\centering
@@ -794,10 +796,10 @@ All of the code for this thesis were stored in git repositories to keep track of
 
 Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track (\cite{musicsepintro1}). To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
 
-There are many motivations for performing this separation. \textcite{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
+There are many motivations for performing this separation. \textcite[1]{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
 channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix.''
 
-The ISMIR 2021 Music Demixing Challenge (MDX) (\cite{mdx21}),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} describes audio source separation as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
+The ISMIR 2021 Music Demixing Challenge (MDX)\footnotemark{} describes audio source separation as consisting of different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
 
 \begin{quote}
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
@@ -808,9 +810,11 @@ A common thread in survey papers is that the domains of speech enhancement and m
 \begin{figure}[ht]
 	\centering
 	\subfloat{\includegraphics[height=4cm]{./images-mss/mixdemix.png}}
-	\caption{Diagram for music mixing and demixing}
+	\caption{Diagram for music mixing and demixing\protect\footnotemark[\value{footnote}]}
 	\label{fig:mixingdiagrams}
 \end{figure}
+
+\footnotetext{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
 
 \newpagefill
 
@@ -823,11 +827,11 @@ Among the earliest computational approaches for blind source separation is Indep
 \begin{figure}[ht]
 	\centering
 	\includegraphics[height=8cm]{./images-mss/positional.png}
-	\caption{Position-based source separation (\cite{musicsepgood})}
+	\caption{Position-based source separation (\cite[9]{musicsepgood})}
 \label{fig:icaposition}
 \end{figure}
 
-According to \textcite{musicsepintro1}, ICA techniques arose more typically for speech denoising (\cite{speechsep}), and they make assumptions that cannot be generalized easily to music:
+According to \textcite[1]{musicsepintro1}, ICA techniques arose more typically for speech denoising (\cite{speechsep}), and they make assumptions that cannot be generalized easily to music:
 
 \begin{quote}
 	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, nonstationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are nonlinearities in the mixing process (e.g., dynamic range compression).
@@ -835,32 +839,34 @@ According to \textcite{musicsepintro1}, ICA techniques arose more typically for 
 
 Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}).
 
-For cases where ICA cannot be applied, musical source models are more popular (\cite{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other, or sparse in their spectral representation (\cite{musicsepgood}), such that they can be extracted with time-frequency masks applied in the spectral domain. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
+For cases where ICA cannot be applied, musical source models are more popular (\cite[11]{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other, or sparse in their spectral representation (\cite{musicsepgood}), such that they can be extracted with time-frequency masks applied in the spectral domain. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Mixed spectrogram]{\includegraphics[height=4.75cm]{./images-mss/mss1.png}}
 	\subfloat[Source spectrograms]{\includegraphics[height=5cm]{./images-mss/mss2.png}}
-	\caption{Sparsity of different music sources in the spectral domain}
+	\caption{Sparsity of different music sources in the spectral domain (\cite[1, 3]{musicsepgood})}
 \label{fig:sepgood}
 \end{figure}
 
-Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``selects a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel.'' A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}). Figure \ref{fig:fitzhpss} shows the basic operation of the median filtering operator for HPSS.
+Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' (\cite[11]{musicsepgood}). A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}). Figure \ref{fig:fitzhpss} shows the result of HPSS.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{./images-misc/hpss.png}
-	\caption{Median-filtering HPSS}
+	\includegraphics[width=0.65\textwidth]{./images-misc/hpss.png}
+	\caption{Median-filtering HPSS\protect\footnotemark}
 	\label{fig:fitzhpss}
 \end{figure}
 
-Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
+\footnotetext{\url{https://librosa.org/librosa_gallery/auto_examples/plot_hprss.html}}
+
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/kamvnmf.png}}\\
 	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/mssdnn.png}}
-	\caption{Different techniques for spectral music demixing (\cite{musicsepgood})}
+	\caption{Different techniques for spectral music demixing (\cite[12, 14]{musicsepgood})}
 	\label{fig:spectraldemix}
 \end{figure}
 
@@ -876,7 +882,7 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or ha
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.7\textwidth]{./images-mss/maskdemo.png}
-	\caption{Results of a soft and hard oracle mask applied for speech denoising}
+	\caption{Results of a soft and hard oracle mask applied for speech denoising (\cite[71]{masking})}
 	\label{fig:masks}
 \end{figure}
 
@@ -921,15 +927,17 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 
 Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data (\cite{musdb18, musdb18hq}).
 
-In UMX, a deep neural network is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture is a variant of a sequence2sequence model. Open-Unmix uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} the architecture of UMX and one of its predecessors.
+In UMX, a deep neural network is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture is a variant of a sequence2sequence model. Open-Unmix uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Open-Unmix Bi-LSTM architecture]{\includegraphics[width=0.8\textwidth]{./images-neural/umx.png}}\\
-	\subfloat[Simple DNN architecture for MSS]{\includegraphics[width=0.8\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
-	\caption{Architecture of Open-Unmix (\cite{umx}) and one of its simpler predecessors (\cite{umxorig1})}
+	\subfloat[Open-Unmix Bi-LSTM architecture\protect\footnotemark]{\includegraphics[width=0.8\textwidth]{./images-neural/umx.png}}\\
+	\subfloat[Simple DNN architecture for MSS ({\cite[262]{umxorig1}})]{\includegraphics[width=0.8\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
+	\caption{Architecture of Open-Unmix and one of its simpler predecessors}
 	\label{fig:umxes}
 \end{figure}
+
+\footnotetext{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}
 
 \textcite{xumx} combined the 4 separate target networks into a single model to apply the loss functions and optimizations jointly across all 4 targets, rather than optimizing each one separately. The model is named CrossNet-Open-Unmix (X-UMX). It also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients.
 
@@ -939,9 +947,9 @@ While the discussed Open-Unmix model is based on sequence2sequence ideas with a 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Simple CDAE]{\includegraphics[width=\textwidth]{./images-neural/cdae_1.png}}\\
-	\subfloat[Different sizes of time and frequency filter by frequency band]{\includegraphics[width=0.7\textwidth]{./images-neural/cdae_2.png}}
-	\caption{Various convolutional architectures for music source separation}
+	\subfloat[Simple CDAE ({\cite[2]{plumbley1}})]{\includegraphics[width=\textwidth]{./images-neural/cdae_1.png}}\\
+	\subfloat[CDAE with time and frequency filters that vary by frequency band ({\cite[2]{plumbley2}})]{\includegraphics[width=0.7\textwidth]{./images-neural/cdae_2.png}}
+	\caption{Convolutional architectures for music source separation}
 	\label{fig:cdaes}
 \end{figure}
 

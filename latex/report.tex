@@ -76,6 +76,12 @@
 \newcommand{\secondarycitedirect}[2]{\secondaryciteauthor{#1} (\secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
 \newcommand{\secondaryciteindirect}[2]{(\secondaryciteauthor{#1}, \secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
 
+\newcounter{note}
+\newcommand{\note}[1] {
+    \stepcounter{note}
+    \footnotetext[\arabic{note}]{#1}
+}
+
 \title{\ThesisTitle}
 
 \author{\vspace{1em}\\Sevag Hanssian \\
