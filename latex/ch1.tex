@@ -45,7 +45,7 @@ The Constant-Q Transform was originally proposed by \textcite{jbrown} to analyze
 	\subfloat[Linear-frequency DFT]{\includegraphics[height=5.2cm]{./images-tftheory/violindft.png}}
 	\hspace{0.5em}
 	\subfloat[Constant-Q transform]{\includegraphics[height=5.5cm]{./images-tftheory/violincqt.png}}
-	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$\cite{jbrown}}
+	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$ (\cite{jbrown})}
 	\label{fig:violin}
 \end{figure}
 
@@ -66,7 +66,7 @@ Other music demixing systems have been proposed that use the CQT instead of the 
 
 Additionally, there are papers that describe frequency-warped transforms, with an interest in using nonlinear musical or auditory frequency scales for specific applications (\cite{warped1, warped2, earlywarped1, earlywarped2, warpedcomparison, warpedpsycho}). The NSGT and sliCQ Transform, with their support for arbitrary frequency scales with perfect invertibility, are therefore of interest as the best implementation choices for these various frequency warping schemes. The NSGT and sliCQ Transforms have open-source reference implementations in MATLAB\footnote{\url{http://ltfat.org/doc/filterbank/cqt_code.html}} and Python\footnote{\url{https://github.com/grrrr/nsgt}}, allowing for reproducibility and further research.
 
-In this thesis, \textcite{umx}'s deep neural network for music demixing, which is based on the STFT, will be considered as the starting point. It is chosen for being fully open-source\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} with the intention of encouraging further research. The objective of this thesis is to adapt Open-Unmix to use the sliCQ Transform instead of the STFT. The goal is to present a working music demixing application with the sliCQ Transform as a starting point for future systems that can benefit from application-specific and optimal time-frequency resolution, without needing to write custom frequency warping schemes or being constrained by the fixed-resolution STFT.
+Open-Unmix (\cite{umx}) is a state-of-the-art deep neural network for music demixing based on the STFT. The reference implementation is published as fully open-source software\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} with the intention of encouraging further music demixing research. The objective of this thesis is to adapt Open-Unmix to use the sliCQ Transform instead of the STFT. The goal is to present a working music demixing application with the sliCQ Transform as a starting point for future systems that can benefit from application-specific and optimal time-frequency resolution, without needing to write custom frequency warping schemes or being constrained by the fixed-resolution STFT.
 
 \subsection{Contribution and results}
 

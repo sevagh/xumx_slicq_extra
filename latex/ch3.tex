@@ -58,7 +58,7 @@ The Variable-Q scale is the same as the log or octave scales, except with a smal
 	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
 \end{quote}
 
-Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provides the following equations in \ref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
+Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provides the following equations in \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
 \begin{align}\tag{5}\label{equation:variablebw}
 	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
@@ -130,7 +130,7 @@ An addition made to the sliced version of the NSGT, or the sliCQT, was to automa
 \subsubsection{GPU-accelerated NSGT/sliCQT with PyTorch}
 \label{sec:torchslicq}
 
-The reference NSGT/sliCQT library uses NumPy (\cite{numpy}), a CPU-based Python numerical computation library. To train deep neural networks efficiently, using PyTorch with GPU support is required (\cite{pytorch}). PyTorch, in addition to being a deep learning framework, is also a numerical computation library which implements a large amount of NumPy's functions (\cite{pytorch}).
+The reference NSGT/sliCQT library uses NumPy, a CPU-based Python numerical computation library. To train deep neural networks efficiently, using PyTorch with GPU support is required (\cite{pytorch}). PyTorch, in addition to being a deep learning framework, is also a numerical computation library which implements a large amount of NumPy's functions.
 
 The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in listing \ref{lst:profilerout} for the \Verb#forward# function of the sliced NSGT.
 
@@ -337,7 +337,7 @@ In the parameter exploration, we require the following components to build the o
 
 \textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex-valued, invertible time-frequency transforms with Fourier coefficients
 
-As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \ref{equation:irm1}:
+As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \eqref{equation:irm1}:
 \begin{align}\tag{1}\label{equation:irm1}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n]), X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), |X_{\text{source}}| = \text{abs}(X_{\text{source}})\\
@@ -346,7 +346,7 @@ As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle
 	\nonumber & \hat{x}_{\text{source, IRM1}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, IRM1}})
 \end{align}
 
-Similar to the IRM1 calculation, let us examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let us call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \ref{equation:softneural}:
+Similar to the IRM1 calculation, let us examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let us call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \eqref{equation:softneural}:
 \begin{align}\tag{2}\label{equation:softneural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}})\\
@@ -356,7 +356,7 @@ Similar to the IRM1 calculation, let us examine the real case where we only have
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
 \end{align}
 
-This is the soft mask output of Open-Unmix, which is supported by one of the configuration options. However, by default Open-Unmix prefers to use the estimated magnitude and the phase of the mixture, over soft masks. The source waveform is estimated using the source magnitude spectrogram and mix phase spectrogram, and show in equations \ref{equation:mpineural}:
+This is the soft mask output of Open-Unmix, which is supported by one of the configuration options. However, by default Open-Unmix prefers to use the estimated magnitude and the phase of the mixture, over soft masks. The source waveform is estimated using the source magnitude spectrogram and mix phase spectrogram, and show in equations \eqref{equation:mpineural}:
 \begin{align}\tag{3}\label{equation:mpineural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
@@ -367,7 +367,7 @@ This is the soft mask output of Open-Unmix, which is supported by one of the con
 
 In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle (\cite{noisyphase1, noisyphase2}), which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
 
-Let us write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \ref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \ref{equation:mpioracle}:
+Let us write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \eqref{equation:mpioracle}:
 \begin{align}\tag{4}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
@@ -451,7 +451,7 @@ During the oracle evaluation, line-profiler showed that the slowest step was the
   \label{lst:slowbssprofile}
 \end{listing}
 
-The bottlenecks of the library use NumPy (\cite{numpy}) and SciPy (\cite{scipy}) operations, which are both Python numerical computation libraries that run on the CPU. The CuPy (\cite{cupy}) library provides replacement functions of NumPy and SciPy which run on CUDA (\cite{cuda}), the compute framework for NVIDIA GPUs. This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch (\cite{pytorch}) also uses CUDA and was used in an earlier section \ref{sec:torchslicq}, for the BSS evaluation library CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
+The bottlenecks of the library use NumPy and SciPy operations, which are both Python numerical computation libraries that run on the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides replacement functions of NumPy and SciPy which run on CUDA,\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} the compute framework for NVIDIA GPUs. This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch (\cite{pytorch}) also uses CUDA and was used in an earlier section \ref{sec:torchslicq}, for the BSS evaluation library CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
 
 Similar to the NSGT/sliCQT library, the modifications made to the museval library were stored in my forked copy of the repository.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval/commit/f3b7540faddc8d2b1bc91cecaf05fd20d96df7c6}} The replacement of the NumPy or SciPy function is as simple as using the CuPy equivalent, taking special care about GPU out-of-memory errors. The code listing \ref{code:thirddiff} shows an example of the CuPy replacement of one of the slow computations discovered by the profiler.
 
@@ -470,7 +470,7 @@ Similar to the NSGT/sliCQT library, the modifications made to the museval librar
 
 First, we will look at incorporating CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) ideas with Open-Unmix. Since X-UMX and UMX are both based on the STFT spectrogram, the general model will stay the same even if we replace the STFT with the sliCQT.
 
-As mentioned, Open-Unmix (\cite{umx}) has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based. X-UMX has an open-source implementation available as well,\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} which uses NNabla (\cite{nnabla}), a different Python deep learning framework. Therefore part of the methodology of this thesis involves incorporating the X-UMX ideas inside the PyTorch version of UMX.
+As mentioned, Open-Unmix (\cite{umx}) has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based. X-UMX has an open-source implementation available as well,\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} which uses NNabla,\footnote{\url{https://nnabla.org/}} a different Python deep learning framework. Therefore part of the methodology of this thesis involves incorporating the X-UMX ideas inside the PyTorch version of UMX.
 
 After the X-UMX modifications are described, we will look at which parts of Open-Unmix need to incorporate the PyTorch implementation of the sliCQT that was described in section \ref{sec:torchslicq}.\footnote{\url{https://github.com/sevagh/nsgt}} Finally, the convolutional denoising autoencoder model architectures of \textcite{plumbley1, plumbley2}  will be described, along with how they might be applied to the sliCQT.
 
@@ -495,14 +495,14 @@ The loss function of X-UMX is first modified to include a multi-domain loss (MDL
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 
-We can use these equations in the loss function to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In xumx-sliCQ, we use \textcite{auraloss}'s auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR, \cite{roux2018sdr}) loss function for time-domain audio waveforms. According to \textcite{roux2018sdr}, SI-SDR compared to the original SDR is ``in a simpler, more robust measure, called scale-invariant SDR (SI-SDR).''
+We can use these equations in the loss function to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In xumx-sliCQ, we use the auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR, \cite{roux2018sdr}) loss function for time-domain audio waveforms. According to \textcite{roux2018sdr}, SI-SDR compared to the original SDR is ``in a simpler, more robust measure, called scale-invariant SDR (SI-SDR).''
 
 We will call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is computed as follows:
 \begin{align}
 	\nonumber & \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)
 \end{align}
 
-There are 14 MSE loss combinations made from the 4 targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. The equations \ref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
+There are 14 MSE loss combinations made from the 4 targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. The equations \eqref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
 \begin{align}\tag{5}\label{equation:cl}
 	\nonumber & \text{mse\_loss}_{1} = \text{MSE}(|\text{STFT}(\hat{x}_{1})|, |\text{STFT}(x_{1})|)\\
 	\nonumber & \text{mse\_loss}_{2} = \text{MSE}(|\text{STFT}(\hat{x}_{1} + \hat{x}_{2})|, |\text{STFT}(x_{1} + x_{2}|))\\
@@ -510,7 +510,7 @@ There are 14 MSE loss combinations made from the 4 targets to implement the comb
 	\nonumber & \text{mse\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{mse\_loss}_{n}}
 \end{align}
 
-For the time-domain loss, the same 14 combinations of the combination targets are considered, shown in the equations \ref{equation:mdl}, where $x$ represents the time-domain waveform, the subscript represents the target:
+For the time-domain loss, the same 14 combinations of the combination targets are considered, shown in the equations \eqref{equation:mdl}, where $x$ represents the time-domain waveform, the subscript represents the target:
 \begin{align}\tag{6}\label{equation:mdl}
 	\nonumber & \text{sdr\_loss}_{1} = \text{SI-SDR}(\hat{x}_{1}, x_{1})\\
 	\nonumber & \text{sdr\_loss}_{2} = \text{SI-SDR}(\hat{x}_{1} + \hat{x}_{2}, x_{1} + x_{2})\\

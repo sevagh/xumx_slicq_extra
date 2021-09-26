@@ -56,7 +56,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[Chap
 
 Throughout this section, the description of the Fourier Transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
 
-\textcite{ltfat}'s Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44100 Hz.
+The Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44100 Hz.
 
 \begin{figure}[ht]
 	\centering
@@ -74,21 +74,21 @@ The Fourier Transform originated as an integral transform in mathematics, which 
 	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string.
 \end{quote}
 
-The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \ref{equation:ctft} and \ref{equation:ictft} (\cite[Chapter~11]{dspfirst}):
+The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \eqref{equation:ctft} and \eqref{equation:ictft} (\cite[Chapter~11]{dspfirst}):
 \begin{align}
 	X(j\omega) = \int_{-\infty}^{\infty}{x(t)e^{-j\omega t}\mathit{dt}} \tag{1}\label{equation:ctft} \\
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
 \end{align}
 
-\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \ref{equation:ictft} defines the signal $x(t)$ in terms of a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
+\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \eqref{equation:ictft} defines the signal $x(t)$ in terms of a ``sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals.'' The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
 
-Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform (shown previously in equations \ref{equation:ctft} and \ref{equation:ictft}), and is defined by the pair of equations \ref{equation:dtft} and \ref{equation:idtft} (\cite[Chapter~12]{melbook}):
+Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform (shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}), and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} (\cite[Chapter~12]{melbook}):
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
 \end{align}
 
-The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \ref{equation:rect} or polar form in equation \ref{equation:polar} (\cite[Chapter~2]{discretebook}):
+The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \eqref{equation:rect} or polar form in equation \eqref{equation:polar} (\cite[Chapter~2]{discretebook}):
 \begin{align}
 	X(e^{j\omega}) = X_{\text{real}}(e^{j\omega}) + j X_{\text{imag}}(e^{j\omega}) \tag{5}\label{equation:rect} \\
 	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\measuredangle X(e^{j\omega})} \tag{6}\label{equation:polar}
@@ -98,14 +98,7 @@ The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referr
 
 According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take 1 time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). 
 
-Starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten, fiftyyears}). Refer to figure \ref{fig:bigo} to see the differences in the expected running times of the FFT over the naive implementation.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.7\textwidth]{./images-misc/bigo.png}
-	\caption{Visual comparison of the ``Big-O'', or worst-case running times of algorithms (taken from \url{https://www.bigocheatsheet.com/})}
-	\label{fig:bigo}
-\end{figure}
+Starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten, fiftyyears}).
 
 The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
@@ -124,7 +117,7 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal}, \textcite[Chapter~10]{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...''
 
-\textcite{gabor1946}'s seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals. Gabor quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier Transform:
+Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals (\cite{gabor1946}). Gabor quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier Transform:
 
 \begin{quote}
 	[t]he foregoing solutions [of the Fourier Transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren
@@ -132,9 +125,9 @@ Continuing from the discussion of the DFT in the previous section \ref{sec:freqa
 
 According to \textcite{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.''
 
-Gabor derived the principal of time-frequency uncertainty from Heisenberg's uncertainty principle in quantum physics, which states that ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' (\cite{hallm, heisenberg1927}). Gabor's time-frequency uncertainty principle states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ as the \textit{logon}, or smallest possible unit of time-frequency information.
+Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that ``the more precisely the position [of an electron] is determined, the less precisely the momentum is known, and conversely'' \secondaryciteindirect{heisenberg1927}{hallm}. Gabor's time-frequency uncertainty principle states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite{gabor1946}). This is also referred to as the Gabor limit, and $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation.'' Gabor referred to the time-frequency tile $\Delta t \Delta f$ as the \textit{logon}, or smallest possible unit of time-frequency information.
 
-Let us start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \ref{equation:delta}:
+Let us start with a description of the time-domain unit impulse signal or sequence (\cite[Chapter~2]{melbook}) in equation \eqref{equation:delta}:
 \begin{flalign}\label{equation:delta}
 \delta[n] = \begin{cases}
 	1 \text{\hspace{1em}} n = 0\\
@@ -173,26 +166,28 @@ Note that these are not refutations of Gabor's ideas, but in fact a confirmation
 What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function
 \end{quote}
 
-Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e. the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equation \ref{equation:gabort}:
+Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e. the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equation \eqref{equation:gabort}:
 \begin{flalign}\tag{7}\label{equation:gabort}
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)], G_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n}
 \end{flalign}
 
 where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform.
 
-The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equation \ref{equation:stft}:
+The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equation \eqref{equation:stft}:
 \begin{flalign}\tag{8}\label{equation:stft}
 	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)], X_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations \ref{equation:gabort} and \ref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. Practically, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as overlap-add conditions are respected.\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}} The MATLAB documentation for the \Verb#iscola# function contains the diagram in figure \ref{fig:stftdiagram}, which shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on the input signal.
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window. Note how similar equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as the COLA (constant overlap-add) constraint is respected (\cite{cola}). Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on a waveform.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images-tftheory/stft_diagram.png}
-	\caption{Diagram showing the forward and inverse STFT or Gabor transform}
+	\caption{Diagram showing the forward and inverse STFT or Gabor transform\protect\footnotemark}
 	\label{fig:stftdiagram}
 \end{figure}
+
+\footnotetext{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
 
 Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-frequency plane, and how the Gabor transform and the STFT with higher frequency or higher time resolution appear on the time-frequency plane.
 
@@ -245,7 +240,7 @@ We close this section with a quote from \textcite{doerflersouls} on the powerful
 
 The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
-The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equation \ref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equation \eqref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
@@ -255,7 +250,7 @@ The name ``Constant-Q'' refers to the constant ratio of the frequency being anal
 	\subfloat[Properties of DFT, CQT]{\includegraphics[height=5.05cm]{./images-tftheory/dftvcqt.png}}
 	\hspace{0.5em}
 	\subfloat[Window sizes for CQT]{\includegraphics[height=5cm]{./images-tftheory/qwindowchanges.png}}
-	\caption{Various aspects of \textcite{jbrown}'s CQT}
+	\caption{Various aspects of the original CQT (\cite{jbrown})}
 	\label{fig:jbrowncqt}
 \end{figure}
 
@@ -267,7 +262,7 @@ This first CQT implementation was not designed to be invertible, until \textcite
 
 \textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced Constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the Variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale. The formula given is $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
 
-In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} (\cite{essentia}), LTFAT,\footnote{\url{https://ltfat.org/}} (\cite{ltfat}) and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} (\cite{librosa}) still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
+In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
 Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft}, generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.
 
@@ -324,7 +319,7 @@ These requirements lead to invertibility of the frame operator and therefore to 
 	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case
 \end{quote}
 
-To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \ref{equation:stationarygab}:
+To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \eqref{equation:stationarygab}:
 \begin{align} \tag{10}\label{equation:stationarygab}
 g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
 \end{align}
@@ -338,13 +333,13 @@ As stated by \textcite{adaptivecqt}, ``[w]e will indicate such a frame as \texti
 	\label{fig:uniformtflattice}
 \end{figure}
 
-We can also describe \textcite{doerflerphd}'s multiple Gabor systems with the following set of equations, continuing from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by the equations in \ref{equation:onegabor}.
+We can also describe the multiple Gabor systems of \textcite{doerflerphd} with the following set of equations, continuing from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by the equations in \eqref{equation:onegabor}.
 \begin{align}
 	\nonumber g_{m,n}(t) &= g(t - na)e^{j2\pi m b t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{m,n \in \mathbb{Z}}c_{m,n}g_{m,n}(t) \tag{12}\label{equation:onegabor}
 \end{align}
 
-Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, with the equations in \ref{equation:multigabor}:
+Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, with the equations in \eqref{equation:multigabor}:
 \begin{align}
 	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r})e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{r=0}^{R-1}\sum_{m,n \in \mathbb{Z}}c^{r}_{m,n}g^{r}_{m,n}(t) \tag{13}\label{equation:multigabor}
@@ -355,7 +350,7 @@ For a resolution that changes with time, the Nonstationary Gabor atom is chosen 
 	g_{m,n}(t) &= g_{n}(t)e^{j2\pi m b_{n}t}, m,n \in \mathbb{Z}
 \end{align}
 
-To describe equation \ref{equation:irregulartime}, Balazs states:
+To describe equation \eqref{equation:irregulartime}, Balazs states:
 
 \begin{quote}
 		[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.
@@ -532,7 +527,7 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 \subsection{Machine learning and deep learning for music signals}
 \label{sec:ml}
 
-Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to \textcite{introtoml}'s description of machine learning:
+Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to the description of machine learning by \textcite{introtoml}:
 
 \begin{quote}
 	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
@@ -581,13 +576,13 @@ Convolutional neural networks (CNN) ``are based on convolving their input with l
 	\label{fig:cnnbasic}
 \end{figure}
 
-From \textcite{audiocnn2}'s paper, the network architecture and feature map for an audio CNN is shown, where the extracted feature map is visualized in the spectral domain.
+The network architecture and feature map for an audio CNN is shown in figure \ref{fig:audiocnn}, where the extracted feature map is visualized in the spectral domain.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[CNN architecture for audio waveforms]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn.png}}\\
 	\subfloat[Visualization of audio spectral features learned by each layer]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn2.png}}
-	\caption{Feature maps in a typical audio CNN}
+	\caption{Feature maps in a typical audio CNN (\cite{audiocnn2})}
 	\label{fig:audiocnn}
 \end{figure}
 
@@ -696,7 +691,7 @@ The \Verb#random# module of Python contains a random number generator (RNG).\foo
 
 \subsubsection{Numerical and machine learning libraries for Python}
 
-Python has a rich ecosystem of academic libraries. NumPy (\cite{numpy}) and SciPy (\cite{scipy}) are used for numerical computation and parallelized matrix operations that run on the CPU (central processing unit). Pandas (\cite{pandas}) and Seaborn (\cite{seaborn}) are available for data processing. Matplotlib (\cite{matplotlib}) is a plotting library. Tensorflow (\cite{tensorflow}) and PyTorch (\cite{pytorch}) are libraries for machine learning and deep learning, which also have numerical computation and parallelized matrix operations that are similar to NumPy and SciPy, except that they can run on the GPU (graphical processing unit). The use of the GPU allows for more efficient, faster, and larger parallelized matrix operations, which are essential for modern machine learning and deep learning techniques.
+Python has a rich ecosystem of academic libraries. NumPy\footnote{\url{https://numpy.org/}} and SciPy\footnote{\url{https://scipy.org/}} are used for numerical computation and parallelized matrix operations that run on the CPU (central processing unit). Matplotlib\footnote{\url{https://matplotlib.org/}} is a plotting library. Tensorflow\footnote{\url{https://www.tensorflow.org/}} and PyTorch\footnote{\url{https://pytorch.org/}} are libraries for machine learning and deep learning, which also have numerical computation and parallelized matrix operations that are similar to NumPy and SciPy, except that they can run on the GPU (graphical processing unit). The use of the GPU allows for more efficient, faster, and larger parallelized matrix operations, which are essential for modern machine learning and deep learning techniques.
 
 In NumPy, the ndarray\footnote{\url{https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html}} is the core datastructure representing an n-dimensional array of objects, which can be numerical (such as int16 or float32) or general objects (such as strings). The same speech signal represented by the Python list above can be represented by a 1-dimensional ndarray of 64-bit floating-point values:
 
@@ -802,7 +797,7 @@ Typical music recordings are mono or stereo mixtures, with multiple sound object
 There are many motivations for performing this separation. \textcite{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
 channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix.''
 
-In \textcite{mdx21}'s ISMIR 2021 Music Demixing Challenge (MDX),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} audio source separation is described as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
+The ISMIR 2021 Music Demixing Challenge (MDX) (\cite{mdx21}),\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} describes audio source separation as having different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
 
 \begin{quote}
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
@@ -850,7 +845,7 @@ For cases where ICA cannot be applied, musical source models are more popular (\
 \label{fig:sepgood}
 \end{figure}
 
-Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``selects a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel.'' A well-known example of a KAM-based music separation algorithm is \textcite{fitzgerald1}'s median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm. Figure \ref{fig:fitzhpss} shows the basic operation of the median filtering operator for HPSS.
+Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``selects a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel.'' A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}). Figure \ref{fig:fitzhpss} shows the basic operation of the median filtering operator for HPSS.
 
 \begin{figure}[ht]
 	\centering
@@ -859,7 +854,7 @@ Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\c
 	\label{fig:fitzhpss}
 \end{figure}
 
-Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; \textcite{nmfpaper}'s survey on NMF techniques covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
 \begin{figure}[ht]
 	\centering
@@ -974,37 +969,22 @@ The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from t
 	\textbf{SDR:} Signal to Distortion Ratio
 \end{tight_itemize}
 
-Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from the following equation \ref{equation:sdrinstr}:
+Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from the following equation \eqref{equation:sdrinstr}:
 \begin{align}
 	\nonumber & \text{SDR}_{\text{instr}} = \\
 	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{10}\label{equation:sdrinstr}
 \end{align}
 
-The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from the equation \ref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \ref{equation:sdrsong}:
+The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from the equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
 	\text{SDR}_{\text{song}} = \frac{1}{4}(\text{SDR}_{\text{bass}} + \text{SDR}_{\text{drums}} + \text{SDR}_{\text{vocals}} + \text{SDR}_{\text{other}}) \tag{11}\label{equation:sdrsong}
 \end{align}
 
-In the most recent SiSec evaluation (\cite{sisec2018}), the BSS evaluation measure used is BSS v4, a variant of BSS available in their Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval.\footnote{\url{https://github.com/sigsep/bsseval}} The differences between BSS as used in SiSec 2016 (\cite{sisec2016}) and BSS v4 are outlined in the bsseval project's GitHub README file:
-
-\begin{quote}
-	One particularity of BSSEval is to compute the metrics after optimally matching the estimates to the true sources through linear distortion filters. This allows the criteria to be robust to some linear mismatches... this matching is the reason for most of the computation cost of BSSEval...
-
-	For this package, we enabled the option of having time invariant distortion filters, instead of necessarily taking them as varying over time as done in the previous versions of BSSEval. First, enabling this option significantly reduces the computational cost for evaluation because matching needs to be done only once for the whole signal. Second, it introduces much more dynamics in the evaluation, because time-varying matching filters turn out to over-estimate performance. Third, this makes matching more robust, because true sources are not silent throughout the whole recording, while they often were for short windows
-\end{quote}
+In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 (\cite{sisec2016}). The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used to calculate the results in this thesis.
 
 \subsubsection{Open-source ecosystem}
 
-There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub\footnote{\url{https://github.com/}} to provide tools, tutorials, and implementations for source separation. Of note are:
-
-\begin{tight_enumerate}
-	\item
-		SigSep,\footnote{\url{https://github.com/sigsep}} which contains many tools, including \textcite{umx}'s Open-Unmix model, \textcite{musdb18, musdb18hq}'s MUSDB18 dataset loaders, and \textcite{bss}'s BSS evaluation metrics
-	\item
-		nussl,\footnote{\url{https://github.com/nussl}} from \textcite{nussl}, which contains a library with many algorithms for music and speech separation
-	\item
-		Asteroid,\footnote{\url{https://github.com/asteroid-team}} from \textcite{asteroid}, another source separation toolkit
-\end{tight_enumerate}
+There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub to provide tools, tutorials, and implementations for source separation. In particular, the SigSep organization\footnote{\url{https://github.com/sigsep}} contains many tools useful for music demixing research, including the reference implementation of Open-Unmix (\cite{umx}), MUSDB18 dataset loaders (\cite{musdb18, musdb18hq}), and BSS evaluation metrics (\cite{bss, sisec2018})
 
 The author of this thesis owes a debt of gratitude to these projects. Without such community-focused efforts, the field of music demixing would be less approachable for beginners.
 
