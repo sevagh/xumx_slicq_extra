@@ -53,7 +53,7 @@ In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or
 
 To supplement the Constant-Q scales (octave and log), the Variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}}
 
-The Variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite{variableq1} provide the motivation for the Variable-Q scale:
+The Variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite[5]{variableq1} provide the motivation for the Variable-Q scale:
 \begin{quote}
 	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
 \end{quote}
@@ -213,7 +213,7 @@ In this section, only short excerpts of the torch port were shown, due to requir
 \subsubsection{Matrix and ragged forms}
 \label{sec:matrixvragged}
 
-Although the CQT implementation they are referencing is different from the NSGT, \textcite{klapuricqt} describe that
+Although the CQT implementation they are referencing is different from the NSGT, \textcite[1]{klapuricqt} describe that
 \begin{quote}
 	[the] CQT produces a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized.
 \end{quote}
@@ -495,7 +495,7 @@ The loss function of X-UMX is first modified to include a multi-domain loss (MDL
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 
-We can use these equations in the loss function to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In xumx-sliCQ, we use the auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR, \cite{roux2018sdr}) loss function for time-domain audio waveforms. According to \textcite{roux2018sdr}, SI-SDR compared to the original SDR is ``in a simpler, more robust measure, called scale-invariant SDR (SI-SDR).''
+We can use these equations in the loss function to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In xumx-sliCQ, we use the auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR) (\cite{roux2018sdr}) loss function for time-domain audio waveforms. SI-SDR is a simpler and more robust variant of SDR which improves on some failure cases of SDR (\cite{roux2018sdr}).
 
 We will call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is computed as follows:
 \begin{align}
@@ -529,7 +529,7 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 	\centering
 	\subfloat[Multi-domain loss (MDL)]{\includegraphics[width=0.75\textwidth]{./images-neural/xumx1.png}}\\
 	\subfloat[Combination loss (CL)]{\includegraphics[width=0.75\textwidth]{./images-neural/xumx2.png}}
-	\caption{Loss functions of X-UMX (\cite{xumx})}
+	\caption{Loss functions of X-UMX (\cite[2]{xumx})}
 	\label{fig:xumxlosses}
 \end{figure}
 
@@ -548,7 +548,7 @@ The MUSDDB18-HQ data loader is the starting point of the neural network, and the
 	\item
 		The data loader is instantiated,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L222}} ready to return $(x, y)$ pairs of waveforms for every training example.
 	\item
-		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \textcite{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing.''
+		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \textcite[309]{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing.''
 	\item
 		The $(x, y)$ pairs have their magnitude STFT taken in the training loop.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}} The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean})$, where the std and mean are from the data whitening step.
 	\item
@@ -660,7 +660,7 @@ CDAEs are symmetric: a stack of convolutional layers in the encoder are applied 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{./images-neural/convtranspose.png}
-	\caption{Deconvolution operation (\cite{convtranspose})}
+	\caption{Deconvolution operation (\cite[11]{convtranspose})}
 	\label{fig:convtranspose}
 \end{figure}
 
@@ -685,7 +685,7 @@ The kernel parameters define the size and movement of the 2D convolution kernel 
 	\subfloat[2D convolution kernel with padding > 0]{\includegraphics[width=\textwidth]{./images-neural/conv2.png}}\\
 	\subfloat[2D convolution kernel with stride > 1]{\includegraphics[width=\textwidth]{./images-neural/conv3.png}}\\
 	\subfloat[2D convolution kernel with dilation > 1]{\includegraphics[width=\textwidth]{./images-neural/conv4.png}}
-	\caption{Different behaviors of kernel parameters (\cite{convguide})}
+	\caption{Different behaviors of kernel parameters (\cite[14, 29]{convguide})}
 	\label{fig:convdiags}
 \end{figure}
 
