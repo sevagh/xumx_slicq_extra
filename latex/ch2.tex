@@ -805,7 +805,7 @@ The ISMIR 2021 Music Demixing Challenge (MDX)\footnotemark{} describes audio sou
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
 \end{quote}
 
-A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of (\cite{musicsepintro1, musicsepsurvey}). Music demixing is the focus of this thesis, shown in figure \ref{fig:mixingdiagrams}.
+A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of (\cite{musicsepintro1, musicmask}). Music demixing is the focus of this thesis, shown in figure \ref{fig:mixingdiagrams}.
 
 \begin{figure}[ht]
 	\centering
@@ -820,9 +820,9 @@ A common thread in survey papers is that the domains of speech enhancement and m
 
 \subsubsection{Computational approaches}
 
-Computational source separation has a history for at least 50 years (\cite{musicsepsurvey, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
+Computational source separation has a history for at least 50 years (\cite{musicmask, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
 
-Among the earliest computational approaches for blind source separation is Independent Component Analysis (ICA)  (\cite{musicsepsurvey, musicsepgood, musicsepintro1}), which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. We refer the readers to \textcite{ica1, ica2} for ICA algorithms, and to \textcite{blind1, blind2} for a more in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
+Among the earliest computational approaches for blind source separation is Independent Component Analysis (ICA)  (\cite{musicmask, musicsepgood, musicsepintro1}), which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. We refer the readers to \textcite{ica1, ica2} for ICA algorithms, and to \textcite{blind1, blind2} for a more in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
 \begin{figure}[ht]
 	\centering
@@ -860,7 +860,7 @@ Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\c
 
 \footnotetext{\url{https://librosa.org/librosa_gallery/auto_examples/plot_hprss.html}}
 
-Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicsepsurvey, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicmask, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
 \begin{figure}[ht]
 	\centering
