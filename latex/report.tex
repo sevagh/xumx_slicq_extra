@@ -15,7 +15,6 @@
 \usepackage{verbatim}
 \usepackage{listings}
 \usepackage{rotating}
-  
 \usepackage{minted}
 \usemintedstyle{github}
 \usepackage{subfig}
@@ -78,6 +77,8 @@
 \newcommand{\secondarycitedirect}[2]{\secondaryciteauthor{#1} (\secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
 \newcommand{\secondaryciteindirect}[2]{(\secondaryciteauthor{#1}, \secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
 
+\renewcommand*{\postvolpunct}{\addcolon\addspace}
+
 \newcounter{note}
 \newcommand{\note}[1] {
     \stepcounter{note}
@@ -139,14 +140,5 @@
 %\nocite{*}
 \section{References}
 \printbibliography[heading=none]
-
-%\newpagefill
-%
-%\begin{appendices}
-%
-%\section{Code availability and replicating the results}
-%\label{appendix:coderesultsrepro}
-%
-%\end{appendices}
 
 \end{document}
