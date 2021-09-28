@@ -4,11 +4,6 @@ CHAPTER ?= "ch0"
 texpdf:
 	latexmk $(tex_fname) ${LATEXMK_FLAGS} 
 
-report-refs-dev: export LATEXMK_FLAGS="-pvc"
-report-refs-dev: report-refs
-report-refs: tex_fname="report_refs.tex"
-report-refs: texpdf
-
 report-dev: export LATEXMK_FLAGS="-pvc"
 report-dev: report
 report: tex_fname="report.tex"
@@ -38,3 +33,4 @@ clean:
 	-rm *.vrb
 	-rm *.fls
 	-rm *.toc
+	-rm *.log

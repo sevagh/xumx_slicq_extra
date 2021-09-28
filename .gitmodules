@@ -19,3 +19,6 @@
 [submodule "mss_evaluation/vendor/ai-research-code"]
 	path = mss_evaluation/vendor/ai-research-code
 	url = https://github.com/sony/ai-research-code
+[submodule "latex/mdx-submissions21"]
+	path = latex/mdx-submissions21
+	url = git@github.com:sevagh/mdx-submissions21
