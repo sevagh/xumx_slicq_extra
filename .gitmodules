@@ -22,3 +22,6 @@
 [submodule "latex/mdx-submissions21"]
 	path = latex/mdx-submissions21
 	url = git@github.com:sevagh/mdx-submissions21
+[submodule "nsgt_spec_plotter/nsgt"]
+	path = nsgt_spec_plotter/nsgt
+	url = git@github.com:sevagh/nsgt
