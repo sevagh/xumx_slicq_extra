@@ -301,9 +301,9 @@ As summarized by \textcite[2]{adaptivecqt}, ``[t]he definition of multiple Gabor
 
 Using multiple transforms, such as using two Gabor transforms (or STFTs) with a small and large window for the transient and tonal properties of music, is also called an \textit{overcomplete} dictionary (\cite{dictionary}), where there is a lot of redundancy in the transform domain.
 
-The advantage of the CQT over such approaches is that it contains these desirable transform properties in one single transform. The NSGT is a time-frequency transform with varying time-frequency resolution, whose motivating application is the CQT (\cite{jaillet, balazs}). It is constructed from frame theory (\cite{frametheory}), which is a mathematical technique for computing redundant, stable ways of representing a signal (\cite{framesintro}). The NSGT can use nonuniform time and frequency spacing in its time-frequency analysis of a signal, and it has a perfect inverse operation, such that there is practically no reconstruction error.
+The advantage of the CQT over such approaches is that it contains these desirable transform properties in one single transform. The NSGT is a time-frequency transform with varying time-frequency resolution, whose motivating application is the CQT (\cite{jaillet, balazs}). It is constructed from frame theory (\cite{frametheory}), a mathematical technique for computing redundant, stable ways of representing a signal (\cite{framesintro}). The NSGT can use nonuniform time and frequency spacing in its time-frequency analysis of a signal, and it has a perfect inverse operation with practically no reconstruction error.
 
-The construction of nonstationary Gabor frames relies on three properties of the windows and time-frequency shift parameters used (\cite{balazs}):
+The construction of nonstationary Gabor frames relies on three properties of the windows and time-frequency shift parameters used (\cite[2]{balazs}):
 \begin{tight_itemize}
 	\item
 		The signal $f$ of interest is localized at time- (or frequency-) positions $n$ by means of multiplication with a compactly supported (or limited bandwidth, respectively) window function $g_{n}$
@@ -333,7 +333,7 @@ As stated by \textcite[3]{adaptivecqt}, ``[w]e will indicate such a frame as \te
 	\label{fig:uniformtflattice}
 \end{figure}
 
-We can also describe the multiple Gabor systems of \textcite{doerflerphd} with the following set of equations, continuing from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by the equations in \eqref{equation:onegabor}.
+The definition of the multiple Gabor systems of \textcite{doerflerphd} continues from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by the equations in \eqref{equation:onegabor}:
 \begin{align}
 	\nonumber g_{m,n}(t) &= g(t - na)e^{j2\pi m b t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{m,n \in \mathbb{Z}}c_{m,n}g_{m,n}(t) \tag{12}\label{equation:onegabor}
@@ -627,19 +627,18 @@ Python\footnote{\url{https://www.python.org/}} is a general-purpose programming 
 Python 3.9.6 (default, Jul 16 2021, 00:00:00)
 [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)] on linux
 Type "help", "copyright", "credits" or "license" for more information.
->>>
 >>> print('this is python')
 this is python
 \end{BVerbatim}
 \end{listing}
 
-The Python interpreter is widely distributed on most modern operating systems (OS) like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts (\cite{pythonscience}). Important concepts from the Python language that appear repeatedly in this thesis will be described in this section.
+The Python interpreter is widely distributed on most modern operating systems (OS) like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts (\cite{pythonscience}). Python constructs that appear repeatedly in this thesis will be described in this section.
 
 The first is the list,\footnote{\url{https://docs.python.org/3/tutorial/datastructures.html\#more-on-lists}} which is a core datastructure of the language. The list in Python corresponds to the array data structure in computer science (\cite{skiena}). It allows for the construction of an ordered list of objects. For example, a discrete-time speech signal may be described by a list of its amplitude values, where the position in the list is the time sample $n$:
 
-\hfil \Verb#speech_signal = [0.15, 0.28, 0.57, 0.98, -0.59]#
+\hfill \Verb#speech_signal = [0.15, 0.28, 0.57, 0.98, -0.59]#
 
-The generator is a function in Python which generates the next value of a sequence whenever it is called with the \Verb#yield# statement.\footnote{\url{https://docs.python.org/3/reference/simple_stmts.html\#the-yield-statement}} The internal state of the sequence is managed by the generator function. Generators are used for efficiency, where instead of pre-computing the output of some expensive function for the entire set of values, the expensive function is only executed when a single value is demanded at a time. This is also called lazy evaluation.\footnote{\url{https://cvw.cac.cornell.edu/python/lazy}} An example of a generator is shown in listing \ref{lst:siggen}.
+The generator is a function in Python which generates the next value of a sequence whenever it is called with the \Verb#yield# statement.\footnote{\url{https://docs.python.org/3/reference/simple_stmts.html\#the-yield-statement}} The internal state of the sequence is managed by the generator function. Generators are used for efficiency where an expensive function is only executed when a single value is demanded at a time. This is also called lazy evaluation.\footnote{\url{https://cvw.cac.cornell.edu/python/lazy}} An example of a generator is shown in listing \ref{lst:siggen}.
 
 \begin{listing}[ht]
 \centering
@@ -717,7 +716,7 @@ Tensors can be used for numerical computations using the GPU in both PyTorch and
 
 \subsubsection{Package managers for Python}
 
-To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates a clean, isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages must be published by the authors and maintainers on the public Python Package Index (PyPi).\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in listing \ref{lst:reqtxt}.
+To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates an isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages are published to the public Python Package Index (PyPi) by the authors.\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in listing \ref{lst:reqtxt}.
 
 \begin{listing}[ht]
 \centering
@@ -751,7 +750,7 @@ dependencies:
 	\label{lst:condayml}
 \end{listing}
 
-Pip is installed by default with Python, making it the simpler choice, while Conda is more powerful but needs to be installed separately in the user's OS. In different parts of the code accompanying this thesis, both pip and Conda files are used, and they will be shown to help the readers replicate the necessary Python environments.
+Pip is installed by default with Python, but Conda needs to be installed separately. For the code in this thesis, both pip and Conda files are used and provided to help the readers replicate the necessary Python environments.
 
 \subsubsection{Version control systems and git}
 
@@ -837,36 +836,25 @@ According to \textcite[1]{musicsepintro1}, ICA techniques arose more typically f
 	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, nonstationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are nonlinearities in the mixing process (e.g., dynamic range compression).
 \end{quote}
 
-Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}).
-
-For cases where ICA cannot be applied, musical source models are more popular (\cite[11]{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other, or sparse in their spectral representation (\cite{musicsepgood}), such that they can be extracted with time-frequency masks applied in the spectral domain. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
+Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}). For cases where ICA cannot be applied, musical source models are more popular (\cite[11]{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other, or sparse in their spectral representation (\cite{musicsepgood}), such that they can be extracted with time-frequency masks applied in the spectral domain. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Mixed spectrogram]{\includegraphics[height=4.75cm]{./images-mss/mss1.png}}
 	\subfloat[Source spectrograms]{\includegraphics[height=5cm]{./images-mss/mss2.png}}
-	\caption{Sparsity of different music sources in the spectral domain (\cite[1, 3]{musicsepgood})}
+	\caption{Sparsity of music sources in the spectral domain (\cite[1, 3]{musicsepgood})}
 \label{fig:sepgood}
 \end{figure}
 
-Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' (\cite[11]{musicsepgood}). A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}). Figure \ref{fig:fitzhpss} shows the result of HPSS.
+Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' (\cite[11]{musicsepgood}). A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}).
 
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.65\textwidth]{./images-misc/hpss.png}
-	\caption{Median-filtering HPSS\protect\footnotemark}
-	\label{fig:fitzhpss}
-\end{figure}
-
-\footnotetext{\url{https://librosa.org/librosa_gallery/auto_examples/plot_hprss.html}}
-
-Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicmask, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the nonnegative magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicmask, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/kamvnmf.png}}\\
 	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/mssdnn.png}}
-	\caption{Different techniques for spectral music demixing (\cite[12, 14]{musicsepgood})}
+	\caption{Techniques for spectral music demixing (\cite[12, 14]{musicsepgood})}
 	\label{fig:spectraldemix}
 \end{figure}
 
@@ -875,7 +863,7 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
 
-Surveys on speech (\cite{speechmask}) and music separation (\cite{musicmask}) indicate that the majority of source separation algorithms use the technique of time-frequency masking (or spectral masking) to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
+Surveys on speech (\cite{speechmask}) and music separation (\cite{musicmask}) indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
 A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. To compute a binary mask, there must be an additional real-valued parameter, $\theta \in [0.0, 1.0]$, which is the separation factor -- values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
 
@@ -919,6 +907,11 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 \begin{align}
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
+
+\newpagefill
+
+\subsubsection{Wavelets and custom time-frequency approaches}
+\label{sec:waveletsetc}
 
 \newpagefill
 
