@@ -297,9 +297,7 @@ Note the shape of the matrix form is $401 \text{ slices} \times 2 \text{ channel
 
 In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqoverlaps} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
 
-The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file. This function was included in the original project in the example spectrogram code.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/examples/spectrogram.py\#L19}}
-
-We believe that due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility should be included in the core of the library. In the spectrogram example of the forked library, the new \Verb#overlap_add_slicq# function is imported from the core library.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py\#L19}} Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram.
+The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file. Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram.
 
 \begin{figure}[ht]
 	\centering
@@ -310,12 +308,12 @@ We believe that due to necessity of the 50\% overlap to create a meaningful spec
 	\label{fig:overlappedspectrograms}
 \end{figure}
 
-The overlap-add procedure for the matrix form of the sliCQT operates on the whole matrix, and for the ragged transform, it needs to be applied to each of the tensors in the list.
-
-\newpagefill
+The overlap-add procedure for the matrix form of the sliCQT operates on the whole matrix. For the ragged transform, it is applied to each of the tensors in the list.
 
 \subsubsection{Spectrogram plotting utility}
 \label{sec:slicqspec}
+
+Due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility leads to the need for a spectrogram plotting implementation. All of the spectrograms in this thesis were created using the example spectrogram script.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py}} The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} takes the overlap-added matrix form of the sliCQT as an input, and uses the matplotlib\footnote{\url{matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} to generate a spectrogram.
 
 \newpagefill
 

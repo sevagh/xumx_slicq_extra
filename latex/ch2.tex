@@ -819,7 +819,7 @@ A common thread in survey papers is that the domains of speech enhancement and m
 
 \subsubsection{Computational approaches}
 
-Computational source separation has a history for at least 50 years (\cite{musicmask, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
+Computational source separation has a history of at least 50 years (\cite{musicmask, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
 
 Among the earliest computational approaches for blind source separation is Independent Component Analysis (ICA)  (\cite{musicmask, musicsepgood, musicsepintro1}), which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. We refer the readers to \textcite{ica1, ica2} for ICA algorithms, and to \textcite{blind1, blind2} for a more in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
@@ -863,7 +863,7 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 
 A simple case of music source separation is harmonic/percussive source separation (\cite{musicsepgood}). Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. This is a form of KAM (kernel additive modelling) algorithm.
 
-Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. By applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT, vertical (or percussive) features are diminished since their neighboring pixels are empty, preserving horizontal (or harmonic) features. This can be repeated with the axes flipped to obtain the percussive estimate. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create harmonic and percussive signals.
+Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals.
  
 \textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The result of binary-masked median-filtering harmonic/percussive source separation is shown in figure \ref{fig:fitz1}.
 
@@ -893,36 +893,30 @@ The Time-Frequency Jigsaw Puzzle is an algorithm for tonal/transient separation 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Two lattices within a super-tile; the rectangular region is the super-tile, the ellipses represent the domains within which each TF atom's spectrogram exceeds some fixed threshold, and the dots represent their center (the TF sampling points)]{\includegraphics[width=0.475\textwidth]{./images-wavelets/tfjigsaw-supertiles.png}}
-	\hspace{0.1em}
-	\subfloat[$G^{0}$ and $G^{1}$ represent the analysis maps for the two Gabor frames, $\tilde{G}^{0}_{p}$ and $\tilde{G}^{1}_{p}$ represent the partial synthesis maps from the selected TF atoms, and $\mathcal{H}$ represents the calculation of entropy and corresponding decision]{\includegraphics[width=0.475\textwidth]{./images-wavelets/tfjigsaw-entropycriterion.png}}
+	\subfloat[Two Gabor transforms, $G^{0}$ and $G^{1}$, with high time resolution and high frequency resolution respectively]{\includegraphics[width=0.55\textwidth]{./images-wavelets/tfjigsaw-supertiles.png}}\\
+	\subfloat[$\mathcal{H}$ calculates the entropy of the $G^{0}$ and $G^{1}$ transforms of the input signal $x$ and decides which coefficients to subtract iteratively to create transient and tonal layers $\tilde{G}^{0}$ and $\tilde{G}^{1}$]{\includegraphics[width=0.55\textwidth]{./images-wavelets/tfjigsaw-entropycriterion.png}}
 	\caption{Illustrations of the TF Jigsaw Puzzle (\cite[3, 4]{tfjigsaw})}
 	\label{fig:supertiles}
 \end{figure}
 
-After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion selects coefficients which have more entropy than random white noise, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
+After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion selects coefficients which have more entropy than random white noise, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}.
+
+The next tonal/transient separation algorithm considered is the WMDCTLasso algorithm (\cite{wmdct}).\footnotemark{} The Gabor expansion used is the WMDCT (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions by using a wide and narrow window. The WMDCT is a time-frequency transform where the signal is decomposed into sum of real cosines instead of the complex exponentials of the DFT (\cite{mdct}).
+
+Next, a method called Group-LASSO (Least Absolute Shrinkage and Selection Operator) is applied to separate the tonal and transient layers. In the wide-window MDCT analysis, the Group-LASSO shrinkage in the frequency group selects the most sparse coefficients in frequency, representing tonal parts of the signal. In the narrow-window MDCT analysis,  Group-LASSO shrinkage in the time group selects the most sparse coefficients in time, representing transient parts of the signal.
+
+An example of TFJigsaw and WMDCTLasso tonal/transient separation applied to the glockenspiel signal is shown in figure \ref{fig:tonaltranssep}.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-wavelets/tfjigsaw-sep-example.png}
-	\caption{TFJigsawSep for tonal/transient separation}
-	\label{fig:tfjigsawdemo}
-\end{figure}
-
-The next tonal/transient separation algorithm considered is the WMDCTLasso algorithm (\cite{wmdct}).\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} The time-frequency transform used is the WMDCT (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window. Next, a method called Group-LASSO (Least Absolute Shrinkage and Selection Operator) is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency resolution.
-
-In the wide window MDCT analysis, the Group-LASSO shrinkage in the frequency group selects the most sparse coefficients in frequency, representing tonal parts of the signal. In the narrow window MDCT analysis, the  Group-LASSO shrinkage in the time group selects the most sparse coefficients in time, representing transient parts of the signal. An example of a resulting decomposition of the glockenspiel signal is shown in figure \ref{fig:wmdctex}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[WMDCT of glockenspiel signal]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock1.jpg}}
+	\subfloat[TFJigsawSep]{\includegraphics[width=\textwidth]{./images-wavelets/tfjigsaw-sep-example.png}}\\
+	\subfloat[WMDCTLasso\protect\footnotemark]{\includegraphics[width=0.315\textwidth]{./images-wavelets/Glock1.jpg}
 	\hspace{0.1em}
-	\subfloat[Tonal estimate]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock_Ton.jpg}}\\
-	\subfloat[Transient estimate]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock_Trans.jpg}}
+	{\includegraphics[width=0.315\textwidth]{./images-wavelets/Glock_Ton.jpg}}
 	\hspace{0.1em}
-	\subfloat[Reconstructed glockenspiel WMDCT]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock_Recon.jpg}}
-	\caption{WMDCTLasso for tonal/transient separation of the glockenspiel signal\protect\footnotemark}
-	\label{fig:wmdctex}
+	{\includegraphics[width=0.315\textwidth]{./images-wavelets/Glock_Trans.jpg}}}
+	\caption{Tonal/transient separation algorithms}
+	\label{fig:tonaltranssep}
 \end{figure}
 
 \footnotetext{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}}
@@ -934,9 +928,15 @@ In the wide window MDCT analysis, the Group-LASSO shrinkage in the frequency gro
 
 The wavelet transform was designed to overcome the limitations of the fixed time-frequency resolution of the STFT (\cite{wavelets1, wavelets2}). Similar to the CQT, the wavelet transform uses short windows in the high-frequency regions and long windows in the low-frequency regions, making it more suitable for musical and auditory applications.
 
-Wavelet transforms relate to the Fourier transform as follows. The Fourier transform, as shown in section \ref{sec:freqanal}, represents a signal as a sum of sinusoids which are infinite in duration. The infinite duration is in fact what leads to the time-frequency uncertainty principle, since it transforms a time-domain waveform into the mutually exclusive frequency domain without any temporal information.
+Wavelet transforms relate to the Fourier transform as follows. The Fourier transform, described previously in section \ref{sec:freqanal}, represents a signal as a sum of sinusoids which are infinite in duration. The infinite duration is in fact what leads to the time-frequency uncertainty principle, since it transforms a time-domain waveform into the mutually exclusive frequency domain without any temporal information.
 
-Wavelet transforms, instead of using infinite sinusoids, represent signals as a sum of \textit{wavelets}, which are finite in duration. ``Many signals and images of interest exhibit piecewise smooth behavior punctuated by transients. Speech signals are characterized by short bursts encoding consonants followed by steady-state oscillations indicative of vowels[...] Unlike the Fourier basis, wavelet bases are adept at sparsely representing piecewise regular signals and images, which include transient behavior. Compare wavelets with sine waves, which are the basis of Fourier analysis. Sinusoids do not have limited duration -- they extend from minus to plus infinity. While sinusoids are smooth and predictable, wavelets tend to be irregular and asymmetric.''\footnotemark{} The wavelet and infinite sinusoid are compared in figure \ref{fig:waveletinf}.
+Wavelet transforms, instead of using infinite sinusoids, represent signals as a sum of \textit{wavelets}, which are finite in duration:
+
+\begin{quote}
+	Many signals and images of interest exhibit piecewise smooth behavior punctuated by transients. Speech signals are characterized by short bursts encoding consonants followed by steady-state oscillations indicative of vowels[...] Unlike the Fourier basis, wavelet bases are adept at sparsely representing piecewise regular signals and images, which include transient behavior. Compare wavelets with sine waves, which are the basis of Fourier analysis. Sinusoids do not have limited duration -- they extend from minus to plus infinity. While sinusoids are smooth and predictable, wavelets tend to be irregular and asymmetric.\footnotemark{}
+\end{quote}
+
+ The wavelet and infinite sinusoid are compared in figure \ref{fig:waveletinf}.
 
 \begin{figure}[ht]
 	\centering
@@ -947,7 +947,7 @@ Wavelet transforms, instead of using infinite sinusoids, represent signals as a 
 
 \footnotetext{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}
 
-The STFT and Gabor expansions can be considered as a form of wavelet analysis (\cite{gaborwavelet1, gaborwavelet2}), although the details of the relationship are beyond the scope of this thesis. Still, we keep in mind that wavelet-based source separation techniques are related to the previously shown algorithms that use the STFT, CQT, or other Gabor expansions like the WMDCT.
+The STFT and Gabor expansions can be considered as a form of wavelet analysis (\cite{gaborwavelet1, gaborwavelet2}), although the derivation of the relationship is beyond the scope of this thesis. Still, we keep in mind that wavelet-based source separation techniques are related to the previously shown algorithms that use the STFT, CQT, or other Gabor expansions like the WMDCT.
 
 \textcite{wavelets} uses a wavelet transform to perform source separation. They create a \textit{scalogram}, which is the wavelet equivalent of a spectrogram, using a wavelet transform similar to the constant-Q transform (\cite[2--3]{wavelets}):
 
