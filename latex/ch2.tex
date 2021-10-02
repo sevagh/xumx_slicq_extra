@@ -858,6 +858,81 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 	\label{fig:spectraldemix}
 \end{figure}
 
+\subsubsection{Wavelets and custom time-frequency transforms}
+\label{sec:waveletsetc}
+
+The Time-Frequency Jigsaw Puzzle \cite{tfjigsaw} was designed for tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the iterative approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
+
+\begin{quote}
+	[...] the starting point is to define the tonal layer of the signal as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high frequency resolution (i.e. with a wide window), and the transient layer as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high time resolution (i.e. a narrow window).
+\end{quote}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Two lattices within a super-tile; the rectangular region is the super-tile, the ellipses represent the domains within which each TF atom's spectrogram exceeds some fixed threshold, and the dots represent their center (the TF sampling points)]{\includegraphics[height=4cm]{./images-wavelets/tfjigsaw-supertiles.png}}
+	\hspace{1em}
+	\subfloat[$G^{0}$ and $G^{1}$ represent the analysis maps for the two Gabor frames, $\tilde{G}^{0}_{p}$ and $\tilde{G}^{1}_{p}$ represent the partial synthesis maps from the selected TF atoms, and $\mathcal{H}$ represents the calculation of entropy and corresponding decision]{\includegraphics[height=4cm]{./images-wavelets/tfjigsaw-entropycriterion.png}}
+	\caption{\textcite{tfjigsaw}'s illustrations of the TF Jigsaw Puzzle}
+	\label{fig:supertiles}
+\end{figure}
+
+After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion selects coefficients which have more entropy than random white noise, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}, and the results are shown in figure \ref{fig:tfjigsawdemo}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=16cm]{./images-wavelets/tfjigsaw-sep-example.png}
+	\caption{TFJigsawSep for tonal/transient separation}
+	\label{fig:tfjigsawdemo}
+\end{figure}
+
+``WMDCTLasso'' is described in a paper by \textcite{wmdct}, and a web demo is available.\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} In LTFAT, the name of the algorithm is ``Audioshrink.''\footnote{\url{https://ltfat.github.io/doc/demos/demo_audioshrink.html}}
+
+The WMDCTLasso algorithm performs a decomposition based on structured sparsity. It uses WMDCTs (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window -- with the wide window, the tonal sounds are well-represented, and with the narrow window, transient sounds are well-represented.
+
+Next, a method called Group-LASSO shrinkage is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency representation. An example of a resulting decomposition of jazz music is shown in figure \ref{fig:wmdctex}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=16cm]{./images-wavelets/wmdctjazz.png}
+	\caption{WMDCTLasso for tonal/transient separation in jazz music}
+	\label{fig:wmdctex}
+\end{figure}
+
+In the WMDCTLasso algorithm \cite{wmdct}, Group-LASSO (Least Absolute Shrinkage and Selection Operator) is used to separate tonal and transient sounds by choosing the most sparse transform coefficients. The technique of Group-LASSO derives from the original Lasso \cite{tibshirani} method for linear regression using $l1$ penalty. Basis pursuit is a classic example of the lasso applied to optimal signal decomposition in the coefficient domain \cite{dictionary1}.
+
+The behavior of Group-LASSO is to enforce sparsity \textit{across} groups of coefficients, such that energetic groups of coefficients are globally retained and other groups are globally discarded. Another way to describe Group-LASSO is the selection of \textit{signifiance maps}, or important groups of coefficients, shown in figure \ref{fig:grouplasso}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=5cm]{./images-wavelets/grouplasso.png}
+	\caption{Group-LASSO regression with two overlapping energetic groups of coefficients}
+	\label{fig:grouplasso}
+\end{figure}
+
+\textcite{wmdct} expanded these ideas and provided a set of real-world applications, from which the studied algorithm ``Audioshrink'' (or WMDCTLasso) in this paper is taken. The TF analysis used is the MDCT, and the expectation is that ``the  tonal  layer  is  expected  to  be  sparsely  represented in the frequency domain, with emergent frequencies that may evolve slowly with time (i.e. almost horizontal lines of large MDCT coefficients),'' and ``the transient layer is expected to be sparse in time, but spread out in the frequency domain.'' The problem of tonal/transient separation is solved using the MDCT and Group-LASSO by performing the following procedure:
+
+\begin{tight_itemize}
+	\item
+		In the wide window MDCT analysis, use Group-LASSO shrinkage in the frequency group to choose the most sparse coefficients in frequency, representing tonal parts of the signal.
+	\item
+		In the narrow window MDCT analysis, use Group-LASSO shrinkage in the time group to choose the most sparse coefficients in time, representing transient parts of the signal.
+\end{tight_itemize}
+
+
+
+If one considers the two-pass median filtering algorithms, using a narrow window TF decomposition for sharper temporal resolution and a wide window TF decomposition for sharper frequency resolution, we observe that the expected (and achieved) result is to improve the quality of separation. In short, this is because the simplistic KAM model of the median filters (for separating vertical and horizontal lines in the spectrogram) works better in each case:
+
+\begin{tight_itemize}
+	\item
+		In the wide window TF analysis, horizontal lines (i.e., harmonic sounds) are represented more sharply, and vertical lines (i.e., percussive sounds) are weaker and more blurry. Median filtering in the horizontal direction will lead to a better separation of the harmonic component.
+	\item
+		The inverse is true for the narrow window TF analysis, leading to a better separation of the percussive component.
+\end{tight_itemize}
+
+Thus we can see that the median filtering proximity kernel separation for harmonic sounds performs better in a TF representation suited for harmonic sounds, and that the median filtering proximity kernel for percussive sounds performs better in a TF representation suited for percussive sounds.
+
+We can even sense the intuition here that extending simple KAM algorithms with better TF representations, such that harmonic sounds are more and more sharply defined, and percussive sounds less, in the harmonic TF representation (and vice-versa for the percussive TF representation) would lead to improved separations. This restates one of the primary goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
+
 \newpagefill
 
 \subsubsection{Time-frequency masking and oracle estimators}
@@ -910,8 +985,7 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 
 \newpagefill
 
-\subsubsection{Wavelets and custom time-frequency approaches}
-\label{sec:waveletsetc}
+
 
 \newpagefill
 
