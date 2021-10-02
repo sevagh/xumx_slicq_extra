@@ -846,7 +846,7 @@ Techniques more specific to music were developed as a necessity to deal with the
 \label{fig:sepgood}
 \end{figure}
 
-Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' (\cite[11]{musicsepgood}). A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}).
+Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' (\cite[11]{musicsepgood}). A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}).
 
 Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicmask, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
@@ -858,21 +858,45 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 	\label{fig:spectraldemix}
 \end{figure}
 
-\subsubsection{Wavelets and custom time-frequency transforms}
-\label{sec:waveletsetc}
+\subsubsection{Harmonic/percussive source separation}
+\label{sec:hpss}
 
-The Time-Frequency Jigsaw Puzzle \cite{tfjigsaw} was designed for tonal/transient (or harmonic/percussive) separation is among one of the possible applications of TFJigsaw. The insight is similar to the iterative approach described previously -- in a TF representation with high frequency resolution, tonal sounds are well-represented, and in a TF representation with high time resolution, transient sounds are well-represented:
+A simple case of music source separation is harmonic/percussive source separation (\cite{musicsepgood}). Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. This is a form of KAM (kernel additive modelling) algorithm.
 
+Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. By applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT, vertical (or percussive) features are diminished since their neighboring pixels are empty, preserving horizontal (or harmonic) features. This can be repeated with the axes flipped to obtain the percussive estimate. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create harmonic and percussive signals.
+ 
+\textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The result of binary-masked median-filtering harmonic/percussive source separation is shown in figure \ref{fig:fitz1}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Mixed signal with median filters]{{\includegraphics[width=0.475\textwidth]{./images-hpss/mix_stft_medianfilters.png} }}
+	\hspace{0.1em}
+	\subfloat[Percussive estimate]{{\includegraphics[width=0.475\textwidth]{./images-hpss/perc_stft.png} }}\\
+	\subfloat[Harmonic estimate]{{\includegraphics[width=0.475\textwidth]{./images-hpss/harm_stft.png} }}
+	\hspace{0.1em}
+	\subfloat[Residual estimate]{{\includegraphics[width=0.475\textwidth]{./images-hpss/resi_stft.png} }}
+	\caption{Example of median filtering HPSS with binary masking applied to the glockenspiel signal}
+	\label{fig:fitz1}
+\end{figure}
+
+\textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice.
+
+\subsubsection{Tonal/transient separation}
+\label{sec:custgabor}
+
+The two-pass median filtering algorithms shown previously used a short-window STFT for a high time resolution percussive estimate, and a long-window STFT for a high frequency resolution harmonic estimate. The Gabor transform, which as described was the first published example of an STFT-like operation, eventually evolved into a system for time-frequency transforms, called Gabor expansions (\cite{gaborexpansion}). Alternate terms for harmonic and percussive are tonal and transient, and we will consider two algorithms for tonal/transient source separation which follow the same idea of using two different time-frequency resolutions with custom Gabor expansions.
+
+The Time-Frequency Jigsaw Puzzle is an algorithm for tonal/transient separation with custom Gabor expansions (\cite[6--7]{tfjigsaw}):
 \begin{quote}
 	[...] the starting point is to define the tonal layer of the signal as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high frequency resolution (i.e. with a wide window), and the transient layer as the ``component'' which admits a sparse expansion with respect to a Gabor frame with high time resolution (i.e. a narrow window).
 \end{quote}
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Two lattices within a super-tile; the rectangular region is the super-tile, the ellipses represent the domains within which each TF atom's spectrogram exceeds some fixed threshold, and the dots represent their center (the TF sampling points)]{\includegraphics[height=4cm]{./images-wavelets/tfjigsaw-supertiles.png}}
-	\hspace{1em}
-	\subfloat[$G^{0}$ and $G^{1}$ represent the analysis maps for the two Gabor frames, $\tilde{G}^{0}_{p}$ and $\tilde{G}^{1}_{p}$ represent the partial synthesis maps from the selected TF atoms, and $\mathcal{H}$ represents the calculation of entropy and corresponding decision]{\includegraphics[height=4cm]{./images-wavelets/tfjigsaw-entropycriterion.png}}
-	\caption{\textcite{tfjigsaw}'s illustrations of the TF Jigsaw Puzzle}
+	\subfloat[Two lattices within a super-tile; the rectangular region is the super-tile, the ellipses represent the domains within which each TF atom's spectrogram exceeds some fixed threshold, and the dots represent their center (the TF sampling points)]{\includegraphics[width=0.475\textwidth]{./images-wavelets/tfjigsaw-supertiles.png}}
+	\hspace{0.1em}
+	\subfloat[$G^{0}$ and $G^{1}$ represent the analysis maps for the two Gabor frames, $\tilde{G}^{0}_{p}$ and $\tilde{G}^{1}_{p}$ represent the partial synthesis maps from the selected TF atoms, and $\mathcal{H}$ represents the calculation of entropy and corresponding decision]{\includegraphics[width=0.475\textwidth]{./images-wavelets/tfjigsaw-entropycriterion.png}}
+	\caption{Illustrations of the TF Jigsaw Puzzle (\cite[3, 4]{tfjigsaw})}
 	\label{fig:supertiles}
 \end{figure}
 
@@ -880,60 +904,65 @@ After creating two representations of the signal, these are superimposed in a si
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=16cm]{./images-wavelets/tfjigsaw-sep-example.png}
+	\includegraphics[width=\textwidth]{./images-wavelets/tfjigsaw-sep-example.png}
 	\caption{TFJigsawSep for tonal/transient separation}
 	\label{fig:tfjigsawdemo}
 \end{figure}
 
-``WMDCTLasso'' is described in a paper by \textcite{wmdct}, and a web demo is available.\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} In LTFAT, the name of the algorithm is ``Audioshrink.''\footnote{\url{https://ltfat.github.io/doc/demos/demo_audioshrink.html}}
+The next tonal/transient separation algorithm considered is the WMDCTLasso algorithm (\cite{wmdct}).\footnote{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}} The time-frequency transform used is the WMDCT (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window. Next, a method called Group-LASSO (Least Absolute Shrinkage and Selection Operator) is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency resolution.
 
-The WMDCTLasso algorithm performs a decomposition based on structured sparsity. It uses WMDCTs (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions, by using a wide and narrow window -- with the wide window, the tonal sounds are well-represented, and with the narrow window, transient sounds are well-represented.
-
-Next, a method called Group-LASSO shrinkage is applied to separate the tonal and transient layers by exploiting their respective sparsity in each time-frequency representation. An example of a resulting decomposition of jazz music is shown in figure \ref{fig:wmdctex}.
+In the wide window MDCT analysis, the Group-LASSO shrinkage in the frequency group selects the most sparse coefficients in frequency, representing tonal parts of the signal. In the narrow window MDCT analysis, the  Group-LASSO shrinkage in the time group selects the most sparse coefficients in time, representing transient parts of the signal. An example of a resulting decomposition of the glockenspiel signal is shown in figure \ref{fig:wmdctex}.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=16cm]{./images-wavelets/wmdctjazz.png}
-	\caption{WMDCTLasso for tonal/transient separation in jazz music}
+	\subfloat[WMDCT of glockenspiel signal]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock1.jpg}}
+	\hspace{0.1em}
+	\subfloat[Tonal estimate]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock_Ton.jpg}}\\
+	\subfloat[Transient estimate]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock_Trans.jpg}}
+	\hspace{0.1em}
+	\subfloat[Reconstructed glockenspiel WMDCT]{\includegraphics[width=0.425\textwidth]{./images-wavelets/Glock_Recon.jpg}}
+	\caption{WMDCTLasso for tonal/transient separation of the glockenspiel signal\protect\footnotemark}
 	\label{fig:wmdctex}
 \end{figure}
 
-In the WMDCTLasso algorithm \cite{wmdct}, Group-LASSO (Least Absolute Shrinkage and Selection Operator) is used to separate tonal and transient sounds by choosing the most sparse transform coefficients. The technique of Group-LASSO derives from the original Lasso \cite{tibshirani} method for linear regression using $l1$ penalty. Basis pursuit is a classic example of the lasso applied to optimal signal decomposition in the coefficient domain \cite{dictionary1}.
-
-The behavior of Group-LASSO is to enforce sparsity \textit{across} groups of coefficients, such that energetic groups of coefficients are globally retained and other groups are globally discarded. Another way to describe Group-LASSO is the selection of \textit{signifiance maps}, or important groups of coefficients, shown in figure \ref{fig:grouplasso}.
-
-\begin{figure}
-	\centering
-	\includegraphics[width=5cm]{./images-wavelets/grouplasso.png}
-	\caption{Group-LASSO regression with two overlapping energetic groups of coefficients}
-	\label{fig:grouplasso}
-\end{figure}
-
-\textcite{wmdct} expanded these ideas and provided a set of real-world applications, from which the studied algorithm ``Audioshrink'' (or WMDCTLasso) in this paper is taken. The TF analysis used is the MDCT, and the expectation is that ``the  tonal  layer  is  expected  to  be  sparsely  represented in the frequency domain, with emergent frequencies that may evolve slowly with time (i.e. almost horizontal lines of large MDCT coefficients),'' and ``the transient layer is expected to be sparse in time, but spread out in the frequency domain.'' The problem of tonal/transient separation is solved using the MDCT and Group-LASSO by performing the following procedure:
-
-\begin{tight_itemize}
-	\item
-		In the wide window MDCT analysis, use Group-LASSO shrinkage in the frequency group to choose the most sparse coefficients in frequency, representing tonal parts of the signal.
-	\item
-		In the narrow window MDCT analysis, use Group-LASSO shrinkage in the time group to choose the most sparse coefficients in time, representing transient parts of the signal.
-\end{tight_itemize}
-
-
-
-If one considers the two-pass median filtering algorithms, using a narrow window TF decomposition for sharper temporal resolution and a wide window TF decomposition for sharper frequency resolution, we observe that the expected (and achieved) result is to improve the quality of separation. In short, this is because the simplistic KAM model of the median filters (for separating vertical and horizontal lines in the spectrogram) works better in each case:
-
-\begin{tight_itemize}
-	\item
-		In the wide window TF analysis, horizontal lines (i.e., harmonic sounds) are represented more sharply, and vertical lines (i.e., percussive sounds) are weaker and more blurry. Median filtering in the horizontal direction will lead to a better separation of the harmonic component.
-	\item
-		The inverse is true for the narrow window TF analysis, leading to a better separation of the percussive component.
-\end{tight_itemize}
-
-Thus we can see that the median filtering proximity kernel separation for harmonic sounds performs better in a TF representation suited for harmonic sounds, and that the median filtering proximity kernel for percussive sounds performs better in a TF representation suited for percussive sounds.
-
-We can even sense the intuition here that extending simple KAM algorithms with better TF representations, such that harmonic sounds are more and more sharply defined, and percussive sounds less, in the harmonic TF representation (and vice-versa for the percussive TF representation) would lead to improved separations. This restates one of the primary goals of this paper -- to show that simple source separation techniques can be improved by changing the linear STFT to a better TF dictionary.
+\footnotetext{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}}
 
 \newpagefill
+
+\subsubsection{Wavelets}
+\label{sec:wavelets}
+
+The wavelet transform was designed to overcome the limitations of the fixed time-frequency resolution of the STFT (\cite{wavelets1, wavelets2}). Similar to the CQT, the wavelet transform uses short windows in the high-frequency regions and long windows in the low-frequency regions, making it more suitable for musical and auditory applications.
+
+Wavelet transforms relate to the Fourier transform as follows. The Fourier transform, as shown in section \ref{sec:freqanal}, represents a signal as a sum of sinusoids which are infinite in duration. The infinite duration is in fact what leads to the time-frequency uncertainty principle, since it transforms a time-domain waveform into the mutually exclusive frequency domain without any temporal information.
+
+Wavelet transforms, instead of using infinite sinusoids, represent signals as a sum of \textit{wavelets}, which are finite in duration. ``Many signals and images of interest exhibit piecewise smooth behavior punctuated by transients. Speech signals are characterized by short bursts encoding consonants followed by steady-state oscillations indicative of vowels[...] Unlike the Fourier basis, wavelet bases are adept at sparsely representing piecewise regular signals and images, which include transient behavior. Compare wavelets with sine waves, which are the basis of Fourier analysis. Sinusoids do not have limited duration -- they extend from minus to plus infinity. While sinusoids are smooth and predictable, wavelets tend to be irregular and asymmetric.''\footnotemark{} The wavelet and infinite sinusoid are compared in figure \ref{fig:waveletinf}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.65\textwidth]{./images-wavelets/wavelet.png}
+	\caption{The infinite sine wave of the Fourier transform compared to a finite wavelet\protect\footnotemark[\value{footnote}]}
+	\label{fig:waveletinf}
+\end{figure}
+
+\footnotetext{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}
+
+The STFT and Gabor expansions can be considered as a form of wavelet analysis (\cite{gaborwavelet1, gaborwavelet2}), although the details of the relationship are beyond the scope of this thesis. Still, we keep in mind that wavelet-based source separation techniques are related to the previously shown algorithms that use the STFT, CQT, or other Gabor expansions like the WMDCT.
+
+\textcite{wavelets} uses a wavelet transform to perform source separation. They create a \textit{scalogram}, which is the wavelet equivalent of a spectrogram, using a wavelet transform similar to the constant-Q transform (\cite[2--3]{wavelets}):
+
+\begin{quote}
+	The time-frequency structures of audio signals are well revealed by Q-constant filter banks, which model the signal cochlea transformation. This can also be written as a multiscale wavelet transform, whose modulus defines a time-frequency representation that is called a scalogram image[...] We show that a wavelet transform can partly separate the time-frequency supports of two different harmonic template models, and characterize the overlap of these time-frequency supports.
+\end{quote}
+
+Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.65\textwidth]{./images-wavelets/wavelet_sep.png}
+	\caption{Source separation using wavelets. Cyan shows the first harmonic source, yellow shows the second harmonic source, and red shows the overlap (\cite[5]{wavelets})}
+	\label{fig:waveletsep}
+\end{figure}
 
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
@@ -949,7 +978,16 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or ha
 	\label{fig:masks}
 \end{figure}
 
-The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms (\cite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}). Discarding the phase of the complex STFT is a choice made for simplicity, but the phase may be important for source separation applications (\cite{ditchphase}).
+An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2}, is given by the following equation:
+\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}} \]
+
+, where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is of the form:
+\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
+
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in the following equation:
+\[ M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta, M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}}) \]
+
+The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms (\cite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}). Discarding the phase of the complex STFT is a choice made for simplicity, although the phase may be important for source separation applications (\cite{ditchphase}).
 
 To illustrate the calculation of the oracle mask, let us describe a simple case of a mixed song consisting of a vocal and drum track. We assume that we have access to the isolated source recordings of vocals and drums, as well as the mix.
 
@@ -982,10 +1020,6 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 \begin{align}
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
-
-\newpagefill
-
-
 
 \newpagefill
 
