@@ -185,27 +185,21 @@ Next, the list and generator for the forward operation of the transform, which i
   \label{code:seconddiff}
 \end{listing}
 
-In this section, only short excerpts of the torch port were shown, due to requiring to display hundreds of lines of code to show the full effort. Instead, the workflow for how to use the GitHub UI for browsing the individual steps of the torch port was described in figure \ref{fig:ghcommitbrowser}. This list describes several important commits:
+In this section, only short excerpts of the torch port were shown, due to requiring to display hundreds of lines of code to show the full effort. Instead, the workflow for how to use the GitHub UI for browsing the individual steps of the torch port was described in figure \ref{fig:ghcommitbrowser}. The following list contains links to several important commits:
 
 \begin{tight_enumerate}
 	 \item
-		 Beginning the torch port of the sliced NSGT (or sliCQT):\\
-		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/ce9785d40d1053fcffc72115d5fbdcb28d44bf7c}}
+		 \href{https://github.com/sevagh/nsgt/commit/ce9785d40d1053fcffc72115d5fbdcb28d44bf7c}{Beginning the torch port of the sliced NSGT (or sliCQT)}
 	 \item
-		 Optimizing the main loop of the forward transform:\\
-		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/49a70d112ba4091d271a9438a8c38cf380ce62b4}}
+		 \href{https://github.com/sevagh/nsgt/commit/49a70d112ba4091d271a9438a8c38cf380ce62b4}{Optimizing the main loop of the forward transform}
 	 \item
-		 Adding a configurable device (CPU/GPU) to the sliCQT for finer user control:\\
-		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/2d41fe002d95e4dbd1cdb76ef24aa03c95cfbe46}}
+		 \href{https://github.com/sevagh/nsgt/commit/2d41fe002d95e4dbd1cdb76ef24aa03c95cfbe46}{Adding a configurable device (CPU/GPU) to the sliCQT for finer user control}
 	 \item
-		 Optimizing the backward/inverse transform:\\
-		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/9552aa1eb0735e93ce91b648a5b7f629066693b3}}
+		 \href{https://github.com/sevagh/nsgt/commit/9552aa1eb0735e93ce91b648a5b7f629066693b3}{Optimizing the backward/inverse transform}
 	 \item
-		 Returning tensors (i.e. ndarrays or matrices) instead of generators:\\
-		 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/1a5886bced951af132ab8659d30a565bcade87b2}}
+		 \href{https://github.com/sevagh/nsgt/commit/1a5886bced951af132ab8659d30a565bcade87b2}{Returning tensors (i.e. ndarrays or matrices) instead of generators}
 	 \item
-	 	 Supporting torch in the non-sliced NSGT:\\
-	 	 {\scriptsize \url{https://github.com/sevagh/nsgt/commit/8d873f7dc8053c553664dcc5c0816eaf3e1ddae0}}
+		 \href{https://github.com/sevagh/nsgt/commit/8d873f7dc8053c553664dcc5c0816eaf3e1ddae0}{Supporting torch in the non-sliced NSGT}
 \end{tight_enumerate}
 
 \newpagefill
