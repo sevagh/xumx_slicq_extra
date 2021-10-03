@@ -16,7 +16,7 @@ proposal: texpdf
 
 chapter-dev: export LATEXMK_FLAGS="-pvc"
 chapter-dev: chapter
-chapter: tex_fname="${CHAPTER}.tex"
+chapter: tex_fname="report_${CHAPTER}.tex"
 chapter: texpdf
 
 all: report
