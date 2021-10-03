@@ -7,7 +7,7 @@
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
 
-\textcite[8]{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system.'' Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \textcite[2]{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure.''
+\citeauthor{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system'' (\cite[8]{discretebook}). Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \citeauthor{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure'' (\cite[2]{moore}).
 
 The waveform is defined as the function of pressure variation plotted against time (\cite{moore, melbook}), and is real-valued and continuous in both time and amplitude (\cite{melbook}). A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
 
@@ -32,7 +32,7 @@ Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for t
 	\label{fig:aliasing}
 \end{figure}
 
-Second, the continuous amplitude needs to be quantized. Stated by \textcite[190]{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values.'' The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
+Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values'' (\cite[190]{discretebook}). The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
 
 \begin{figure}[ht]
 	\centering
@@ -48,10 +48,10 @@ Second, the continuous amplitude needs to be quantized. Stated by \textcite[190]
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
 
-\textcite[4]{moore} states that
+\citeauthor{moore} states that
 
 \begin{quote}
-	[a]lthough all sounds can be specified by their variation in pressure with time, it is often more convenient, and more meaningful, to specify them in a different way when the sounds are complex. This method is based on a theorem by Fourier, who proved that almost any complex waveform can be analyzed, or broken down, into a series of sinusoids with specific frequencies, amplitudes, and phases. This is done using a mathematical procedure called the Fourier Transform.
+	[a]lthough all sounds can be specified by their variation in pressure with time, it is often more convenient, and more meaningful, to specify them in a different way when the sounds are complex. This method is based on a theorem by Fourier, who proved that almost any complex waveform can be analyzed, or broken down, into a series of sinusoids with specific frequencies, amplitudes, and phases. This is done using a mathematical procedure called the Fourier Transform (\cite[4]{moore}).
 \end{quote}
 
 Throughout this section, the description of the Fourier Transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
@@ -68,10 +68,10 @@ The Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox f
 \subsubsection{Frequency analysis and Fourier Transforms (CTFT, DFT, FFT)}
 \label{sec:freqanal}
 
-The Fourier Transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite[54]{fourierhistory}). The Fourier Transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier Transform to music is described by \textcite[461]{fouriermusic}, who state that
+The Fourier Transform originated as an integral transform in mathematics, which are a class of ``useful tools for solving problems involving certain types of partial differential equations (PDEs), mainly when their solutions on the corresponding domains of definition are difficult to deal with'' (\cite[54]{fourierhistory}). The Fourier Transform was originally introduced by Joseph Fourier in his earlier papers (\cite{fourierhist1, fourierhist2}), and fully expanded and collected in his seminal work on heat (\cite{fourierheat}). The connection of the Fourier Transform to music is described by \citeauthor{fouriermusic}, who state that
 
 \begin{quote}
-	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string.
+	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string (\cite[461]{fouriermusic}).
 \end{quote}
 
 The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \eqref{equation:ctft} and \eqref{equation:ictft} (\cite[308]{dspfirst}):
@@ -115,17 +115,17 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 \subsubsection{Joint time-frequency analysis with the Gabor Transform and Short-time Fourier Transform (STFT)}
 \label{sec:jointtfa}
 
-Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal}, \textcite[714]{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...''
+Continuing from the discussion of the DFT in the previous section \ref{sec:freqanal},\citeauthor{discretebook} state that ``often, in practical applications of sinusoidal signal models, the signal properties (amplitudes, frequencies, and phases) will change with time. For example, nonstationary signal models of this type are required to describe radar, sonar, speech, and data communication signals. A single DFT estimate is not sufficient to describe such signals...'' (\cite[714]{discretebook}).
 
-Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals (\cite{gabor1946}). \textcite[431]{gabor1946} quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier Transform:
+Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communication}, introduced significant and far-reaching concepts in the time and frequency analysis of acoustic signals (\cite{gabor1946}). \citeauthor{gabor1946} quotes famed American telecommunication engineer John Carson (\cite{carsonfamous}) to describe the limitations of the Fourier Transform:
 
 \begin{quote}
-	[t]he foregoing solutions [of the Fourier Transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren
+	[t]he foregoing solutions [of the Fourier Transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren (\cite[431]{gabor1946})
 \end{quote}
 
-According to \textcite[3624]{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts.''
+According to \citeauthor{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts'' (\cite[3624]{korpel}).
 
-Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \textcite[432]{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit.''. This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' (\cite[432]{gabor1946}).
+Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \citeauthor{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite[432]{gabor1946}). This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' (\cite[432]{gabor1946}).
 
 Let us start with a description of the time-domain unit impulse signal or sequence (\cite[20]{melbook}) in equation \eqref{equation:delta}:
 \begin{flalign}\label{equation:delta}
@@ -148,22 +148,22 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 	\label{fig:gaborfirst}
 \end{figure}
 
-The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a property of the Fourier Transform and not a fundamental physical limitation, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \textcite[610]{psycho2} describes one of these experiments:
+The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. To further elaborate that this is a property of the Fourier Transform and not a fundamental physical limitation, several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit. \citeauthor{psycho2} describes one of these experiments:
 
 \begin{quote}
-	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen (DL) for a tone pulse of duration d. [...]  It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...]
+	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen (DL) for a tone pulse of duration d. [...]  It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...] (\cite[610]{psycho2})
 \end{quote}
 
-More recently, according to \textcite[4]{psycho1}:
+More recently, according to \citeauthor{psycho1}:
 
 \begin{quote}
-	[w]e have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10.
+	[w]e have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10 (\cite[4]{psycho1}).
 \end{quote}
 
-\textcite[4]{psycho1} go on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue.'' Nevertheless, if we choose to proceed with time-frequency analysis despite this limitation, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \textcite[435]{gabor1946} asks:
+\citeauthor{psycho1} go on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue'' (\cite[4]{psycho1}). Nevertheless, if we choose to proceed with time-frequency analysis despite this limitation, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \citeauthor{gabor1946} asks:
 
 \begin{quote}
-What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function
+	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function (\cite[435]{gabor1946})
 \end{quote}
 
 Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e. the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equation \eqref{equation:gabort}:
@@ -225,10 +225,10 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 	\label{fig:stfts}
 \end{figure}
 
-We close this section with a quote from \textcite[96]{doerflersouls} on the powerful properties of the STFT:
+We close this section with a quote from \citeauthor{doerflersouls} on the powerful properties of the STFT:
 
 \begin{quote}
-       ... the STFT has at least three souls: it is the Fourier Transform of windowed portions of the signal, it is the convolution of the signal with modulated versions of the window and it is the scalar product of the signal with time-shifted modulated versions of the window. These three souls can be exploited in the applications, for the computation of the STFT and for its sampling ...
+	... the STFT has at least three souls: it is the Fourier Transform of windowed portions of the signal, it is the convolution of the signal with modulated versions of the window and it is the scalar product of the signal with time-shifted modulated versions of the window. These three souls can be exploited in the applications, for the computation of the STFT and for its sampling... (\cite[96]{doerflersouls})
 \end{quote}
 
 \newpagefill
@@ -236,7 +236,7 @@ We close this section with a quote from \textcite[96]{doerflersouls} on the powe
 \subsubsection{Constant-Q Transform (CQT)}
 \label{sec:cqt}
 
-\textcite[1]{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies.'' As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region (\cite{doerflerphd, cqtransient}). 
+\citeauthor{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies'' (\cite[1]{cqtransient}). As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region (\cite{doerflerphd, cqtransient}). 
 
 The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
 
@@ -256,7 +256,7 @@ The name ``Constant-Q'' refers to the constant ratio of the frequency being anal
 
 This first CQT implementation was not designed to be invertible, until \textcite{klapuricqt} introduced an algorithm for an approximate inverse of the CQT back to the time-domain waveform, with an inversion error of $\approx 10^{-3}$. The approximate inverse for the CQT was also approached differently by \textcite{fitzgeraldcqt}.
 
-\textcite[1]{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal.'' Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the Constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale with equal temperament (\cite{westernpitch1, westernpitch2}).
+\citeauthor{klapuricqt} describe the CQT as ``a time-frequency representation where the frequency bins are geometrically spaced and the Q-factors (ratios of the center frequencies to bandwidths) of all bins are equal'' (\cite[1]{klapuricqt}). Frequency bins that are geometrically spaced are also logarithmically spaced with a base of two (\cite{geometriclog}). The bins-per-octave setting of the CQT is related to the Constant-Q ratio by the formula $Q = 2^{\sfrac{1}{\text{bins}}}$. For example, for 12 bins-per-octave, this results in a $Q$ factor of 1.059, which is the well-known ``12th root of two'' based on the Western chromatic scale with equal temperament (\cite{westernpitch1, westernpitch2}).
 
 \textcite{invertiblecqt} implemented the Constant-Q Transform with Nonstationary Gabor frames (\cite{balazs}), which allowed for perfect reconstruction for the first time. This is also called the CQ-NSGT, or Constant-Q Nonstationary Gabor Transform. The next section, \ref{sec:theorynsgt}, will cover the NSGT in detail, but for now we shall continue with how the NSGT led to improved implementations of the CQT.
 
@@ -295,9 +295,9 @@ Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft
 	\label{fig:dorflertradeoff}
 \end{figure}
 
-As summarized by \textcite[2]{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions... The nonstationary Gabor frames [...] are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas.'' In other words, a single Nonstationary Gabor transform can replace the need for multiple distinct Gabor transforms (or STFTs).
+As summarized by \citeauthor{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions... The nonstationary Gabor frames [...] are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas'' (\cite[2]{adaptivecqt}). In other words, a single Nonstationary Gabor transform can replace the need for multiple distinct Gabor transforms (or STFTs).
 
-\textcite[1049]{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began a ``fundamental move from transforms to dictionaries for [...] signal representation.'' Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task.''
+\citeauthor{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began a ``fundamental move from transforms to dictionaries for [...] signal representation'' (\cite[1049]{dictionary}). Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task'' (\cite[1049]{dictionary}).
 
 Using multiple transforms, such as using two Gabor transforms (or STFTs) with a small and large window for the transient and tonal properties of music, is also called an \textit{overcomplete} dictionary (\cite{dictionary}), where there is a lot of redundancy in the transform domain.
 
@@ -313,10 +313,10 @@ The construction of nonstationary Gabor frames relies on three properties of the
 		Adjacent windows overlap to avoid loss of information. At the same time, unnecessary overlap is undesirable. We assume that $0 < A \le \sum_{n \in \mathbb{Z}}|g_{n}(t)|^{2} \le B < \infty$, a.e. (almost everywhere), for some positive A and B
 \end{tight_itemize}
 
-These requirements lead to invertibility of the frame operator and therefore to perfect reconstruction. \textcite[1482]{balazs} continues on to say that
+These requirements lead to invertibility of the frame operator and therefore to perfect reconstruction. \citeauthor{balazs} continues on to say that
 
 \begin{quote}
-	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case
+	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case (\cite[1482]{balazs})
 \end{quote}
 
 To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \eqref{equation:stationarygab}:
@@ -324,7 +324,7 @@ To derive the NSGT, let us recall the previously-seen definition of the Gabor tr
 g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
 \end{align}
 
-As stated by \textcite[3]{adaptivecqt}, ``[w]e will indicate such a frame as \textit{stationary}, since the window used for time-frequency shifts does not change and the time-frequency shifts form a lattice of $a \times b$.'' Figure \ref{fig:uniformtflattice} shows the resulting uniform $a \times b$ tiling of the time-frequency plane.
+As stated by \citeauthor{adaptivecqt}, ``[w]e will indicate such a frame as \textit{stationary}, since the window used for time-frequency shifts does not change and the time-frequency shifts form a lattice of $a \times b$'' (\cite[3]{adaptivecqt}). Figure \ref{fig:uniformtflattice} shows the resulting uniform $a \times b$ tiling of the time-frequency plane.
 
 \begin{figure}[ht]
 	\centering
@@ -350,10 +350,10 @@ For a resolution that changes with time, the Nonstationary Gabor atom is chosen 
 	g_{m,n}(t) &= g_{n}(t)e^{j2\pi m b_{n}t}, m,n \in \mathbb{Z}
 \end{align}
 
-\textcite[1485]{balazs} describe the system in equation \eqref{equation:irregulartime} further:
+\citeauthor{balazs} describe the system in equation \eqref{equation:irregulartime} further:
 
 \begin{quote}
-		[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position.
+	[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position (\cite[1485]{balazs}).
 \end{quote}
 
 For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$ (\cite[1486]{balazs}):
@@ -527,13 +527,13 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 \subsection{Machine learning and deep learning for music signals}
 \label{sec:ml}
 
-Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to the description of machine learning by \textcite[105]{introtoml}:
+Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing (\cite{musicsp}). Signal processing encompasses the subfields of statistical, approximate, or stochastic signal processing (\cite{stochasticsp, statisticalsp}). The field of optimization has been used for approximate signal processing problems for decades (\cite{optsp}). Some of the classic examples include basis pursuit and matching pursuit (\cite{dictionary1, dictionary2}). To consider the problem of optimization outside of the signal processing domain, we refer to the description of machine learning by \citeauthor{introtoml}:
 
 \begin{quote}
-	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion.
+	In many scientific disciplines, the primary objective is to model the relationship between a set of observable quantities (inputs) and another set of variables that are related to these (outputs). [...] Machine learning provides techniques that can automatically build a computational model of these complex relationships by processing the available data and maximizing a problem dependent performance criterion (\cite[105]{introtoml}).
 \end{quote}
 
-According to \textcite[1]{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot.'' A characteristic of deep networks is that they have many hidden layers, named so ``because we do not necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' (\cite[2]{introtodl}) to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
+According to \citeauthor{introtodl}, deep learning ``is the subfield of machine learning that is devoted to building algorithms that explain and learn a high and low level of abstractions of data that traditional machine learning algorithms often cannot'' (\cite[1]{introtodl}). A characteristic of deep networks is that they have many hidden layers, named so ``because we do not necessarily see what the inputs and outputs of these neurons are explicitly beyond knowing they are the output of the preceding layer,'' (\cite[2]{introtodl}) to model more complex relationships between the input and output. Figure \ref{fig:fcdn} shows a deep network with hidden layers.
 
 \begin{figure}[ht]
 	\centering
@@ -542,12 +542,12 @@ According to \textcite[1]{introtodl}, deep learning ``is the subfield of machine
 	\label{fig:fcdn}
 \end{figure}
 
-\textcite[1]{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to.'' However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
+\citeauthor{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to'' (\cite[1]{introtodl}). However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
 
-We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \textcite[3591]{mldspmix}, analytic knowledge and machine learning should both be considered in the study of acoustic signals:
+We also note that statistical signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). In fact, according to \citeauthor{mldspmix}, analytic knowledge and machine learning should both be considered in the study of acoustic signals:
 
 \begin{quote}
-	Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained.
+	Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained (\cite[3591]{mldspmix}).
 \end{quote}
 
 \begin{figure}[ht]
@@ -754,7 +754,7 @@ Pip is installed by default with Python, but Conda needs to be installed separat
 
 \subsubsection{Version control systems and git}
 
-Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database (\cite{gitbook}). \textcite[1]{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you screw things up or lose files, you can easily recover.''
+Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database (\cite{gitbook}). \citeauthor{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you screw things up or lose files, you can easily recover'' (\cite[1]{gitbook}).
 
 According to \textcite{gitbook}, version control systems are either centralized or distributed. In a distributed version control systems (DVCS), each person's copy of the code contains the full history of changes. This means that people can work on their own private copy of the code, and then sync changes with a central server, rather than depending on the central server for viewing the history like in a centralized version control system (CVCS). This allows people to work independently of the central server, until they are ready to sync changes back with the other collaborators.
 
@@ -775,9 +775,9 @@ All of the code for this thesis were stored in git repositories to keep track of
 
 \subsubsection{Open-source software and GitHub}
 
-\textcite[1]{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form.'' Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
+\citeauthor{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form'' (\cite[1]{floss}). Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
 
-\textcite[131]{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects.'' GitHub contains tools for working with git repositories, including social elements for creating personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate to show code written for the thesis or code from third-party projects, such that the reader can view the true source code that is being described. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in figure \ref{fig:githubpytorch}.
+\citeauthor{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects'' (\cite[131]{gitbook}). GitHub contains tools for working with git repositories, including social elements for creating personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate to show code written for the thesis or code from third-party projects, such that the reader can view the true source code that is being described. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in figure \ref{fig:githubpytorch}.
 
 \begin{figure}[ht]
 	\centering
@@ -795,8 +795,7 @@ All of the code for this thesis were stored in git repositories to keep track of
 
 Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track (\cite{musicsepintro1}). To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
 
-There are many motivations for performing this separation. \textcite[1]{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-
-channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix.''
+There are many motivations for performing this separation. \citeauthor{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix'' (\cite[1]{musicsepgood}).
 
 The ISMIR 2021 Music Demixing Challenge (MDX)\footnotemark{} describes audio source separation as consisting of different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
 
@@ -830,10 +829,10 @@ Among the earliest computational approaches for blind source separation is Indep
 \label{fig:icaposition}
 \end{figure}
 
-According to \textcite[1]{musicsepintro1}, ICA techniques arose more typically for speech denoising (\cite{speechsep}), and they make assumptions that cannot be generalized easily to music:
+According to \citeauthor{musicsepintro1}, ICA techniques arose more typically for speech denoising (\cite{speechsep}), and they make assumptions that cannot be generalized easily to music:
 
 \begin{quote}
-	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, nonstationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are nonlinearities in the mixing process (e.g., dynamic range compression).
+	[systems which aim] to recover clean speech from noisy recordings [...] can be seen as a particular instance of source separation. [...] many algorithms assume the audio background can be modeled as stationary. However, the musical sources are characterized by a very rich, nonstationary spectrotemporal structure. This prohibits the use of such methods. Musical sounds often exhibit highly synchronous evolution over both time and frequency, making overlap in both time and frequency very common. Furthermore, a typical commercial music mixture violates all the classical assumptions of ICA. Instruments are correlated (e.g., a chorus of singers), there are more instruments than channels in the mixture, and there are nonlinearities in the mixing process (e.g., dynamic range compression) (\cite[1]{musicsepintro1}).
 \end{quote}
 
 Techniques more specific to music were developed as a necessity to deal with these differences (\cite{musicseptechniques1, musicseptechniques2}). For cases where ICA cannot be applied, musical source models are more popular (\cite[11]{musicsepgood}), which are ``model-based approaches that attempt to capture the spectral characteristics of the target source can be used.'' Sources are assumed to be sufficiently different from each other, or sparse in their spectral representation (\cite{musicsepgood}), such that they can be extracted with time-frequency masks applied in the spectral domain. Figure \ref{fig:sepgood} shows how different sources have unique spectral patterns.
@@ -848,7 +847,7 @@ Techniques more specific to music were developed as a necessity to deal with the
 
 Kernel Additive Modeling (KAM) is the simplest form of music source modeling (\cite{musicsepgood}). To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' (\cite[11]{musicsepgood}). A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/percussive Source Separation (HPSS) algorithm (\cite{fitzgerald1}).
 
-Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicmask, musicsepgood}). According to \textcite[12]{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$; a survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
+Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) (\cite{musicmask, musicsepgood}). According to \citeauthor{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$ (\cite[12]{musicsepgood}). A survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches (\cite{musicsepgood, sisec2018}). Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
 \begin{figure}[ht]
 	\centering

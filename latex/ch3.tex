@@ -53,9 +53,9 @@ In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or
 
 To supplement the Constant-Q scales (octave and log), the Variable-Q scale (\cite{variableq1, variableq2}) was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}}
 
-The Variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \textcite[5]{variableq1} provide the motivation for the Variable-Q scale:
+The Variable-Q scale is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \citeauthor{variableq1} provide the motivation for the Variable-Q scale:
 \begin{quote}
-	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution.
+	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution (\cite[5]{variableq1}).
 \end{quote}
 
 Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provides the following equations in \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
@@ -213,9 +213,9 @@ In this section, only short excerpts of the torch port were shown, due to requir
 \subsubsection{Matrix and ragged forms}
 \label{sec:matrixvragged}
 
-Although the CQT implementation they are referencing is different from the NSGT, \textcite[1]{klapuricqt} describe that
+Although the CQT implementation they are referencing is different from the NSGT, \citeauthor{klapuricqt} describe that
 \begin{quote}
-	[the] CQT produces a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized.
+	[the] CQT produces a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized (\cite[1]{klapuricqt}).
 \end{quote}
 
 This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in figure \ref{fig:raggedslicqt}. In the original list-based design of the library, a list of time-frequency coefficients per frequency bin is returned, and a parameter called \Verb#matrixform# ensures that each item in the list of time-frequency coefficients has the same length with zero-padding.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/nsgtf_loop.py\#L51}}
@@ -551,7 +551,7 @@ The MUSDDB18-HQ data loader is the starting point of the neural network, and the
 	\item
 		The data loader is instantiated,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L222}} ready to return $(x, y)$ pairs of waveforms for every training example.
 	\item
-		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \textcite[309]{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing.''
+		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \citeauthor{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing'' (\cite[309]{Kessy_2018}).
 	\item
 		The $(x, y)$ pairs have their magnitude STFT taken in the training loop.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}} The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean})$, where the std and mean are from the data whitening step.
 	\item
@@ -667,7 +667,7 @@ CDAEs are symmetric: a stack of convolutional layers in the encoder are applied 
 	\label{fig:convtranspose}
 \end{figure}
 
-To describe convolutional layers, \textcite[6]{convguide} state that ``images, sound clips and many other similar kinds of data have an intrinsic structure,'' and share the following properties:
+To describe convolutional layers, \citeauthor{convguide} state that ``images, sound clips and many other similar kinds of data have an intrinsic structure,'' and share the following properties (\cite[6]{convguide}):
 
 \begin{tight_enumerate}
 	\item
