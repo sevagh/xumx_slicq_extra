@@ -1,0 +1,76 @@
+  \documentclass[final]{beamer}
+  \mode<presentation> {
+    \usetheme{Berlin} 
+  }
+\usepackage{xpatch}
+\usepackage{atbegshi} \AtBeginDocument{\AtBeginShipoutNext{\AtBeginShipoutDiscard}}
+  \setbeamertemplate{navigation symbols}{}
+  \usepackage[english]{babel}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    citestyle=authoryear,
+    sorting=none,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+\xapptobibmacro{cite}{\setunit{\nametitledelim}\printfield{title}}{}{}
+\addbibresource{citations.bib}
+  \usepackage{amsmath,amsthm, amssymb, latexsym}
+  \usefonttheme[onlymath]{serif}
+  \boldmath
+  \usepackage[orientation=landscape,size=a0,scale=2.0]{beamerposter}
+  \title{xumx-sliCQ, MDX 2021}
+  \author{Sevag Hanssian}
+  \institute{McGill University}
+  \begin{document}
+  \begin{frame}{} 
+    \begin{block}{sliCQT}
+	  \begin{enumerate}
+		  \item
+			  STFT: stationary Gabor transform. Fixed time-frequency resolution
+		  \item
+			  sliCQT: realtime/slice-wise implementation of NSGT (Nonstationary Gabor transform)\footcite{slicq, balazs}
+		  \item
+			  TF transforms with Fourier coefficients, varying TF resolution, perfect inverse. Musical/auditory frequency scales e.g. log2/CQT, ERBlet transform
+	  \end{enumerate}
+    \end{block}
+	  \begin{figure}
+		  \centering
+		  \includegraphics[width=0.23\textwidth]{./images-poster/slicq.png}
+		  \includegraphics[width=0.23\textwidth]{./images-poster/stft_small.png}
+		  \includegraphics[width=0.23\textwidth]{./images-poster/stft.png}
+		  \includegraphics[width=0.23\textwidth]{./images-poster/stft_big.png}
+	  \end{figure}
+	\begin{block}{xumx-sliCQ}
+	  \begin{enumerate}
+		  \item
+			  Simple models use magnitude spectrogram; phase and waveforms are more complicated. For waveform, use phase of mix (aka ``noisy phase'')
+		  \item
+			  sliCQT demonstrates good tonal/transient representation, and displays more musical information than the STFT
+		  \item
+			  Choose sliCQT params by maximizing SDR of ``noisy phase'' oracle: $\hat{X}_{\text{target}} = |X_{\text{target}}| \cdot \measuredangle{X_{\text{mix}}}$; \textbf{7.42 dB} vs. 6.23 on MUSDB18-HQ validation set
+		  \item
+			  sliCQT output: list of complex 2D $\text{Time} \times \text{Frequency}$ tensors of Fourier coefficients, bucketed by time resolution. Different temporal frame rate per bucket
+		  \item
+			  Overall system mostly similar to UMX/XUMX\footcite{umx, xumx}: convolutional layers\footcite{plumbley2} applied to each bucket of sliCQT
+	  \end{enumerate}
+    \end{block}
+	  \begin{figure}
+		  \centering
+		  \includegraphics[width=0.47\textwidth]{./images-blockdiagrams/xumx_slicq_system_compressed.png}
+		  \hspace{1em}
+		  \includegraphics[width=0.47\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget.png}
+	  \end{figure}
+	\begin{block}{Results and future work}
+	  \begin{enumerate}
+		  \item
+			  PyTorch implementation of sliCQT: \url{https://github.com/sevagh/nsgt}
+		  \item
+			  xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}; \textbf{3.6 dB} vs. 4.64 (umx), 5.54 (x-umx) on MUSDB18-HQ test set (trained only on MUSDB18-HQ)
+		  \item
+			  \textbf{Future:} Essentia NSGConstantQ with better phase and rasterized matrix form.\footcite{variableq1} Single matrix vs. multiple temporal framerates
+	  \end{enumerate}
+	\end{block}
+  \end{frame}
+\end{document}
