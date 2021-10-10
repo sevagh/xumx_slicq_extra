@@ -1,4 +1,6 @@
-# :brain: sliceq22-ideas
+# sliceq22-ideas
+
+:brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain:
 
 A collection of ideas that might improve on my first attempt at [music demixing with the sliCQT](https://github.com/sevagh/xumx-sliCQ) (which was submitted to [MDX 2021](https://mdx-workshop.github.io/)):
 
@@ -6,7 +8,7 @@ A collection of ideas that might improve on my first attempt at [music demixing 
 * :warning: I won't be able to work on this in the near future so I'm creating this as more of an idea dump than working code
 * :no_entry: It needs a lot of work! So don't take this document too seriously, and feel free to open any GitHub issues
 
-### Shortcomings of the first sliCQT
+### Better 2014 sliCQT
 
 In [xumx-sliCQ](https://github.com/sevagh/xumx-sliCQ), the sliCQT used is from the [Holighaus, Dörfler, Velasco, Grill, 2012](https://arxiv.org/abs/1210.0084) paper: "A framework for invertible, real-time constant-Q transforms." A characteristic of time-frequency transforms with varying time-frequency resolution (CQT, sliCQT, NSGT, etc.) is that the different frequency bins may have a different temporal framerate. The reference implementation of the Holighaus 2012 transform [contains a matrix form with zero-padding](https://github.com/sevagh/nsgt#ragged-vs-matrix), but my networks couldn't learn from it.
 
@@ -74,7 +76,37 @@ Problems with the learned de-overlap network as it stands now are:
 
 ### sliCQT parameter search
 
-In xumx-sliCQ
+#### Noisy-phase or mix-phase oracle
+
+In xumx-sliCQ, the parameter search used the noisy-phase or mix-phase inversion (MPI) oracle (mix phase + amplitude/magnitude of target). The SDR of the MPI was maximized in a 60-iteration grid search to find the best sliCQ parameters.
+
+The same MPI parameter search may produce different or better results when repeated with the new 2014 sliCQT:
+* Recompute the MPI taking into account the improved phase and rasterized matrix form
+* Recompute the MPI with the learned de-overlap network
+
+The Essentia NSGConstantQ is only implemented for the log scale (i.e. Constant-Q) and Variable-Q (same with a small offset). The sliCQT library used supports the mel and Bark psychoacoustic scales in addition to those 2. To do a full parameter search with the same 4 frequency scales would require the psychoacoustic scales to be added to Essentia (but perhaps they're not even necessary for optimal music demixing).
+
+#### Different sliCQT parameters per target
+
+The parameter search for xumx-sliCQ considered the median SDR across all 4 targets, or maximize the performance of each target in a separate parameter search.
+
+The different sliCQT parameters per target idea was abandoned in xumx-sliCQ to be able to use the combination loss of xumx (wherein the 4 target sliCQTs are summed in the various loss functions - and to be summed, they need to be the same shape by using the same parameters). However, as a counterpoint, the Wiener-EM step can be done in both the sliCQT and the STFT domain ([1](https://github.com/sevagh/xumx-sliCQ/blob/main/docs/wiener_em.md), [2](https://github.com/sevagh/xumx-sliCQ#network-architecture)). This actually means that the combination loss of xumx might be usable in conjunction with different sliCQTs per-target, _if_ the xumx loss is done in the STFT domain as well.
+
+#### Ridge analysis
+
+I asked on [DSP stackexchange](https://dsp.stackexchange.com/questions/78422/how-to-objectively-measure-how-good-a-time-frequency-representation-of-music-i) about how to objectively measure how "good" a time-frequency transform is. I was pointed to a concept called "ridge analysis": [view this paper on HAL](https://hal.archives-ouvertes.fr/hal-02945707/document).
+
+The whole point of using the sliCQT with the varying time-frequency resolution was to represent the transient and tonal components of music with good definition within a single transform. The idea is to objectively compute the best parameters of the sliCQT by which one is representing tonal/transient the best.
+
+It seems complicated, but the (hazy) idea in my head can look like:
+1. Use ridge analysis (or any of the above techniques) to find the best transform for a single target. Say, the best sliCQT for "drums" is one where the drum signal is most sparse
+2. Or, use ridge analysis to find the best transform where a single target is much better than the others. E.g., imagine a good sliCQT for bass is also good for vocals, but there's a different sliCQT where bass isn't as good, but vocals are even worse, resulting in a better separation
+
+### More data
+
+During my participation in MDX 21, I [discussed](https://discourse.aicrowd.com/t/making-new-music-available-for-demixing-research/6344) and then [created](https://github.com/OnAir-Music/OnAir-Music-Dataset) the OnAir Music Dataset.
+
+To align with MUSDB18-HQ, the dataset can benefit from a data loader for the classic 4 targets (drums, bass, vocals, other). The raw stems will always be provided as-is from the artists and recording/mixing engineer of the OnAir Music project. The data loader will be the component that transforms the raw stems into the 4 targets.
 
 ### Install and run the code
 
