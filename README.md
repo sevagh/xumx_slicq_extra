@@ -4,10 +4,13 @@ Extra scripts, latex files, etc. relating to https://github.com/sevagh/xumx-sliC
 
 The subcomponents of xumx_slicq_extra are:
 * diagrams.svg: used to create diagrams for https://github.com/sevagh/xumx-sliCQ and https://github.com/sevagh/nsgt
-* latex: latex files for reports, presentations, and eventual master's thesis
+* latex: latex files for reports, presentations, and Master's thesis
+* matlab: MATLAB scripts for reproducing thesis spectrograms (STFT, CQT, etc.) and misc. plots
 * misc_scripts: misc scripts for converting Periphery stems into a MUSDB18-compatible dataset (not used in xumx-sliCQ)
-* umx_experiments: a scrapyard of many, many variants of umx with the sliCQ that I tried to make work with the aim of submitting them to the [AICrowd Sony ISMIR 2021 Music Demixing Challenge](https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021)
 * mss_evaluation: scripts for oracle (mix-phase, IRM/IBM, etc.) evaluations of the sliCQ, vendored tools from sigsep (musdb, museval, etc.), vendored code for the original Open-Unmix/UMX and Sony X-UMX, pretrained models for umxhq and xumx, and the evaluation and boxplot scripts
+* nsgt_spec_plotter: Python scripts for reproducing thesis sliCQT spectrograms
+* sliceq22-ideas: :brain: ideas for the next demixing challenge that build on xumx-sliCQ
+* umx_experiments: a scrapyard of many, many variants of umx with the sliCQ that I tried to make work with the aim of submitting them to the [AICrowd Sony ISMIR 2021 Music Demixing Challenge](https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021)
 
 The 3-way evaluation to show xumx-sliCQ's performance is reported in the xumx-sliCQ repo, and repeated here:
 

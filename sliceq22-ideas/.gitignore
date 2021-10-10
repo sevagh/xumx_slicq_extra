@@ -1,0 +1,6 @@
+*.wav
+__pycache__
+*.pyc
+*.egg-info
+/logs
+/sliceq22-train

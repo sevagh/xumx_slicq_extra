@@ -25,3 +25,6 @@
 [submodule "nsgt_spec_plotter/nsgt"]
 	path = nsgt_spec_plotter/nsgt
 	url = git@github.com:sevagh/nsgt
+[submodule "sliceq22-ideas/essentia"]
+	path = sliceq22-ideas/essentia
+	url = https://github.com/MTG/essentia
