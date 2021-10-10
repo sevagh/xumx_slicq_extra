@@ -1,7 +1,5 @@
 # sliceq22-ideas
 
-:brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain: :brain:
-
 A collection of ideas that might improve on my first attempt at [music demixing with the sliCQT](https://github.com/sevagh/xumx-sliCQ) (which was submitted to [MDX 2021](https://mdx-workshop.github.io/)):
 
 * The name is from "sliceq" (the sliCQT/sliced Constant-Q transform), and 22 for "MDX 2022" in anticipation of next year's challenge
