@@ -33,6 +33,8 @@
 			  sliCQT: realtime/slice-wise implementation of NSGT (Nonstationary Gabor transform)\footcite{slicq, balazs}
 		  \item
 			  TF transforms with Fourier coefficients, varying TF resolution, perfect inverse. Musical/auditory frequency scales e.g. log2/CQT, ERBlet transform
+		  \item
+			  sliCQT demonstrates good tonal/transient representation, and displays more musical information than the STFT
 	  \end{enumerate}
     \end{block}
 	  \begin{figure}
@@ -46,8 +48,6 @@
 	  \begin{enumerate}
 		  \item
 			  Simple models use magnitude spectrogram; phase and waveforms are more complicated. For waveform, use phase of mix (aka ``noisy phase'')
-		  \item
-			  sliCQT demonstrates good tonal/transient representation, and displays more musical information than the STFT
 		  \item
 			  Choose sliCQT params by maximizing SDR of ``noisy phase'' oracle: $\hat{X}_{\text{target}} = |X_{\text{target}}| \cdot \measuredangle{X_{\text{mix}}}$; \textbf{7.42 dB} vs. 6.23 on MUSDB18-HQ validation set
 		  \item
@@ -69,7 +69,7 @@
 		  \item
 			  xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}; \textbf{3.6 dB} vs. 4.64 (umx), 5.54 (x-umx) on MUSDB18-HQ test set (trained only on MUSDB18-HQ)
 		  \item
-			  \textbf{Future:} Essentia NSGConstantQ with better phase and rasterized matrix form.\footcite{variableq1} Single matrix vs. multiple temporal framerates
+			  \textbf{Future:} Better sliCQT\footcite{variableq1} + other ideas: \url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/sliceq22-ideas}
 	  \end{enumerate}
 	\end{block}
   \end{frame}

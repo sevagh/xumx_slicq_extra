@@ -106,6 +106,12 @@ During my participation in MDX 21, I [discussed](https://discourse.aicrowd.com/t
 
 To align with MUSDB18-HQ, the dataset can benefit from a data loader for the classic 4 targets (drums, bass, vocals, other). The raw stems will always be provided as-is from the artists and recording/mixing engineer of the OnAir Music project. The data loader will be the component that transforms the raw stems into the 4 targets.
 
+### Implement better 2014 sliCQT in existing sliCQT library
+
+The [PyTorch sliCQT library](https://github.com/sevagh/nsgt) is what I used in xumx-sliCQ, forked from the reference NSGT/sliCQT implementation of [Thomas Grill](https://github.com/grrrr/nsgt).
+
+That library is embedded inside xumx-sliCQ, so if the improved phase and rasterized matrix form of the 2014 sliCQT can be easily incorporated, it would result in a lower friction to releasing an improved "xumx-sliCQ-22", instead of re-building the entire neural network on top of Essentia's datastructures.
+
 ### Install and run the code
 
 Clone this repo with submodules
