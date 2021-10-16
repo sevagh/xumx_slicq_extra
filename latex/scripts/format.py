@@ -87,9 +87,14 @@ if __name__ == '__main__':
 
         parens = re.findall(r'\((.*?)\)', string)
 
-        t_3d = parens[0].split(',')[-1][:-1].strip()
-        t_2d_ola = parens[1].split(',')[-1][:-1].strip()
-        t_2d_flat = parens[2].split(',')[-1][:-1].strip()
+        t_3d = parens[0].split(',')[-1][:-1]
+        t_2d_ola = parens[1].split(',')[-1][:-1]
+        t_2d_flat = parens[2].split(',')[-1][:-1]
 
-        print(f'{block} & {f} & (9,{fs},{t_3d}) & ({fs},{t_2d_ola}) & ({fs},{t_2d_flat}) \\\\')
+        #print(f'{float(t_2d_ola):,.0f}')
+        #print(f'{t_2d_flat}')
+
+        spc = ' \ '
+
+        print(f'{block} & {f} & (9,{spc}{fs},{spc}{float(t_3d):,.0f}) & ({fs},{spc}{float(t_2d_ola):,.0f}) & ({fs},{spc}{float(t_2d_flat):,.0f}) \\\\')
         print('\hline')
