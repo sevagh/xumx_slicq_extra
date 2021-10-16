@@ -290,7 +290,7 @@ else:
   \label{code:raggedvmatrix}
 \end{figure}
 
-Note the shape of the matrix form is $401 \text{ slices} \times 2 \text{ channels} \times 21 \text{ frequency bins} \times 264 \text{ time coefficents}$. The shape of the first matrix in the ragged form is $401 \text{ slices} \times 2 \text{ channels} \times 8 \text{ frequency bins} \times 16 \text{ time coefficents}$. This is the lowest time-frequency resolution of this sliCQT, with only outputs 16 time coefficients, shared by the first 8 frequency bins. In the matrix form, these 16 values are padded up to 264 to fit the maximum time resolution. The total summed frequency bins of the list of matrices in the ragged form is 21, leading to an identical transform. Also note the identical reconstruction error from both forms.
+Note the shape of the matrix form is $401 \text{ slices} \times 2 \text{ channels} \times 21 \text{ frequency bins} \times 264 \text{ time coefficents}$. The shape of the first matrix in the ragged form is $401 \text{ slices} \times 2 \text{ channels} \times 8 \text{ frequency bins} \times 16 \text{ time coefficents}$. This is the lowest time-frequency resolution of this sliCQT, with only outputs 16 time coefficients, shared by the first eight frequency bins. In the matrix form, these 16 values are padded up to 264 to fit the maximum time resolution. The total summed frequency bins of the list of matrices in the ragged form is 21, leading to an identical transform. Also note the identical reconstruction error from both forms.
 
 \subsubsection{Slice overlap-add utility}
 \label{sec:slicqola}
@@ -397,7 +397,7 @@ According to \textcite{randomgrid}, 60 iterations of random grid will find a sta
 
 The random search parameters are shown in Table \ref{table:slicqparams}. Several decisions were made to limit the size of the parameter search.
 
-The maximum bins were capped to 300 and the maximum slice length was capped to 44,100 samples, which represents 1 second of music. This is a nice round number, and re-appears in several demixing papers (\cite{plumbley1, plumbley2, demucs}) as a good subsequence length to extract from a larger musical track. Although the NSGT/sliCQT can be configured to output thousands of frequency bins and use arbitrarily large slice lengths, larger sizes (and the corresponding large slice length) will lead to higher-dimension outputs that are more difficult to use in a neural network.
+The maximum bins were capped to 300 and the maximum slice length was capped to 44,100 samples, which represents one second of music. This is a nice round number, and re-appears in several demixing papers (\cite{plumbley1, plumbley2, demucs}) as a good subsequence length to extract from a larger musical track. Although the NSGT/sliCQT can be configured to output thousands of frequency bins and use arbitrarily large slice lengths, larger sizes (and the corresponding large slice length) will lead to higher-dimension outputs that are more difficult to use in a neural network.
 
 The maximum frequency was capped to 22,050 Hz, which is the the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. This is for performance reasons -- the NSGT/sliCQT automatically adds additional frequency bins for the DC (0 Hz) and Nyquist ($\sfrac{f_{s}}{2} \text{ Hz}$) frequencies if they are missing from the user-specified scale, and having two large, adjacent upper frequency bins (e.g., if the user uses 17,000 Hz as the upper limit, 22,050 Hz is the automatically-added Nyquist) creates a very performance-intensive transform with huge dimensionality which does not fit on the GPU of the test machine (with 12GB of memory).
 
@@ -426,7 +426,7 @@ The slice length and transition length were automatically picked for the randoml
 \end{tabular}
 \end{table}
 
-The maximized metric is the median SDR score across the 4 targets of the 14 validation tracks of MUSDB18-HQ. The SDR is a score in dB which commonly is the single evaluation metric that summarizes the global performance of a music demixing system, which was described as part of the total set of BSS metrics in section \ref{sec:evalbss}, and which was the objective metric used to rank demixing systems in the ISMIR 2021 Music Demixing Challenge (\cite{mdx21}).\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
+The maximized metric is the median SDR score across the four targets of the 14 validation tracks of MUSDB18-HQ. The SDR is a score in dB which commonly is the single evaluation metric that summarizes the global performance of a music demixing system, which was described as part of the total set of BSS metrics in section \ref{sec:evalbss}, and which was the objective metric used to rank demixing systems in the ISMIR 2021 Music Demixing Challenge (\cite{mdx21}).\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
 
 \newpagefill
 
@@ -480,9 +480,9 @@ After the X-UMX modifications are described, we will look at which parts of Open
 \subsubsection{Incorporating CrossNet-Open-Unmix}
 \label{sec:xumxinc}
 
-CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) is a further development on Open-Unmix which improves the music demixing performance without adding any additional trainable parameters. All 4 target models are trained simultaneously instead of separately, which allows for loss functions that consider multiple targets. However, it requires more compute resources for training, since the GPU needs to store and train 4 independent target models simultaneously instead of separately.
+CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) is a further development on Open-Unmix which improves the music demixing performance without adding any additional trainable parameters. All four target models are trained simultaneously instead of separately, which allows for loss functions that consider multiple targets. However, it requires more compute resources for training, since the GPU needs to store and train four independent target models simultaneously instead of separately.
 
-For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than 4 independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of Open-Unmix.
+For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than four independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of Open-Unmix.
 
 In Open-Unmix, the loss function is only for the single target being trained, and only applied by the mean squared error (MSE) function on the magnitude STFT coefficients, making it a loss of the frequency domain. The MSE loss of the magnitude STFT is computed from Equation \eqref{equation:mselossstft}, where $Y$ represents the ground truth magnitude STFT, $\hat{Y}$ represents the network estimate, and there are $n$ total elements in the STFT matrix:
 \begin{align}\tag{31}\label{equation:mselossstft}
@@ -507,7 +507,7 @@ We will call this one $\text{sdr\_loss}$ to denote time-domain loss which is app
 	& \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{33}\label{equation:sisdr}
 \end{align}
 
-There are 14 MSE loss combinations made from the 4 targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. Equations \eqref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
+There are 14 MSE loss combinations made from the four targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. Equations \eqref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
 \begin{align}\tag{34}\label{equation:cl}
 	\nonumber & \text{mse\_loss}_{1} = \text{MSE}(|\text{STFT}(\hat{x}_{1})|, |\text{STFT}(x_{1})|)\\
 	\nonumber & \text{mse\_loss}_{2} = \text{MSE}(|\text{STFT}(\hat{x}_{1} + \hat{x}_{2})|, |\text{STFT}(x_{1} + x_{2}|))\\
@@ -528,7 +528,7 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}
 
- A visualization of the multi-domain loss (MDL) and combination loss (CL) for 4 targets is shown in Figure \ref{fig:xumxlosses}.
+ A visualization of the multi-domain loss (MDL) and combination loss (CL) for four targets is shown in Figure \ref{fig:xumxlosses}.
 
 \begin{figure}[ht]
 	\centering
@@ -538,7 +538,7 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 	\label{fig:xumxlosses}
 \end{figure}
 
-The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4})$ in training, where $y_{1-4}$ are the ground-truth waveforms of all 4 isolated targets.
+The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4})$ in training, where $y_{1-4}$ are the ground-truth waveforms of all four isolated targets.
 
 \newpagefill
 
@@ -561,18 +561,18 @@ The MUSDDB18-HQ data loader is the starting point of the neural network, and the
 	\item
 		The estimate of the neural network is $|\hat{Y}|$. The loss function is $\text{MSE}(|Y|, |\hat{Y}|)$, and this is used as the optimization target for the parameter updates.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L34}}
 	\item
-		This process is repeated until the network is fully trained (i.e. the loss stops improving), and 4 independent networks are each trained on the 4 MUSDB18-HQ sources (vocals, drums, bass, other) respectively.
+		This process is repeated until the network is fully trained (i.e. the loss stops improving), and four independent networks are each trained on the four MUSDB18-HQ sources (vocals, drums, bass, other) respectively.
 	\item
-		The inference step of the neural network is when Open-Unmix loads all 4 independently trained networks to create time-domain estimates of the sources.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/model.py\#L258}}
+		The inference step of the neural network is when Open-Unmix loads all four independently trained networks to create time-domain estimates of the sources.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/model.py\#L258}}
 	\item
-		For a given mixed waveform $x$, Open-Unmix estimates $|Y_{1}|, |Y_{2}|, |Y_{3}|, |Y_{4}|$ for each source. Then, a process called Wiener filtering and expectation maximization is applied (\cite{umxorig1, wiener2, wiener3, wiener4}).\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L338}} First the mix-phase inversion is used to come up with the first waveform estimate $y_{1}, y_{2}, y_{3}, y_{4}$. Then, the iterative Wiener expectation maximization process uses the 4 target STFT spectrograms in an iterative procedure to refine the estimates.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L154}}
+		For a given mixed waveform $x$, Open-Unmix estimates $|Y_{1}|, |Y_{2}|, |Y_{3}|, |Y_{4}|$ for each source. Then, a process called Wiener filtering and expectation maximization is applied (\cite{umxorig1, wiener2, wiener3, wiener4}).\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L338}} First the mix-phase inversion is used to come up with the first waveform estimate $y_{1}, y_{2}, y_{3}, y_{4}$. Then, the iterative Wiener expectation maximization process uses the four target STFT spectrograms in an iterative procedure to refine the estimates.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/filtering.py\#L154}}
 \end{tight_enumerate}
 
-Let us recap where the STFT is used in the above steps. The STFT is used to compute magnitude spectrogram statistics from the training data. The magnitude STFT of the training waveform $x$ is taken and passed as an input to the bi-directional LSTM. Then, the output estimated magnitude STFT from the 4 target models are considered together to perform an iterative Wiener-EM refinement step in the STFT domain. Finally, the estimates are transformed into time-domain waveforms with the iSTFT and the mix-phase inversion.
+Let us recap where the STFT is used in the above steps. The STFT is used to compute magnitude spectrogram statistics from the training data. The magnitude STFT of the training waveform $x$ is taken and passed as an input to the bi-directional LSTM. Then, the output estimated magnitude STFT from the four target models are considered together to perform an iterative Wiener-EM refinement step in the STFT domain. Finally, the estimates are transformed into time-domain waveforms with the iSTFT and the mix-phase inversion.
 
 These are are the places in the Open-Unmix PyTorch template where the STFT must be replaced with the sliCQT. Moreover, it was mentioned that the ragged sliCQT will be used, which is a list of time-frequency matrices for frequency bins that share the same time resolution, and not a single rectangular matrix like the STFT. This arises from the different temporal frame rates of each frequency bin which is the desire of the NSGT/sliCQT (or CQT). This means that all of the operations which expect a single rectangular real-valued matrix of the STFT returns need to be modified to work on a list of matrices instead.
 
-Figure \ref{fig:xumxslicq} shows the proposed modification to the basic Open-Unmix architecture, which shows where the sliCQT is used. It also shows how the 4 models are trained together to apply the X-UMX loss functions.
+Figure \ref{fig:xumxslicq} shows the proposed modification to the basic Open-Unmix architecture, which shows where the sliCQT is used. It also shows how the four models are trained together to apply the X-UMX loss functions.
 
 \begin{figure}[ht]
 	\centering
@@ -581,7 +581,7 @@ Figure \ref{fig:xumxslicq} shows the proposed modification to the basic Open-Unm
 	\label{fig:xumxslicq}
 \end{figure}
 
-In section \ref{sec:matrixvragged}, we saw that to use the ragged sliCQT one must simply loop over the list of matrices where each matrix (or block) contains at least 1 frequency bin that share a specific time-frequency resolution. A simple example of the STFT to sliCQT conversion is the custom MSE loss function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/loss.py\#L8}} shown in Code Listing \ref{code:simplemse}.
+In section \ref{sec:matrixvragged}, we saw that to use the ragged sliCQT one must simply loop over the list of matrices where each matrix (or block) contains at least one frequency bin that share a specific time-frequency resolution. A simple example of the STFT to sliCQT conversion is the custom MSE loss function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/loss.py\#L8}} shown in Code Listing \ref{code:simplemse}.
 
 \begin{listing}[h]
   \centering
@@ -628,7 +628,7 @@ Within each sub-network, or \Verb#OpenUnmixTimeBucket#, the implementation is si
   \label{code:raggedumxoneblock}
 \end{listing}
 
-After the \Verb#OpenUnmix# class outputs the estimates of the magnitude sliCQT for all 4 targets, the post-processing Wiener expectation maximization step needs to be applied. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the 4 target magnitude spectrograms.
+After the \Verb#OpenUnmix# class outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation maximization step needs to be applied. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the four target magnitude spectrograms.
 
 The approach in xumx-sliCQ was to add a boolean parameter named \Verb#slicq_wiener#. If \Verb#slicq_wiener# is set to False, the first waveform estimate is taken from the sliCQT and the Wiener-EM step is applied on the STFT,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L301}} shown in Code Listing \ref{code:wienerstft}. If \Verb#slicq_wiener# is set to True, the Wiener-EM step is performed directly on the sliCQT.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L380}} The ragged sliCQT was zero-padded into a single rectangular matrix, allowing the original Wiener-EM code to be used (with minor modifications) for both the STFT and rectangular zero-padded sliCQT.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L389-L404}} The zero-padding operation is shown in Code Listing \ref{code:wienerslicqt}. Each strategy results in a different music demixing quality and execution time, which will be discussed in section \ref{sec:experiment}. 
 
@@ -694,9 +694,9 @@ The kernel parameters define the size and movement of the 2D convolution kernel 
 	\label{fig:convdiags}
 \end{figure}
 
-Different buckets in the ragged transform may have different dimensions for time and frequency, so the 2D convolution filter sizes are different depending on the input size. The training input is split into 1 second sequences, which is the same sequence size used in both CDAE papers (\cite{plumbley1, plumbley2}). This means that the ragged sliCQT dimensions (frequency bins and time coefficients) for 1 second of audio dictate the maximum size of time and frequency kernel that can be applied in each convolution layer. After each layer, a 2D batch normalization (BN) and nonlinear activation function, specifically the rectified linear unit (ReLU) activation, are applied (\cite{plumbley2}).
+Different buckets in the ragged transform may have different dimensions for time and frequency, so the 2D convolution filter sizes are different depending on the input size. The training input is split into one second sequences, which is the same sequence size used in both CDAE papers (\cite{plumbley1, plumbley2}). This means that the ragged sliCQT dimensions (frequency bins and time coefficients) for one second of audio dictate the maximum size of time and frequency kernel that can be applied in each convolution layer. After each layer, a 2D batch normalization (BN) and nonlinear activation function, specifically the rectified linear unit (ReLU) activation, are applied (\cite{plumbley2}).
 
-Note that after the encoder-decoder layers for the sliCQT, we need to add a ``growth layer.'' This is the inverse of the slice overlap-add procedure with learnable parameters. It uses a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers 3 time coefficients to produce 6 time coefficients. The final activation is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask which can then be applied to the input mixed magnitude spectrogram.
+Note that after the encoder-decoder layers for the sliCQT, we need to add a ``growth layer.'' This is the inverse of the slice overlap-add procedure with learnable parameters. It uses a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers three time coefficients to produce six time coefficients. The final activation is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask which can then be applied to the input mixed magnitude spectrogram.
 
 The exact parameters and configuration of the convolutional kernels and layers are described in Tables \ref{table:convtable1}, \ref{table:convtable2}, \ref{table:convtable3}, \ref{table:convtable4}, and \ref{table:convtable5}. The parameters were initially chosen from the kernel values and layers in \textcite{plumbley1, plumbley2}. The parameters were repeatedly modified in an informal hyperparameter tuning process during my submissions to the ISMIR 2021 Music Demixing Challenge. The various tested networks can be viewed in the submission repository here.\footnote{\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}} The design was also constrained by the time limits of the network inference in the challenge. For example, dilations in the time dimension were chosen to efficiently increase the temporal receptive field on the sliCQT without slowing down the inference step.
 

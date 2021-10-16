@@ -96,7 +96,7 @@ The Fourier Transform is a complex-valued function of $\omega$, which is the var
 
 The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively (\cite{discretebook}).
 
-According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take 1 time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). 
+According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take one time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared (\cite{skiena}). 
 
 Starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten}).
 
@@ -384,7 +384,7 @@ The NSGT coefficients for a signal of length $L$ are given by an FFT of length $
 
 We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
-Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in Table \ref{table:nsgtfreqsandqs}.
+Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following four frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in Table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
@@ -410,7 +410,7 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 	\label{table:nsgtfreqsandqs}
 \begin{tabular}{ |l|l|p{10cm}| }
 	 \hline
-	 Scale & Bins & First 5 frequency bins \\
+	 Scale & Bins & First five frequency bins \\
 	 \hline
 	 \hline
 	 Constant-Q & 100 & 20.00, 21.47, 23.04, 24.73, 26.54 \\
@@ -433,7 +433,7 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 \vspace{1em}
 \begin{tabular}{ |l|l|p{10cm}| }
 	 \hline
-	 Scale & Bins & Last 5 frequency bins \\
+	 Scale & Bins & Last five frequency bins \\
 	 \hline
 	 \hline
 	 Constant-Q & 100 & 16,614.38, 17,832.63, 19,140.20, 20,543.64, 22,050.00 \\
@@ -456,7 +456,7 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 \vspace{1em}
 \begin{tabular}{ |l|l|p{10cm}| }
 	 \hline
-	 Scale & Bins & First 5 Q factors \\
+	 Scale & Bins & First five Q-factors \\
 	 \hline
 	 \hline
 	 Constant-Q & 100 & 7.06, 7.06, 7.06, 7.06, 7.06  \\
@@ -479,7 +479,7 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 \vspace{1em}
 \begin{tabular}{ |l|l|p{10cm}| }
 	 \hline
-	 Scale & Bins & Last 5 Q factors \\
+	 Scale & Bins & Last five Q-factors \\
 	 \hline
 	 \hline
 	 Constant-Q & 100 & 7.06, 7.06, 7.06, 7.06, 7.06  \\
@@ -822,7 +822,7 @@ A common thread in survey papers is that the domains of speech enhancement and m
 
 \subsubsection{Computational approaches}
 
-Computational source separation has a history of at least 50 years (\cite{musicmask, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, 4 sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
+Computational source separation has a history of at least 50 years (\cite{musicmask, musicsepintro1}), originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, four sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset (\cite{musdb18}).
 
 Among the earliest computational approaches for blind source separation is Independent Component Analysis (ICA)  (\cite{musicmask, musicsepgood, musicsepintro1}), which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. We refer the readers to \textcite{ica1, ica2} for ICA algorithms, and to \textcite{blind1, blind2} for a more in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
@@ -972,7 +972,7 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
 
 Surveys on speech (\cite{speechmask}) and music separation (\cite{musicmask}) indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
-A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. To compute a binary mask, there must be an additional real-valued parameter, $\theta \in [0.0, 1.0]$, which is the separation factor -- values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
+A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only zero and one. To compute a binary mask, there must be an additional real-valued parameter, $\theta \in [0.0, 1.0]$, which is the separation factor -- values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
 
 \begin{figure}[ht]
 	\centering
@@ -1009,7 +1009,7 @@ We seek to calculate various interesting oracle masks from the STFTs of the mix 
 	\nonumber X_{d} &= \text{STFT}(x_{d}[n]), |X_{d}| = \text{abs}(X_{d})
 \end{align}
  
-\textcite{sisec2018} report the performance of 5 oracles, called IRM1, IRM2, IBM1, IBM2, and the MWF (multichannel Wiener filter). The first 4 are more relevant to stereo music, which is the case considered in this thesis. The ``I'' is for Ideal, ``R|B'' denotes a Ratio vs. Binary mask, ``M'' is for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the magnitude spectrogram raised to the 1st power remains unchanged, while one raised to the 2nd power is the power spectrogram.
+\textcite{sisec2018} report the performance of five oracles, called IRM1, IRM2, IBM1, IBM2, and the MWF (multichannel Wiener filter). The first four are more relevant to stereo music, which is the case considered in this thesis. The ``I'' is for Ideal, ``R|B'' denotes a Ratio vs. Binary mask, ``M'' is for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the magnitude spectrogram raised to the first power remains unchanged, while one raised to the second power is the power spectrogram.
 
 The oracles for the vocal source (and the same equations apply to the drum track) are computed from Equations \eqref{equation:vocaloracles}, noting that a typical default value for $\theta$ is 0.5:
 \begin{align}\tag{20}\label{equation:vocaloracles}
@@ -1049,7 +1049,7 @@ In UMX, a deep neural network is used to estimate the magnitude spectrograms of 
 
 \footnotetext{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}
 
-\textcite{xumx} combined the 4 separate target networks into a single model to apply the loss functions and optimizations jointly across all 4 targets, rather than optimizing each one separately. The model is named CrossNet-Open-Unmix (X-UMX). It also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients.
+\textcite{xumx} combined the four separate target networks into a single model to apply the loss functions and optimizations jointly across all four targets, rather than optimizing each one separately. The model is named CrossNet-Open-Unmix (X-UMX). It also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients.
 
 \subsubsection{Convolutional denoising autoencoders}
 
@@ -1074,7 +1074,7 @@ The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test spl
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
 
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. There are 4 distinct metrics that comprise BSS:
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
@@ -1087,7 +1087,7 @@ The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from t
 	\textbf{SDR:} Signal to Distortion Ratio
 \end{tight_itemize}
 
-Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from Equation \eqref{equation:sdrinstr}:
+Out of these four scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from Equation \eqref{equation:sdrinstr}:
 \begin{align}
 	\nonumber & \text{SDR}_{\text{instr}} = \\
 	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{22}\label{equation:sdrinstr}
