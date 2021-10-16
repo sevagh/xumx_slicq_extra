@@ -407,6 +407,8 @@ The slice length and transition length were automatically picked for the randoml
 
 \begin{table}[ht]
 	\centering
+	\caption{Parameter ranges for the sliCQT hyperparameter search}
+	\label{table:slicqparams}
 \begin{tabular}{ |l|l|l|l| }
 	 \hline
 	 Scale & Bins & Minimum frequency (Hz) & Additional params \\
@@ -422,8 +424,6 @@ The slice length and transition length were automatically picked for the randoml
 	 Bark & 10--300 & 10.0--130.0 & n/a \\
 	 \hline
 \end{tabular}
-	\caption{Parameter ranges for the sliCQT hyperparameter search}
-	\label{table:slicqparams}
 \end{table}
 
 The maximized metric is the median SDR score across the 4 targets of the 14 validation tracks of MUSDB18-HQ. The SDR is a score in dB which commonly is the single evaluation metric that summarizes the global performance of a music demixing system, which was described as part of the total set of BSS metrics in section \ref{sec:evalbss}, and which was the objective metric used to rank demixing systems in the ISMIR 2021 Music Demixing Challenge (\cite{mdx21}).\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
@@ -702,6 +702,8 @@ The exact parameters and configuration of the convolutional kernels and layers a
 
 \begin{table}[ht]
 	\centering
+	\caption{Kernel parameters, time dimension}
+	\label{table:convtable1}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
 		\# time coefficients & CDAE layer & Growth layer \\
@@ -712,9 +714,9 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		$> 100$ & \makecell[l]{size=13\\stride=1\\dilation=2} & \makecell[l]{size=3\\stride=2\\dilation=1} \\
 	 \hline
 \end{tabular}
-	\caption{Kernel parameters, time dimension}
-	\label{table:convtable1}
 	\vspace{1em}
+	\caption{Kernel parameters, frequency dimension}
+	\label{table:convtable2}
 \begin{tabular}{ |l|l|l| }
 	 \hline
 		\# frequency bins & CDAE layer & Growth layer \\
@@ -727,9 +729,9 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		$\ge 20$ & \makecell[l]{size=5\\stride=1\\dilation=1} & \makecell[l]{size=1\\stride=1\\dilation=1} \\
 	 \hline
 \end{tabular}
-	\caption{Kernel parameters, frequency dimension}
-	\label{table:convtable2}
 	\vspace{1em}
+	\caption{CDAE encoder layers}
+	\label{table:convtable3}
 \begin{tabular}{ |l|l|l|l|l| }
 	 \hline
 		Layer 1 & Layer 2 \\
@@ -738,9 +740,9 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		Conv2d$\Big($\makecell[l]{in=2\\out=25}$\Big)$, BN, ReLU & Conv2d$\Big($\makecell[l]{in=25\\out=55}$\Big)$, BN, ReLU \\
 	 \hline
 \end{tabular}
-	\caption{CDAE encoder layers}
-	\label{table:convtable3}
 	\vspace{1em}
+	\caption{CDAE decoder layers}
+	\label{table:convtable4}
 \begin{tabular}{ |l|l|l|l|l| }
 	 \hline
 		Layer 1 & Layer 2 \\
@@ -749,9 +751,9 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		ConvTranspose2d$\Big($\makecell[l]{in=55\\out=25}$\Big)$, BN, ReLU & ConvTranspose2d$\Big($\makecell[l]{in=25\\out=2}$\Big)$, BN, ReLU \\
 	 \hline
 \end{tabular}
-	\caption{CDAE decoder layers}
-	\label{table:convtable4}
 	\vspace{1em}
+	\caption{Growth (inverse 50\% overlap-add) layer}
+	\label{table:convtable5}
 \begin{tabular}{ |l| }
 	 \hline
 		Growth layer \\
@@ -760,8 +762,6 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		ConvTranspose2d$\Big($\makecell[l]{in=2\\out=2}$\Big)$, Sigmoid \\
 	 \hline
 \end{tabular}
-	\caption{Growth (inverse 50\% overlap-add) layer}
-	\label{table:convtable5}
 \end{table}
 
 \end{document}

@@ -108,6 +108,8 @@ The second benchmark script is for the PyTorch implementation of the NSGT/sliCQT
 
 \begin{table}[ht]
 	\centering
+	\caption{Execution times for the matrix form of the forward + backward sliCQT}
+	\label{table:nsgttorchresultsmatrix}
 	\begin{tabular}{ |l|l|l|l| }
 	 \hline
 		NSGT library & Device & Time (s) \\
@@ -124,12 +126,12 @@ The second benchmark script is for the PyTorch implementation of the NSGT/sliCQT
 		PyTorch & GPU (3080 Ti) &  2.40 \\
 	 \hline
 \end{tabular}
-	\caption{Execution times for the matrix form of the forward + backward sliCQT}
-	\label{table:nsgttorchresultsmatrix}
 \end{table}
 
 \begin{table}[ht]
 	\centering
+	\caption{Execution times for the ragged form of the forward + backward sliCQT}
+	\label{table:nsgttorchresultsragged}
 	\begin{tabular}{ |l|l|l|l| }
 	 \hline
 		NSGT library & Device & Time (s) \\
@@ -146,8 +148,6 @@ The second benchmark script is for the PyTorch implementation of the NSGT/sliCQT
 		PyTorch & CPU & 1.85  \\
 	 \hline
 \end{tabular}
-	\caption{Execution times for the ragged form of the forward + backward sliCQT}
-	\label{table:nsgttorchresultsragged}
 \end{table}
 
 The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the ragged transform is a list of tensors. To perform operations on the ragged transform requires looping over the list which negates some of the benefits of GPU parallelism. Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance leapfrogs both.
@@ -197,6 +197,8 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 
 \begin{table}[ht]
 	\centering
+	\caption{Dimensions of the forward ragged sliCQT, first 35 time buckets}
+	\label{table:slicqdim1}
 	\begin{tabular}{ |l|l|l|l|l| }
 	 \hline
 		Block & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
@@ -275,12 +277,12 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 35 & 221--222 & (9, \ 2, \ 152) & (2, \ 532) & (2, \ 912) \\
 \hline
 \end{tabular}
-	\caption{Dimensions of the forward ragged sliCQT, first 35 time buckets}
-	\label{table:slicqdim1}
 \end{table}
 
 \begin{table}[ht]
 	\centering
+	\caption{Dimensions of the forward ragged sliCQT, last 35 time buckets}
+	\label{table:slicqdim2}
 	\begin{tabular}{ |l|l|l|l|l| }
 	 \hline
 		Block & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
@@ -356,8 +358,6 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 69 & 262 & (9, \ 1, \ 292) & (1, \ 1,022) & (1, \ 1,752) \\
 \hline
 \end{tabular}
-	\caption{Dimensions of the forward ragged sliCQT, last 35 time buckets}
-	\label{table:slicqdim2}
 \end{table}
 
 \newpagefill
@@ -388,6 +388,8 @@ The BSSv4 scores for the demixing results, computed on the test set of the MUSDB
 
 \begin{table}[ht]
 	\centering
+	\caption{Evaluated pretrained models in the BSS boxplot}
+	\label{table:bsseval}
 	\begin{tabular}{ |p{2.5cm}|l|l|p{3.5cm}|p{3.5cm}| }
 	 \hline
 		Project & Legend & SDR & Code repository & Pretrained model \\
@@ -402,8 +404,6 @@ The BSSv4 scores for the demixing results, computed on the test set of the MUSDB
 		\makecell[l]{xumx-sliCQ \\ STFT-WEM} & slicq-wstft & 3.60 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
 \end{tabular}
-	\caption{Evaluated pretrained models in the BSS boxplot}
-	\label{table:bsseval}
 \end{table}
 
 We discussed in section \ref{sec:replacestft} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener expectation maximization step that could be done with the sliCQT or the STFT. Both configurations were evaluated and shown in the boxplot.
@@ -493,6 +493,8 @@ Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the sli
 
 \begin{table}[ht]
 	\centering
+	\caption{Execution times for the inference of the models}
+	\label{table:infperf}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
 		Model & Device & Time (s) \\
@@ -505,8 +507,6 @@ Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the sli
 		xumx-sliCQ, sliCQT-WEM & CPU & 104.54  \\
 	 \hline
 \end{tabular}
-	\caption{Execution times for the inference of the models}
-	\label{table:infperf}
 \end{table}
 
 xumx-sliCQ is slower in its inference performance than UMX. Overall, xumx-sliCQ is smaller on disk, which is an advantage over UMX, but it executes \textasciitilde2x slower than UMX with the STFT-Wiener-EM step while producing lower BSS metrics in the music demixing task. xumx-sliCQ with the sliCQT-Wiener-EM step is \textasciitilde2x slower than with the STFT-Wiener-EM step for a small \textasciitilde0.1 dB boost in the median SDR score.
