@@ -73,7 +73,7 @@ The author of this thesis takes code availability and reproducibility seriously.
 
 The first benchmark script is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the forked copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. The benchmark script can be viewed here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}} For the 14 validation tracks of MUSDB18-HQ, it creates a random estimate (using \Verb#numpy.randn# to create an audio signal), and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA RTX 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
 
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec (\cite{sisec2016}, \cite{sisec2018}). Also, note the passing regression test in listing \ref{lst:regressionout}, showing that the library is working correctly with the speedup.
+The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec (\cite{sisec2016}, \cite{sisec2018}). Also, note the passing regression test in Code Listing \ref{lst:regressionout}, showing that the library is working correctly with the speedup.
 
 \begin{listing}[h]
   \centering
@@ -169,7 +169,7 @@ The sliCQT chosen by one run of the script that produced the best median SDR use
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-The full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
+The full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
 
 \begin{figure}[H]
 	\centering
@@ -188,14 +188,12 @@ Note that the channel dimension is omitted from the table. There is one spectrog
 
 It is instructive to compare the dimensionality of the chosen sliCQT parameters to the matrix form of the sliCQT, and to the STFT with a window size of 4,096 and an overlap of 1,024.
 
-The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{frequency} \times \text{time}$ shape of $9 \times 263 \times 292$, representing the same 9 slices for 1 second of audio as the ragged transform, and 263 frequency bins, which includes the 0--32.9 Hz bin added to the 262 we specified between 32.9--22,050 Hz. The time coefficients are of length 292, which as shown in table \ref{table:slicqdim2} is the maximum time resolution of the highest frequency bin. The other frequency bins have some operations performed including zero-padding to fit the same dimension. The 2D $\text{frequency} \times \text{time}$ shapes are $263 \times 1{,}022$ for the overlap-added spectrogram and $263 \times 1{,}752$ for the flattened spectrogram.
+The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{frequency} \times \text{time}$ shape of $9 \times 263 \times 292$, representing the same 9 slices for 1 second of audio as the ragged transform, and 263 frequency bins, which includes the 0--32.9 Hz bin added to the 262 we specified between 32.9--22,050 Hz. The time coefficients are of length 292, which as shown in Table \ref{table:slicqdim2} is the maximum time resolution of the highest frequency bin. The other frequency bins have some operations performed including zero-padding to fit the same dimension. The 2D $\text{frequency} \times \text{time}$ shapes are $263 \times 1{,}022$ for the overlap-added spectrogram and $263 \times 1{,}752$ for the flattened spectrogram.
 
-The STFT with a window of 4,096 and overlap of 1,024 results in a $\text{frequency} \times \text{time}$ transform of shape $2{,}049 \times 40$, where 2,049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4{,}096}{2} + 1$. The 40 frames are computed from the signal length (or 44,100 samples for 1s of audio), window size, and overlap using Equation \ref{equation:stftframes}:
+The STFT with a window of 4,096 samples and overlap of 1,024 samples results in a 2D $\text{frequency} \times \text{time}$ transform of shape $2{,}049 \times 40$, where 2,049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4{,}096}{2} + 1$, and 40 is the number of temporal frames computed from the signal length (or 44,100 samples for 1s of audio), window size, and overlap using Equation \ref{equation:stftframes}:
 \begin{align}
 	\text{floor}(\frac{44{,}100-4{,}096}{1{,}024}) + 1 = 40\tag{11}\label{equation:stftframes}
 \end{align}
-
-Note the considerably smaller time coefficients of 40 frames representing 1 second of audio, which is uniform across all 2,049 output frequencies.
 
 \begin{table}[ht]
 	\centering
@@ -370,7 +368,7 @@ Note the considerably smaller time coefficients of 40 frames representing 1 seco
 
 The learning hyperparameters of xumx-sliCQ were mostly kept the same to Open-Unmix and CrossNet-Open-Unmix. The training uses an Adam optimizer which runs for 1,000 iterations (or epochs), with a learning rate of 0.001 and a weight decay of 0.00001. There is also an adaptive learning rate scheduler with a decay patience of 80 and a decay gamma of 0.3. A difference between the learning hyperparameters of X-UMX and UMX is that the network trains for the full 1,000 epochs without any early stopping, which was also incorporated in xumx-sliCQ.
 
-Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss (CL), with a mixing coefficient between the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0, but in xumx-sliCQ it is set to 0.1 to reflect the observed order of magnitude difference in the MSE loss of the STFT and the sliCQT. xumx-sliCQ reports 6,669,912 trainable parameters in total from the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package. The training curves can be seen in figure \ref{fig:networkloss}, visualized using Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a training visualization tool.
+Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss (CL), with a mixing coefficient between the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0, but in xumx-sliCQ it is set to 0.1 to reflect the observed order of magnitude difference in the MSE loss of the STFT and the sliCQT. xumx-sliCQ reports 6,669,912 trainable parameters in total from the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package. The training curves can be seen in Figure \ref{fig:networkloss}, visualized using Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a training visualization tool.
 
 \begin{figure}[ht]
 	\centering
@@ -386,7 +384,7 @@ Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss 
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
-The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets. The evaluation script is stored here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
+The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the 4 targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the 4 targets. The evaluation script is stored here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
 
 \begin{table}[ht]
 	\centering
@@ -410,7 +408,7 @@ The BSSv4 scores for the demixing results, computed on the test set of the MUSDB
 
 We discussed in section \ref{sec:replacestft} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener expectation maximization step that could be done with the sliCQT or the STFT. Both configurations were evaluated and shown in the boxplot.
 
-Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in listing \ref{lst:wienerem}, where 5 different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.'' The evaluated configurations were:
+Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Code Listing \ref{lst:wienerem}, where 5 different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.'' The evaluated configurations were:
 \begin{tight_enumerate}
 	\item
 		1 + 2 iterations of STFT-Wiener-EM
@@ -469,7 +467,7 @@ Note that the default number of iterations for the Wiener-EM step is one, in UMX
 
 To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged list of matrices, with a slight difference in BSS metrics from the ragged form. The zero-padded sliCQ-Wiener-EM is the chosen implementation in the final model, with an option to also use the STFT-Wiener-EM. Both types of Wiener-EM with the sliCQ beat the STFT. Also, in both cases, 2 iterations were considerably worse than 1 iteration. The computation time of the inference step will be discussed in more detail in the next section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQ Wiener-EM.
 
-To maximize result reproducibility, all the pretrained models and code were downloaded from the public hosted locations shown in table \ref{table:bsseval} and stored in a separate public repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
+To maximize result reproducibility, all the pretrained models and code were downloaded from the public hosted locations shown in Table \ref{table:bsseval} and stored in a separate public repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 
 \begin{figure}[ht]
 	\centering
@@ -483,7 +481,7 @@ To maximize result reproducibility, all the pretrained models and code were down
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
 
-The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} was one of the 3 compared neural networks as shown in table \ref{table:bsseval} in section \ref{sec:demixresults}. The weights are for a PyTorch model, and it was only trained on MUSDB18-HQ. The size on disk of the model weights for the 4 targets combined is 137 MB.
+The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} was one of the 3 compared neural networks as shown in Table \ref{table:bsseval} in section \ref{sec:demixresults}. The weights are for a PyTorch model, and it was only trained on MUSDB18-HQ. The size on disk of the model weights for the 4 targets combined is 137 MB.
 
 The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} is for the NNabla deep learning framework. The file containing trained weights for the combined 4 targets is 136 MB, almost the same as the size of the UMX PyTorch weights.
 

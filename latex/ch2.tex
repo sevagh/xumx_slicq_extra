@@ -9,7 +9,7 @@
 
 \citeauthor{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system'' (\cite[8]{discretebook}). Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \citeauthor{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure'' (\cite[2]{moore}).
 
-According to \textcite{melbook}, the waveform is a natural and mathematically convenient representation of a signal. For acoustic signals, the waveform represents the continuously varying pattern of the signal as a function of the continuous variable $t$, which represents time. A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in figure \ref{fig:discretecontinuous}.
+According to \textcite{melbook}, the waveform is a natural and mathematically convenient representation of a signal. For acoustic signals, the waveform represents the continuously varying pattern of the signal as a function of the continuous variable $t$, which represents time. A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers (\cite{discretebook}). The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$.  A continuous-time signal and its discrete representation are shown in Figure \ref{fig:discretecontinuous}.
 
 \begin{figure}[ht]
 	\centering
@@ -23,7 +23,7 @@ Continuous-time signals are converted into discrete-time representations by two 
 
 First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem (\cite{discretebook}), described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
 
-Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation (\cite{dspfirst}). The diagram in figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately. We refer the readers to the full chapter in the textbook for a more full description of challenges in signal sampling.
+Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation (\cite{dspfirst}). The diagram in Figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e. $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately. We refer the readers to the full chapter in the textbook for a more full description of challenges in signal sampling.
 
 \begin{figure}[ht]
 	\centering
@@ -32,7 +32,7 @@ Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for t
 	\label{fig:aliasing}
 \end{figure}
 
-Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values'' (\cite[190]{discretebook}). The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in figure \ref{fig:adccircuit}.
+Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values'' (\cite[190]{discretebook}). The second variable which relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation (\cite{discretebook}). An A/D or ADC (analog-to-digital converter) circuit and its operation on a waveform is shown in Figure \ref{fig:adccircuit}.
 
 \begin{figure}[ht]
 	\centering
@@ -100,7 +100,7 @@ According to \textcite{skiena}, algorithms in computer science are often describ
 
 Starting from legendary mathematician Carl Friedrich Gauss in 1805 (\cite{gausshist}), and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century (\cite{ffttopten}).
 
-The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
+The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum (\cite{discretebook}). The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
 \begin{figure}[ht]
 	\centering
@@ -178,7 +178,7 @@ The STFT, or Short-Time Fourier Transform, has been described independently from
 	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)], X_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window (\cite{dictionary}). Note how similar equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as the COLA (constant overlap-add) constraint is respected (\cite{cola}). Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on a waveform.
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window (\cite{dictionary}). Note how similar Equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as the COLA (constant overlap-add) constraint is respected (\cite{cola}). Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on a waveform.
 
 \begin{figure}[ht]
 	\centering
@@ -199,7 +199,7 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in figure \ref{fig:gaussvshamm}.
+Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
 
 \begin{figure}[ht]
 	\centering
@@ -238,7 +238,7 @@ We close this section with a quote from \citeauthor{doerflersouls} on the powerf
 
 \citeauthor{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies'' (\cite[1]{cqtransient}). As described in section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region (\cite{doerflerphd, cqtransient}). 
 
-The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in figure \ref{fig:violin}.
+The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in Figure \ref{fig:violin}.
 
 The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients (\cite{cqtransient}). Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equation \eqref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
@@ -270,7 +270,7 @@ This first CQT implementation was not designed to be invertible, until \textcite
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
-Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft}, generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.
+Various plots of STFT and CQT spectrograms are shown in Figure \ref{fig:cqtvstft}, generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.
 
 \begin{figure}[ht]
 	\centering
@@ -382,7 +382,7 @@ The NSGT coefficients for a signal of length $L$ are given by an FFT of length $
 
 We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
-Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
+Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in Table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
@@ -504,7 +504,7 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
-The NSGT processes the entire input signal at once. In cases where the input signal must be processed in fixed-size chunks, such as realtime streaming, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). The slicing operation is shown in figure \ref{fig:slicqtukeys}.
+The NSGT processes the entire input signal at once. In cases where the input signal must be processed in fixed-size chunks, such as realtime streaming, the sliCQ Transform (sliCQT, or sliced Constant-Q Transform) was created (\cite{invertiblecqt, slicq}). The slicing operation is shown in Figure \ref{fig:slicqtukeys}.
 
 \begin{figure}[ht]
 	\centering
@@ -550,7 +550,7 @@ According to \citeauthor{introtodl}, deep learning ``is the subfield of machine 
 
 \citeauthor{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to'' (\cite[1]{introtodl}). However, machine learning methods have achieved success in many fields including natural language processing (\cite{nlpml}), computer vision (\cite{cvml}), and audio (\cite{audiodeeplearning}), indicating that data-driven approaches are useful, despite falling short of general artificial intelligence (\cite{generalai}).
 
-We also note that signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). According to \citeauthor{mldspmix}, signal processing and machine learning should both be considered in the study of acoustic signals, shown in figure \ref{fig:dspmlmix}.
+We also note that signal processing techniques and machine and deep learning are compatible with one another and can be used together (\cite{mlsp1, mlsp2}). According to \citeauthor{mldspmix}, signal processing and machine learning should both be considered in the study of acoustic signals, shown in Figure \ref{fig:dspmlmix}.
 
 \begin{figure}[ht]
 	\centering
@@ -580,7 +580,7 @@ Convolutional neural networks (CNN) ``are based on convolving their input with l
 
 \footnotetext{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}
 
-The network architecture and feature map for an audio CNN is shown in figure \ref{fig:audiocnn}, where the extracted feature map is visualized in the spectral domain.
+The network architecture and feature map for an audio CNN is shown in Figure \ref{fig:audiocnn}, where the extracted feature map is visualized in the spectral domain.
 
 \begin{figure}[ht]
 	\centering
@@ -640,7 +640,7 @@ The first is the list,\footnote{\url{https://docs.python.org/3/tutorial/datastru
 
 \hfill \Verb#speech_signal = [0.15, 0.28, 0.57, 0.98, -0.59]#
 
-The generator is a function in Python which generates the next value of a sequence whenever it is called with the \Verb#yield# statement.\footnote{\url{https://docs.python.org/3/reference/simple_stmts.html\#the-yield-statement}} The internal state of the sequence is managed by the generator function. Generators are used for efficiency where an expensive function is only executed when a single value is demanded at a time. This is also called lazy evaluation.\footnote{\url{https://cvw.cac.cornell.edu/python/lazy}} An example of a generator is shown in listing \ref{lst:siggen}.
+The generator is a function in Python which generates the next value of a sequence whenever it is called with the \Verb#yield# statement.\footnote{\url{https://docs.python.org/3/reference/simple_stmts.html\#the-yield-statement}} The internal state of the sequence is managed by the generator function. Generators are used for efficiency where an expensive function is only executed when a single value is demanded at a time. This is also called lazy evaluation.\footnote{\url{https://cvw.cac.cornell.edu/python/lazy}} An example of a generator is shown in Code Listing \ref{lst:siggen}.
 
 \begin{listing}[ht]
 \centering
@@ -662,7 +662,7 @@ The generator is a function in Python which generates the next value of a sequen
 	\label{lst:siggen}
 \end{listing}
 
-The decorator in Python is a single line with a leading \Verb#@# symbol, added on top of a function, to wrap the execution of the function with another.\footnote{\url{https://docs.python.org/3/glossary.html\#term-decorator}} A simple example of a decorator is shown in listing \ref{lst:decorator}.
+The decorator in Python is a single line with a leading \Verb#@# symbol, added on top of a function, to wrap the execution of the function with another.\footnote{\url{https://docs.python.org/3/glossary.html\#term-decorator}} A simple example of a decorator is shown in Code Listing \ref{lst:decorator}.
 
 \begin{listing}[ht]
 \centering
@@ -718,7 +718,7 @@ Tensors can be used for numerical computations using the GPU in both PyTorch and
 
 \subsubsection{Package managers for Python}
 
-To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates an isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages are published to the public Python Package Index (PyPi) by the authors.\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in listing \ref{lst:reqtxt}.
+To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates an isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, pip,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages are published to the public Python Package Index (PyPi) by the authors.\footnote{\url{https://pypi.org/}} An example of a pip file, conventionally called \Verb#requirements.txt#, is shown in Code Listing \ref{lst:reqtxt}.
 
 \begin{listing}[ht]
 \centering
@@ -731,7 +731,7 @@ numpy==1.19.4
 	\label{lst:reqtxt}
 \end{listing}
 
-There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish and distribute their packages to users, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in listing \ref{lst:condayml}. Conda files can also support the pip syntax, since pip is a native Python tool. The user can combine the best of both worlds by using Conda and pip syntax simultaneously in their Conda environment file.
+There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish and distribute their packages to users, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in Code Listing \ref{lst:condayml}. Conda files can also support the pip syntax, since pip is a native Python tool. The user can combine the best of both worlds by using Conda and pip syntax simultaneously in their Conda environment file.
 
 \begin{listing}[ht]
 \centering
@@ -779,7 +779,7 @@ All of the code for this thesis were stored in git repositories to keep track of
 
 \citeauthor{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form'' (\cite[1]{floss}). Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
 
-\citeauthor{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects'' (\cite[131]{gitbook}). GitHub contains tools for working with git repositories, including social elements for personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in figure \ref{fig:githubpytorch}.
+\citeauthor{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects'' (\cite[131]{gitbook}). GitHub contains tools for working with git repositories, including social elements for personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate. An example of the GitHub code browser showing a file from the PyTorch project's git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in Figure \ref{fig:githubpytorch}.
 
 \begin{figure}[ht]
 	\centering
@@ -805,7 +805,7 @@ The ISMIR 2021 Music Demixing Challenge (MDX)\footnotemark{} describes audio sou
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
 \end{quote}
 
-A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of (\cite{musicsepintro1, musicmask}). Music demixing is the focus of this thesis, shown in figure \ref{fig:mixingdiagrams}.
+A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of (\cite{musicsepintro1, musicmask}). Music demixing is the focus of this thesis, shown in Figure \ref{fig:mixingdiagrams}.
 
 \begin{figure}[ht]
 	\centering
@@ -866,7 +866,7 @@ A simple case of music source separation is harmonic/percussive source separatio
 
 Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals.
  
-\textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The result of binary-masked median-filtering harmonic/percussive source separation is shown in figure \ref{fig:fitz1}.
+\textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The result of binary-masked median-filtering harmonic/percussive source separation is shown in Figure \ref{fig:fitz1}.
 
 \begin{figure}[ht]
 	\centering
@@ -900,13 +900,13 @@ The Time-Frequency Jigsaw Puzzle is an algorithm for tonal/transient separation 
 	\label{fig:supertiles}
 \end{figure}
 
-After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion selects coefficients which have more entropy than random white noise, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in figure \ref{fig:supertiles}.
+After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion selects coefficients which have more entropy than random white noise, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in Figure \ref{fig:supertiles}.
 
 The next tonal/transient separation algorithm considered is the WMDCTLasso algorithm (\cite{wmdct}).\footnotemark{} The Gabor expansion used is the WMDCT (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions by using a wide and narrow window. The WMDCT is a time-frequency transform where the signal is decomposed into sum of real cosines instead of the complex exponentials of the DFT (\cite{mdct}).
 
 Next, a method called Group-LASSO (Least Absolute Shrinkage and Selection Operator) is applied to separate the tonal and transient layers. In the wide-window MDCT analysis, the Group-LASSO shrinkage in the frequency group selects the most sparse coefficients in frequency, representing tonal parts of the signal. In the narrow-window MDCT analysis,  Group-LASSO shrinkage in the time group selects the most sparse coefficients in time, representing transient parts of the signal.
 
-An example of TFJigsaw and WMDCTLasso tonal/transient separation applied to the glockenspiel signal is shown in figure \ref{fig:tonaltranssep}.
+An example of TFJigsaw and WMDCTLasso tonal/transient separation applied to the glockenspiel signal is shown in Figure \ref{fig:tonaltranssep}.
 
 \begin{figure}[ht]
 	\centering
@@ -937,7 +937,7 @@ Wavelet transforms, instead of using infinite sinusoids, represent signals as a 
 	Many signals and images of interest exhibit piecewise smooth behavior punctuated by transients. Speech signals are characterized by short bursts encoding consonants followed by steady-state oscillations indicative of vowels[...] Unlike the Fourier basis, wavelet bases are adept at sparsely representing piecewise regular signals and images, which include transient behavior. Compare wavelets with sine waves, which are the basis of Fourier analysis. Sinusoids do not have limited duration -- they extend from minus to plus infinity. While sinusoids are smooth and predictable, wavelets tend to be irregular and asymmetric.\footnotemark{}
 \end{quote}
 
- The wavelet and infinite sinusoid are compared in figure \ref{fig:waveletinf}.
+ The wavelet and infinite sinusoid are compared in Figure \ref{fig:waveletinf}.
 
 \begin{figure}[ht]
 	\centering
@@ -970,7 +970,7 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
 
 Surveys on speech (\cite{speechmask}) and music separation (\cite{musicmask}) indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
-A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. To compute a binary mask, there must be an additional real-valued parameter, $\theta \in [0.0, 1.0]$, which is the separation factor -- values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in figure \ref{fig:masks}.
+A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only 0 and 1. To compute a binary mask, there must be an additional real-valued parameter, $\theta \in [0.0, 1.0]$, which is the separation factor -- values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
 
 \begin{figure}[ht]
 	\centering
@@ -1045,7 +1045,7 @@ In UMX, a deep neural network is used to estimate the magnitude spectrograms of 
 
 \subsubsection{Convolutional denoising autoencoders}
 
-While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}). The architectures are shown in figure \ref{fig:cdaes}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT.
+While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing (\cite{plumbley1, plumbley2}). The architectures are shown in Figure \ref{fig:cdaes}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT.
 
 \begin{figure}[ht]
 	\centering
