@@ -192,7 +192,7 @@ The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{fr
 
 The STFT with a window of 4,096 samples and overlap of 1,024 samples results in a 2D $\text{frequency} \times \text{time}$ transform of shape $2{,}049 \times 40$, where 2,049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4{,}096}{2} + 1$, and 40 is the number of temporal frames computed from the signal length (or 44,100 samples for 1s of audio), window size, and overlap using Equation \ref{equation:stftframes}:
 \begin{align}
-	\text{floor}(\frac{44{,}100-4{,}096}{1{,}024}) + 1 = 40\tag{11}\label{equation:stftframes}
+	\text{floor}(\frac{44{,}100-4{,}096}{1{,}024}) + 1 = 40\tag{37}\label{equation:stftframes}
 \end{align}
 
 \begin{table}[ht]

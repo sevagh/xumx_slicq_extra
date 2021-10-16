@@ -74,7 +74,7 @@ The Fourier Transform originated as an integral transform in mathematics, which 
 	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string (\cite[461]{fouriermusic}).
 \end{quote}
 
-The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of equations \eqref{equation:ctft} and \eqref{equation:ictft} (\cite[308]{dspfirst}):
+The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by the pair of Equations \eqref{equation:ctft} and \eqref{equation:ictft} (\cite[308]{dspfirst}):
 \begin{align}
 	X(j\omega) = \int_{-\infty}^{\infty}{x(t)e^{-j\omega t}\mathit{dt}} \tag{1}\label{equation:ctft} \\
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
@@ -82,13 +82,13 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 \textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \eqref{equation:ictft} defines the signal $x(t)$ in terms of a sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals. The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
 
-Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} (\cite[289]{melbook}):
+Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in Equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of Equations \eqref{equation:dtft} and \eqref{equation:idtft} (\cite[289]{melbook}):
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
 \end{align}
 
-The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \eqref{equation:rect} or polar form in equation \eqref{equation:polar} (\cite[49]{discretebook}):
+The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in Equation \eqref{equation:rect} or polar form in Equation \eqref{equation:polar} (\cite[49]{discretebook}):
 \begin{align}
 	X(e^{j\omega}) = X_{\text{real}}(e^{j\omega}) + j X_{\text{imag}}(e^{j\omega}) \tag{5}\label{equation:rect} \\
 	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\measuredangle X(e^{j\omega})} \tag{6}\label{equation:polar}
@@ -127,7 +127,7 @@ According to \citeauthor{korpel}, ``Gabor came to the conclusion that the diffic
 
 Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \citeauthor{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite[432]{gabor1946}). This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' (\cite[432]{gabor1946}).
 
-Let us start with a description of the time-domain unit impulse signal or sequence (\cite[20]{melbook}) in equation \eqref{equation:delta}:
+Let us start with a description of the time-domain unit impulse signal or sequence (\cite[20]{melbook}) in Equation \eqref{equation:delta}:
 \begin{flalign}\label{equation:delta}
 \delta[n] = \begin{cases}
 	1 \text{\hspace{1em}} n = 0\\
@@ -166,16 +166,18 @@ More recently, according to \citeauthor{psycho1}:
 	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function (\cite[435]{gabor1946})
 \end{quote}
 
-Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e. the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equation \eqref{equation:gabort}:
+Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e. the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by Equations \eqref{equation:gabort}:
 \begin{flalign}\tag{7}\label{equation:gabort}
-	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)], G_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n}
+	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
+	\nonumber G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n}
 \end{flalign}
 
 where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform (\cite{dictionary}).
 
-The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equation \eqref{equation:stft}:
+The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work (\cite{stftindie}), but additional research in the 1980s (\cite{dictionary}) led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by Equations \eqref{equation:stft}:
 \begin{flalign}\tag{8}\label{equation:stft}
-	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)], X_{m}(f) = \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
+	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)]\\
+	\nonumber X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
 \end{flalign}
 
 where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window (\cite{dictionary}). Note how similar Equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes (\cite{stftinvertible}), as long as the COLA (constant overlap-add) constraint is respected (\cite{cola}). Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e. Gabor transform or STFT) is performed on a waveform.
@@ -325,8 +327,8 @@ These requirements lead to invertibility of the frame operator and therefore to 
 	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case (\cite[1482]{balazs})
 \end{quote}
 
-To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by equation \eqref{equation:stationarygab}:
-\begin{align} \tag{10}\label{equation:stationarygab}
+To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal (\cite{adaptivecqt}), described by Equation \eqref{equation:stationarygab}:
+\begin{align} \tag{11}\label{equation:stationarygab}
 g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
 \end{align}
 
@@ -339,13 +341,13 @@ As stated by \citeauthor{adaptivecqt}, ``[w]e will indicate such a frame as \tex
 	\label{fig:uniformtflattice}
 \end{figure}
 
-The definition of the multiple Gabor systems of \textcite{doerflerphd} continues from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by the equations in \eqref{equation:onegabor}:
+The definition of the multiple Gabor systems of \textcite{doerflerphd} continues from the stationary Gabor transform. Given the stationary Gabor atom, where $a$ and $b$ are the time-frequency shift parameters and $f(t)$ is the reconstructed input signal, the Gabor transform is described by Equations \eqref{equation:onegabor}:
 \begin{align}
 	\nonumber g_{m,n}(t) &= g(t - na)e^{j2\pi m b t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{m,n \in \mathbb{Z}}c_{m,n}g_{m,n}(t) \tag{12}\label{equation:onegabor}
 \end{align}
 
-Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, with the equations in \eqref{equation:multigabor}:
+Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, with Equations \eqref{equation:multigabor}:
 \begin{align}
 	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r})e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{r=0}^{R-1}\sum_{m,n \in \mathbb{Z}}c^{r}_{m,n}g^{r}_{m,n}(t) \tag{13}\label{equation:multigabor}
@@ -356,7 +358,7 @@ For a resolution that changes with time, the Nonstationary Gabor atom is chosen 
 	g_{m,n}(t) &= g_{n}(t)e^{j2\pi m b_{n}t}, m,n \in \mathbb{Z}
 \end{align}
 
-\citeauthor{balazs} describe the system in equation \eqref{equation:irregulartime} further:
+\citeauthor{balazs} describe the system in Equation \eqref{equation:irregulartime} further:
 
 \begin{quote}
 	[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position (\cite[1485]{balazs}).
@@ -979,14 +981,20 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or ha
 	\label{fig:masks}
 \end{figure}
 
-An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2}, is given by the following equation:
-\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}} \]
+An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2}, is given by Equation \eqref{equation:softmask}:
+\begin{align}
+	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}}\tag{16}\label{equation:softmask}
+\end{align}
 
-, where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is of the form:
-\[ M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta \]
+, where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is given by Equation \eqref{equation:hardmask}:
+\begin{align}
+	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{17}\label{equation:hardmask}
+\end{align}
 
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in the following equation:
-\[ M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta, M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}}) \]
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in Equation \eqref{equation:residual}:
+\begin{align}
+	M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta, M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}})\tag{18}\label{equation:residual}
+\end{align}
 
 The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms (\cite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}). Discarding the phase of the complex STFT is a choice made for simplicity, although the phase may be important for source separation applications (\cite{ditchphase}).
 
@@ -994,8 +1002,8 @@ To illustrate the calculation of the oracle mask, let us describe a simple case 
 
 We start by denoting the waveforms $x_{v}[n]$ and $x_{d}[n]$ for the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, let us say that we want our algorithm or network to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
 
-Given the following operations to get the STFTs of the mix and two sources, we seek to calculate various interesting oracle masks:
-\begin{align}
+We seek to calculate various interesting oracle masks from the STFTs of the mix and two sources shown in Equations \eqref{equation:targetstfts}:
+\begin{align}\tag{19}\label{equation:targetstfts}
 	\nonumber X_{m} &= \text{STFT}(x_{m}[n]), |X_{m}| = \text{abs}(X_{m})\\
 	\nonumber X_{v} &= \text{STFT}(x_{v}[n]), |X_{v}| = \text{abs}(X_{v})\\
 	\nonumber X_{d} &= \text{STFT}(x_{d}[n]), |X_{d}| = \text{abs}(X_{d})
@@ -1003,8 +1011,8 @@ Given the following operations to get the STFTs of the mix and two sources, we s
  
 \textcite{sisec2018} report the performance of 5 oracles, called IRM1, IRM2, IBM1, IBM2, and the MWF (multichannel Wiener filter). The first 4 are more relevant to stereo music, which is the case considered in this thesis. The ``I'' is for Ideal, ``R|B'' denotes a Ratio vs. Binary mask, ``M'' is for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the magnitude spectrogram raised to the 1st power remains unchanged, while one raised to the 2nd power is the power spectrogram.
 
-The oracles for the vocal source (and the same equations apply to the drum track) are computed thus, noting that a typical default value for $\theta$ is 0.5:
-\begin{align}
+The oracles for the vocal source (and the same equations apply to the drum track) are computed from Equations \eqref{equation:vocaloracles}, noting that a typical default value for $\theta$ is 0.5:
+\begin{align}\tag{20}\label{equation:vocaloracles}
 	\nonumber \text{IRM1}_{v} &= \frac{|X_{v}|^{1}}{|X_{m}|^{1}}\text{,\qquad}
 	\nonumber \text{IRM2}_{v} = \frac{|X_{v}|^{2}}{|X_{m}|^{2}}\\
 	\nonumber \text{IBM1}_{v} &= \begin{cases}
@@ -1017,8 +1025,8 @@ The oracles for the vocal source (and the same equations apply to the drum track
 	\end{cases}
 \end{align}
 
-To estimate the time domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform:
-\begin{align}
+To estimate the time domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using Equation \eqref{equation:cplxinvert}:
+\begin{align}\tag{21}\label{equation:cplxinvert}
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
 
@@ -1079,15 +1087,15 @@ The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from t
 	\textbf{SDR:} Signal to Distortion Ratio
 \end{tight_itemize}
 
-Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from the following equation \eqref{equation:sdrinstr}:
+Out of these 4 scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system (\cite{sdruseful}). The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from Equation \eqref{equation:sdrinstr}:
 \begin{align}
 	\nonumber & \text{SDR}_{\text{instr}} = \\
-	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{10}\label{equation:sdrinstr}
+	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{22}\label{equation:sdrinstr}
 \end{align}
 
-The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from the equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
+The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from Equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in Equation \eqref{equation:sdrsong}:
 \begin{align}
-	\text{SDR}_{\text{song}} = \frac{1}{4}(\text{SDR}_{\text{bass}} + \text{SDR}_{\text{drums}} + \text{SDR}_{\text{vocals}} + \text{SDR}_{\text{other}}) \tag{11}\label{equation:sdrsong}
+	\text{SDR}_{\text{song}} = \frac{1}{4}(\text{SDR}_{\text{bass}} + \text{SDR}_{\text{drums}} + \text{SDR}_{\text{vocals}} + \text{SDR}_{\text{other}}) \tag{23}\label{equation:sdrsong}
 \end{align}
 
 In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 (\cite{sisec2016}). The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used to calculate the results in this thesis.

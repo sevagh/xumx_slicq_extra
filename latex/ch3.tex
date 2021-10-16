@@ -18,7 +18,13 @@ xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, al
 
 The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank (\cite{variableq1}). The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed, like the frequency offset parameter of the Variable-Q scale shown in section \ref{sec:theorynsgt}.
 
-The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. Recall from section \ref{sec:cqt} that to compute the total bins from the bins-per-octave setting of the CQ-NSGT, we can use $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies.
+The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. Equation \eqref{equation:bpo} describes how to compute the total bins from the bins-per-octave setting of the CQ-NSGT:
+
+\begin{align}
+	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]\tag{24}\label{equation:bpo}
+\end{align}
+
+where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. This equation was shown previously in section \ref{sec:cqt}.
 
 In the Python implementation, using the CQ-NSGT is the same as the base NSGT (or sliCQT) with a manually-defined octave scale. One can use the logarithmic scale for more direct control over the total bins. The difference is shown in Code Listing \ref{code:octvlog}. The resulting frequency scale is plotted in Figure \ref{fig:octvlog}.
 
@@ -59,7 +65,7 @@ The Variable-Q scale is the same as the log or octave scales, except with a smal
 \end{quote}
 
 Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform (\cite{erblet}) as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provide the following Equations \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
-\begin{align}\tag{5}\label{equation:variablebw}
+\begin{align}\tag{25}\label{equation:variablebw}
 	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
 
@@ -72,8 +78,8 @@ The is to widen the bandwidths of the windows at the low frequency bins signific
 	\label{fig:vq}
 \end{figure}
 
-The next frequency scale added was the Bark psychoacoustic scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L207}} to complement the included mel scale. We used one of the possible formulas used to convert between Bark and Hz frequencies (\cite{barktan}) and vice versa, sometimes colloquially called the ``Barktan formula''\footnote{\url{https://ccrma.stanford.edu/~jos/bbt/Optimal_Frequency_Warpings.html}}:
-\begin{align}
+The next frequency scale added was the Bark psychoacoustic scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L207}} to complement the included mel scale. We used one of the possible formulas used to convert between Bark and Hz frequencies (\cite{barktan}) and vice versa, sometimes colloquially called the ``Barktan formula''\footnote{\url{https://ccrma.stanford.edu/~jos/bbt/Optimal_Frequency_Warpings.html}}, shown in Equation \eqref{equation:barktan}:
+\begin{align}\tag{26}\label{equation:barktan}
 	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh(\frac{f_{\text{Hz}}}{600}), f_{\text{Hz}} = 600 \cdot sinh(\frac{f_{\text{Bark}}}{6})
 \end{align}
 
@@ -334,8 +340,8 @@ In the parameter exploration, we require the following components to build the o
 
 \textbf{N.B.} The words TFTransform (and iTFTransform for the inverse or backward transform) will be used to refer to either the STFT or sliCQT in the equations shown in this section, since both are complex-valued, invertible time-frequency transforms with Fourier coefficients
 
-As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with the following equations in \eqref{equation:irm1}:
-\begin{align}\tag{1}\label{equation:irm1}
+As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with Equations \eqref{equation:irm1}:
+\begin{align}\tag{27}\label{equation:irm1}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n]), X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), |X_{\text{source}}| = \text{abs}(X_{\text{source}})\\
 	\nonumber & \text{IRM1}_{\text{source}} = \frac{|X_{\text{source}}|^{1}}{|X_{\text{mix}}|^{1}}\\
@@ -343,8 +349,8 @@ As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle
 	\nonumber & \hat{x}_{\text{source, IRM1}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, IRM1}})
 \end{align}
 
-Similar to the IRM1 calculation, let us examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let us call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \eqref{equation:softneural}:
-\begin{align}\tag{2}\label{equation:softneural}
+Similar to the IRM1 calculation, let us examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let us call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in Equations \eqref{equation:softneural}:
+\begin{align}\tag{28}\label{equation:softneural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}})\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}})\\
@@ -353,8 +359,8 @@ Similar to the IRM1 calculation, let us examine the real case where we only have
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
 \end{align}
 
-This is the soft mask output of Open-Unmix, which is supported by one of the configuration options. However, by default Open-Unmix prefers to use the estimated magnitude and the phase of the mixture, over soft masks. The source waveform is estimated using the source magnitude spectrogram and mix phase spectrogram, and show in equations \eqref{equation:mpineural}:
-\begin{align}\tag{3}\label{equation:mpineural}
+This is the soft mask output of Open-Unmix, which is supported by one of the configuration options. However, by default Open-Unmix prefers to use the estimated magnitude and the phase of the mixture, over soft masks. The source waveform is estimated using the source magnitude spectrogram and mix phase spectrogram, and show in Equations \eqref{equation:mpineural}:
+\begin{align}\tag{29}\label{equation:mpineural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}})\\
@@ -364,8 +370,8 @@ This is the soft mask output of Open-Unmix, which is supported by one of the con
 
 In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle (\cite{noisyphase1, noisyphase2}), which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
 
-Let us write out the equations for the MPI oracle derived from the mixed-phase neural network estimate equations from \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using the equations \eqref{equation:mpioracle}:
-\begin{align}\tag{4}\label{equation:mpioracle}
+Let us write out the equations for the MPI oracle, derived from the mixed-phase neural network estimate in Equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using Equations \eqref{equation:mpioracle}:
+\begin{align}\tag{30}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
 	\nonumber & X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
@@ -478,13 +484,13 @@ CrossNet-Open-Unmix (X-UMX) (\cite{xumx}) is a further development on Open-Unmix
 
 For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than 4 independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of Open-Unmix.
 
-In Open-Unmix, the loss function is only for the single target being trained, and only applied by the mean squared error (MSE) function on the magnitude STFT coefficients, making it a loss of the frequency domain. The MSE loss of the magnitude STFT is computed from the following equation, where $Y$ represents the ground truth magnitude STFT, $\hat{Y}$ represents the network estimate, and there are $n$ total elements in the STFT matrix:
-\begin{align}
+In Open-Unmix, the loss function is only for the single target being trained, and only applied by the mean squared error (MSE) function on the magnitude STFT coefficients, making it a loss of the frequency domain. The MSE loss of the magnitude STFT is computed from Equation \eqref{equation:mselossstft}, where $Y$ represents the ground truth magnitude STFT, $\hat{Y}$ represents the network estimate, and there are $n$ total elements in the STFT matrix:
+\begin{align}\tag{31}\label{equation:mselossstft}
 	\nonumber & \text{MSE}(Y, \hat{Y}) = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i})^{2}}
 \end{align}
 
 The loss function of X-UMX is first modified to include a multi-domain loss (MDL), which refers to the existing frequency-domain loss (spectrogram MSE) in addition to a new time-domain loss. The time-domain loss is in fact the SDR score from the BSS metrics which we have seen before. Equations \eqref{equation:mpirepeat} show how the magnitude STFT of the Open-Unmix neural network is converted back to the time-domain waveform estimate for a target (or source):
-\begin{align}\tag{5}\label{equation:mpirepeat}
+\begin{align}\tag{32}\label{equation:mpirepeat}
 	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{Open-Unmix}(x_{\text{mix}})\\
@@ -498,11 +504,11 @@ We can use these equations in the loss function to convert from the estimated ma
 
 We will call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is shown in Equation \eqref{equation:sisdr}:
 \begin{align}
-	& \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{6}\label{equation:sisdr}
+	& \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{33}\label{equation:sisdr}
 \end{align}
 
 There are 14 MSE loss combinations made from the 4 targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. Equations \eqref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
-\begin{align}\tag{5}\label{equation:cl}
+\begin{align}\tag{34}\label{equation:cl}
 	\nonumber & \text{mse\_loss}_{1} = \text{MSE}(|\text{STFT}(\hat{x}_{1})|, |\text{STFT}(x_{1})|)\\
 	\nonumber & \text{mse\_loss}_{2} = \text{MSE}(|\text{STFT}(\hat{x}_{1} + \hat{x}_{2})|, |\text{STFT}(x_{1} + x_{2}|))\\
 	\nonumber & \text{(... repeat for 14 combinations)}\\
@@ -510,15 +516,15 @@ There are 14 MSE loss combinations made from the 4 targets to implement the comb
 \end{align}
 
 For the time-domain loss, the same 14 combinations of the combination targets are considered, shown in the Equations \eqref{equation:mdl}, where $x$ represents the time-domain waveform, the subscript represents the target:
-\begin{align}\tag{6}\label{equation:mdl}
+\begin{align}\tag{35}\label{equation:mdl}
 	\nonumber & \text{sdr\_loss}_{1} = \text{SI-SDR}(\hat{x}_{1}, x_{1})\\
 	\nonumber & \text{sdr\_loss}_{2} = \text{SI-SDR}(\hat{x}_{1} + \hat{x}_{2}, x_{1} + x_{2})\\
 	\nonumber & \text{(... repeat for 14 combinations)}\\
 	\nonumber & \text{sdr\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{sdr\_loss}_{n}}
 \end{align}
 
-As a last step, the time-domain loss is multiplied by a mixing coefficient, $\alpha$, before adding it to the frequency-domain loss to create the total loss function:
-\begin{align}
+As a last step, the time-domain loss is multiplied by a mixing coefficient, $\alpha$, before adding it to the frequency-domain loss to create the total loss function in Equation \eqref{equation:totalloss}:
+\begin{align}\tag{36}\label{equation:totalloss}
 	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}
 
