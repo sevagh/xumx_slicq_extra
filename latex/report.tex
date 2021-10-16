@@ -13,7 +13,6 @@
 \usepackage{pdfpages}
 \usepackage{wrapfig}
 \usepackage{verbatim}
-\usepackage{listings}
 \usepackage{rotating}
 \usepackage{minted}
 \usemintedstyle{github}
@@ -84,6 +83,9 @@
     \footnotetext[\arabic{note}]{#1}
 }
 
+\renewcommand\listingscaption{Code Listing}
+\renewcommand\listoflistingscaption{List of Code Listings}
+
 \title{\ThesisTitle}
 
 \author{\vspace{1em}\\Sevag Hanssian \\
@@ -112,6 +114,8 @@
 \listoffigures
 
 \listoflistings
+
+\listoftables
 
 \newpagefill
 

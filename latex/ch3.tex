@@ -280,7 +280,7 @@ else:
  \subfloat{(c) Output printed by above for the ragged form}
  \vspace{1em}
  \end{minipage}
-  \captionof{listing}{Matrix and ragged forms of a sliCQT using 20-22050 Hz on the Bark scale with 20 frequency bins}
+  \captionof{listing}{Matrix and ragged forms of a sliCQT using 20-22,050 Hz on the Bark scale with 20 frequency bins}
   \label{code:raggedvmatrix}
 \end{figure}
 
@@ -297,8 +297,8 @@ The next addition to the slice utilities was to include a utility function for t
 	\centering
 	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}
 	\hspace{0.1em}
-	\subfloat[sliCQT with minimum automatic sllen (6744) and 50\% overlap-add]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
-	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22050 Hz}
+	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
+	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22,050 Hz}
 	\label{fig:overlappedspectrograms}
 \end{figure}
 
@@ -383,7 +383,7 @@ The mix-phase inversion oracle (MPI) score is the target we will choose to maxim
 
 The splitting of a dataset into training, test, and validation sets was covered in section \ref{sec:ml}. To recap, the training set is used by the model to make predictions from the input and comparing its predicted output to the ground truth training output. The test set must be unseen during training, and the model's performance is tested on this set at the end of each training iteration (also called epoch) to show the generalization performance of the network. The validation set is also a set of data unseen in training, which can be used for the hyperparameter search.
 
-In Open-Unmix, the STFT window size is set to 4096 by default (with a 1024 overlap), and it is a hyperparameter of the network. Therefore, the sliCQT parameters should equivalently be considered a hyperparameter in xumx-sliCQ. The MPI oracle testbench should use the predefined validation set of MUSDB18-HQ, which consists of 14 tracks. sliCQT parameters should be selected and be evaluated on their MPI score using BSS metrics for the 14 validation tracks.
+In Open-Unmix, the STFT window size is set to 4,096 samples by default (with a 1,024-sample overlap), and it is a hyperparameter of the network. Therefore, the sliCQT parameters should equivalently be considered a hyperparameter in xumx-sliCQ. The MPI oracle testbench should use the predefined validation set of MUSDB18-HQ, which consists of 14 tracks. sliCQT parameters should be selected and be evaluated on their MPI score using BSS metrics for the 14 validation tracks.
 
 The performance of the IRM1 (soft magnitude mask) and MPI (mixed-phase inversion) oracles will be shown for the best (and worst) sliCQT parameters, alongside different STFT window sizes. The intent is to show how the window size and time-frequency resolution of the STFT and sliCQT affect music demixing results per target (\cite{tftradeoff1}).
 
@@ -391,9 +391,9 @@ According to \textcite{randomgrid}, 60 iterations of random grid will find a sta
 
 The random search parameters are shown in table \ref{table:slicqparams}. Several decisions were made to limit the size of the parameter search.
 
-The maximum bins were capped to 300 and the maximum slice length was capped to 44100 samples, which represents 1 second of music. This is a nice round number, and re-appears in several demixing papers (\cite{plumbley1, plumbley2, demucs}) as a good subsequence length to extract from a larger musical track. Although the NSGT/sliCQT can be configured to output thousands of frequency bins and use arbitrarily large slice lengths, larger sizes (and the corresponding large slice length) will lead to higher-dimension outputs that are more difficult to use in a neural network.
+The maximum bins were capped to 300 and the maximum slice length was capped to 44,100 samples, which represents 1 second of music. This is a nice round number, and re-appears in several demixing papers (\cite{plumbley1, plumbley2, demucs}) as a good subsequence length to extract from a larger musical track. Although the NSGT/sliCQT can be configured to output thousands of frequency bins and use arbitrarily large slice lengths, larger sizes (and the corresponding large slice length) will lead to higher-dimension outputs that are more difficult to use in a neural network.
 
-The maximum frequency was capped to 22050 Hz, the Nyquist rate of the 44100 sample rate of MUSDB18-HQ. This is for performance reasons -- the NSGT/sliCQT automatically adds additional frequency bins for the DC (0 Hz) and Nyquist ($\sfrac{f_{s}}{2} \text{ Hz}$) frequencies if they are missing from the user-specified scale, and having two large, adjacent upper frequency bins (e.g. say that the user sets 17000 Hz, and 22050 Hz is the automatically-added Nyquist) creates a very performance-intensive transform with huge dimensionality which does not fit on the GPU of the test machine (with 12GB of memory).
+The maximum frequency was capped to 22,050 Hz, which is the the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. This is for performance reasons -- the NSGT/sliCQT automatically adds additional frequency bins for the DC (0 Hz) and Nyquist ($\sfrac{f_{s}}{2} \text{ Hz}$) frequencies if they are missing from the user-specified scale, and having two large, adjacent upper frequency bins (e.g., if the user uses 17,000 Hz as the upper limit, 22,050 Hz is the automatically-added Nyquist) creates a very performance-intensive transform with huge dimensionality which does not fit on the GPU of the test machine (with 12GB of memory).
 
 The minimum frequency range (10.0--130.0 Hz) was inspired by one of the sliCQT papers (\cite{slicq}) which demonstrated the sliCQT with those frequency ranges.
 
@@ -427,7 +427,7 @@ The maximized metric is the median SDR score across the 4 targets of the 14 vali
 \subsubsection{GPU-accelerated BSS metrics with CuPy}
 \label{sec:fasterbsscupy}
 
-During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows some of the line-profiler output of the IRM1 oracle mask with the STFT, using a window size of 4096, on 1 out of the 14 MUSDB18-HQ validation tracks, with the \Verb#@profile# decorator placed on the BSS inner computation functions.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/blob/master/museval/metrics.py\#L512-L601}}
+During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. Listing \ref{lst:slowbssprofile} shows some of the line-profiler output of the IRM1 oracle mask with the STFT, using a window size of 4,096, on one out of the 14 MUSDB18-HQ validation tracks, with the \Verb#@profile# decorator placed on the BSS inner computation functions.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/blob/master/museval/metrics.py\#L512-L601}}
 
 \begin{listing}[h]
   \centering
@@ -600,7 +600,7 @@ The \Verb#get_statistics# function\footnote{\url{https://github.com/sevagh/xumx-
   \label{code:fourthdiff}
 \end{listing}
 
-The neural network was modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16000 Hz by default), which lets the part of the STFT above 16000 Hz to pass through the network unmodified. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16000 Hz passes through untouched. An excerpt of the neural network code is shown in listing \ref{code:raggedumx}.
+The neural network was modified to instantiate an inner network\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L150-L187}} for each matrix in the ragged sliCQT. The class name for the total neural network is called \Verb#OpenUnmix#. The inner network for each sub-matrix of the sliCQT is called \Verb#OpenUnmixTimeBucket#, referring to how each matrix is a ``bucket'' of frequency bins that share the same time resolution. Finally, the \Verb#DummyTimeBucket# class is a network that lets a single ragged sliCQT bucket pass through unchanged. This is to respect the \Verb#bandwidth# parameter of Open-Unmix (16,000 Hz by default), which lets the part of the STFT above 16,000 Hz to pass through the network unmodified. Similarly for the ragged sliCQT, all of the matrices whose first frequency bin is above 16,000 Hz passes through untouched. An excerpt of the neural network code is shown in listing \ref{code:raggedumx}.
 
 \begin{listing}[ht]
   \centering
@@ -727,7 +727,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		Layer 1 & Layer 2 \\
 	 \hline
 	 \hline
-		Conv2d \makecell[l]{in=2\\out=25}, BN, ReLU & Conv2d \makecell[l]{in=25\\out=55}, BN, ReLU \\
+		Conv2d$\Big($\makecell[l]{in=2\\out=25}$\Big)$, BN, ReLU & Conv2d$\Big($\makecell[l]{in=25\\out=55}$\Big)$, BN, ReLU \\
 	 \hline
 \end{tabular}
 	\caption{CDAE encoder layers}
@@ -738,7 +738,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		Layer 1 & Layer 2 \\
 	 \hline
 	 \hline
-		ConvTranspose2d \makecell[l]{in=55\\out=25}, BN, ReLU & ConvTranspose2d \makecell[l]{in=25\\out=2}, BN, ReLU \\
+		ConvTranspose2d$\Big($\makecell[l]{in=55\\out=25}$\Big)$, BN, ReLU & ConvTranspose2d$\Big($\makecell[l]{in=25\\out=2}$\Big)$, BN, ReLU \\
 	 \hline
 \end{tabular}
 	\caption{CDAE decoder layers}
@@ -749,7 +749,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 		Growth layer \\
 	 \hline
 	 \hline
-		ConvTranspose2d \makecell[l]{in=2\\out=2}, Sigmoid \\
+		ConvTranspose2d$\Big($\makecell[l]{in=2\\out=2}$\Big)$, Sigmoid \\
 	 \hline
 \end{tabular}
 	\caption{Growth (inverse 50\% overlap-add) layer}

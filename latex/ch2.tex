@@ -56,7 +56,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{di
 
 Throughout this section, the description of the Fourier Transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
 
-The Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44100 Hz.
+The Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency (\cite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}). This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. For the rest of this chapter, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44,100 Hz.
 
 \begin{figure}[ht]
 	\centering
@@ -104,8 +104,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[2048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_2048.png}}\\
-	\subfloat[262144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_262144.png}}
+	\subfloat[2,048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_2048.png}}\\
+	\subfloat[262,144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_262144.png}}
 	\caption{DFT of the Glockenspiel waveform. Note the richer frequency information in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
@@ -123,7 +123,7 @@ Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communicat
 	[t]he foregoing solutions [of the Fourier Transform], though unquestionably mathematically correct, are somewhat difficult to reconcile with our physical intuitions and our physical concepts of such variable frequency mechanisms as, for instance, the siren (\cite[431]{gabor1946})
 \end{quote}
 
-According to \citeauthor{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts'' (\cite[3624]{korpel}).
+According to \citeauthor{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts'' (\cite[3,624]{korpel}).
 
 Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \citeauthor{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' (\cite[432]{gabor1946}). This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' (\cite[432]{gabor1946}).
 
@@ -199,12 +199,12 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2048 samples, and 16384 samples, which at the sample rate of the glockenspiel signal (44100 Hz) represent $\sfrac{128}{44100}\cdot 1000 = $ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in figure \ref{fig:gaussvshamm}.
+Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in figure \ref{fig:gaussvshamm}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images-tftheory/hamming_vs_gauss.png}
-	\caption{2048-sample Hamming and Gaussian windows}
+	\caption{2,048-sample Hamming and Gaussian windows}
 	\label{fig:gaussvshamm}
 \end{figure}
 
@@ -215,12 +215,12 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_128.png}}
 	\hspace{0.1em}
 	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_128.png}}\\
-	\subfloat[STFT, 2048-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_2048.png}}
+	\subfloat[STFT, 2,048-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_2048.png}}
 	\hspace{0.1em}
-	\subfloat[Gabor transform, 2048-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
-	\subfloat[STFT, 16384-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_16384.png}}
+	\subfloat[Gabor transform, 2,048-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
+	\subfloat[STFT, 16,384-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_16384.png}}
 	\hspace{0.1em}
-	\subfloat[Gabor transform, 16384-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_16384.png}}
+	\subfloat[Gabor transform, 16,384-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_16384.png}}
 	\caption{Visual comparison of the magnitude STFT spectrograms with the Hamming and Gaussian window}
 	\label{fig:stfts}
 \end{figure}
@@ -260,7 +260,13 @@ This first CQT implementation was not designed to be invertible, until \textcite
 
 \textcite{invertiblecqt} implemented the Constant-Q Transform with Nonstationary Gabor frames (\cite{balazs}), which allowed for perfect reconstruction for the first time. This is also called the CQ-NSGT, or Constant-Q Nonstationary Gabor Transform. The next section, \ref{sec:theorynsgt}, will cover the NSGT in detail, but for now we shall continue with how the NSGT led to improved implementations of the CQT.
 
-\textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced Constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the Variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale. The formula given is $K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]$, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
+\textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced Constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the Variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale, shown in Equation \ref{equation:bpo}:
+
+\begin{align}
+	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]\tag{10}\label{equation:bpo}
+\end{align}
+
+, where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22{,}050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT (\cite{invertiblecqt, slicq, variableq1}). However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction (\cite{klapuricqt}). Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
@@ -273,10 +279,10 @@ Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft
 	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_256.png}}\\
 	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt24.png}}
 	\hspace{0.1em}
-	\subfloat[STFT spectrogram, window size 1024]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_1024.png}}\\
+	\subfloat[STFT spectrogram, window size 1,024]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_1024.png}}\\
 	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt48.png}}
 	\hspace{0.1em}
-	\subfloat[STFT spectrogram, window size 4096]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_4096.png}}
+	\subfloat[STFT spectrogram, window size 4,096]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_4096.png}}
 	\caption{Spectrograms of the glockenspiel signal, showing how the CQT displays more musical information than the STFT for all frequency resolutions}
 	\label{fig:cqtvstft}
 \end{figure}
@@ -297,7 +303,7 @@ Various plots of STFT and CQT spectrograms are shown in figure \ref{fig:cqtvstft
 
 As summarized by \citeauthor{adaptivecqt}, ``[t]he definition of multiple Gabor frames, which is comprehensively treated in [D{\"o}rfler 2002], provides Gabor frames with analysis techniques with multiple resolutions... The nonstationary Gabor frames [...] are a further development; [...] they provide for a class of FFT-based algorithms [...] together with perfect reconstruction formulas'' (\cite[2]{adaptivecqt}). In other words, a single Nonstationary Gabor transform can replace the need for multiple distinct Gabor transforms (or STFTs).
 
-\citeauthor{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began a ``fundamental move from transforms to dictionaries for [...] signal representation'' (\cite[1049]{dictionary}). Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task'' (\cite[1049]{dictionary}).
+\citeauthor{dictionary} describe the shift from the term \textit{transform}, e.g., the Gabor transform or STFT, to \textit{dictionary}, stating that works by \cite{dictionary1} and \cite{dictionary2} began a ``fundamental move from transforms to dictionaries for [...] signal representation'' (\cite[1,049]{dictionary}). Accordingly, an important outcome of this terminology change was the ``idea that a signal was allowed to have more than one description in the representation domain, and that selecting the best one depended on the task'' (\cite[1,049]{dictionary}).
 
 Using multiple transforms, such as using two Gabor transforms (or STFTs) with a small and large window for the transient and tonal properties of music, is also called an \textit{overcomplete} dictionary (\cite{dictionary}), where there is a lot of redundancy in the transform domain.
 
@@ -376,7 +382,7 @@ The NSGT coefficients for a signal of length $L$ are given by an FFT of length $
 
 We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales (\cite{melbook}), or the Variable-Q scale based on the psychoacoustic ERBlet transform (\cite{variableq1, variableq2}).
 
-Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
+Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following 4 frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
@@ -426,21 +432,21 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 	 Scale & Bins & Last 5 frequency bins \\
 	 \hline
 	 \hline
-	 Constant-Q & 100 & 16614.38, 17832.63, 19140.20, 20543.64, 22050.00 \\
+	 Constant-Q & 100 & 16,614.38, 17,832.63, 19,140.20, 20,543.64, 22,050.00 \\
 	 \hline
-	 Variable-Q (+15 Hz) & 100 & 16629.38, 17847.63, 19155.20, 20558.64, 22065.00 \\
+	 Variable-Q (+15 Hz) & 100 & 16,629.38, 17,847.63, 19,155.20, 20,558.64, 22,065.00 \\
 	 \hline
-	 mel & 100 & 19087.44, 19789.79, 20517.07, 21270.17, 22050.00 \\
+	 mel & 100 & 19,087.44, 19,789.79, 20,517.07, 21,270.17, 22,050.00 \\
 	 \hline
-	 Bark & 100 & 18558.87, 19376.12, 20229.33, 21120.07, 22050.00 \\
+	 Bark & 100 & 18,558.87, 19,376.12, 20,229.33, 21,120.07, 22,050.00 \\
 	 \hline
-	 Constant-Q & 500 & 20845.91, 21140.62, 21439.50, 21742.61, 22050.00 \\
+	 Constant-Q & 500 & 20,845.91, 21,140.62, 21,439.50, 21,742.61, 22,050.00 \\
 	 \hline
-	 Variable-Q (+15 Hz) & 500 & 20860.91, 21155.62, 21454.50, 21757.61, 22065.00 \\
+	 Variable-Q (+15 Hz) & 500 & 20,860.91, 21,155.62, 21,454.50, 21,757.61, 22,065.00 \\
 	 \hline
-	 mel & 500 & 21428.92, 21582.58, 21737.31, 21893.11, 22050.00 \\
+	 mel & 500 & 21,428.92, 21,582.58, 21,737.31, 21,893.11, 22,050.00 \\
 	 \hline
-	 Bark & 500 & 21308.75, 21491.70, 21676.21, 21862.31, 22050.00 \\
+	 Bark & 500 & 21,308.75, 21,491.70, 21,676.21, 21,862.31, 22,050.00 \\
 	 \hline
 \end{tabular}\\
 \vspace{1em}
@@ -489,7 +495,7 @@ Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT 
 	 Bark & 500 & 58.49, 58.49, 58.49, 58.49, 58.49 \\
 	 \hline
 \end{tabular}
-	\caption{Different frequencies and Q factors for various NSGT scales, 20-22050 Hz}
+	\caption{Different frequencies and Q factors for various NSGT scales, 20-22,050 Hz}
 	\label{table:nsgtfreqsandqs}
 \end{table}
 
@@ -1053,7 +1059,7 @@ We will note that each of the papers gives us different ideas with how to adapt 
 
 \subsubsection{Public datasets}
 
-The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset (\cite{musdb18}), and more recently the HQ (high-quality) version (\cite{musdb18hq}). MUSDB18-HQ contains stereo wav files sampled at 44100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets (\cite{sisec2016, otherdataset2}).
+The most popular music stem dataset used by SISEC and SigSep is the MUSDB18 dataset (\cite{musdb18}), and more recently the HQ (high-quality) version (\cite{musdb18hq}). MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets (\cite{sisec2016, otherdataset2}).
 
 The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test split. Following the rules defined in the ISMIR 2021 Music Demixing Challenge,\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} for a network to be considered trained only on MUSDB18-HQ, the predefined data splits must be used.
 
