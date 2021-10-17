@@ -28,7 +28,7 @@ A design constraint of X-UMX is that the spectrograms for the four targets to ha
 
 \subsection{Summary and outlook}
 
-The STFT has known limitations that arise from its fixed time-frequency resolution. Methods of spectral music demixing that use the STFT have addressed this limitation by using multiple STFTs or by using different time-frequency transforms like the CQT. Time-domain waveform models, or end-to-end models (\cite{waveunet, demucs, endtoend}), are achieving success as an alternative to spectral models.
+The STFT has known limitations that arise from its fixed time-frequency resolution. Methods of spectral music demixing that use the STFT have addressed this limitation by using multiple STFTs or by using different time-frequency transforms like the CQT. Time-domain waveform models, or end-to-end models \parencite{waveunet, demucs, endtoend}, are achieving success as an alternative to spectral models.
 
 Recall that in spectral models for source separation, the phase is commonly discarded. According to \textcite{endtoend}, attempts to use the phase of the spectrogram could not beat magnitude spectral models, and waveform models have surpassed both since the waveform implicitly contains the phase.
 

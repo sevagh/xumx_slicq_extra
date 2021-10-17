@@ -73,7 +73,7 @@ The author of this thesis takes code availability and reproducibility seriously.
 
 The first benchmark script is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the forked copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. The benchmark script can be viewed here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}} For the 14 validation tracks of MUSDB18-HQ, it creates a random estimate (using \Verb#numpy.randn# to create an audio signal), and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA RTX 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
 
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec (\cite{sisec2016}, \cite{sisec2018}). Also, note the passing regression test in Code Listing \ref{lst:regressionout}, showing that the library is working correctly with the speedup.
+The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec \parencite{sisec2016, sisec2018}. Also, note the passing regression test in Code Listing \ref{lst:regressionout}, showing that the library is working correctly with the speedup.
 
 \begin{listing}[h]
   \centering
@@ -192,7 +192,7 @@ The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{fr
 
 The STFT with a window of 4,096 samples and overlap of 1,024 samples results in a 2D $\text{frequency} \times \text{time}$ transform of shape $2{,}049 \times 40$, where 2,049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4{,}096}{2} + 1$, and 40 is the number of temporal frames computed from the signal length (or 44,100 samples for 1s of audio), window size, and overlap using equation \ref{equation:stftframes}:
 \begin{align}
-	\text{floor}(\frac{44{,}100-4{,}096}{1{,}024}) + 1 = 40\tag{37}\label{equation:stftframes}
+	\text{floor}(\frac{44{,}100-4{,}096}{1{,}024} + 1 = 40\tag{37}\label{equation:stftframes}
 \end{align}
 
 \begin{table}[ht]
@@ -384,7 +384,7 @@ Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss 
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
-The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ (\cite{musdb18hq}) dataset, are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the four targets. The evaluation script is stored here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
+The BSSv4 scores for the demixing results, computed on the test set of the MUSDB18-HQ \parencite{musdb18hq} dataset, are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. ``-WEM'' denotes ``Wiener-expectation-maximization,'' the post-processing iterative refinement step of the four targets. The evaluation script is stored here.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}}
 
 \begin{table}[ht]
 	\centering
@@ -487,7 +487,7 @@ The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai
 
 The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model}} is 28 MB, making xumx-sliCQ the smallest network from the comparison.
 
-To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs (\cite{deepcpuinf, deepcpuinf2}). The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. The music demixing result generation script from the previous section \ref{sec:demixresults} was simply adapted to add timing measurements. Note that X-UMX was omitted from the comparison, since it runs on NNabla, a different deep learning framework than PyTorch.
+To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs \parencite{deepcpuinf, deepcpuinf2}. The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. The music demixing result generation script from the previous section \ref{sec:demixresults} was simply adapted to add timing measurements. Note that X-UMX was omitted from the comparison, since it runs on NNabla, a different deep learning framework than PyTorch.
 
 Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the sliCQT-Wiener-EM and STFT-Wiener-EM post-processing steps were measured.
 
