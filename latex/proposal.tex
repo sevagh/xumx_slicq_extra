@@ -1,6 +1,6 @@
 \documentclass[letter,12pt]{article}
 \usepackage[svgnames]{xcolor}
-\usepackage[left=4cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage[left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
 \usepackage{hyperref}
 \hypersetup{
   colorlinks   = true, %Colours links instead of ugly boxes
@@ -22,8 +22,11 @@
   \setlength{\parskip}{0pt}
 }{\end{enumerate}}
 
-\title{\ThesisTitle}
+\renewcommand*{\postvolpunct}{\addcolon\addspace}
+
+\title{\vspace{-2.25em}\ThesisTitle\vspace{-0.5em}}
 \author{Sevag Hanssian}
+\date{\vspace{-0.5em}October 17, 2021\vspace{-1.25em}}
 
 \begin{document}
 
@@ -45,7 +48,7 @@ Model-based methods are ``prone to large errors and poor performance'' (\cite[13
 
 \section{Proposed Research / Methodology}
 
-The adaptation of Open-Unmix to use the sliCQT requires several preliminary tasks. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use a GPU-capable deep learning framework. Next, sliCQT parameters must be chosen to equal or surpass the STFT in music source separation. Finally, the code of the Open-Unmix model should be modified to replace the STFT with the sliCQT.
+The adaptation of Open-Unmix to use the sliCQT requires several preliminary tasks. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use PyTorch,\footnote{\url{https://pytorch.org}} which is the GPU deep learning framework used in the reference implementation of Open-Unmix.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} Next, sliCQT parameters must be chosen to equal or surpass the STFT in music source separation. Finally, the code of Open-Unmix should be modified to replace the STFT with the sliCQT.
 
 The model will use the MUSDB18-HQ dataset (\cite{musdb18hq}) for both training and evaluation, to allow fair comparisons with Open-Unmix and other published models. The objective metric used will be the BSS (Blind Source Separation) eval metrics (\cite{bss}). The MUSDB18-HQ dataset and BSS eval metrics are standard for music demixing, and have been used in previous Signal Source Separation Evaluation Campaigns (SiSEC) (\cite{sisec2018}).
 
@@ -59,8 +62,8 @@ In music demixing approaches that use the STFT, choosing the appropriate time-fr
 %\nocite{*}
 
 \begingroup
-\setstretch{0.925}
-\setlength\bibitemsep{0.065em}
+\setstretch{0.9}
+\setlength\bibitemsep{0.05em}
 \printbibheading[title={References},heading=bibnumbered]
 \printbibliography[heading=none]
 \endgroup
