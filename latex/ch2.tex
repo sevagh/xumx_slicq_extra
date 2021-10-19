@@ -141,8 +141,8 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[width=0.65\textwidth]{./images-tftheory/gabor13.png}}\\
-	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[width=0.65\textwidth]{./images-tftheory/gabor2.png}}
+	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[width=0.6\textwidth]{./images-tftheory/gabor13.png}}\\
+	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[width=0.6\textwidth]{./images-tftheory/gabor2.png}}
 	\caption{Time-frequency tradeoff intuitions \parencite[103, 106]{gabor2}}
 	\label{fig:gaborfirst}
 \end{figure}
@@ -183,12 +183,15 @@ where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-tftheory/stft_diagram.png}
-	\caption{Diagram showing the forward and inverse STFT or Gabor transform\protect\footnotemark}
-	\label{fig:stftdiagram}
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+		\centering
+		\includegraphics[width=0.8\textwidth]{./images-tftheory/stft_diagram.png}
+		\caption[Forward and inverse STFT or Gabor transform]{Forward and inverse STFT or Gabor transform\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}}
+		\label{fig:stftdiagram}
+	\end{minipage}
 \end{figure}
-
-\footnotetext{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
 
 Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-frequency plane, and how the Gabor transform and the STFT with higher frequency or higher time resolution appear on the time-frequency plane.
 
@@ -589,13 +592,16 @@ Convolutional neural networks (CNN) ``are based on convolving their input with l
 
 \begin{figure}[ht]
 	\centering
-	\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_1.png}}\\
-	\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_2.png}}
-	\caption{$3 \times 3$ convolution kernel sliding over patches of input pixels\protect\footnotemark}
-	\label{fig:cnnbasic}
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+		\centering
+		\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_1.png}}\\
+		\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_2.png}}
+		\caption[$3 \times 3$ convolution kernel sliding over patches of input pixels]{$3 \times 3$ convolution kernel sliding over patches of input pixels\footnote[1]{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}}
+		\label{fig:cnnbasic}
+	\end{minipage}
 \end{figure}
-
-\footnotetext{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}
 
 The network architecture and feature map for an audio CNN is shown in Figure \ref{fig:audiocnn}, where the extracted feature map is visualized in the spectral domain.
 
@@ -812,7 +818,7 @@ Typical music recordings are mono or stereo mixtures, with multiple sound object
 
 There are many motivations for performing this separation. \citeauthor{musicsepgood} describe that once we perform audio source separation and have access to the individual source tracks, we can ``remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix'' \parencite[1]{musicsepgood}.
 
-The ISMIR 2021 Music Demixing Challenge (MDX)\footnotemark{} describes audio source separation as consisting of different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
+The ISMIR 2021 Music Demixing Challenge\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} (MDX) \parencite{mdx21} describes audio source separation as consisting of different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' The competition description mentions important uses for music demixing systems, ranging from entertainment to hearing aids:
 
 \begin{quote}
 	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.
@@ -822,14 +828,15 @@ A common thread in survey papers is that the domains of speech enhancement and m
 
 \begin{figure}[ht]
 	\centering
-	\subfloat{\includegraphics[height=4cm]{./images-mss/mixdemix.png}}
-	\caption{Diagram for music mixing and demixing\protect\footnotemark[\value{footnote}]}
-	\label{fig:mixingdiagrams}
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+		\centering
+		\subfloat{\includegraphics[height=4cm]{./images-mss/mixdemix.png}}
+		\caption[Music mixing and demixing block diagrams]{Music mixing and demixing block diagrams\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}}
+		\label{fig:mixingdiagrams}
+	\end{minipage}
 \end{figure}
-
-\footnotetext{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
-
-\newpagefill
 
 \subsubsection{Computational approaches}
 
@@ -920,7 +927,7 @@ The Time-Frequency Jigsaw Puzzle is an algorithm for tonal/transient separation 
 
 After creating two representations of the signal, these are superimposed in a single time-frequency plane to create so-called ``super-tiles.'' Next, within each super-tile, a R{\'e}nyi entropy criterion selects coefficients which have more entropy than random white noise, and subtracts these from the original signal. This is performed iteratively until the tonal and transient layers emerge. The super-tiles and entropy criterion are shown in Figure \ref{fig:supertiles}.
 
-The next tonal/transient separation algorithm considered is the WMDCTLasso algorithm \parencite{wmdct}.\footnotemark{} The Gabor expansion used is the WMDCT (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions by using a wide and narrow window. The WMDCT is a time-frequency transform where the signal is decomposed into sum of real cosines instead of the complex exponentials of the DFT \parencite{mdct}.
+The next tonal/transient separation algorithm considered is the WMDCTLasso algorithm \parencite{wmdct}. The Gabor expansion used is the WMDCT (Windowed Modified Discrete Cosine Transform) applied with two different time-frequency resolutions by using a wide and narrow window. The WMDCT is a time-frequency transform where the signal is decomposed into sum of real cosines instead of the complex exponentials of the DFT \parencite{mdct}.
 
 Next, a method called Group-LASSO (Least Absolute Shrinkage and Selection Operator) is applied to separate the tonal and transient layers. In the wide-window MDCT analysis, the Group-LASSO shrinkage in the frequency group selects the most sparse coefficients in frequency, representing tonal parts of the signal. In the narrow-window MDCT analysis,  Group-LASSO shrinkage in the time group selects the most sparse coefficients in time, representing transient parts of the signal.
 
@@ -936,14 +943,17 @@ Examples of TFJigsaw and WMDCTLasso tonal/transient separation applied to the gl
 
 \begin{figure}[ht]
 	\centering
-	\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock1.jpg}}\\
-	\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock_Ton.jpg}}\\
-	\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock_Trans.jpg}}
-	\caption{WMDCTLasso tonal/transient separation\protect\footnotemark}
-	\label{fig:wmdcttonaltranssep}
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+		\centering
+		\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock1.jpg}}\\
+		\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock_Ton.jpg}}\\
+		\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock_Trans.jpg}}
+		\caption[WMDCTLasso tonal/transient separation]{WMDCTLasso tonal/transient separation\footnote[1]{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}}}
+		\label{fig:wmdcttonaltranssep}
+	\end{minipage}
 \end{figure}
-
-\footnotetext{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}}
 
 \newpagefill
 
@@ -957,19 +967,21 @@ Wavelet transforms relate to the Fourier transform as follows. The Fourier trans
 Wavelet transforms, instead of using infinite sinusoids, represent signals as a sum of \textit{wavelets}, which are finite in duration:
 
 \begin{quote}
-	Many signals and images of interest exhibit piecewise smooth behavior punctuated by transients. Speech signals are characterized by short bursts encoding consonants followed by steady-state oscillations indicative of vowels[...] Unlike the Fourier basis, wavelet bases are adept at sparsely representing piecewise regular signals and images, which include transient behavior. Compare wavelets with sine waves, which are the basis of Fourier analysis. Sinusoids do not have limited duration -- they extend from minus to plus infinity. While sinusoids are smooth and predictable, wavelets tend to be irregular and asymmetric.\footnotemark{}
+	Many signals and images of interest exhibit piecewise smooth behavior punctuated by transients. Speech signals are characterized by short bursts encoding consonants followed by steady-state oscillations indicative of vowels[...] Unlike the Fourier basis, wavelet bases are adept at sparsely representing piecewise regular signals and images, which include transient behavior. Compare wavelets with sine waves, which are the basis of Fourier analysis. Sinusoids do not have limited duration -- they extend from minus to plus infinity. While sinusoids are smooth and predictable, wavelets tend to be irregular and asymmetric.\footnote{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}
 \end{quote}
 
  The wavelet and infinite sinusoid are compared in Figure \ref{fig:waveletinf}.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.75\textwidth]{./images-wavelets/wavelet.png}
-	\caption{The infinite sine wave of the Fourier transform compared to a finite wavelet\protect\footnotemark[\value{footnote}]}
-	\label{fig:waveletinf}
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+		\includegraphics[width=0.75\textwidth]{./images-wavelets/wavelet.png}
+		\caption[Infinite sine wave of the Fourier transform vs. finite wavelet]{Infinite sine wave of the Fourier transform vs. finite wavelet\footnote[1]{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}}
+		\label{fig:waveletinf}
+	\end{minipage}
 \end{figure}
-
-\footnotetext{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}
 
 The STFT and Gabor expansions can be considered as a form of wavelet analysis \parencite{gaborwavelet1, gaborwavelet2}, although the derivation of the relationship is beyond the scope of this thesis. Still, we keep in mind that wavelet-based source separation techniques are related to the previously shown algorithms that use the STFT, CQT, or other Gabor expansions like the WMDCT.
 
