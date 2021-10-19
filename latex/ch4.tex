@@ -162,16 +162,15 @@ The sliCQT chosen by one run of the script that produced the best median SDR use
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Good sliCQT -- Bark, 262 bins, 32.9--22,050 Hz]{\includegraphics[width=0.475\textwidth]{./images-gspi/slicqt_good.png}}
-	\hspace{0.1em}
-	\subfloat[Bad sliCQT -- Constant-Q/log, 142 bins, 129.7--22,050 Hz]{\includegraphics[width=0.475\textwidth]{./images-gspi/slicqt_bad.png}}
+	\subfloat[Good sliCQT -- Bark, 262 bins, 32.9--22,050 Hz]{\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_good.png}}\\
+	\subfloat[Bad sliCQT -- Constant-Q/log, 142 bins, 129.7--22,050 Hz]{\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_bad.png}}
 	\caption{sliCQTs from the MPI oracle hyperparameter search}
 	\label{fig:bipolarslicqs}
 \end{figure}
 
 The full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
 
-\begin{figure}[H]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-bss/oracle_boxplot.pdf}
 	\caption{Boxplot for oracle mask evaluations}
@@ -192,7 +191,7 @@ The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{fr
 
 The STFT with a window of 4,096 samples and overlap of 1,024 samples results in a 2D $\text{frequency} \times \text{time}$ transform of shape $2{,}049 \times 40$, where 2,049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4{,}096}{2} + 1$, and 40 is the number of temporal frames computed from the signal length (or 44,100 samples for 1s of audio), window size, and overlap using equation \ref{equation:stftframes}:
 \begin{align}
-	\text{floor}(\frac{44{,}100-4{,}096}{1{,}024} + 1 = 40\tag{37}\label{equation:stftframes}
+	\text{floor}\big(\frac{44{,}100-4{,}096}{1{,}024}\big) + 1 = 40\tag{37}\label{equation:stftframes}
 \end{align}
 
 \begin{table}[ht]
@@ -201,7 +200,7 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 	\label{table:slicqdim1}
 	\begin{tabular}{ |l|l|l|l|l| }
 	 \hline
-		Block & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
+		Bucket & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
 	 \hline
 	 \hline
 0 & 0 & (9, \ 1, \ 28) & (1, \ 98) & (1, \ 168) \\
@@ -274,8 +273,6 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 \hline
 34 & 219--220 & (9, \ 2, \ 148) & (2, \ 518) & (2, \ 888) \\
 \hline
-35 & 221--222 & (9, \ 2, \ 152) & (2, \ 532) & (2, \ 912) \\
-\hline
 \end{tabular}
 \end{table}
 
@@ -285,9 +282,10 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 	\label{table:slicqdim2}
 	\begin{tabular}{ |l|l|l|l|l| }
 	 \hline
-		Block & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
+		Bucket & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
 	 \hline
 	 \hline
+35 & 221--222 & (9, \ 2, \ 152) & (2, \ 532) & (2, \ 912) \\
 \hline
 36 & 223 & (9, \ 1, \ 156) & (1, \ 546) & (1, \ 936) \\
 \hline
@@ -372,8 +370,7 @@ Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Train loss]{\includegraphics[width=\textwidth]{./images-neural/train_loss.png}}
-	\hspace{0.5em}
+	\subfloat[Train loss]{\includegraphics[width=\textwidth]{./images-neural/train_loss.png}}\\
 	\subfloat[Validation loss]{\includegraphics[width=\textwidth]{./images-neural/valid_loss.png}}
 	\caption{Tensorboard loss curves for xumx-sliCQ, 1,000 epochs}
 	\label{fig:networkloss}

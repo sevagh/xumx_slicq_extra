@@ -18,7 +18,7 @@ xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, al
 
 The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. In essence the NSGT/sliCQT can be thought of as a filterbank \parencite{variableq1}. The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed, like the frequency offset parameter of the Variable-Q scale shown in section \ref{sec:theorynsgt}.
 
-The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. equation \eqref{equation:bpo1} describes how to compute the total bins from the bins-per-octave setting of the CQ-NSGT:
+The provided scales\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}} are octave, log, linear (i.e. the regular STFT), and mel. The octave scale is similar to the log scale, except that the octave scale takes a bins-per-octave (bpo) argument, and the log scale takes a bins argument. Equation \eqref{equation:bpo1} describes how to compute the total bins from the bins-per-octave setting of the CQ-NSGT:
 
 \begin{align}
 	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}} + 1]\tag{24}\label{equation:bpo1}
@@ -167,8 +167,8 @@ The starting point of porting the library to the GPU was to simply replace all N
 
 \begin{figure}[!ht]
 	\centering
-	\subfloat[GitHub commit browser]{\includegraphics[width=0.65\textwidth]{./images-misc/ghcommitbrowser.png}}\\
-	\subfloat[View file and line changes in each commit]{\includegraphics[width=0.65\textwidth]{./images-misc/ghcommitsingle.png}}
+	\subfloat[GitHub commit browser]{\includegraphics[width=0.9\textwidth]{./images-misc/ghcommitbrowser.png}}\\
+	\subfloat[View file and line changes in each commit]{\includegraphics[width=0.85\textwidth]{./images-misc/ghcommitsingle.png}}
 	\caption{How to browse the individual steps of the torch porting effort}
 	\label{fig:ghcommitbrowser}
 \end{figure}
@@ -222,7 +222,7 @@ This same statement also applies to the NSGT, where different frequency bins hav
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-misc/slicq_shape.png}
+	\includegraphics[width=0.9\textwidth]{./images-misc/slicq_shape.png}
 	\caption{Illustration of the different time resolution per frequency bin of the NSGT}
 	\label{fig:raggedslicqt}
 \end{figure}
@@ -301,9 +301,8 @@ The next addition to the slice utilities was to include a utility function for t
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}
-	\hspace{0.1em}
-	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
+	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
+	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
 	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22,050 Hz}
 	\label{fig:overlappedspectrograms}
 \end{figure}
@@ -343,29 +342,29 @@ In the parameter exploration, we require the following components to build the o
 As shown in section \ref{sec:masksandoracles}, the definition of the IRM1 oracle based on the STFT, or ideal ratio/soft mask with the magnitude spectrogram raised to the first power, for a mixed song waveform $x_{\text{mix}}[n]$ and one of its isolated sources $x_{\text{source}}[n]$, and the subsequent oracle-estimated source waveform $\hat{x}_{\text{source}}[n]$ are computed with equations \eqref{equation:irm1}:
 \begin{align}\tag{27}\label{equation:irm1}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n]), X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
-	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}, |X_{\text{source}}| = \text{abs}(X_{\text{source}}\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}, |X_{\text{source}}| = \text{abs}(X_{\text{source}})\\
 	\nonumber & \text{IRM1}_{\text{source}} = \frac{|X_{\text{source}}|^{1}}{|X_{\text{mix}}|^{1}}\\
 	\nonumber & \hat{X}_{\text{source, IRM1}} = X_{\text{mix}} \cdot \text{IRM1}_{\text{source}}\\
-	\nonumber & \hat{x}_{\text{source, IRM1}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, IRM1}}
+	\nonumber & \hat{x}_{\text{source, IRM1}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, IRM1}})
 \end{align}
 
 Similar to the IRM1 calculation, let us examine the real case where we only have the mix available, and the magnitude spectrogram of the source was estimated by a neural network. Let us call this $|X_{\text{source}}|_{\text{est}}$, and see how the source waveform is computed with ratio masks in equations \eqref{equation:softneural}:
 \begin{align}\tag{28}\label{equation:softneural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
-	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}\\
-	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}}\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}})\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}})\\
 	\nonumber & \text{EstRatioMask}_{\text{source}} = \frac{{|X_{\text{source}}|_{\text{est}}}^{1}}{|X_{\text{mix}}|^{1}}\\
 	\nonumber & \hat{X}_{\text{source, est}} = X_{\text{mix}} \cdot \text{EstRatioMask}_{\text{source}}\\
-	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}}
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
 \end{align}
 
 This is the soft mask output of Open-Unmix, which is supported by one of the configuration options. However, by default Open-Unmix prefers to use the estimated magnitude and the phase of the mixture, over soft masks. The source waveform is estimated using the source magnitude spectrogram and mix phase spectrogram, and show in equations \eqref{equation:mpineural}:
 \begin{align}\tag{29}\label{equation:mpineural}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
-	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}, \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}}\\
-	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}}\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{NeuralNetwork}(x_{\text{mix}})\\
 	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \measuredangle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}}
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, est}})
 \end{align}
 
 In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. There are some mentions in demixing or source separation literature for the ``noisy phase'' oracle \parencite{noisyphase1, noisyphase2}, which is a more speech-based definition -- recall that in speech separation, a common task is to separate speech from noise signals. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, so we should call it the mix-phase inversion (or MPI) oracle.
@@ -373,11 +372,11 @@ In other words, the magnitude of the isolated source is combined with the phase,
 Let us write out the equations for the MPI oracle, derived from the mixed-phase neural network estimate in equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
 \begin{align}\tag{30}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \text{TFTransform}(x_{\text{mix}}[n])\\
-	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}, \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}}\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
 	\nonumber & X_{\text{source}} = \text{TFTransform}(x_{\text{source}}[n])\\
-	\nonumber & |X_{\text{source}}| = \text{abs}(X_{\text{source}}, \measuredangle{X_{\text{source}}} = \text{angle}(X_{\text{source}}\\
+	\nonumber & |X_{\text{source}}| = \text{abs}(X_{\text{source}}), \measuredangle{X_{\text{source}}} = \text{angle}(X_{\text{source}})\\
 	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \measuredangle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, MPI}}
+	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \text{iTFTransform}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
 This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It gives us the idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
@@ -486,16 +485,16 @@ For simplicity, having a single training loop and single trained model to perfor
 
 In Open-Unmix, the loss function is only for the single target being trained, and only applied by the mean squared error (MSE) function on the magnitude STFT coefficients, making it a loss of the frequency domain. The MSE loss of the magnitude STFT is computed from equation \eqref{equation:mselossstft}, where $Y$ represents the ground truth magnitude STFT, $\hat{Y}$ represents the network estimate, and there are $n$ total elements in the STFT matrix:
 \begin{align}\tag{31}\label{equation:mselossstft}
-	\nonumber & \text{MSE}(Y, \hat{Y} = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i}^{2}}
+	\nonumber & \text{MSE}(Y, \hat{Y}) = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i}^{2}})
 \end{align}
 
-The loss function of X-UMX is first modified to include a multi-domain loss (MDL), which refers to the existing frequency-domain loss (spectrogram MSE) in addition to a new time-domain loss. The time-domain loss is in fact the SDR score from the BSS metrics which we have seen before. equations \eqref{equation:mpirepeat} show how the magnitude STFT of the Open-Unmix neural network is converted back to the time-domain waveform estimate for a target (or source):
+The loss function of X-UMX is first modified to include a multi-domain loss (MDL), which refers to the existing frequency-domain loss (spectrogram MSE) in addition to a new time-domain loss. The time-domain loss is in fact the SDR score from the BSS metrics which we have seen before. Equations \eqref{equation:mpirepeat} show how the magnitude STFT of the Open-Unmix neural network is converted back to the time-domain waveform estimate for a target (or source):
 \begin{align}\tag{32}\label{equation:mpirepeat}
 	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
-	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}, \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}}\\
-	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{Open-Unmix}(x_{\text{mix}}\\
+	\nonumber & |X_{\text{mix}}| = \text{abs}(X_{\text{mix}}), \measuredangle{X_{\text{mix}}} = \text{angle}(X_{\text{mix}})\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{Open-Unmix}(x_{\text{mix}})\\
 	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \measuredangle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}}
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 
 Similar equations were previously described for the mix-phase inversion (MPI) oracle in section \ref{sec:mpi}.
@@ -504,21 +503,21 @@ We can use these equations in the loss function to convert from the estimated ma
 
 We will call this one $\text{sdr\_loss}$ to denote time-domain loss which is applied to waveforms $x$ and $\hat{x}$ (the ground-truth and estimated waveform respectively). The SI-SDR loss is shown in equation \eqref{equation:sisdr}:
 \begin{align}
-	& \text{SI-SDR}(x, \hat{x} = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{33}\label{equation:sisdr}
+	& \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{33}\label{equation:sisdr}
 \end{align}
 
-There are 14 MSE loss combinations made from the four targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. equations \eqref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
+There are 14 MSE loss combinations made from the four targets to implement the combination loss (CL). In the spectral/frequency domain, we will use $\text{mse\_loss}$ as shorthand for frequency-domain loss. Equations \eqref{equation:cl} show the computation of the total frequency-domain loss, where $x$ represents the time-domain waveform, the subscript represents the target (1--4 for vocals, drums, bass, and other):
 \begin{align}\tag{34}\label{equation:cl}
-	\nonumber & \text{mse\_loss}_{1} = \text{MSE}(|\text{STFT}(\hat{x}_{1}|, |\text{STFT}(x_{1}|)\\
-	\nonumber & \text{mse\_loss}_{2} = \text{MSE}(|\text{STFT}(\hat{x}_{1} + \hat{x}_{2}|, |\text{STFT}(x_{1} + x_{2}|))\\
+	\nonumber & \text{mse\_loss}_{1} = \text{MSE}(|\text{STFT}(\hat{x}_{1})|, |\text{STFT}(x_{1})|)\\
+	\nonumber & \text{mse\_loss}_{2} = \text{MSE}(|\text{STFT}(\hat{x}_{1} + \hat{x}_{2})|, |\text{STFT}(x_{1} + x_{2})|)\\
 	\nonumber & \text{(... repeat for 14 combinations)}\\
 	\nonumber & \text{mse\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{mse\_loss}_{n}}
 \end{align}
 
 For the time-domain loss, the same 14 combinations of the combination targets are considered, shown in the equations \eqref{equation:mdl}, where $x$ represents the time-domain waveform, the subscript represents the target:
 \begin{align}\tag{35}\label{equation:mdl}
-	\nonumber & \text{sdr\_loss}_{1} = \text{SI-SDR}(\hat{x}_{1}, x_{1}\\
-	\nonumber & \text{sdr\_loss}_{2} = \text{SI-SDR}(\hat{x}_{1} + \hat{x}_{2}, x_{1} + x_{2}\\
+	\nonumber & \text{sdr\_loss}_{1} = \text{SI-SDR}(\hat{x}_{1}, x_{1})\\
+	\nonumber & \text{sdr\_loss}_{2} = \text{SI-SDR}(\hat{x}_{1} + \hat{x}_{2}, x_{1} + x_{2})\\
 	\nonumber & \text{(... repeat for 14 combinations)}\\
 	\nonumber & \text{sdr\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{sdr\_loss}_{n}}
 \end{align}
@@ -532,8 +531,8 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Multi-domain loss (MDL)]{\includegraphics[width=0.75\textwidth]{./images-neural/xumx1.png}}\\
-	\subfloat[Combination loss (CL)]{\includegraphics[width=0.75\textwidth]{./images-neural/xumx2.png}}
+	\subfloat[Multi-domain loss (MDL)]{\includegraphics[width=\textwidth]{./images-neural/xumx1.png}}\\
+	\subfloat[Combination loss (CL)]{\includegraphics[width=\textwidth]{./images-neural/xumx2.png}}
 	\caption{Loss functions of X-UMX \parencite[2]{xumx}}
 	\label{fig:xumxlosses}
 \end{figure}
@@ -555,7 +554,7 @@ The MUSDDB18-HQ data loader is the starting point of the neural network, and the
 	\item
 		The \Verb#get_statistics#\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L56}} function is applied, which computes the mean and standard deviation from the magnitude STFTs of the entire training dataset. \citeauthor{Kessy_2018} describes data whitening as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing'' \parencite[309]{Kessy_2018}.
 	\item
-		The $(x, y)$ pairs have their magnitude STFT taken in the training loop.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}} The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean}$, where the std and mean are from the data whitening step.
+		The $(x, y)$ pairs have their magnitude STFT taken in the training loop.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/scripts/train.py\#L23}} The magnitude STFTs, denoted $(|X|, |Y|)$ are passed into the inner neural network. $|X|$ is modified with $|X| = \text{std}*(|X|+\text{mean})$, where the std and mean are from the data whitening step.
 	\item
 		The whitened $|X|$ is used as an input to the neural network layers, which as mentioned in section \ref{sec:umx} is a bi-directional LSTM.
 	\item
@@ -576,7 +575,7 @@ Figure \ref{fig:xumxslicq} shows the proposed modification to the basic Open-Unm
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_system_compressed.png}
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_system_compressed_largefont.png}
 	\caption{Block diagram of xumx-sliCQ architecture}
 	\label{fig:xumxslicq}
 \end{figure}
@@ -655,8 +654,8 @@ The convolutional denoising autoencoder (CDAE) models of \textcite{plumbley1, pl
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget.png}
-	\caption{Block diagram of the individual convolutional blocks of xumx-sliCQ}
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget_largefont.png}
+	\caption{Block diagram of the individual CNNs of xumx-sliCQ}
 	\label{fig:cdaeslicqt}
 \end{figure}
 
@@ -664,7 +663,7 @@ CDAEs are symmetric: a stack of convolutional layers in the encoder are applied 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.75\textwidth]{./images-neural/convtranspose.png}
+	\includegraphics[width=0.8\textwidth]{./images-neural/convtranspose.png}
 	\caption{Deconvolution operation \parencite[11]{convtranspose}}
 	\label{fig:convtranspose}
 \end{figure}

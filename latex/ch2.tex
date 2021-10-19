@@ -13,8 +13,8 @@ According to \textcite{melbook}, the waveform is a natural and mathematically co
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Continuous-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/continuoustime.png}}\\
-	\subfloat[Discrete-time waveform]{\includegraphics[height=2.4cm]{./images-tftheory/discretetime.png}}
+	\subfloat[Continuous-time waveform]{\includegraphics[width=0.9\textwidth]{./images-tftheory/continuoustime.png}}\\
+	\subfloat[Discrete-time waveform]{\includegraphics[width=0.9\textwidth]{./images-tftheory/discretetime.png}}
 	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ \parencite[10]{discretebook}}
 	\label{fig:discretecontinuous}
 \end{figure}
@@ -80,25 +80,25 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(j\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
 \end{align}
 
-\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. equation \eqref{equation:ictft} defines the signal $x(t)$ in terms of a sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals. The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
+\textcite{dspfirst} calls $X(j\omega)$ the frequency-domain representation of the signal $x(t)$. Equation \eqref{equation:ictft} defines the signal $x(t)$ in terms of a sum of infinitely many complex-exponential signals with $X(j\omega)$ controlling the amplitude and phases of these signals. The continuous-time Fourier Transform provides a one-to-one mapping of the time domain to the frequency domain.
 
 Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
 \begin{align}
-	X(e^{j\omega} = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
-	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega}e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
+	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{3}\label{equation:dtft} \\
+	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{4}\label{equation:idtft}
 \end{align}
 
 The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \eqref{equation:rect} or polar form in equation \eqref{equation:polar} \parencite[49]{discretebook}:
 \begin{align}
-	X(e^{j\omega} = X_{\text{real}}(e^{j\omega} + j X_{\text{imag}}(e^{j\omega} \tag{5}\label{equation:rect} \\
-	X(e^{j\omega} = |X(e^{j\omega}|e^{j\measuredangle X(e^{j\omega}} \tag{6}\label{equation:polar}
+	X(e^{j\omega}) = X_{\text{real}}(e^{j\omega}) + j X_{\text{imag}}(e^{j\omega}) \tag{5}\label{equation:rect} \\
+	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\measuredangle X(e^{j\omega})} \tag{6}\label{equation:polar}
 \end{align}
 
-The quantities $|X(e^{j\omega}|$ and $\measuredangle X(e^{j\omega}$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively \parencite{discretebook}.
+The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively \parencite{discretebook}.
 
-According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take one time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2}$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared \parencite{skiena}. 
+According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take one time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared \parencite{skiena}. 
 
-Starting from legendary mathematician Carl Friedrich Gauss in 1805 \parencite{gausshist}, and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N}$. This resulted in the FFT becoming one of the most important algorithms of the 20th century \parencite{ffttopten}.
+Starting from legendary mathematician Carl Friedrich Gauss in 1805 \parencite{gausshist}, and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century \parencite{ffttopten}.
 
 The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
@@ -141,9 +141,8 @@ Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-com
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[height=5cm]{./images-tftheory/gabor13.png}}
-	\hspace{2em}
-	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[height=6.25cm]{./images-tftheory/gabor2.png}}
+	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[width=0.65\textwidth]{./images-tftheory/gabor13.png}}\\
+	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[width=0.65\textwidth]{./images-tftheory/gabor2.png}}
 	\caption{Time-frequency tradeoff intuitions \parencite[103, 106]{gabor2}}
 	\label{fig:gaborfirst}
 \end{figure}
@@ -160,7 +159,7 @@ More recently, according to \citeauthor{psycho1}:
 	[w]e have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10 \parencite[4]{psycho1}.
 \end{quote}
 
-\citeauthor{psycho1} go on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue'' \parencite[4]{psycho1}. Nevertheless, if we choose to proceed with time-frequency analysis despite this limitation, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \citeauthor{gabor1946} asks:
+\citeauthor{psycho1} goes on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue'' \parencite[4]{psycho1}. Nevertheless, if we choose to proceed with time-frequency analysis despite this limitation, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \citeauthor{gabor1946} asks:
 
 \begin{quote}
 	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function \parencite[435]{gabor1946}
@@ -201,7 +200,7 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popular choice of window, the Hamming window, for three different window sizes: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
+Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2} shows the Gabor transform, which is the STFT with the Gaussian window. Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
 
 \begin{figure}[ht]
 	\centering
@@ -214,17 +213,20 @@ Figure \ref{fig:stfts} shows the Gabor transform alongside the STFT using a popu
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_128.png}}
-	\hspace{0.1em}
-	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_128.png}}\\
-	\subfloat[STFT, 2,048-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_2048.png}}
-	\hspace{0.1em}
-	\subfloat[Gabor transform, 2,048-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
-	\subfloat[STFT, 16,384-sample Hamming]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_hamm_16384.png}}
-	\hspace{0.1em}
-	\subfloat[Gabor transform, 16,384-sample Gaussian]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_gauss_16384.png}}
-	\caption{Visual comparison of the magnitude STFT spectrograms with the Hamming and Gaussian window}
-	\label{fig:stfts}
+	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_128.png}}\\
+	\subfloat[STFT, 2,048-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_2048.png}}\\
+	\subfloat[STFT, 16,384-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_16384.png}}
+	\caption{Magnitude spectrograms with the Hamming window STFT}
+	\label{fig:stfts1}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_128.png}}\\
+	\subfloat[Gabor transform, 2,048-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
+	\subfloat[Gabor transform, 16,384-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_16384.png}}
+	\caption{Magnitude spectrograms with the Gabor transform, i.e., the Gaussian window STFT}
+	\label{fig:stfts2}
 \end{figure}
 
 We close this section with a quote from \citeauthor{doerflersouls} on the powerful properties of the STFT:
@@ -242,16 +244,16 @@ We close this section with a quote from \citeauthor{doerflersouls} on the powerf
 
 The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in Figure \ref{fig:violin}.
 
-The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. equation \eqref{equation:jbrowncqt} describes how the different windows $N[k]$ are applied to the signal:
+The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equations \eqref{equation:jbrowncqt} describe how the different windows $N[k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
-	\nonumber N[k] \text{(window length)} &= \frac{f_{s}}{f_{k}}Q, W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
+	\nonumber & \text{window length} = N[k] = \frac{f_{s}}{f_{k}}Q\\
+	\nonumber & W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Properties of DFT, CQT]{\includegraphics[height=5.05cm]{./images-tftheory/dftvcqt.png}}
-	\hspace{0.5em}
-	\subfloat[First 12 window sizes for the CQT]{\includegraphics[height=5cm]{./images-tftheory/qwindowchanges.png}}
+	\subfloat[Properties of DFT, CQT]{\includegraphics[width=0.65\textwidth]{./images-tftheory/dftvcqt.png}}\\
+	\subfloat[Window sizes for computing the CQT]{\includegraphics[width=0.65\textwidth]{./images-tftheory/qwindowchanges.png}}
 	\caption{Various aspects of the original CQT \parencite[427, 428]{jbrown}}
 	\label{fig:jbrowncqt}
 \end{figure}
@@ -265,28 +267,31 @@ This first CQT implementation was not designed to be invertible, until \textcite
 \textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced Constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the Variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale, shown in equation \ref{equation:bpo}:
 
 \begin{align}
-	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}} + 1]\tag{10}\label{equation:bpo}
+	K = [B \log_{2}\big(\frac{\xi_{\text{max}}}{\xi_{\text{min}}}\big) + 1]\tag{10}\label{equation:bpo}
 \end{align}
 
 , where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. For example, for $B = 12 \text{ bins-per-octave}$, $\xi_{\text{min}} = 83 \text{ Hz}$ and $\xi_{\text{max}} = 22{,}050 \text{ Hz}$, the result is $K \approx 97 \text{ total frequency bins}$.
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT \parencite{invertiblecqt, slicq, variableq1}. However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction \parencite{klapuricqt}. Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
-Various plots of STFT and CQT spectrograms are shown in Figure \ref{fig:cqtvstft}, generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.
+Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox. Note how the CQT spectrograms contain more musical information than the STFT spectrograms at all frequency resolutions.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[CQT spectrogram, 12 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt12.png}}
-	\hspace{0.1em}
-	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_256.png}}\\
-	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt24.png}}
-	\hspace{0.1em}
-	\subfloat[STFT spectrogram, window size 1,024]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_1024.png}}\\
-	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_cqt48.png}}
-	\hspace{0.1em}
-	\subfloat[STFT spectrogram, window size 4,096]{\includegraphics[width=0.475\textwidth]{./images-gspi/glock_stft_4096.png}}
-	\caption{Spectrograms of the glockenspiel signal, showing how the CQT displays more musical information than the STFT for all frequency resolutions}
-	\label{fig:cqtvstft}
+	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_256.png}}\\
+	\subfloat[STFT spectrogram, window size 1,024]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_1024.png}}\\
+	\subfloat[STFT spectrogram, window size 4,096]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_4096.png}}
+	\caption{STFT magnitude spectrograms of the glockenspiel signal}
+	\label{fig:cqtvsstft1}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[CQT spectrogram, 12 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt12.png}}\\
+	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt24.png}}\\
+	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt48.png}}
+	\caption{CQT magnitude spectrograms of the glockenspiel signal}
+	\label{fig:cqtvsstft2}
 \end{figure}
 
 \newpagefill
@@ -298,7 +303,7 @@ Various plots of STFT and CQT spectrograms are shown in Figure \ref{fig:cqtvstft
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-tftheory/tf_tradeoff_dorfler.png}
+	\includegraphics[width=0.9\textwidth]{./images-tftheory/tf_tradeoff_dorfler.png}
 	\caption{Time-frequency tradeoff for a glockenspiel signal \parencite[20]{doerflerphd}}
 	\label{fig:dorflertradeoff}
 \end{figure}
@@ -324,7 +329,7 @@ The construction of nonstationary Gabor frames relies on three properties of the
 These requirements lead to invertibility of the frame operator and therefore to perfect reconstruction. \citeauthor{balazs} continues on to say that
 
 \begin{quote}
-	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case \parencite[1482]{balazs}
+	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case \parencite[1,482]{balazs}
 \end{quote}
 
 To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal \parencite{adaptivecqt}, described by equation \eqref{equation:stationarygab}:
@@ -336,7 +341,7 @@ As stated by \citeauthor{adaptivecqt}, ``[w]e will indicate such a frame as \tex
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=6.25cm]{./images-tftheory/stationarygabor.png}
+	\includegraphics[width=0.5\textwidth]{./images-tftheory/stationarygabor.png}
 	\caption{Uniform time-frequency resolution of the stationary Gabor transform \parencite[3]{adaptivecqt}}
 	\label{fig:uniformtflattice}
 \end{figure}
@@ -349,11 +354,11 @@ The definition of the multiple Gabor systems of \textcite{doerflerphd} continues
 
 Similarly, we can describe an overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, with equations \eqref{equation:multigabor}:
 \begin{align}
-	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r}e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
+	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r})e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{r=0}^{R-1}\sum_{m,n \in \mathbb{Z}}c^{r}_{m,n}g^{r}_{m,n}(t) \tag{13}\label{equation:multigabor}
 \end{align}
 
-For a resolution that changes with time, the Nonstationary Gabor atom is chosen from a set of functions $\{g_{n}\}$ and a fixed frequency sampling step $b_{n}$:
+For a resolution that changes with time, the Nonstationary Gabor atom is chosen from a set of functions $\{g_{n}\}$ and a fixed frequency sampling step $b_{n}$, shown in equation \eqref{equation:irregulartime}:
 \begin{align}\tag{14}\label{equation:irregulartime}
 	g_{m,n}(t) &= g_{n}(t)e^{j2\pi m b_{n}t}, m,n \in \mathbb{Z}
 \end{align}
@@ -361,12 +366,12 @@ For a resolution that changes with time, the Nonstationary Gabor atom is chosen 
 \citeauthor{balazs} describe the system in equation \eqref{equation:irregulartime} further:
 
 \begin{quote}
-	[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position \parencite[1485]{balazs}.
+	[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position \parencite[1,485]{balazs}.
 \end{quote}
 
-For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$ \parencite[1486]{balazs}:
+For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$, shown in equation \eqref{equation:irregularfrequency} \parencite[1,486]{balazs}:
 \begin{align}\tag{15}\label{equation:irregularfrequency}
-	h_{m,n}(t) = h_{m}(t - na_{m}, m,n \in \mathbb{Z}
+	h_{m,n}(t) = h_{m}(t - na_{m}), m,n \in \mathbb{Z}
 \end{align}
 
 Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolution by time and by frequency in terms of sampled points on the time-frequency grid.
@@ -376,32 +381,46 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\subfloat[Gabor atoms that change with time]{\includegraphics[width=6.25cm]{./images-tftheory/irregulartime.png}}
 	\hspace{1em}
 	\subfloat[Gabor atoms that change with frequency]{\includegraphics[width=6.25cm]{./images-tftheory/irregularfrequency.png}}
-	\caption{Varying time-frequency sampling of the Nonstationary Gabor transform \parencite[1485, 1487]{balazs}}
+	\caption{Varying time-frequency sampling of the Nonstationary Gabor transform \parencite[1,485, 1,487]{balazs}}
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
-The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n})$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows.
+The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows.
 
 We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales \parencite{melbook}, or the Variable-Q scale based on the psychoacoustic ERBlet transform \parencite{variableq1, variableq2}.
 
-Figure \ref{fig:bunchansgts} shows several different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following four frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in Table \ref{table:nsgtfreqsandqs}.
+Figures \ref{fig:bunchansgts1}, \ref{fig:bunchansgts2}, \ref{fig:bunchansgts3}, and \ref{fig:bunchansgts4} show different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. The plots are generated from my fork\footnote{\url{https://github.com/sevagh/nsgt}} of the reference Python NSGT library. My modifications to the library will be described further in section \ref{sec:methodology}. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for each of the following four frequency scales: mel, Bark, Constant-Q, and Variable-Q, using a frequency range of 20--22,050 Hz. For the Variable-Q scale, the fixed frequency offset applied is 15 Hz.  Details of the frequency scales used to generate the NSGT spectrograms are shown in Table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT, Constant-Q scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_cqlog_100.png}}
-	\hspace{0.1em}
-	\subfloat[NSGT, Constant-Q scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}\\
-	\subfloat[NSGT, Variable-Q scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_vqlog_100.png}}
-	\hspace{0.1em}
-	\subfloat[NSGT, Variable-Q scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_vqlog_500.png}}\\
-	\subfloat[NSGT, mel scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_100.png}}
-	\hspace{0.1em}
-	\subfloat[NSGT, mel scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_mel_500.png}}\\
-	\subfloat[NSGT, Bark scale, 100 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_bark_100.png}}
-	\hspace{0.1em}
-	\subfloat[NSGT, Bark scale, 500 bins]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_nsgt_bark_500.png}}\\
-	\caption{Different NSGT spectrograms of the glockenspiel signal}
-	\label{fig:bunchansgts}
+	\subfloat[NSGT, Constant-Q scale, 100 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_cqlog_100.png}}\\
+	\subfloat[NSGT, Constant-Q scale, 500 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}
+	\caption{Constant-Q NSGT spectrograms of the glockenspiel signal}
+	\label{fig:bunchansgts1}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[NSGT, Variable-Q scale, 100 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_vqlog_100.png}}\\
+	\subfloat[NSGT, Variable-Q scale, 500 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_vqlog_500.png}}
+	\caption{Variable-Q NSGT spectrograms of the glockenspiel signal}
+	\label{fig:bunchansgts2}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[NSGT, mel scale, 100 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_100.png}}\\
+	\subfloat[NSGT, mel scale, 500 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_500.png}}
+	\caption{mel-scale NSGT spectrograms of the glockenspiel signal}
+	\label{fig:bunchansgts3}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[NSGT, Bark scale, 100 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_bark_100.png}}\\
+	\subfloat[NSGT, Bark scale, 500 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_bark_500.png}}
+	\caption{Bark-scale NSGT spectrograms of the glockenspiel signal}
+	\label{fig:bunchansgts4}
 \end{figure}
 
 \begin{table}[ht]
@@ -523,9 +542,8 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_overlap_flatten.png}}
-	\hspace{0.1em}
-	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.475\textwidth]{./images-gspi/gspi_overlap_proper.png}}
+	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
+	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_proper.png}}
 	\caption{sliCQT spectrograms demonstrating the slice half-overlap}
 	\label{fig:slicqoverlaps}
 \end{figure}
@@ -545,19 +563,19 @@ According to \citeauthor{introtodl}, deep learning ``is the subfield of machine 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{./images-neural/dnn.png}
+	\includegraphics[width=0.65\textwidth]{./images-neural/dnn.png}
 	\caption{Deep neural network with hidden layers \parencite[2]{introtodl}}
 	\label{fig:fcdn}
 \end{figure}
 
-\citeauthor{introtodl} go on to state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to'' \parencite[1]{introtodl}. However, machine learning methods have achieved success in many fields including natural language processing \parencite{nlpml}, computer vision \parencite{cvml}, and audio \parencite{audiodeeplearning}, indicating that data-driven approaches are useful, despite falling short of general artificial intelligence \parencite{generalai}.
+\citeauthor{introtodl} state that ``most machine learning algorithms as they exist now focus on function optimization, and the solutions yielded do not always explain the underlying trends within the data nor give the inferential power that artificial intelligence was trying to get close to'' \parencite[1]{introtodl}. However, machine learning methods have achieved success in many fields including natural language processing \parencite{nlpml}, computer vision \parencite{cvml}, and audio \parencite{audiodeeplearning}, indicating that data-driven approaches are useful, despite falling short of general artificial intelligence \parencite{generalai}.
 
 We also note that signal processing techniques and machine and deep learning are compatible with one another and can be used together \parencite{mlsp1, mlsp2}. According to \citeauthor{mldspmix}, signal processing and machine learning should both be considered in the study of acoustic signals, shown in Figure \ref{fig:dspmlmix}.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.45\textwidth]{./images-neural/dspmlmix.jpg}
-	\caption{``Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained \parencite[3591]{mldspmix}''}
+	\includegraphics[width=0.65\textwidth]{./images-neural/dspmlmix.jpg}
+	\caption{``Whereas physical models are reliant on rules, which are updated by physical evidence (data), ML is purely data-driven. By augmenting ML methods with physical models to obtain hybrid models, a synergy of the strengths of physical intuition and data-driven insights can be obtained \parencite[3,591]{mldspmix}''}
 	\label{fig:dspmlmix}
 \end{figure}
 
@@ -565,17 +583,14 @@ In machine learning, the input data is typically split into a training set and a
 
 \textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that models from the field of computer vision, originally designed for 2D images where pixels are related spatially, may not exactly fit audio waveforms where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains \parencite{audiodeeplearning}.
 
-\newpagefill
-
-\subsubsection{Convolutional Neural Networks (CNN)}
+\subsubsection{Convolutional neural networks (CNN)}
 
 Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' \parencite[3]{audiodeeplearning}. These are useful for both images and audio according because of their ability to exploit spatial or temporal correlation in data \parencite{cnns}. Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel \textit{slides} over the pixels of the input image.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat{\includegraphics[width=0.48\textwidth]{./images-neural/sliding_conv_1.png}}
-	\hspace{0.15em}
-	\subfloat{\includegraphics[width=0.48\textwidth]{./images-neural/sliding_conv_2.png}}
+	\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_1.png}}\\
+	\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_2.png}}
 	\caption{$3 \times 3$ convolution kernel sliding over patches of input pixels\protect\footnotemark}
 	\label{fig:cnnbasic}
 \end{figure}
@@ -586,15 +601,15 @@ The network architecture and feature map for an audio CNN is shown in Figure \re
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[CNN architecture for audio waveforms ({\cite[7]{audiocnn2}}]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn.png}}\\
-	\subfloat[Audio spectral features learned by each layer ({\cite[4]{audiocnn3}}]{\includegraphics[width=0.65\textwidth]{./images-neural/audio_cnn2.png}}
+	\subfloat[CNN architecture for audio waveforms {\parencite[7]{audiocnn2}}]{\includegraphics[width=0.9\textwidth]{./images-neural/audio_cnn.png}}\\
+	\subfloat[Audio spectral features learned by each layer {\parencite[4]{audiocnn3}}]{\includegraphics[width=0.9\textwidth]{./images-neural/audio_cnn2.png}}
 	\caption{Example of an audio CNN architecture and spectral feature maps}
 	\label{fig:audiocnn}
 \end{figure}
 
 Finally, we note that for audio applications, both 1D convolutions (also referred to as temporal convolutions) applied directly to the audio waveform and 2D convolutions applied to time-frequency transforms (most commonly the STFT) are both used \parencite{tcn, 2dconv}.
 
-\subsubsection{Recurrent Neural Networks (RNN)}
+\subsubsection{Recurrent neural networks (RNN)}
 
 For time series data, for which the audio waveform is an exemplar given the temporal evolution of its amplitude, recurrent neural networks (RNNs) are useful since the input sequence of data is introduced back into the network with a cyclic or recurrent connection, and outputs are predicted based on past (or future, if the network is bi-directional) values of the sequence \parencite{rnns}. RNNs are also used commonly in sequence-to-sequence, or seq2seq, models \parencite{seq2seqs}.
 
@@ -608,10 +623,9 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Regular RNN with cyclic connections to past data ({\cite[3]{birnn}}]{\includegraphics[width=0.47\textwidth]{./images-neural/simple_rnn.png}}
-	\hspace{0.1em}
-	\subfloat[Bi-directional LSTM with cyclic connections to past and future data ({\cite[3]{birnn}}]{\includegraphics[width=0.47\textwidth]{./images-neural/birnn.png}}\\
-	\subfloat[Different recurrent units ({\cite[7]{lstmrnngru}}]{\includegraphics[width=0.68\textwidth]{./images-neural/gates.png}}
+	\subfloat[Regular RNN with cyclic connections to past data {\parencite[3]{birnn}}]{\includegraphics[width=0.575\textwidth]{./images-neural/simple_rnn.png}}\\
+	\subfloat[Bi-directional LSTM with cyclic connections to past and future data {\parencite[3]{birnn}}]{\includegraphics[width=0.625\textwidth]{./images-neural/birnn.png}}\\
+	\subfloat[Different recurrent units {\parencite[7]{lstmrnngru}}]{\includegraphics[width=\textwidth]{./images-neural/gates.png}}
 	\caption{RNN diagrams}
 	\label{fig:rnndiags}
 \end{figure}
@@ -766,16 +780,13 @@ Git is a popular tool for DVCS written by Linus Torvalds, who is also known for 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[How git stores snapshots of files]{\includegraphics[height=3.3cm]{./images-misc/git.png}}
-	\hspace{0.1em}
-	\subfloat[Recommended git workflow]{\includegraphics[height=3.3cm]{./images-misc/git2.png}}
+	\subfloat[How git stores snapshots of files]{\includegraphics[width=0.8\textwidth]{./images-misc/git.png}}\\
+	\subfloat[Recommended git workflow]{\includegraphics[width=0.6\textwidth]{./images-misc/git2.png}}
 	\caption{How git works \parencite[6, 8]{gitbook}}
 	\label{fig:git}
 \end{figure}
 
 All of the code for this thesis were stored in git repositories to keep track of historical changes. It conveniently allows the author to reference the git history to describe the evolution of the project and the incremental progress.
-
-\newpagefill
 
 \subsubsection{Open-source software and GitHub}
 
@@ -785,7 +796,7 @@ All of the code for this thesis were stored in git repositories to keep track of
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[height=6cm]{./images-misc/github.png}
+	\includegraphics[width=\textwidth]{./images-misc/github.png}
 	\caption{GitHub's code browser showing a file from the PyTorch source code}
 	\label{fig:githubpytorch}
 \end{figure}
@@ -843,8 +854,8 @@ Techniques more specific to music were developed as a necessity to deal with the
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Mixed spectrogram]{\includegraphics[height=4.75cm]{./images-mss/mss1.png}}
-	\subfloat[Source spectrograms]{\includegraphics[height=5cm]{./images-mss/mss2.png}}
+	\subfloat[Mixed spectrogram]{\includegraphics[width=0.675\textwidth]{./images-mss/mss1.png}}\\
+	\subfloat[Source spectrograms]{\includegraphics[width=0.675\textwidth]{./images-mss/mss2.png}}
 	\caption{Sparsity of music sources in the spectral domain \parencite[1, 3]{musicsepgood}}
 \label{fig:sepgood}
 \end{figure}
@@ -855,8 +866,8 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/kamvnmf.png}}\\
-	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.7\textwidth]{./images-mss/mssdnn.png}}
+	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.9\textwidth]{./images-mss/kamvnmf.png}}\\
+	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.9\textwidth]{./images-mss/mssdnn.png}}
 	\caption{Techniques for spectral music demixing \parencite[12, 14]{musicsepgood}}
 	\label{fig:spectraldemix}
 \end{figure}
@@ -866,20 +877,25 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 
 A simple case of music source separation is harmonic/percussive source separation \parencite{musicsepgood}. Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. This is a form of KAM (kernel additive modelling) algorithm.
 
-Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals.
- 
-\textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The result of binary-masked median-filtering harmonic/percussive source separation is shown in Figure \ref{fig:fitz1}.
+Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals. The median filters are shown in Figure \ref{fig:fitz1}.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Mixed signal with median filters]{{\includegraphics[width=0.475\textwidth]{./images-hpss/mix_stft_medianfilters.png} }}
-	\hspace{0.1em}
-	\subfloat[Percussive estimate]{{\includegraphics[width=0.475\textwidth]{./images-hpss/perc_stft.png} }}\\
-	\subfloat[Harmonic estimate]{{\includegraphics[width=0.475\textwidth]{./images-hpss/harm_stft.png} }}
-	\hspace{0.1em}
-	\subfloat[Residual estimate]{{\includegraphics[width=0.475\textwidth]{./images-hpss/resi_stft.png} }}
-	\caption{Example of median filtering HPSS with binary masking applied to the glockenspiel signal}
+	\includegraphics[width=0.675\textwidth]{./images-hpss/mix_stft_medianfilters.png}
+	\caption{Median filtering HPSS with binary masking applied to the glockenspiel signal}
 	\label{fig:fitz1}
+\end{figure}
+
+ 
+\textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The results of binary-masked median-filtering harmonic/percussive source separation is shown in Figure \ref{fig:fitz12}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Percussive estimate]{{\includegraphics[width=0.675\textwidth]{./images-hpss/perc_stft.png} }}\\
+	\subfloat[Harmonic estimate]{{\includegraphics[width=0.675\textwidth]{./images-hpss/harm_stft.png} }}\\
+	\subfloat[Residual estimate]{{\includegraphics[width=0.675\textwidth]{./images-hpss/resi_stft.png} }}
+	\caption{Outputs median filtering HPSS with binary masking applied to the glockenspiel signal}
+	\label{fig:fitz12}
 \end{figure}
 
 \textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice.
@@ -908,18 +924,23 @@ The next tonal/transient separation algorithm considered is the WMDCTLasso algor
 
 Next, a method called Group-LASSO (Least Absolute Shrinkage and Selection Operator) is applied to separate the tonal and transient layers. In the wide-window MDCT analysis, the Group-LASSO shrinkage in the frequency group selects the most sparse coefficients in frequency, representing tonal parts of the signal. In the narrow-window MDCT analysis,  Group-LASSO shrinkage in the time group selects the most sparse coefficients in time, representing transient parts of the signal.
 
-An example of TFJigsaw and WMDCTLasso tonal/transient separation applied to the glockenspiel signal is shown in Figure \ref{fig:tonaltranssep}.
+Examples of TFJigsaw and WMDCTLasso tonal/transient separation applied to the glockenspiel signal are shown in Figures \ref{fig:tfjigsawtonaltranssep} and \ref{fig:wmdcttonaltranssep}.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[TFJigsawSep]{\includegraphics[width=\textwidth]{./images-wavelets/tfjigsaw-sep-example.png}}\\
-	\subfloat[WMDCTLasso\protect\footnotemark]{\includegraphics[width=0.315\textwidth]{./images-wavelets/Glock1.jpg}
-	\hspace{0.1em}
-	{\includegraphics[width=0.315\textwidth]{./images-wavelets/Glock_Ton.jpg}}
-	\hspace{0.1em}
-	{\includegraphics[width=0.315\textwidth]{./images-wavelets/Glock_Trans.jpg}}}
-	\caption{Tonal/transient separation algorithms}
-	\label{fig:tonaltranssep}
+	\subfloat{\includegraphics[width=0.8\textwidth,trim=0 0 1690 0, clip]{./images-wavelets/tfjigsaw-sep-example.png}}\\
+	\subfloat{\includegraphics[width=0.8\textwidth,trim=1690 0 0 0, clip]{./images-wavelets/tfjigsaw-sep-example.png}}
+	\caption{TFJigsaw tonal/transient separation}
+	\label{fig:tfjigsawtonaltranssep}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock1.jpg}}\\
+	\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock_Ton.jpg}}\\
+	\subfloat{\includegraphics[width=0.575\textwidth]{./images-wavelets/Glock_Trans.jpg}}
+	\caption{WMDCTLasso tonal/transient separation\protect\footnotemark}
+	\label{fig:wmdcttonaltranssep}
 \end{figure}
 
 \footnotetext{\url{https://homepage.univie.ac.at/monika.doerfler/StrucAudio.html}}
@@ -943,7 +964,7 @@ Wavelet transforms, instead of using infinite sinusoids, represent signals as a 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.65\textwidth]{./images-wavelets/wavelet.png}
+	\includegraphics[width=0.75\textwidth]{./images-wavelets/wavelet.png}
 	\caption{The infinite sine wave of the Fourier transform compared to a finite wavelet\protect\footnotemark[\value{footnote}]}
 	\label{fig:waveletinf}
 \end{figure}
@@ -962,7 +983,7 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.65\textwidth]{./images-wavelets/wavelet_sep.png}
+	\includegraphics[width=0.75\textwidth]{./images-wavelets/wavelet_sep.png}
 	\caption{Source separation using wavelets. Cyan shows the first harmonic source, yellow shows the second harmonic source, and red shows the overlap \parencite[5]{wavelets}}
 	\label{fig:waveletsep}
 \end{figure}
@@ -976,7 +997,7 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or ha
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7\textwidth]{./images-mss/maskdemo.png}
+	\includegraphics[width=0.8\textwidth]{./images-mss/maskdemo.png}
 	\caption{Results of a soft and hard oracle mask applied for speech denoising \parencite[71]{masking}}
 	\label{fig:masks}
 \end{figure}
@@ -991,9 +1012,10 @@ An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2},
 	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{17}\label{equation:hardmask}
 \end{align}
 
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equation \eqref{equation:residual}:
-\begin{align}
-	M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta, M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}}\tag{18}\label{equation:residual}
+, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equations \eqref{equation:residual}:
+\begin{align}\tag{18}\label{equation:residual}
+	\nonumber & M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta\\
+	\nonumber & M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}})
 \end{align}
 
 The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms \parencite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}. Discarding the phase of the complex STFT is a choice made for simplicity, although the phase may be important for source separation applications \parencite{ditchphase}.
@@ -1004,9 +1026,9 @@ We start by denoting the waveforms $x_{v}[n]$ and $x_{d}[n]$ for the isolated vo
 
 We seek to calculate various interesting oracle masks from the STFTs of the mix and two sources shown in equations \eqref{equation:targetstfts}:
 \begin{align}\tag{19}\label{equation:targetstfts}
-	\nonumber X_{m} &= \text{STFT}(x_{m}[n]), |X_{m}| = \text{abs}(X_{m}\\
-	\nonumber X_{v} &= \text{STFT}(x_{v}[n]), |X_{v}| = \text{abs}(X_{v}\\
-	\nonumber X_{d} &= \text{STFT}(x_{d}[n]), |X_{d}| = \text{abs}(X_{d}
+	\nonumber X_{m} &= \text{STFT}(x_{m}[n]), |X_{m}| = \text{abs}(X_{m})\\
+	\nonumber X_{v} &= \text{STFT}(x_{v}[n]), |X_{v}| = \text{abs}(X_{v})\\
+	\nonumber X_{d} &= \text{STFT}(x_{d}[n]), |X_{d}| = \text{abs}(X_{d})
 \end{align}
  
 \textcite{sisec2018} report the performance of five oracles, called IRM1, IRM2, IBM1, IBM2, and the MWF (multichannel Wiener filter). The first four are more relevant to stereo music, which is the case considered in this thesis. The ``I'' is for Ideal, ``R|B'' denotes a Ratio vs. Binary mask, ``M'' is for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the magnitude spectrogram raised to the first power remains unchanged, while one raised to the second power is the power spectrogram.
@@ -1027,10 +1049,8 @@ The oracles for the vocal source (and the same equations apply to the drum track
 
 To estimate the time domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using equation \eqref{equation:cplxinvert}:
 \begin{align}\tag{21}\label{equation:cplxinvert}
-	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}}
+	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
-
-\newpagefill
 
 \subsubsection{Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX)}
 \label{sec:umx}
@@ -1041,8 +1061,8 @@ In UMX, a deep neural network is used to estimate the magnitude spectrograms of 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Open-Unmix Bi-LSTM architecture\protect\footnotemark]{\includegraphics[width=0.8\textwidth]{./images-neural/umx.png}}\\
-	\subfloat[Simple DNN architecture for MSS ({\cite[262]{umxorig1}}]{\includegraphics[width=0.8\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
+	\subfloat[Open-Unmix Bi-LSTM architecture\protect\footnotemark]{\includegraphics[width=\textwidth]{./images-neural/umx.png}}\\
+	\subfloat[Simple DNN architecture for MSS {\parencite[262]{umxorig1}}]{\includegraphics[width=\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
 	\caption{Architecture of Open-Unmix and one of its simpler predecessors}
 	\label{fig:umxes}
 \end{figure}
@@ -1057,8 +1077,8 @@ While the discussed Open-Unmix model is based on sequence2sequence ideas with a 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Simple CDAE ({\cite[2]{plumbley1}}]{\includegraphics[width=\textwidth]{./images-neural/cdae_1.png}}\\
-	\subfloat[CDAE with time and frequency filters that vary by frequency band ({\cite[2]{plumbley2}}]{\includegraphics[width=0.7\textwidth]{./images-neural/cdae_2.png}}
+	\subfloat[Simple CDAE {\parencite[2]{plumbley1}}]{\includegraphics[width=\textwidth]{./images-neural/cdae_1.png}}\\
+	\subfloat[CDAE with time and frequency filters that vary by frequency band {\parencite[2]{plumbley2}}]{\includegraphics[width=0.8\textwidth]{./images-neural/cdae_2.png}}
 	\caption{Convolutional architectures for music source separation}
 	\label{fig:cdaes}
 \end{figure}
@@ -1095,7 +1115,7 @@ Out of these four scores, SDR is the single global score which is commonly used 
 
 The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
-	\text{SDR}_{\text{song}} = \frac{1}{4}(\text{SDR}_{\text{bass}} + \text{SDR}_{\text{drums}} + \text{SDR}_{\text{vocals}} + \text{SDR}_{\text{other}} \tag{23}\label{equation:sdrsong}
+	\text{SDR}_{\text{song}} = \frac{1}{4}(\text{SDR}_{\text{bass}} + \text{SDR}_{\text{drums}} + \text{SDR}_{\text{vocals}} + \text{SDR}_{\text{other}}) \tag{23}\label{equation:sdrsong}
 \end{align}
 
 In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used to calculate the results in this thesis.
@@ -1103,7 +1123,5 @@ In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sise
 \subsubsection{Open-source ecosystem}
 
 There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub to provide tools, tutorials, and implementations for source separation. In particular, the SigSep organization\footnote{\url{https://github.com/sigsep}} contains many tools useful for music demixing research, including the reference implementation of Open-Unmix \parencite{umx}, MUSDB18 dataset loaders \parencite{musdb18, musdb18hq}, and BSS evaluation metrics \parencite{bss, sisec2018}
-
-The author of this thesis owes a debt of gratitude to these projects. Without such community-focused efforts, the field of music demixing would be less approachable for beginners.
 
 \end{document}

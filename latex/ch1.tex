@@ -29,22 +29,20 @@ Figure \ref{fig:stfttradeoff} shows a musical glockenspiel signal analyzed with 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Wide window STFT (93ms)]{\includegraphics[height=5cm]{./images-tftheory/tf_tradeoff_balasz2.png}}
-	\hspace{0.5em}
-	\subfloat[Narrow window STFT (6ms)]{\includegraphics[height=5cm]{./images-tftheory/tf_tradeoff_balasz1.png}}
+	\subfloat[Wide window STFT (93ms)]{\includegraphics[width=0.7\textwidth]{./images-tftheory/tf_tradeoff_balasz2.png}}\\
+	\subfloat[Narrow window STFT (6ms)]{\includegraphics[width=0.7\textwidth]{./images-tftheory/tf_tradeoff_balasz1.png}}\\
 	\caption{Different window size STFT spectrograms of a glockenspiel signal \parencite[1]{jaillet}}
 	\label{fig:stfttradeoff}
 \end{figure}
 
 \textcite{dictionary} note that the first use of the STFT was by \textcite{gabor1946} to analyze a speech signal, which used fixed-size Gaussian windows. This was called the Gabor transform, and is now considered a special case of the STFT \parencite{dictionary}.
 
-The Constant-Q Transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. The visual comparison of the original Constant-Q Transform and the Fourier Transform is shown in \ref{fig:violin}. From the use of short windows in the high frequencies, the CQT demonstrates good time resolution \parencite{cqtransient} in the region of transients and broadband signals, which are important for timbre and instrument identification \parencite{timbretransients1, timbretransients2}.
+The Constant-Q Transform was originally proposed by \textcite{jbrown} to analyze musical signals with a logarithmic frequency scale to better show the relationship between the fundamental frequency of a musical instruments and its harmonics. The resulting transform used long-duration windows in the low frequency regions and short-duration windows in the high frequency regions. The visual comparison of the original Constant-Q Transform and the Fourier Transform is shown in Figure \ref{fig:violin}. From the use of short windows in the high frequencies, the CQT demonstrates good time resolution \parencite{cqtransient} in the region of transients and broadband signals, which are important for timbre and instrument identification \parencite{timbretransients1, timbretransients2}.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Linear-frequency DFT]{\includegraphics[height=5.2cm]{./images-tftheory/violindft.png}}
-	\hspace{0.5em}
-	\subfloat[Constant-Q transform]{\includegraphics[height=5.5cm]{./images-tftheory/violincqt.png}}
+	\subfloat[Linear-frequency DFT]{\includegraphics[width=0.7\textwidth]{./images-tftheory/violindft.png}}\\
+	\subfloat[Constant-Q transform]{\includegraphics[width=0.7\textwidth]{./images-tftheory/violincqt.png}}
 	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$ \parencite[430]{jbrown}}
 	\label{fig:violin}
 \end{figure}
@@ -53,7 +51,7 @@ Building on the Gabor transform (or STFT), and using the Constant-Q Transform as
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[height=5cm]{./images-tftheory/tf_tradeoff_balasz3.png}
+	\includegraphics[width=0.7\textwidth]{./images-tftheory/tf_tradeoff_balasz3.png}
 	\caption{NSGT spectrogram of a glockenspiel signal, varying window (6-93ms) \parencite[4]{jaillet}}
 	\label{fig:nsgttradeoff}
 \end{figure}
