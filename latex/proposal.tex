@@ -1,6 +1,6 @@
 \documentclass[letter,12pt]{article}
 \usepackage[svgnames]{xcolor}
-\usepackage[left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage[left=2.5cm, right=2.5cm, top=2cm, bottom=2cm]{geometry}
 \usepackage{hyperref}
 \hypersetup{
   colorlinks   = true, %Colours links instead of ugly boxes
@@ -46,13 +46,13 @@ Computational source separation has a long history \parencite{musicsepgood}, ori
 
 Model-based methods are ``prone to large errors and poor performance'' \parencite[13]{musicsepintro1}, and manipulating time-frequency resolution is one possible strategy to improve their results. \textcite{driedger} used multiple STFTs with different window sizes, \textcite{fitzgerald2} replaced the STFT with the CQT, and \textcite{wavelets} used a custom time-frequency transform based on wavelets. More recently, data-driven models based on deep neural networks (DNN) surpassed previous approaches \parencite{sisec2018, musicsepintro1}.
 
-The earliest approaches for DNN-based music demixing started with fully connected networks (FCN), but ``given the large size of music spectrograms, the resulting FCNs contained a large number of parameters'' \parencite[15]{musicsepgood}, which limited the networks to sliding windows of less than one second of temporal context. ``To overcome this limitation, both recurrent neural networks (RNNs) and convolutional neural networks (CNNs) were investigated as they offered a principled way to learn dynamic models '' \parencite[15]{musicsepgood}. Recent examples of DNN-based music demixing in the STFT domain are Open-Unmix \parencite{umx}, which uses an RNN architecture, and the CNN model of \textcite{plumbley2}.
+The earliest approaches for DNN-based music demixing started with fully connected networks (FCN), but these needed many parameters due to the large size of the input music spectrograms, which limited the networks to operate on sliding windows of under one second of temporal context \parencite{musicsepgood}. Recurrent neural networks (RNNs) \parencite{umxorig1} and convolutional neural networks (CNNs) \parencite{plumbley1} have both been used to overcome this limitation, as they need fewer parameters for long temporal sequences of input data \parencite{musicsepgood}. A recent example of music demixing in the STFT domain with an RNN architecture is Open-Unmix \parencite{umx}.
 
 \section{Proposed Research / Methodology}
 
-The adaptation of Open-Unmix to use the sliCQT requires several preliminary tasks. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use PyTorch,\footnote{\url{https://pytorch.org}} which is the GPU deep learning framework used in the reference implementation of Open-Unmix.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} Next, sliCQT parameters must be chosen to equal or surpass the STFT in music source separation. Finally, the code of Open-Unmix should be modified to replace the STFT with the sliCQT, using either an RNN or CNN network architecture.
+The adaptation of Open-Unmix to use the sliCQT will be done in two steps, using the reference implementation of Open-Unmix\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} as a starting point. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use PyTorch,\footnote{\url{https://pytorch.org}} because Open-Unmix uses PyTorch as its GPU deep learning framework. Next, the code of Open-Unmix should be modified to replace the STFT with the sliCQT, using an RNN or CNN architecture, with parameters of the sliCQT chosen to surpass the performance of the STFT.
 
-The model will use the MUSDB18-HQ dataset \parencite{musdb18hq} for both training and evaluation, to allow fair comparisons with Open-Unmix and other published models. The objective metric used will be the BSS (Blind Source Separation) eval metrics \parencite{bss}. The MUSDB18-HQ dataset and BSS eval metrics are standard for music demixing, and have been used in previous Signal Source Separation Evaluation Campaigns (SiSEC) \parencite{sisec2018}.
+The MUSDB18-HQ dataset \parencite{musdb18hq} and BSS (Blind Source Separation) eval metrics \parencite{bss} are standard for music demixing, and have been used in previous Signal Source Separation Evaluation Campaigns (SiSEC) \parencite{sisec2018}. The model in this thesis will use the MUSDB18-HQ dataset for both training and evaluation, to allow fair comparisons with Open-Unmix and other published models, and the objective evaluation metric used will be the BSS eval metrics.
 
 \section{Contributions / Summary}
 
@@ -65,7 +65,7 @@ In music demixing approaches that use the STFT, choosing the appropriate time-fr
 
 \begingroup
 \setstretch{0.9}
-\setlength\bibitemsep{0.05em}
+\setlength\bibitemsep{0.015em}
 \printbibheading[title={References},heading=bibnumbered]
 \printbibliography[heading=none]
 \endgroup

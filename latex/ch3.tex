@@ -295,7 +295,7 @@ Note the shape of the matrix form is $401 \text{ slices} \times 2 \text{ channel
 \subsubsection{Slice overlap-add utility}
 \label{sec:slicqola}
 
-In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqoverlaps} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
+In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqtukeys} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
 
 The next addition to the slice utilities was to include a utility function for the 50\% overlapping of adjacent slices,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/slicq.py\#L38}} where the overlap length is automatically inferred from the shape of the transform. The function is named \Verb#overlap_add_slicq# and is imported from the \Verb#nsgt.slicq# file. Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram.
 
