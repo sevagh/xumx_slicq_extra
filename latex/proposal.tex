@@ -52,7 +52,7 @@ The earliest approaches for DNN-based music demixing started with fully connecte
 
 The adaptation of Open-Unmix to use the sliCQT will be done in two steps, using the reference implementation of Open-Unmix\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} as a starting point. First, the reference Python implementation of the sliCQT\footnote{\url{https://github.com/grrrr/nsgt}} needs to be modified to use PyTorch,\footnote{\url{https://pytorch.org}} because Open-Unmix uses PyTorch as its GPU deep learning framework. Next, the code of Open-Unmix should be modified to replace the STFT with the sliCQT, using an RNN or CNN architecture, with parameters of the sliCQT chosen to surpass the performance of the STFT.
 
-The MUSDB18-HQ dataset \parencite{musdb18hq} and BSS (Blind Source Separation) eval metrics \parencite{bss} are standard for music demixing, and have been used in previous Signal Source Separation Evaluation Campaigns (SiSEC) \parencite{sisec2018}. The model in this thesis will use the MUSDB18-HQ dataset for both training and evaluation, to allow fair comparisons with Open-Unmix and other published models, and the objective evaluation metric used will be the BSS eval metrics.
+The MUSDB18-HQ dataset \parencite{musdb18hq} and BSS (Blind Source Separation) eval metrics \parencite{bss} are standard for training and evaluating music demixing systems, and they have been used in previous Signal Source Separation Evaluation Campaigns (SiSEC) \parencite{sisec2018}. The model in this thesis will use the MUSDB18-HQ dataset for both training and evaluation, to allow fair comparisons with Open-Unmix and other published models, and the objective evaluation metric used will be the BSS eval metrics.
 
 \section{Contributions / Summary}
 
