@@ -1,0 +1,127 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Boadilla}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{fancyvrb}
+\usepackage{multicol}
+\usepackage{optparams}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning}
+\newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
+\usepackage{subfig}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+
+\addbibresource{smallcitations.bib}
+\usepackage{pgfpages}
+\usepackage{xcolor}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+\setbeameroption{hide notes}
+\input{variables.tex}
+
+\title{Decoupling magnitude and phase estimation with deep ResUNet for music source separation}
+\subtitle{ISMIR 2021 paper overview\footfullcite{kong2021decoupling}}
+\author{Sevag Hanssian}
+\setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+  \clearfield{isbn}%
+  \clearfield{title}%
+  \clearfield{url}%
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{inproceedings}{
+    \clearfield{booktitle}%
+}{}
+}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+	\frametitle{Magnitude mask above 1}
+	Common approaches to music source separation (MSS):
+	\begin{enumerate}
+		\item
+			Get spectrogram of mix
+		\item
+			Take magnitude
+		\item
+			Multiply by a mask $\in [0, 1]$ to get source estimate
+		\item
+			Why $[0, 1]$? DFT/STFT is a linear operation: $x_{a} = x_{b} + x_{c}, |X_{a}| = |X_{b}| + |X_{c}|$\\
+			$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
+			if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
+	\end{enumerate}
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-mss/mask_simple.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Phase!}
+	Common approaches to MSS discard the phase; it's difficult to learn relationships from phase
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-mss/whynophase.png}
+	\end{figure}
+	This paper considers the phase, and uses a complex mask to estimate the magnitude and phase of the spectrogram\\
+	$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
+	if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
+	\textbf{Yes!} 
+	\begin{quote}
+		|M(t,f)| can be larger than 1... this may happen when S(t,f) and N(t,f) are out of phase, since that makes the magnitude of mixture to be smaller than that of (individual) signal
+	\end{quote}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Results}
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./ismir2021-phasepaper.png}
+	\end{figure}
+
+	\begin{enumerate}
+		\item
+			We showed that previous MSS methods have upper bound of the performance due to a strong assumption on the magnitude of the masks
+		\item
+			We also showed that accurate phase estimation and unbound complex ideal ratio masks (cIRMs) are important for MSS
+		\item
+			Finally, we analyzed the distribution of cRIMs for MSS and showed that 22\% of cIRMs have magnitude larger than one
+	\end{enumerate}
+\end{frame}
+
+\end{document}
