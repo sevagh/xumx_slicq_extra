@@ -16,6 +16,4 @@ Ls = len(test_signal) # length of total signal
 sllen, trlen = log_scale.suggested_sllen_trlen(fs) # get best suggested sllen/trlen
 print(f'suggested sllen, trlen: {sllen} {trlen}')
 
-nsgt = NSGT(log_scale, fs, Ls) # nsgt operates on the entire signal
-slicqt_warning = NSGT_sliced(log_scale, 2048, 512, fs) # slicqt with bad sllen/trlen
-slicqt_no_warning = NSGT_sliced(log_scale, sllen, trlen, fs) # slicqt with good sllen/trlen
+slicqt = NSGT_sliced(log_scale, sllen, trlen, fs) # slicqt with good sllen/trlen
