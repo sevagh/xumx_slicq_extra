@@ -4,9 +4,7 @@
 \section{Experiment}
 \label{sec:experiment}
 
-This section contains the results of the experiments described in the previous section \ref{sec:methodology}.
-
-The hardware and software specifications of the computer which produced the results in this section are as follows:
+This section contains the results of the experiments described in the previous section \ref{sec:methodology}. The hardware and software specifications of the computer which produced the results are as follows:
 \begin{tight_enumerate}
 	\item
 		Motherboard: Gigabyte Aorus X570 Elite Wifi
@@ -17,7 +15,7 @@ The hardware and software specifications of the computer which produced the resu
 	\item
 		Storage: 1TB ADATA SX8200PNP NVMe
 	\item
-		GPUs: NVIDIA RTX 3080 Ti (12GB VRAM) and NVIDIA RTX 2070 Super (8GB VRAM)
+		GPUs: NVIDIA RTX 3080 Ti (12GB memory), NVIDIA RTX 2070 Super (8GB memory)
 	\item
 		OS: Fedora 34 Workstation Edition, 64-bit
 	\item
@@ -42,7 +40,7 @@ The Python environments used were designed to be reproducible with pip requireme
 		\href{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}
 \end{tight_enumerate}
 
-The repositories associated with this thesis are as follows:
+The code projects associated with this thesis are as follows:
 \begin{tight_enumerate}
 	\item
 		xumx-sliCQ neural network:\\
@@ -65,13 +63,11 @@ The author of this thesis takes code availability and reproducibility seriously.
 
 \subsection{Benchmarks for GPU accelerations}
 
-In section \ref{sec:torchslicq}, it was described that the sliCQT Python library uses the CPU-based NumPy library, and that it was necessary to port the code to the GPU-enabled PyTorch deep learning framework to allow it to run faster and directly on the GPU in the deep neural network of Open-Unmix.
-
-In section \ref{sec:fasterbsscupy}, it was described that the BSS eval step was the slowest part of evaluating oracle performance, which is the important step in the sliCQT parameter selection. Replacing the CPU-based NumPy and SciPy libraries with the GPU-enabled CuPy library for math operations would speed up the oracle evaluations and allow the sliCQT parameter search script to run more efficiently.
-
-The following sections show benchmark results to demonstrate the speedup of the sliCQT and BSS eval libraries achieved from their respective GPU ports.
+The following sections show benchmark results to demonstrate the speedup of the sliCQT and BSS eval libraries achieved from their GPU ports described in sections \ref{sec:torchslicq} and \ref{sec:fasterbsscupy} respectively.
 
 \subsubsection{Faster NSGT/sliCQT with PyTorch}
+
+In section \ref{sec:torchslicq}, it was described that the sliCQT Python library uses the CPU-based NumPy library, and that it was necessary to port the code to the GPU-enabled PyTorch deep learning framework to allow it to run directly on the GPU in the deep neural network of Open-Unmix.
 
 The first benchmark script is for the PyTorch implementation of the NSGT/sliCQT library from section \ref{sec:torchslicq}. My copy of the library contains the PyTorch implementation and the benchmark scripts.\footnote{\url{https://github.com/sevagh/nsgt}, \url{https://github.com/sevagh/nsgt/blob/main/examples/benchmark.py}, \url{https://github.com/sevagh/nsgt/blob/main/examples/run_bench.sh}} The benchmark performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a 3:54 minute mixed song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super. The computation time was measured and averaged across 100 iterations. The cost of the memory transfer of the song to the GPU was not included in the measurement. Tables \ref{table:nsgttorchresultsmatrix} and \ref{table:nsgttorchresultsragged} show the benchmark results for the matrix and ragged sliCQT respectively.
 
@@ -119,13 +115,15 @@ The first benchmark script is for the PyTorch implementation of the NSGT/sliCQT 
 \end{tabular}
 \end{table}
 
-The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the ragged transform is a list of tensors. To perform operations on the ragged transform requires looping over the list which negates some of the benefits of GPU parallelism. Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance leapfrogs both.
+The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the ragged transform is a list of tensors. To perform operations on the ragged transform requires looping over the list which negates some of the benefits of GPU parallelism. Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance beats both.
 
 \subsubsection{Faster BSS metrics with CuPy}
 
+In section \ref{sec:fasterbsscupy}, it was described that the BSS eval step was the slowest part of evaluating oracle performance, which is the core step in the sliCQT parameter search. Replacing the CPU-based NumPy and SciPy libraries with the GPU-enabled CuPy library for math operations would speed up the oracle evaluations and allow the sliCQT parameter search script to run more efficiently.
+
 The second benchmark script is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. For the 14 validation tracks of MUSDB18-HQ, the benchmark script\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}}  creates a random estimate (using \Verb#numpy.randn# to create an audio signal) and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA RTX 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
 
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU. This is a significant reduction that can aid in future large-scale source separation evaluation campaigns like SiSec \parencite{sisec2016, sisec2018}.
+The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the 3080 Ti and 738.39 seconds with the weaker 2070 Super. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU.
 
 \newpagefill
 
@@ -133,19 +131,16 @@ The results were that the regular BSS metrics evaluation on the CPU took 1,485.7
 
 As described in section \ref{sec:mpiparam}, a random parameter search was undertaken to choose the parameters of the sliCQT. The parameter search script\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/slicq_explore.py}, \url{https://github.com/sevagh/xumx-sliCQ/blob/main/docs/slicq_params.md}} computes the median SDR score of the MPI oracle across all four targets and the 14 validation tracks of MUSDB18-HQ. The script ran for 60 iterations using random combinations of sliCQT parameters chosen from the ranges in section \ref{sec:mpiparam}.
 
-For demonstration purposes, the inverse SDR score ($-1.0*\text{SDR}$) was maximized in a second search, to find sliCQT parameters with poor performance.
-
-The best-performing sliCQT parameters chosen by the script used the following parameters: Bark scale, 262 bins, 32.9--22,050 Hz. These parameters were used in the final neural network, xumx-sliCQ. The worst-performing sliCQT parameters chosen by the inverse SDR maximization used the following parameters: Constant-Q (logarithmic) scale, 142 bins, 129.7--22,050 Hz. Figure \ref{fig:bipolarslicqs} shows the magnitude spectrograms of the good and bad sliCQT.
+The best-performing sliCQT parameters chosen by the script used the following parameters: Bark scale, 262 bins, 32.9--22,050 Hz. These parameters were used in the final neural network, xumx-sliCQ.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Good sliCQT -- Bark, 262 bins, 32.9--22,050 Hz]{\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_good.png}}\\
-	\subfloat[Bad sliCQT -- Constant-Q/log, 142 bins, 129.7--22,050 Hz]{\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_bad.png}}
-	\caption{sliCQTs from the MPI oracle hyperparameter search}
+	\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_good.png}
+	\caption{Best sliCQT from the MPI oracle hyperparameter search}
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-The full oracle evaluation on both of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The bad sliCQT starts at a high frequency, 129.7 Hz, which is near the maximum of the 10--130 Hz range. From the spectrogram, we can see that the low frequency bins are very diffuse, or blurry. From the boxplot, we can see that the targets which are expected to be more pitched or tonal (vocals, other) perform similar with both the good and bad sliCQT, but the drums and bass are drastically worse for the bad sliCQT.
+The full oracle evaluation on these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes.
 
 \begin{figure}[ht]
 	\centering
@@ -154,22 +149,9 @@ The full oracle evaluation on both of these sliCQT parameters are shown in the b
 	\label{fig:oraclebssboxplot}
 \end{figure}
 
-\subsubsection{sliCQT dimensionality analysis}
+The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in section \ref{sec:freqscales}.
 
-The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively.
-
-The input data to xumx-sliCQ was split into to sequences of a one second duration. The slice length of the chosen scale results in one second of audio containing nine slices. Each slice consists of a number of time coefficients that varies with the frequency bin. The ragged transform contains 70 buckets of frequency bins grouped by their time resolution. Tables \ref{table:slicqdim1} and \ref{table:slicqdim2} show each bucket in the ragged transform with its original 3D shape ($\text{slice} \times \text{frequency} \times \text{time}$), and the flattened and overlap-added 2D shapes ($\text{time} \times \text{frequency}$).
-
-Note that the channel dimension is omitted from the table. There is one spectrogram for each channel of audio, resulting in an additional $(, 2)$ dimension added to the sliCQT shape from the two channels of the stereo training data. The flattened shape is a result of concatenating the $\text{slice} \times \text{time}$ blocks together; e.g., to flatten $9 \times 10$ results in $90$. The overlap-add considers a $\sfrac{\text{time}}{2}$ overlap between each adjacent slice of size.
-
-It is instructive to compare the dimensionality of the chosen sliCQT parameters to the matrix form of the sliCQT, and to the STFT with a window size of 4,096 and an overlap of 1,024.
-
-The matrix form of the same sliCQT results in a 3D $\text{slice} \times \text{frequency} \times \text{time}$ shape of $9 \times 263 \times 292$, representing the same nine slices for one second of audio as the ragged transform, and 263 frequency bins, which includes the 0--32.9 Hz bin added to the 262 we specified between 32.9--22,050 Hz. The time coefficients are of length 292, which as shown in Table \ref{table:slicqdim2} is the maximum time resolution of the highest frequency bin. The other frequency bins have some operations performed including zero-padding to fit the same dimension. The 2D $\text{frequency} \times \text{time}$ shapes are $263 \times 1{,}022$ for the overlap-added spectrogram and $263 \times 1{,}752$ for the flattened spectrogram.
-
-The STFT with a window of 4,096 samples and overlap of 1,024 samples results in a 2D $\text{frequency} \times \text{time}$ transform of shape $2{,}049 \times 40$, where 2,049 is the number of non-redundant output frequencies of the STFT, computed by $\sfrac{4{,}096}{2} + 1$, and 40 is the number of temporal frames computed from the signal length (or 44,100 samples for 1s of audio), window size, and overlap using equation \ref{equation:stftframes}:
-\begin{align}
-	\text{floor}\big(\frac{44{,}100-4{,}096}{1{,}024}\big) + 1 = 40\tag{37}\label{equation:stftframes}
-\end{align}
+The input data to xumx-sliCQ was split into to sequences of a one second duration. The slice length, 18,060 samples, results in a transform consisting of nine slices for one second of audio. Each slice consists of a number of time coefficients that varies with the frequency bin. The ragged transform contains 70 buckets of frequency bins grouped by their time resolution. Tables \ref{table:slicqdim1} and \ref{table:slicqdim2} show each bucket in the ragged transform with its original 3D shape ($\text{slice} \times \text{frequency} \times \text{time}$).
 
 \begin{table}[ht]
 	\centering
@@ -177,22 +159,22 @@ The STFT with a window of 4,096 samples and overlap of 1,024 samples results in 
 	\label{table:slicqdim1}
 	\begin{tabular}{ |l|l|l|l|l| }
 	 \hline
-		Bucket & Frequency bins & 3D shape & 2D overlap-add shape & 2D flat shape \\
+		Bucket & Frequency bins & Frequencies (Hz) &  3D shape \\
 	 \hline
 	 \hline
-0 & 0 & (9, \ 1, \ 28) & (1, \ 98) & (1, \ 168) \\
+0 & 0 & (9, \ 1, \ 28) \\
 \hline
-1 & 1--86 & (9, \ 86, \ 16) & (86, \ 56) & (86, \ 96) \\
+1 & 1--86 & (9, \ 86, \ 16) \\
 \hline
-2 & 87--100 & (9, \ 14, \ 20) & (14, \ 70) & (14, \ 120) \\
+2 & 87--100 & (9, \ 14, \ 20) \\
 \hline
-3 & 101--111 & (9, \ 11, \ 24) & (11, \ 84) & (11, \ 144) \\
+3 & 101--111 & (9, \ 11, \ 24) \\
 \hline
-4 & 112--120 & (9, \ 9, \ 28) & (9, \ 98) & (9, \ 168) \\
+4 & 112--120 & (9, \ 9, \ 28) \\
 \hline
-5 & 121--128 & (9, \ 8, \ 32) & (8, \ 112) & (8, \ 192) \\
+5 & 121--128 & (9, \ 8, \ 32) \\
 \hline
-6 & 129--135 & (9, \ 7, \ 36) & (7, \ 126) & (7, \ 216) \\
+6 & 129--135 & (9, \ 7, \ 36) \\
 \hline
 7 & 136--141 & (9, \ 6, \ 40) & (6, \ 140) & (6, \ 240) \\
 \hline
