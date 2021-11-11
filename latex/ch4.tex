@@ -135,8 +135,9 @@ The best-performing sliCQT parameters chosen by the script used the following pa
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_good.png}
-	\caption{Best sliCQT from the MPI oracle hyperparameter search}
+	\subfloat[Best sliCQT from MPI oracle parameter search]{\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_good.png}}\\
+	\subfloat[STFT with UMX defaults]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_4096.png}}
+	\caption{Magnitude spectrogram comparison; sliCQT vs. STFT}
 	\label{fig:bipolarslicqs}
 \end{figure}
 
@@ -151,15 +152,25 @@ The full oracle evaluation on these sliCQT parameters are shown in the boxplot i
 
 The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in section \ref{sec:freqscales}.
 
+The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, beating the 6.23 dB achieved by the STFT with the UMX default window and overlap of 4,096 and 1,024 samples respectively. This indicates that a music demixing system that uses the sliCQT with these parameters has the potential to surpass STFT-based performance.
+
+Keep in mind that to translate this theoretical boost to a real advantage in the final model, a neural network architecture must be chosen that can produce a good estimate of the target magnitude sliCQT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b). We hope that this added information gives the neural network an advantage when learning how to demix music from the sliCQT representation over the STFT.
+
 \newpagefill
 
 \subsection{xumx-sliCQ neural network}
 
+This section will show the training procedure and final trained performance of the xumx-sliCQ neural network, whose design was described in section \ref{sec:slicqumx}.
+
 \subsubsection{Learning parameters and training curves}
 
-The learning hyperparameters of xumx-sliCQ were mostly kept the same to Open-Unmix and CrossNet-Open-Unmix. The training uses an Adam optimizer which runs for 1,000 iterations (or epochs), with a learning rate of 0.001 and a weight decay of 0.00001. There is also an adaptive learning rate scheduler with a decay patience of 80 and a decay gamma of 0.3. A difference between the learning hyperparameters of X-UMX and UMX is that the network trains for the full 1,000 epochs without any early stopping, which was also incorporated in xumx-sliCQ.
+This section will cover the details of the hyperparameters of xumx-sliCQ related to the learning of the neural network.
 
-Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss (CL), with a mixing coefficient between the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0, but in xumx-sliCQ it is set to 0.1 to reflect the observed order of magnitude difference in the MSE loss of the STFT and the sliCQT. xumx-sliCQ reports 6,669,912 trainable parameters in total from the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package. The training curves can be seen in Figure \ref{fig:networkloss}, visualized using Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a training visualization tool.
+The training uses an Adam optimizer which runs for 1,000 iterations (or epochs), with a learning rate of 0.001 and a weight decay of 0.00001. There is also an adaptive learning rate scheduler with a decay patience of 80 and a decay gamma of 0.3. These were copied from UMX and X-UMX, unchanged.
+
+Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss (CL), with a mixing coefficient between the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0, but in xumx-sliCQ it is set to 0.1 to reflect the observed order of magnitude difference in the MSE loss of the STFT and the sliCQT.
+
+xumx-sliCQ reports 6,669,912 trainable parameters in total from the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package. The training curves can be seen in Figure \ref{fig:networkloss}, visualized using Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a training visualization tool.
 
 \begin{figure}[ht]
 	\centering
@@ -171,10 +182,49 @@ Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss 
 
 \newpagefill
 
+\subsubsection{Wiener-EM post-processing results}
+\label{sec:wienerconfigs}
+
+We previously discussed in section \ref{sec:replacestftwiener} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener-EM step that could be done with the sliCQT or the STFT. In this section, we will discuss the execution times and SDR scores of the different configurations of Wiener-EM post-processing.
+
+Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Table \ref{table:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.''
+
+\begin{table}[ht]
+	\centering
+	\caption{SDR of Wiener-EM post-processing with the STFT and sliCQT}
+	\label{table:wienerem}
+	\begin{tabular}{ |l|l|l|l| }
+	 \hline
+		Wiener-EM representation & Iterations & Median SDR & Execution time (s) \\
+	 \hline
+	 \hline
+		sliCQT, ragged & 1 & 2.221 & 479.104 \\
+	 \hline
+		sliCQT, zero-padded matrix & 1 & 2.216 & 268.061  \\
+	 \hline
+		STFT & 1 & 2.143 & 221.839  \\
+	 \hline
+		sliCQT, ragged & 2 & 1.941 & 775.51  \\
+	 \hline
+		STFT & 2 & 1.827 & 245.906  \\
+	 \hline
+\end{tabular}
+\end{table}
+
+To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged form, with a negligible drop in SDR. For this reason, the zero-padded sliCQ-Wiener-EM is the chosen implementation of sliCQT-based Wiener-EM in the final model.
+
+Both types of sliCQT-based Wiener-EM beat the STFT, but the Wiener-EM STFT step runs faster and was kept as a configurable option of xumx-sliCQ with the parameter \Verb#slicq_wiener#, as described in section \ref{sec:replacestftwiener}.
+
+For both STFT and sliCQT-based Wiener-EM, two iterations were worse than one iteration. The computation time of the inference step will be shown in section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQT Wiener-EM.
+
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
+In this section, the music demixing results of the trained models UMX, X-UMX, and xumx-sliCQ will be compared.
+
 The BSSv4 scores for the demixing results generated from the evaluation script\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}} were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. ``-WEM'' denotes ``Wiener expectation-maximization,'' the post-processing iterative refinement step of the four targets.
+
+To maximize result reproducibility, all pretrained models and code were downloaded from their public hosted locations shown in Table \ref{table:bsseval} and stored in a separate repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 
 \begin{table}[ht]
 	\centering
@@ -196,69 +246,6 @@ The BSSv4 scores for the demixing results generated from the evaluation script\f
 \end{tabular}
 \end{table}
 
-We discussed in section \ref{sec:replacestft} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener expectation maximization step that could be done with the sliCQT or the STFT. Both configurations were evaluated and shown in the boxplot.
-
-Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Code Listing \ref{lst:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.'' The evaluated configurations were:
-\begin{tight_enumerate}
-	\item
-		1 + 2 iterations of STFT-Wiener-EM
-	\item
-		1 + 2 iterations of ragged sliCQ-Wiener-EM
-	\item
-		1 iteration of zero-padded matrix sliCQ-Wiener-EM
-\end{tight_enumerate}
-
-\begin{listing}[h]
-  \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
-1 iteration of STFT-Wiener-EM:
-    vocals          ==> SDR:   2.727  SIR:   7.992  ISR:   4.126  SAR:   2.082
-    drums           ==> SDR:   2.702  SIR:   1.920  ISR:   5.649  SAR:   1.765
-    bass            ==> SDR:   4.082  SIR:  10.806  ISR:   1.770  SAR:   2.128
-    other           ==> SDR:  -0.939  SIR:  -3.560  ISR:  11.802  SAR:   3.516
-
-    time: 3m41.839s
-
-1 iteration of ragged sliCQ-Wiener-EM:
-    vocals          ==> SDR:   2.754  SIR:   7.907  ISR:   4.166  SAR:   2.034
-    drums           ==> SDR:   2.885  SIR:   1.511  ISR:   5.872  SAR:   1.649
-    bass            ==> SDR:   4.134  SIR:  11.515  ISR:   1.349  SAR:   2.020
-    other           ==> SDR:  -0.891  SIR:  -3.382  ISR:  12.241  SAR:   3.458
-
-    time: 7m59.104s
-
-1 iteration of zero-padded matrix sliCQ-Wiener-EM:
-    vocals          ==> SDR:   2.753  SIR:   7.953  ISR:   4.158  SAR:   2.024
-    drums           ==> SDR:   2.864  SIR:   1.677  ISR:   5.835  SAR:   1.657
-    bass            ==> SDR:   4.140  SIR:  11.599  ISR:   1.350  SAR:   2.016
-    other           ==> SDR:  -0.893  SIR:  -3.391  ISR:  12.189  SAR:   3.448
-
-    time: 4m28.061s
-
-2 iterations of STFT-Wiener-EM:
-    vocals          ==> SDR:   2.368  SIR:   8.594  ISR:   4.081  SAR:   1.094
-    drums           ==> SDR:   2.669  SIR:   2.600  ISR:   6.071  SAR:   1.466
-    bass            ==> SDR:   3.892  SIR:  11.786  ISR:   1.576  SAR:   1.796
-    other           ==> SDR:  -1.620  SIR:  -3.501  ISR:  12.949  SAR:   2.977
-
-    time: 4m5.906s
-
-2 iterations of ragged sliCQ-Wiener-EM:
-    vocals          ==> SDR:   2.481  SIR:   8.152  ISR:   4.101  SAR:   1.173
-    drums           ==> SDR:   2.832  SIR:   1.770  ISR:   6.270  SAR:   1.372
-    bass            ==> SDR:   3.957  SIR:  12.244  ISR:   1.516  SAR:   1.809
-    other           ==> SDR:  -1.505  SIR:  -3.357  ISR:  13.263  SAR:   3.029
-
-    time: 12m55.510s
-\end{minted}
-  \caption{BSS results of various configurations of Wiener-EM post-processing}
-  \label{lst:wienerem}
-\end{listing}
-
-To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged list of matrices, with a slight difference in BSS metrics from the ragged form. The zero-padded sliCQ-Wiener-EM is the chosen implementation in the final model, with an option to also use the STFT-Wiener-EM. Both types of Wiener-EM with the sliCQ beat the STFT. Also, in both cases, two iterations were considerably worse than one iteration. The computation time of the inference step will be discussed in more detail in the next section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQ Wiener-EM.
-
-To maximize result reproducibility, all the pretrained models and code were downloaded from the public hosted locations shown in Table \ref{table:bsseval} and stored in a separate public repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
-
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-bss/boxplot_full.pdf}
@@ -266,20 +253,24 @@ To maximize result reproducibility, all the pretrained models and code were down
 	\label{fig:bssboxplot}
 \end{figure}
 
+The table shows that xumx-sliCQ performed worse than UMX and X-UMX, with both configurations of Wiener-EM.
+
 \newpagefill
 
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
 
-The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} was one of the three compared neural networks as shown in Table \ref{table:bsseval} in section \ref{sec:demixresults}. The weights are for a PyTorch model, and it was only trained on MUSDB18-HQ. The size on disk of the model weights for the four targets combined is 137 MB.
+Finally, in this section, we will measure the size on disk and inference running times of the models.
 
-The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} is for the NNabla deep learning framework. The file containing trained weights for the combined four targets is 136 MB, almost the same as the size of the UMX PyTorch weights.
+The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined.
 
-The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model}} is 28 MB, making xumx-sliCQ the smallest network from the comparison.
+The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} for the NNabla deep learning framework has a size on disk of 136 MB for the four combined targets, which is almost the same as the size of the UMX PyTorch weights. However, the pretrained X-UMX model was omitted from the running time comparison since NNabla cannot be fairly compared to PyTorch.
 
-To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs \parencite{deepcpuinf, deepcpuinf2}. The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. The music demixing result generation script from the previous section \ref{sec:demixresults} was simply adapted to add timing measurements. Note that X-UMX was omitted from the comparison, since it runs on NNabla, a different deep learning framework than PyTorch.
+The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model}} for the PyTorch deep learning framework has a size on disk of 28 MB, making xumx-sliCQ the smallest network from the comparison.
 
-Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the STFT and sliCQT configurations of the post-processing Wiener-EM step were measured, denoted as STFT-WEM and sliCQT-WEM respectively.
+To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs \parencite{deepcpuinf, deepcpuinf2}.
+
+The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the STFT and sliCQT configurations of the post-processing Wiener-EM step were measured, denoted as STFT-WEM and sliCQT-WEM respectively.
 
 \begin{table}[ht]
 	\centering
