@@ -43,7 +43,7 @@ X_meaningful = overlap_add(X_flat)                   # 2D sliceq: (frequency, ti
 
 X_flat_hat = DeOverlapNet(input=X_meaningful)        # 2D sliceq: (frequency, time_coef_total)
 
-X_hat = X_hat.reshape(X.shape)                       # 3D sliceq: (frequency, slices, time_coef_per_slice)
+X_hat = X_flat_hat.reshape(X.shape)                  # 3D sliceq: (frequency, slices, time_coef_per_slice)
 
 loss = MSE(X_hat, X)
 ```
@@ -62,8 +62,11 @@ X_meaningful = overlap_add(X_flat)                   # 2D sliceq: (frequency, ti
 
 Y_meaningful_hat = MDXNet(X_meaningful)              # spectrogram-to-spectrogram MDX network
 
-Y_hat = DeoverlapNet(Y_meaningful_hat)               # low error de-overlap, pre-trained!
-y_hat = islicq(Y_hat)
+Y_flat_hat = DeOverlapNet(Y_meaningful_hat)          # low error de-overlap, pre-trained!
+
+Y_hat = Y_flat_hat.reshape(X.shape)                  # 2D slicq back to 3D
+
+y_hat = islicq(Y_hat)                                # 3D slicq back to waveform
 
 Y = slicq(y)
 
