@@ -89,3 +89,7 @@ Why do I use a single sliCQT?
 I asked on [DSP stackexchange](https://dsp.stackexchange.com/questions/78422/how-to-objectively-measure-how-good-a-time-frequency-representation-of-music-i) about how to objectively measure how "good" a time-frequency transform is. I was pointed to a concept called "ridge analysis": [view this paper on HAL](https://hal.archives-ouvertes.fr/hal-02945707/document).
 
 Idea: use ridge analysis (or any of the above techniques) to find the best transform for a single target. Say, the best sliCQT for "drums" is one where the drum signal is most sparse. This may be _even more useful_ for future MDX, where targets are finer-grained (e.g. electric guitar, thanks [faroit](https://github.com/faroit)!)
+
+### Misc
+
+From Rachel Bittner's keynote (MDX21/ISMIR 2021 Session B keynote), it seems that SI-SDR might not be ideal for music demixing applications; maybe using that as my loss function wasn't the best idea.
