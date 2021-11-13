@@ -92,4 +92,6 @@ Idea: use ridge analysis (or any of the above techniques) to find the best trans
 
 ### Misc
 
-From Rachel Bittner's keynote (MDX21/ISMIR 2021 Session B keynote), it seems that SI-SDR might not be ideal for music demixing applications; maybe using that as my loss function wasn't the best idea.
+Improvements:
+* Use regular SDR in X-UMX time-domain loss. From Rachel Bittner's keynote (MDX21/ISMIR 2021 Session B keynote), it seems that SI-SDR might not be ideal for music demixing applications; maybe using that as my loss function wasn't the best idea.
+* Use Danna-Sep's idea of complex STFT in frequency-domain loss of X-UMX

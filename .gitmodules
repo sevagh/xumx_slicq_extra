@@ -19,12 +19,12 @@
 [submodule "mss_evaluation/vendor/ai-research-code"]
 	path = mss_evaluation/vendor/ai-research-code
 	url = https://github.com/sony/ai-research-code
-[submodule "latex/mdx-submissions21"]
-	path = latex/mdx-submissions21
-	url = git@github.com:sevagh/mdx-submissions21
 [submodule "nsgt_spec_plotter/nsgt"]
 	path = nsgt_spec_plotter/nsgt
 	url = git@github.com:sevagh/nsgt
 [submodule "sliceq22-ideas/essentia"]
 	path = sliceq22-ideas/essentia
 	url = https://github.com/MTG/essentia
+[submodule "latex-old/mdx-submissions21"]
+	path = latex-old/mdx-submissions21
+	url = git@github.com:sevagh/mdx-submissions21
