@@ -91,10 +91,10 @@ Signals needs to be transformed from the continuous to the discrete domain via s
 The Fourier Transform is a complex-valued function of $\omega$, which is the variable that represents the angular frequency in radians. The Fourier Transform can be expressed in the rectangular form in equation \eqref{equation:rect} or polar form in equation \eqref{equation:polar} \parencite[49]{discretebook}:
 \begin{align}
 	X(e^{j\omega}) = X_{\text{real}}(e^{j\omega}) + j X_{\text{imag}}(e^{j\omega}) \tag{5}\label{equation:rect} \\
-	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\measuredangle X(e^{j\omega})} \tag{6}\label{equation:polar}
+	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\angle X(e^{j\omega})} \tag{6}\label{equation:polar}
 \end{align}
 
-The quantities $|X(e^{j\omega})|$ and $\measuredangle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively \parencite{discretebook}.
+The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra respectively \parencite{discretebook}.
 
 According to \textcite{skiena}, algorithms in computer science are often described by their time complexity in a hypothetical computer where simple operations take one time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In the case of the DFT, the number of input elements is the number of samples in the discrete signal. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, i.e. the running time of the algorithm grows proportionally the size of the input signal squared \parencite{skiena}. 
 
@@ -1059,7 +1059,7 @@ Equations \eqref{equation:mpineural} show how the mixed phase and estimated sour
 \begin{align}\tag{29}\label{equation:mpineural}
 	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{MusicDemixingSystem}(x_{\text{mix}})\\
-	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \measuredangle{X_{\text{mix}}}\\
+	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 
@@ -1069,7 +1069,7 @@ Let us write out the equations for an MPI oracle, derived from equations \eqref{
 \begin{align}\tag{30}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & X_{\text{source}} = \text{STFT}(x_{\text{source}}[n])\\
-	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \measuredangle{X_{\text{mix}}}\\
+	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \angle{X_{\text{mix}}}\\
 	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \text{iSTFT}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
@@ -1084,7 +1084,7 @@ The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test spl
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
 
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss} objective measure for separation quality. There are four distinct metrics that comprise BSS:
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
@@ -1112,7 +1112,7 @@ In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sise
 
 \subsubsection{Open-source ecosystem}
 
-There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub to provide tools, tutorials, and implementations for source separation. In particular, the SigSep organization\footnote{\url{https://github.com/sigsep}} contains many tools useful for music demixing research, including the reference implementation of Open-Unmix \parencite{umx}, MUSDB18 dataset loaders \parencite{musdb18, musdb18hq}, and BSS evaluation metrics \parencite{bss, sisec2018}.
+There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub to provide tools, tutorials, and implementations for source separation. In particular, the SigSep organization\footnote{\url{https://github.com/sigsep}} contains many tools useful for music demixing research, including the reference implementation of Open-Unmix \parencite{umx}, MUSDB18 dataset loaders \parencite{musdb18, musdb18hq}, and BSS evaluation metrics \parencite{bss, bss2, sisec2018}.
 
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
@@ -1174,7 +1174,7 @@ The loss function of X-UMX is first modified to include a multi-domain loss (MDL
 \begin{align}\tag{32}\label{equation:mpirepeat}
 	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{Open-Unmix}(x_{\text{mix}})\\
-	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \measuredangle{X_{\text{mix}}}\\
+	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
 	\nonumber & \hat{x}_{\text{source, est}}[n] = \text{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 

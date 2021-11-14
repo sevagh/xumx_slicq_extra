@@ -84,50 +84,7 @@ The NSGT library already contains code which warns the user if their chosen valu
 
 The reference NSGT/sliCQT library uses NumPy, a CPU-based Python numerical computation library. To train deep neural networks efficiently, and to use the NSGT within the code of Open-Unmix, using PyTorch with GPU support is required. PyTorch, in addition to being a deep learning framework, is also a numerical computation library which implements a large amount of NumPy's functions.
 
-The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. An example output is shown in Code Listing \ref{lst:profilerout} for the \Verb#forward# function of the sliced NSGT.
-
-\begin{listing}[h]
-  \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
-Line #      Hits         Time  Per Hit   % Time  Line Contents
-==============================================================
-   150                                               @profile
-   151                                               def forward(self, sig):
-   152         1          4.0      4.0      0.0          sig = self.channelize(sig)
-   153
-   154         1          1.0      1.0      0.0          f_sliced = slicing(sig, self.sl_len, self.tr_area)
-   155
-   156         1      19481.0  19481.0     19.5          cseq = chnmap(self.fwd, f_sliced)
-   157
-   158         1      80658.0  80658.0     80.5          cseq = arrange(cseq, self.M, True)
-   159
-   160         1          3.0      3.0      0.0          cseq = self.unchannelize(cseq)
-   161
-   162         1          1.0      1.0      0.0          return cseq
-\end{minted}
-  \caption{Example line profiler output}
-  \label{lst:profilerout}
-\end{listing}
-
-The starting point of porting the library to the GPU was to simply replace all NumPy functions with their PyTorch equivalents. When refering to code changes, NumPy and PyTorch will be referred to as numpy and torch, their respective Python module names. The torch port to the NSGT/sliCQT can be viewed on GitHub through the commit browser, starting from the following commit.\footnote{\url{https://github.com/sevagh/nsgt/commits/main?after=9aed369865989d90664445c3a6f74843be62f778+34&branch=main}} Figure \ref{fig:ghcommitbrowser} shows how to use the GitHub UI to examine the code changes made in each commit. An excerpt of the change is shown in Code Listing \ref{code:firstdiff}.
-
-\begin{figure}[!ht]
-	\centering
-	\subfloat[GitHub commit browser]{\includegraphics[width=0.9\textwidth]{./images-misc/ghcommitbrowser.png}}\\
-	\subfloat[View file and line changes in each commit]{\includegraphics[width=0.85\textwidth]{./images-misc/ghcommitsingle.png}}
-	\caption{How to browse the individual steps of the torch porting effort}
-	\label{fig:ghcommitbrowser}
-\end{figure}
-
-\begin{listing}[ht]
-  \centering
-\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{diff}{./diffs/diff1.txt}
-\end{inputminted}
-  \caption{Simple examples of porting from numpy to torch}
-  \label{code:firstdiff}
-\end{listing}
-
-Next, the list and generator for the forward operation of the transform, which is one of the performance hotspots, were converted to a preallocated tensor, shown in the Code Listing \ref{code:seconddiff}. The significant commit which introduced this change is here.\footnote{\url{https://github.com/sevagh/nsgt/commit/49a70d112ba4091d271a9438a8c38cf380ce62b4}}
+The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} package for Python prints a line-by-line output of the execution times of Python functions that you annotate with \Verb#@profile#, and it was used to find performance hotspots and bottlenecks in the NSGT library. All NumPy functions and other non-GPU code was replaced with their PyTorch equivalents.
 
 \begin{listing}[ht]
   \centering
@@ -136,25 +93,6 @@ Next, the list and generator for the forward operation of the transform, which i
   \caption{Excerpt of the conversion of lists, for loops, and generators of the forward NSGT to torch tensors and parallel matrix operations}
   \label{code:seconddiff}
 \end{listing}
-
-In this section, only short excerpts of the torch port were shown, due to requiring to display hundreds of lines of code to show the full effort. Instead, the workflow for how to use the GitHub UI for browsing the individual steps of the torch port was described in Figure \ref{fig:ghcommitbrowser}. The following list contains links to several important commits:
-
-\begin{tight_enumerate}
-	 \item
-		 \href{https://github.com/sevagh/nsgt/commit/ce9785d40d1053fcffc72115d5fbdcb28d44bf7c}{Beginning the torch port of the sliced NSGT (or sliCQT)}
-	 \item
-		 \href{https://github.com/sevagh/nsgt/commit/49a70d112ba4091d271a9438a8c38cf380ce62b4}{Optimizing the main loop of the forward transform}
-	 \item
-		 \href{https://github.com/sevagh/nsgt/commit/2d41fe002d95e4dbd1cdb76ef24aa03c95cfbe46}{Adding a configurable device (CPU/GPU) to the sliCQT for finer user control}
-	 \item
-		 \href{https://github.com/sevagh/nsgt/commit/9552aa1eb0735e93ce91b648a5b7f629066693b3}{Optimizing the backward/inverse transform}
-	 \item
-		 \href{https://github.com/sevagh/nsgt/commit/1a5886bced951af132ab8659d30a565bcade87b2}{Returning tensors (i.e. ndarrays or matrices) instead of generators}
-	 \item
-		 \href{https://github.com/sevagh/nsgt/commit/8d873f7dc8053c553664dcc5c0816eaf3e1ddae0}{Supporting torch in the non-sliced NSGT}
-\end{tight_enumerate}
-
-\newpagefill
 
 \subsubsection{Matrix and ragged forms}
 \label{sec:matrixvragged}
