@@ -503,6 +503,8 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 	[...] we have to overlap-add the spectrograms obtained for each frame. Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.
 \end{quote}
 
+Note the terminology of the sliCQT, which uses slice length instead of the window length of the STFT, and transition length or transition area instead of the overlap or hop length of the STFT. Slice and transition are used to distinguish the larger slice-wise operation of the sliCQT from the local windowing and overlapping done \textit{within} each slice to achieve the desired time-frequency resolution. The real overlap between slices can vary up to a maximum of the transition area.
+
 \begin{figure}[ht]
 	\centering
 	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
@@ -528,7 +530,7 @@ Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform \
 	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
 
-The is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. 
+The effect is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. 
 
 The Bark psychoacoustic scale to complement the included mel scale\todo{justify why you like this scale - audio applications}. We can use one of the possible formulas used to convert between Bark and Hz frequencies \parencite{barktan} and vice versa, sometimes colloquially called the ``Barktan formula''\footnote{\url{https://ccrma.stanford.edu/~jos/bbt/Optimal_Frequency_Warpings.html}}, shown in equation \eqref{equation:barktan}:
 \begin{align}\tag{26}\label{equation:barktan}

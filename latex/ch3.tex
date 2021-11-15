@@ -37,7 +37,7 @@ Figure \ref{fig:xumxcl} shows how independent UMX networks for the desired four 
 	\label{fig:xumxcl}
 \end{figure}
 
-Section \ref{sec:inputrepresentation} will cover the replacement of the STFT with the sliCQT in the input representation. Next, section \ref{sec:neuralnet} will show how the Bi-LSTM RNN architecture of UMX is replaced with a CDAE CNN architecture, and how the four independent networks are combined like X-UMX. Finally, section \ref{sec:postprocessing} will show how the post-processing Wiener-EM step is adapted for the sliCQT.
+Section \ref{sec:inputrepresentation} will cover the replacement of the STFT with the sliCQT in the input representation. Next, section \ref{sec:neuralnet} will show why and how the Bi-LSTM RNN architecture of UMX is replaced with a CDAE CNN architecture in xumx-sliCQ, and the combining of the four independent networks per target into a single network like X-UMX. Finally, section \ref{sec:postprocessing} will show how the post-processing Wiener-EM step is adapted for the sliCQT.
 
 \subsection{Input representation}
 \label{sec:inputrepresentation}
@@ -97,7 +97,7 @@ where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max
 
 In section \ref{sec:fscales}, we discussed that the Variable-Q scale for music, and Bark psychoacoustic scales, are both of interest in music or auditory applications. Since we would like to find sliCQT parameters that perform best at music demixing, we would prefer a wider choice of frequency scales in our parameter search. For this reason, we are implementing, in addition to the Constant-Q and mel scales, the Variable-Q and Bark scales.
 
-The time and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed, like the frequency offset parameter of the Variable-Q scale shown in section \ref{sec:fscales}.
+The time \todo{check this out} and frequency resolution of the NSGT and sliCQT in the reference library are defined from the frequency scale. The essential parameters to a frequency scale in the library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed, like the frequency offset parameter of the Variable-Q scale shown in section \ref{sec:fscales}.
 
 To supplement the Constant-Q scales (octave and log), the Variable-Q scale was implemented.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}}
 
@@ -143,6 +143,9 @@ As was shown in Figure \ref{fig:raggedslicqt} in section \ref{sec:theorynsgt}, f
 
 The matrix form is created by zero-padding the tensors with a lower time resolution to fit the higher time resolution frequency bins. The ragged and zero-padded matrix forms are compared in Figure \ref{fig:raggedvszpad}.
 
+\todo[inline]{diagram here on zero-padded!}
+\todo[inline]{describe why zero-pad is bad for NNs?}
+
 \subsubsection{Overlap-add and spectrogram plotting utilities in the sliCQT library}
 \label{sec:slicqtutil}
 
@@ -167,38 +170,15 @@ Due to necessity of the 50\% overlap to create a meaningful spectrogram, the ove
 \subsubsection{Choosing sliCQT parameters}
 \label{sec:slicqparamsrch}
 
-The initial exploration is on whether the sliCQT is suitable as an STFT replacement for music demixing with magnitude spectrogram masking, since this is how Open-Unmix works. A simple approach is to experiment with the sliCQT replacing the STFT inside oracle mask estimators, which were described in \ref{sec:masksandoracles}. If the oracle experiments show promising results, such as the sliCQT oracle performance surpassing STFT oracle performance, it's a good first step towards replacing the STFT with the sliCQT in a neural network.
+Mixed-phase inversion (MPI) is the music demixing strategy where the target magnitude spectrogram is combined with the phase of the mix spectrogram to create a time-domain target waveform estimate, as was described in section \ref{sec:noisyphaseoracle}. The MPI oracle represents the best possible result of the MPI strategy by using the ground truth target magnitude spectrogram. In this section, we will design a sliCQT parameter search to discover optimal sliCQT parameters that produce the best MPI oracle results. Our hypothesis is that using the optimal sliCQT parameters in xumx-sliCQ would produce the best final music demixing results.
 
-To recap, the oracle mask is a perfect time-frequency mask which is computed from ground-truth training data. The oracle is used to give an idea of the upper limit of audio quality from an algorithm or model for music demixing. The mask is typically applied to the magnitude transform, and the phase is discarded.
+As discussed in section \ref{sec:ml}, the validation split of a dataset is often used to tune hyperparameters, which are the parameters of a machine learning or deep learning network defined by the user. In UMX, the STFT window size is set to 4,096 samples by default (with a 1,024-sample overlap), and it is a hyperparameter of the network. Similarly in xumx-sliCQ, the sliCQT parameters are a hyperparameter. The MPI oracle testbench will use the 14 tracks of the validation set of MUSDB18-HQ.
 
-In the parameter exploration, we require the following components to build the oracle testbench:
+According to \textcite{randomgrid}, 60 iterations of a random grid search will find a statistically good set of hyperparameters in a case where an exhaustive grid search is impossible. The strategy chosen was to choose random hyperparameters for 60 iterations and select the highest median SDR score of the MPI oracle waveforms for the four targets (drums, bass, vocals, other). We chose a random grid search because the space of all the possible NSGT/sliCQT parameters is too large for an exhaustive grid search.
 
-\begin{tight_enumerate}
-	\item
-		Python MUSDB18-HQ loader library\footnote{\url{https://github.com/sigsep/sigsep-mus-db}}
-	\item
-		Python BSS metrics evaluator library\footnote{\url{https://github.com/sigsep/sigsep-mus-eval/}} by the SigSep community
-	\item
-		Reference Python NSGT/sliCQT library\footnote{\url{https://github.com/grrrr/nsgt}}
-\end{tight_enumerate}
+The random search parameters are shown in Table \ref{table:slicqparams}. Several decisions were made to set limited ranges of the sliCQT parameters.
 
-The mix-phase inversion oracle (MPI) score is the target we will choose to maximize when searching for sliCQT parameters to beat the STFT. The MPI oracle was described in section \ref{sec:noisyphaseoracle}.
-
-The splitting of a dataset into training, test, and validation sets was covered in section \ref{sec:ml}. To recap, the training set is used by the model to make predictions from the input and comparing its predicted output to the ground truth training output. The test set must be unseen during training, and the model's performance is tested on this set at the end of each training iteration (also called epoch) to show the generalization performance of the network. The validation set is also a set of data unseen in training, which can be used for the hyperparameter search.
-
-In Open-Unmix, the STFT window size is set to 4,096 samples by default (with a 1,024-sample overlap), and it is a hyperparameter of the network. Therefore, the sliCQT parameters should equivalently be considered a hyperparameter in xumx-sliCQ. The MPI oracle testbench should use the predefined validation set of MUSDB18-HQ, which consists of 14 tracks. sliCQT parameters should be selected and be evaluated on their MPI score using BSS metrics for the 14 validation tracks.
-
-The performance of the IRM1 (soft magnitude mask) and MPI (mixed-phase inversion) oracles will be shown for the best (and worst) sliCQT parameters, alongside different STFT window sizes. The intent is to show how the window size and time-frequency resolution of the STFT and sliCQT affect music demixing results per target.
-
-According to \textcite{randomgrid}, 60 iterations of a random grid search will find a statistically good set of hyperparameters in a case where an exhaustive grid search is impossible. The strategy chosen was to choose random hyperparameters for 60 iterations and select the highest MPI score, because an exhaustive grid search of the possible NSGT/sliCQT parameters would be too large. 
-
-The random search parameters are shown in Table \ref{table:slicqparams}. Several decisions were made to limit the size of the parameter search.
-
-The maximum bins were capped to 300 and the maximum slice length was capped to 44,100 samples, which represents one second of music. This is a nice round number, and re-appears in several demixing papers \parencite{plumbley1, plumbley2, demucs} as a good subsequence length to extract from a larger musical track. Although the NSGT/sliCQT can be configured to output thousands of frequency bins and use arbitrarily large slice lengths, larger sizes (and the corresponding large slice length) will lead to higher-dimension outputs that are more difficult to use in a neural network.
-
-The maximum frequency was capped to 22,050 Hz, which is the the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. The minimum frequency range (10.0--130.0 Hz) was inspired by one of the sliCQT papers \parencite{slicq} which demonstrated the sliCQT with those frequency ranges.
-
-The slice length and transition length were automatically picked for the randomly selected frequency scale, making use of the new feature whose addition was described in section \ref{sec:freqscales}.
+The maximum slice length was capped to 44,100 samples, which represents one second of music. The number was chosen because this maximum is often used in demixing papers \parencite{plumbley1, plumbley2, demucs}. The maximum bins were capped to 300. \todo{make this better} The maximum frequency was capped to 22,050 Hz, which is the the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. The minimum frequency range (10.0--130.0 Hz) was inspired by one of the sliCQT papers \parencite{slicq} which demonstrated the sliCQT with those frequency ranges. The slice length and transition length were automatically picked for the randomly selected frequency scale, making use of the new feature whose addition was described in section \ref{sec:freqscales}.
 
 \begin{table}[ht]
 	\centering
@@ -213,7 +193,6 @@ The slice length and transition length were automatically picked for the randoml
 	 \hline
 	 Variable-Q & 10--300 & 10.0--130.0 & Offset = 10.0--130.0 Hz \\
 	 \hline
-	 \hline
 	 mel & 10--300 & 10.0--130.0 & n/a \\
 	 \hline
 	 Bark & 10--300 & 10.0--130.0 & n/a \\
@@ -221,24 +200,18 @@ The slice length and transition length were automatically picked for the randoml
 \end{tabular}
 \end{table}
 
-The maximized metric is the median SDR score across the four targets of the 14 validation tracks of MUSDB18-HQ. The SDR is a score in dB which commonly is the single evaluation metric that summarizes the global performance of a music demixing system, which was described as part of the total set of BSS metrics in section \ref{sec:evalbss}, and which was the objective metric used to rank demixing systems in the ISMIR 2021 Music Demixing Challenge \parencite{mdx21}.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
+The random parameter search selects the sliCQT parameters which achieve the median Signal-to-Distortion (SDR) score across the four targets of the 14 validation tracks of MUSDB18-HQ. Recall from section \ref{sec:evalbss} that the SDR is one of the scores of the BSS eval metrics, with a units of decibels (dB), which is commonly used as a single metric that summarizes the global performance of a music demixing system. The SDR was also the metric used to rank demixing systems in the ISMIR 2021 Music Demixing Challenge \parencite{mdx21}.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
+
+The performance of the MPI (mixed-phase inversion) and the IRM1 (soft magnitude mask) oracles will be reported for the best sliCQT parameters, alongside different STFT window sizes. The IRM1 oracle was described in section \ref{sec:masksandoracles}. The MPI and IRM1 oracles represent both possible configurations of UMX, which can use either the mixed-phase or ratio mask to compute the final waveform. The intent is to show how the window size and time-frequency resolution of the STFT and sliCQT affect music demixing results per target.
 
 \subsubsection{Speeding up the parameter search using the GPU and CuPy}
 \label{sec:fasterbsscupy}
 
-During the oracle evaluation, line-profiler showed that the slowest step was the BSS metrics calculation from the sigsep-mus-eval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package.
+As in section \ref{sec:torchgpu}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS eval metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. We would benefit from a speedup of the parameter search script to get results faster. For that reason we explored a speedup using the GPU.
 
-The bottlenecks of the library use NumPy and SciPy operations, which are Python numerical computation libraries that use the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides replacement functions of NumPy and SciPy which run on NVIDIA GPUs using the CUDA compute framework.\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch also uses CUDA and was used in an earlier section \ref{sec:torchslicq}, for the BSS evaluation library CuPy was easier to work with as a drop-in NumPy/SciPy replacement.
+The bottlenecks of the library use NumPy and SciPy operations, which are Python numerical computation libraries that use the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides replacement functions of NumPy and SciPy which run on NVIDIA GPUs using the CUDA compute framework.\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch was used to replace NumPy code in the earlier section \ref{sec:torchslicq}, CuPy is intended to be a direct replacement of NumPy and SciPy and thus represents an easier porting effort. Also, the MPI oracle testbench will not be used inside the xumx-sliCQ neural network, so it doesn't need to use PyTorch.
 
-Similar to the NSGT/sliCQT library, the modifications made to the museval library were stored in my forked copy of the repository.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval/commit/f3b7540faddc8d2b1bc91cecaf05fd20d96df7c6}} The replacement of the NumPy or SciPy function is as simple as using the CuPy equivalent, taking special care about GPU out-of-memory errors. Code Listing \ref{code:thirddiff} shows an example of the CuPy replacement of one of the slow computations discovered by the profiler.
-
-\begin{listing}[ht]
-  \centering
-\begin{inputminted}[linenos,breaklines,frame=single,fontsize=\scriptsize]{diff}{./diffs/diff3.txt}
-\end{inputminted}
-  \caption{Example of porting SciPy to CuPy with an out-of-memory fallback}
-  \label{code:thirddiff}
-\end{listing}
+The replacement of the NumPy or SciPy function is as simple as using the CuPy equivalent, taking special care about GPU out-of-memory errors. The library is unchanged for end users, and the GPU is simply used whenever possible, falling back to the CPU in case of any errors, or if there is no GPU available on the user's computer. Similar to the NSGT/sliCQT library, the modifications made to the museval library are stored in my copy of the repository for future reference.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval/commit/f3b7540faddc8d2b1bc91cecaf05fd20d96df7c6}}
 
 \newpagefill
 
