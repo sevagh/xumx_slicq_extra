@@ -391,12 +391,12 @@ We believe that the general NSGT is more interesting to study than the CQ-NSGT (
 	... a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized \parencite[1]{klapuricqt}.
 \end{quote}
 
-This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in Figure \ref{fig:raggedslicqt}. In the original list-based design of the library, a list of time-frequency coefficients per frequency bin is returned, and a parameter called \Verb#matrixform# ensures that each item in the list of time-frequency coefficients has the same length with zero-padding.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/nsgtf_loop.py\#L51}}
+This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in Figure \ref{fig:raggedslicqt}. In the reference library, a list of time-frequency coefficients per frequency bin is returned, and a parameter called \Verb#matrixform# ensures that each item in the list of time-frequency coefficients has the same length by applying zero-padding to create a rectangular matrix.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/nsgtf_loop.py\#L51}}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images-misc/slicq_shape.png}
-	\caption{Illustration of the different time resolution per frequency bin of the NSGT}
+	\caption{Illustration of frequency bins grouped by their time resolutions in the NSGT}
 	\label{fig:raggedslicqt}
 \end{figure}
 
@@ -485,30 +485,6 @@ Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show different configu
 
 \newpagefill
 
-\subsubsection{Interesting frequency scales for musical applications}
-\label{sec:fscales}
-
-Let us consider frequency scales that may be interesting for music or audio analysis, in addition to the Constant-Q/logarithmic and mel scales already defined in the reference NSGT library and shown in the previous section.
-
-The Variable-Q scale \parencite{variableq1, variableq2} is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \citeauthor{variableq1} provide the motivation for the Variable-Q scale:
-\begin{quote}
-	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution \parencite[5]{variableq1}.
-\end{quote}
-
-Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform \parencite{erblet} as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provide the following equations \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
-\begin{align}\tag{25}\label{equation:variablebw}
-	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
-\end{align}
-
-The is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. 
-
-The Bark psychoacoustic scale to complement the included mel scale\todo{justify why you like this scale - audio applications}. We can use one of the possible formulas used to convert between Bark and Hz frequencies \parencite{barktan} and vice versa, sometimes colloquially called the ``Barktan formula''\footnote{\url{https://ccrma.stanford.edu/~jos/bbt/Optimal_Frequency_Warpings.html}}, shown in equation \eqref{equation:barktan}:
-\begin{align}\tag{26}\label{equation:barktan}
-	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh \Big(\frac{f_{\text{Hz}}}{600}\Big), f_{\text{Hz}} = 600 \cdot sinh \Big(\frac{f_{\text{Bark}}}{6}\Big)
-\end{align}
-
-\newpagefill
-
 \subsubsection{sliCQ Transform (sliCQT)}
 \label{sec:theoryslicqt}
 
@@ -534,6 +510,30 @@ Slices have a 50\% overlap with adjacent slices. The noninvertibility of the hal
 	\caption{sliCQT spectrograms demonstrating the slice half-overlap}
 	\label{fig:slicqoverlaps}
 \end{figure}
+
+\newpagefill
+
+\subsubsection{Interesting frequency scales for musical applications}
+\label{sec:fscales}
+
+Let us consider frequency scales that may be interesting for music or audio analysis, in addition to the Constant-Q/logarithmic and mel scales already defined in the reference NSGT library and shown in the previous section.
+
+The Variable-Q scale \parencite{variableq1, variableq2} is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \citeauthor{variableq1} provide the motivation for the Variable-Q scale:
+\begin{quote}
+	... [The] CQT has several advantages over STFT when analysing music signals. However, one considerable practical drawback is the fact that the analysis/synthesis atoms get very long towards lower frequencies. This is unreasonable both from a perceptual viewpoint and from a musical viewpoint. Auditory filters in the human auditory system are approximately Constant-Q only for frequencies above 500 Hz and smoothly approach a constant bandwidth towards lower frequencies. Accordingly, music signals generally do not contain closely spaced pitches at low frequencies, thus the Q-factors (relative frequency resolution) can safely be reduced towards lower frequencies, which in turn improves the time resolution \parencite[5]{variableq1}.
+\end{quote}
+
+Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform \parencite{erblet} as a psychoacoustic transform which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provide the following equations \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
+\begin{align}\tag{25}\label{equation:variablebw}
+	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
+\end{align}
+
+The is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. 
+
+The Bark psychoacoustic scale to complement the included mel scale\todo{justify why you like this scale - audio applications}. We can use one of the possible formulas used to convert between Bark and Hz frequencies \parencite{barktan} and vice versa, sometimes colloquially called the ``Barktan formula''\footnote{\url{https://ccrma.stanford.edu/~jos/bbt/Optimal_Frequency_Warpings.html}}, shown in equation \eqref{equation:barktan}:
+\begin{align}\tag{26}\label{equation:barktan}
+	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh \Big(\frac{f_{\text{Hz}}}{600}\Big), f_{\text{Hz}} = 600 \cdot sinh \Big(\frac{f_{\text{Bark}}}{6}\Big)
+\end{align}
 
 \newpagefill
 
@@ -1048,7 +1048,7 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
 
-\subsubsection{Noisy phase or mixed phase inversion (MPI) oracle}
+\subsubsection{Noisy phase or mixed phase inversion (MPI)}
 \label{sec:noisyphaseoracle}
 
 As mentioned in section \ref{sec:masksandoracles}, many music demixing systems prefer to only estimate magnitude spectrograms, and discard the phase. These systems use the phase of the mixed audio combined with the magnitude of the estimated source to create an audio waveform.
@@ -1084,17 +1084,17 @@ The songs in the MUSDB18-HQ dataset have a fixed train, validation, and test spl
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
 
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \cite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
-	\textbf{ISR:} source Image to Spatial distortion Ratio
+	\textbf{SDR:} Signal to Distortion Ratio
 \item
 	\textbf{SIR:} Signal to Interference Ratio
 \item
 	\textbf{SAR:} Signal to Artifacts Ratio
 \item
-	\textbf{SDR:} Signal to Distortion Ratio
+	\textbf{ISR:} source Image to Spatial distortion Ratio
 \end{tight_itemize}
 
 Out of these four scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR as it was defined in the ISMIR 2021 Music Demixing Challenge (and used to rank the participants) can be computed from equation \eqref{equation:sdrinstr}:
@@ -1117,11 +1117,13 @@ There are several groups of researchers who created open-source ecosystems on th
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
 
+\todo[inline]{REVIEW THIS, ITS MASHED TOGETHER}
+
 Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. Open-Unmix is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data \parencite{musdb18, musdb18hq}.
 
-Open-Unmix \parencite{umx} has a reference implementation released as an open-source Python codebase for general music demixing,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch \parencite{pytorch} for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader \parencite{musdb18hq} and BSS metrics evaluator \parencite{bss}, both necessary components for this thesis.
+Open-Unmix \parencite{umx} has a reference implementation released as an open-source Python project,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch \parencite{pytorch} for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader \parencite{musdb18hq} and BSS metrics evaluator \parencite{bss}.
 
-In UMX, a deep neural network is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture is a variant of a sequence2sequence model. Open-Unmix uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
+In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture of the DNN is a variant of a sequence2sequence model. Open-Unmix uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
 
 \begin{figure}[ht]
 	\centering
@@ -1160,6 +1162,8 @@ The STFT is used to compute magnitude spectrogram statistics from the training d
 
 \subsubsection{CrossNet-Open-Unmix (X-UMX)}
 \label{sec:xumx}
+
+\todo[inline]{REVIEW THIS, ITS MASHED TOGETHER}
 
 \textcite{xumx} combined the four separate target networks into a single model to apply the loss functions and optimizations jointly across all four targets, rather than optimizing each one separately. The model is named CrossNet-Open-Unmix (X-UMX). It also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients.
 
