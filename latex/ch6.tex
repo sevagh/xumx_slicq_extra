@@ -1,0 +1,79 @@
+\documentclass[report.tex]{subfiles}
+\begin{document}
+
+\begin{appendices}
+
+\section{Testbench computer specifications}
+\label{appendix:computerspec}
+
+The hardware and software specifications of the computer which produced the results shown throughout this thesis are as follows:
+\begin{tight_enumerate}
+	\item
+		Motherboard: Gigabyte Aorus X570 Elite Wifi
+	\item
+		CPU: AMD Ryzen 5950X
+	\item
+		Memory: 64GB DDR4
+	\item
+		Storage: 1TB ADATA SX8200PNP NVMe
+	\item
+		GPU, primary: NVIDIA RTX 3080 Ti (12GB memory)
+	\item
+		GPU, secondary: NVIDIA RTX 2070 Super (8GB memory)
+	\item
+		OS: Fedora 34 Workstation Edition, 64-bit
+	\item
+		Linux kernel version: 5.133.10-200
+	\item
+		Python 3 version: 3.9.6 (default, Jul 16 2021, 00:00:00)
+	\item
+		NVIDIA driver version: 470.63.01
+	\item
+		NVIDIA CUDA toolkit version: 11.4
+\end{tight_enumerate}
+
+\newpagefill
+
+\section{Code availability}
+\label{appendix:codeavail}
+
+The code projects associated with this thesis are published as open-source software to encourage reproducibility of results.
+
+They are split across the following projects:
+\begin{tight_enumerate}
+	\item
+		NSGT/sliCQT PyTorch copy from sections \ref{sec:improvelib}, \ref{sec:torchgpu}, and \ref{sec:slicqtutil}\\
+		\url{https://github.com/sevagh/nsgt}
+	\item
+		museval (BSS metrics evaluation) CuPy copy from section \ref{sec:fasterbsscupy}:\\
+		\url{https://github.com/sevagh/sigsep-mus-eval}
+	\item
+		xumx-sliCQ neural network from section \ref{sec:neuralnet}:\\
+		\url{https://github.com/sevagh/xumx-sliCQ}
+	\item
+		LaTeX files and scripts for generating this thesis, including all plots and results:\\
+		\url{https://gitlab.com/sevagh/xumx_slicq_extra}
+	\item
+		Submissions made to the ISMIR 2021 Music Demixing Challenge:\\
+		\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}
+\end{tight_enumerate}
+
+All Python environments were designed to be reproducible with pip requirements.txt files or Conda environment files bundled with the source code:
+
+\begin{tight_enumerate}
+	\item
+		Pip file for oracles, trained model evaluations, boxplot creation, and performance benchmarks:\\
+		\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/requirements-cupy.txt}
+	\item
+		Conda environment file for the NSGT/sliCQT PyTorch implementation:\\
+		\url{https://github.com/sevagh/nsgt/blob/main/conda-env.yml}
+	\item
+		Conda environment file for the xumx-sliCQ neural network:\\
+		\href{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}
+\end{tight_enumerate}
+
+I take code availability and reproducibility seriously. Feel free to e-mail me\footnote{\href{mailto:sevag.hanssian@mail.mcgill.ca}{sevag.hanssian@mail.mcgill.ca}, \href{mailto:sevagh+thesis@pm.me}{sevagh+thesis@pm.me}} if you encounter any errors, discrepancies, or difficulties with reproducing any of the results.
+
+\end{appendices}
+
+\end{document}

@@ -6,6 +6,8 @@
 
 The proposed adaptation of Open-Unmix to use the sliCQ Transform (sliCQT) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} and is the subject and main result of this thesis. xumx-sliCQ is pronounced like ``X-U-M-X-slice-Q.''
 
+Decisions for the methodology were influenced by the limitations of the computer that xumx-sliCQ was developed on, e.g., the maximum GPU memory available. Refer to appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer.
+
 An overview of Open-Unmix was given in section \ref{sec:umx}. xumx-sliCQ will be based on the Open-Unmix PyTorch template, and as a result, all of the code developed will be in Python, using PyTorch for the deep learning network to run on the GPU. The rest of this chapter will be focused on the Python and PyTorch implementation details of xumx-sliCQ.
 
 Figure \ref{fig:generalmdx} shows a block diagram for a general DNN music demixing system that uses the magnitude spectrogram as  its input and output representation, and uses the phase of the mixture to swap back to the time domain. This strategy was described in section \ref{sec:noisyphaseoracle}.
@@ -93,7 +95,6 @@ where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max
 	\caption{Frequency bins for the octave and log scales, annotated with their nearest musical note}
 	\label{fig:octvlog}
 \end{figure}
-
 
 In section \ref{sec:fscales}, we discussed that the Variable-Q scale for music, and Bark psychoacoustic scales, are both of interest in music or auditory applications. Since we would like to find sliCQT parameters that perform best at music demixing, we would prefer a wider choice of frequency scales in our parameter search. For this reason, we are implementing, in addition to the Constant-Q and mel scales, the Variable-Q and Bark scales.
 
@@ -207,7 +208,7 @@ The performance of the MPI (mixed-phase inversion) and the IRM1 (soft magnitude 
 \subsubsection{Speeding up the parameter search using the GPU and CuPy}
 \label{sec:fasterbsscupy}
 
-As in section \ref{sec:torchgpu}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS eval metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. We would benefit from a speedup of the parameter search script to get results faster. For that reason we explored a speedup using the GPU.
+Like in section \ref{sec:torchgpu}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS eval metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. We would benefit from a speedup of the parameter search script to get results faster. For that reason we explored a speedup using the GPU.
 
 The bottlenecks of the library use NumPy and SciPy operations, which are Python numerical computation libraries that use the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides replacement functions of NumPy and SciPy which run on NVIDIA GPUs using the CUDA compute framework.\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch was used to replace NumPy code in the earlier section \ref{sec:torchslicq}, CuPy is intended to be a direct replacement of NumPy and SciPy and thus represents an easier porting effort. Also, the MPI oracle testbench will not be used inside the xumx-sliCQ neural network, so it doesn't need to use PyTorch.
 
@@ -231,14 +232,7 @@ After the X-UMX modifications are described, we will look at which parts of Open
 
 These are are the places in the Open-Unmix PyTorch template where the STFT must be replaced with the sliCQT. Moreover, it was mentioned that the ragged sliCQT will be used, which is a list of time-frequency matrices for frequency bins that share the same time resolution, and not a single rectangular matrix like the STFT. This arises from the different temporal frame rates of each frequency bin which is the desire of the NSGT/sliCQT (or CQT). This means that all of the operations which expect a single rectangular real-valued matrix of the STFT returns need to be modified to work on a list of matrices instead.
 
-Figure \ref{fig:xumxslicq} shows the proposed modification to the basic Open-Unmix architecture, which shows where the sliCQT is used. It also shows how the four models are trained together to apply the X-UMX loss functions.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_system_compressed_largefont.png}
-	\caption{Block diagram of xumx-sliCQ architecture}
-	\label{fig:xumxslicq}
-\end{figure}
+Figure \ref{fig:umxandxumxslicq} showed the proposed modifications to the base UMX architecture to use the sliCQT in place of the STFT in the input representation.
 
 In section \ref{sec:matrixvragged}, we saw that to use the ragged sliCQT one must simply loop over the list of matrices where each matrix (or block) contains at least one frequency bin that share a specific time-frequency resolution. A simple example of the STFT to sliCQT conversion is the custom MSE loss function\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/loss.py\#L8}} shown in Code Listing \ref{code:simplemse}.
 
@@ -374,7 +368,9 @@ The exact parameters and configuration of the convolutional kernels and layers a
 \subsubsection{Combining the target networks like X-UMX}
 \label{sec:xumxinc}
 
-For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than four independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of Open-Unmix.
+This section will describe how the UMX models for the four targets are trained together to apply the X-UMX loss functions, as shown in Figure \ref{fig:xumxcl}.
+
+For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than four independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of UMX.
 
 The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4}$ in training, where $y_{1-4}$ are the ground-truth waveforms of all four isolated targets.
 
