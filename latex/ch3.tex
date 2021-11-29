@@ -144,10 +144,16 @@ As was shown in Figure \ref{fig:raggedslicqt} in section \ref{sec:theorynsgt}, f
 
 The matrix form is created by zero-padding the tensors with a lower time resolution to fit the higher time resolution frequency bins. The ragged and zero-padded matrix forms are compared in Figure \ref{fig:raggedvszpad}.
 
-\todo[inline]{diagram here on zero-padded!}
-\todo[inline]{describe why zero-pad is bad for NNs?}
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/slicq_zeropad.png}
+	\caption{Ragged and zero-padded matrix forms of the sliCQT}
+	\label{fig:raggedvszpad}
+\end{figure}
 
-\subsubsection{Overlap-add and spectrogram plotting utilities in the sliCQT library}
+In the upcoming section \ref{sec:raggedvszpmatrix}, we will justify why the ragged form of the sliCQT was chosen instead of the zero-padded matrix form in the final neural network, xumx-sliCQ.
+
+\subsubsection{Overlap-add and spectrogram utilities in the sliCQT library}
 \label{sec:slicqtutil}
 
 In section \ref{sec:theoryslicqt}, the sliCQT was described to have a 50\% overlap between adjacent slices, and that overlap-adding the slices was necessary to generate a good spectrogram. Figure \ref{fig:slicqtukeys} showed the difference between the overlap-added spectrogram and one where adjacent slices were simply joined without any overlap.
@@ -162,9 +168,7 @@ The next addition to the slice utilities was to include a utility function for t
 	\label{fig:overlappedspectrograms}
 \end{figure}
 
-The overlap-add procedure for the matrix form of the sliCQT operates on the whole matrix. For the ragged transform, it is applied to each of the tensors in the list.
-
-Due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility leads to the need for a spectrogram plotting implementation. All of the spectrograms in this thesis were created using the example spectrogram script.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/examples/spectrogram.py}} The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} takes the overlap-added matrix form of the sliCQT as an input, and uses the matplotlib\footnote{\url{matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} to generate a spectrogram.
+Due to necessity of the 50\% overlap to create a meaningful spectrogram, the overlap-add utility is accompanied with a spectrogram plotting implementation.  The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} uses the matplotlib\footnote{\url{matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} in its implementation.
 
 \newpagefill
 
@@ -219,11 +223,23 @@ The replacement of the NumPy or SciPy function is as simple as using the CuPy eq
 \subsection{Neural network}
 \label{sec:neuralnet}
 
+\todo[inline]{rewrite this}
+
 First, we will look at incorporating CrossNet-Open-Unmix (X-UMX) ideas with Open-Unmix. Since X-UMX and UMX are both based on the STFT spectrogram, the general model will stay the same even if we replace the STFT with the sliCQT.
 
 As mentioned, Open-Unmix has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based. X-UMX has an open-source implementation available as well,\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} which uses NNabla,\footnote{\url{https://nnabla.org/}} a different Python deep learning framework. Therefore part of the methodology of this thesis involves incorporating the X-UMX ideas inside the PyTorch version of UMX.
 
 After the X-UMX modifications are described, we will look at which parts of Open-Unmix need to incorporate the PyTorch implementation of the sliCQT that was described in section \ref{sec:torchslicq}.\footnote{\url{https://github.com/sevagh/nsgt}} Finally, we will show how we adapted the STFT-based convolutional denoising autoencoder (CDAE) model architectures that were described in section \ref{sec:cdae} to the sliCQT.
+
+\subsubsection{sliCQT ragged and zero-padded matrix comparison}
+\label{sec:raggedvszpmatrix}
+
+\todo[inline]{you know what to do}
+
+\subsubsection{Bi-LSTM and CNN architecture comparison}
+\label{sec:lstmvsconv}
+
+\todo[inline]{you know what to do}
 
 \subsubsection{Replacing the STFT with the sliCQT in UMX}
 \label{sec:replacestft}
