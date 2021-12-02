@@ -14,15 +14,20 @@ proposal-dev: proposal
 proposal: tex_fname="proposal.tex"
 proposal: texpdf
 
-poster-dev: export LATEXMK_FLAGS="-pvc"
-poster-dev: poster
-poster: tex_fname="poster.tex"
-poster: texpdf
-
 chapter-dev: export LATEXMK_FLAGS="-pvc"
 chapter-dev: chapter
 chapter: tex_fname="report_${CHAPTER}.tex"
 chapter: texpdf
+
+mml21paper-dev: export LATEXMK_FLAGS="-pvc"
+mml21paper-dev: mml21paper
+mml21paper: tex_fname="mml21_paper.tex"
+mml21paper: texpdf
+
+mml21presentation-dev: export LATEXMK_FLAGS="-pvc"
+mml21presentation-dev: mml21presentation
+mml21presentation: tex_fname="mml21_presentation.tex"
+mml21presentation: texpdf
 
 all: report
 

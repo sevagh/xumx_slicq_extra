@@ -1,0 +1,309 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Boadilla}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{fancyvrb}
+\usepackage{soul}
+\usepackage{multicol}
+\usepackage{optparams}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning}
+\newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
+\usepackage{subfig}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+\addbibresource{citations.bib}
+\usepackage{pgfpages}
+\usepackage{xcolor}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+\setbeameroption{hide notes}
+\input{variables.tex}
+
+\title{Music demixing with the sliCQ transform}
+\author{Sevag Hanssian}
+%\date{August 21, 2021}
+\date{}
+\setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+  \clearfield{isbn}%
+  \clearfield{title}%
+  \clearfield{url}%
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{inproceedings}{
+    \clearfield{booktitle}%
+}{}
+}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+	\frametitle{Source separation}
+	\begin{enumerate}
+		\item
+			Audio source separation is the task of extracting an estimate of a single isolated source from audio
+			\begin{itemize}
+				\item
+					E.g., cocktail party
+			\end{itemize}
+		\item
+			In music demixing (or unmixing), we estimate multiple sources from mixed music, which are summed to get back the original mix
+			\begin{itemize}
+				\item
+					Think reverse of the recording studio, where stems are recorded separately and mixed together create the mix
+				\item
+					Linear sum is the simplest case
+			\end{itemize}
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.5em}
+		\includegraphics[width=\textwidth]{./images-mss/mixdemix.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music demixing}
+	In music demixing (or unmixing), we estimate multiple sources from mixed music, which are summed to get back the original mix
+	\begin{itemize}
+		\item
+			Think of reversing the mixing process of the recording studio, where stems are recorded separately
+		\item
+			Linear sum is the simplest case, mix = sum(sources)
+	\end{itemize}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.5em}
+		\includegraphics[width=\textwidth]{./images-mss/mixdemix.png}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Improving harmonic/percussive source separation (HPSS)}
+	\begin{enumerate}
+	\item
+		Short-time Fourier Transform (STFT) window size matters per-target\footfullcite{tftradeoff1, tftradeoff2}
+	\item
+		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footfullcite{cqtransient}
+	\item
+		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footfullcite{doerflerphd}
+	\item
+		window=4096 for harmonic, window=256 for percussive in HPSS\footfullcite{driedger}
+	\item
+		Constant-Q Transform (CQT) and multiple STFTs in HPSS\footfullcite{fitzgerald2}
+	\item
+		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Short-time Fourier Transform vs. Constant-Q Transform}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-1em}
+		\subfloat[STFT, window = 256]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft_256.png}}
+		\subfloat[STFT, window = 1024]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft_1024.png}}
+		\subfloat[STFT, window = 4096]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft_4096.png}}
+		\vspace{-0.5em}
+		\subfloat[CQT, 12 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt12.png}}
+		\subfloat[CQT, 24 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt24.png}}
+		\subfloat[CQT, 48 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt48.png}}
+		\vspace{-0.5em}
+	\end{figure}
+\end{frame}
+
+\note{
+	\begin{itemize}
+		\item
+			small window STFT has blurry frequency bins, sharp temporal events
+		\item
+			long window STFT loses some of the frequency components of the glockenspiel
+		\item
+			CQT has sharp temporal events and more frequency contents for any bins-per-octave
+	\end{itemize}
+}
+
+\begin{frame}
+	\frametitle{My approach -- sliCQ}
+	\begin{enumerate}
+	\item
+		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, realtime sliCQ Transform\footcite{invertiblecqt, slicq, variableq1}
+	\item
+		STFT-like transforms with windows that vary with time
+	\item
+		CQT motivates the NSGT/sliCQ, but can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.)
+	\item
+		Outputs the familiar Fourier coefficients with perfect inverse
+	\item
+		Competition goal: use sliCQ in Open-Unmix (UMX)
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.5em}
+		\includegraphics[height=2.5cm]{./images-gspi/gspi_xumx_slicq_params.png}
+		\vspace{-0.5em}
+		\caption{sliCQ: 262-bin Bark scale, 32.9--22050 Hz}
+		\vspace{-0.5em}
+	\end{figure}
+\end{frame}
+\note{
+	\begin{itemize}
+		\item
+			Optimal time-frequency resolution per frequency bin might improve results
+		\item
+			Bridge the gap between spectral models and waveform models (by improving their time-frequency resolution)
+	\end{itemize}
+}
+
+\begin{frame}
+	\frametitle{My approach -- xumx-sliCQ}
+	\begin{enumerate}
+	\item
+		xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}
+	\item
+		PyTorch fork of NSGT/sliCQ: \url{https://github.com/sevagh/nsgt}
+	\item
+		Uses UMX\footcite{umx} PyTorch template + CrossNet-Open-Unmix (X-UMX)\footcite{xumx}
+	\item
+		Replace STFT with sliCQT, replace Bi-LSTM with convolutions\footfullcite{plumbley2}
+\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[height=3.5cm]{./images-blockdiagrams/xumx_slicq_system_compressed.png}
+		\vspace{-1em}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{What worked vs. didn't work}
+	sliCQT has a matrix form with zero-padding; poor neural network convergence; different frequency bins = different temporal frame rate\\
+	Use ragged form, write different conv layers for each time-frequency resolution block:
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[height=5cm]{./images-blockdiagrams/slicq_shape.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Competition results}
+	\begin{enumerate}
+	\item
+		Luck-based approach with network copied from STFT models
+	\item
+		Invitation to demixing researchers: more rigorous, data-driven approaches to the sliCQT parameter search and network architectures
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=8cm]{./images-misc/leaderboard_header.png}\\
+		\vspace{-0.25em}
+		\includegraphics[width=8cm]{./images-misc/leaderboard_myplace.png}
+		\caption{Leaderboard A position of xumx-sliCQ}
+		\vspace{-1em}
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{My impressions on the competition}
+	\begin{enumerate}
+	\item
+	 ``It is definitely a great environment to push the limit, had it been for a paper, I would have stopped sooner.'' -- defossez
+	 \item
+		 There was a lot of active discussion on the board and everything felt set up for participants to succeed
+	 \item
+		 GitLab submission process worked well, submissions were easy, and the containers had important Python libraries already installed
+	 \item
+		 I look forward to the 2022 competition
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Magnitude mask above 1}
+	Common approaches to music source separation (MSS):
+	\begin{enumerate}
+		\item
+			Get spectrogram of mix
+		\item
+			Take magnitude
+		\item
+			Multiply by a mask $\in [0, 1]$ to get source estimate
+		\item
+			Why $[0, 1]$? DFT/STFT is a linear operation: $x_{a} = x_{b} + x_{c}, |X_{a}| = |X_{b}| + |X_{c}|$\\
+			$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
+			if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
+	\end{enumerate}
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-mss/mask_simple.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Phase!}
+	Common approaches to MSS discard the phase; it's difficult to learn relationships from phase
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-mss/whynophase.png}
+	\end{figure}
+	This paper considers the phase, and uses a complex mask to estimate the magnitude and phase of the spectrogram\\
+	$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
+	if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
+	\textbf{Yes!} 
+	\begin{quote}
+		|M(t,f)| can be larger than 1... this may happen when S(t,f) and N(t,f) are out of phase, since that makes the magnitude of mixture to be smaller than that of (individual) signal
+	\end{quote}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Results}
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-misc/ismir2021-phasepaper.png}
+	\end{figure}
+
+	\begin{enumerate}
+		\item
+			We showed that previous MSS methods have upper bound of the performance due to a strong assumption on the magnitude of the masks
+		\item
+			We also showed that accurate phase estimation and unbound complex ideal ratio masks (cIRMs) are important for MSS
+		\item
+			Finally, we analyzed the distribution of cRIMs for MSS and showed that 22\% of cIRMs have magnitude larger than one
+	\end{enumerate}
+\end{frame}
+
+\end{document}
