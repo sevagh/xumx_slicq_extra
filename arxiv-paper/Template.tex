@@ -5,6 +5,15 @@
 \documentclass{article}
 \usepackage{spconf,amsmath,graphicx}
 \usepackage{subcaption}
+\usepackage[
+    %backend=biber, 
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    url=false,
+    doi=false
+]{biblatex}
+\addbibresource{citations.bib}
 
 % Example definitions.
 % --------------------
@@ -55,7 +64,7 @@ Fully convolutional denoising autoencoders, single channel audio source separati
 %
 \section{Introduction}
 \label{sec:intro}
-Different types of deep neural networks (DNNs) have been used to tackle the single channel source separation (SCSS) problem for audio mixtures \cite{Stefan:17:imssbdnntdanb,Grais:17:descassdnn, Kim:15:adaatsltm, chandna:17:massudcnn}. The denoising autoencoder (DAE) is a special type of fully connected feedforward neural networks that takes noisy input signals and outputs their denoised version \cite{Xie:12:ididnn,Vincent:10:sdalurdnldc}. DAEs are common in deep learning, they are used to learn noise robust low-dimensional features even when the inputs are perturbed with some noise \cite{Pascal:08:ecrfda,HinSal:06:rddnn}. DAEs have been used for SCSS where the inputs of the DAE are the spectral frames of the mixed signal and the outputs are the spectral frames of the target source \cite{Kim:15:adaatsltm, Paris:17:nnanmf}. The fully connected DAEs with frame-wise inputs and outputs do not capture the 2D (spectral-temporal) structures of the spectrogram of the input and output signals. Since DAEs are fully connected networks, they usually have many parameters to be optimized.
+Different types of deep neural networks (DNNs) have been used to tackle the single channel source separation (SCSS) problem for audio mixtures \cite{gabor1946}.
 
 For their ability in extracting robust spectral-temporal structures of different audio signals \cite{Honglak:09:uflaccdbn}, convolutional neural networks (CNN) have been used successfully to learn useful features in many audio processing applications such as: speech recognition \cite{Yanmin:16:vdcnnnrsr}, speech enhancement \cite{Szu:16:snrcnnmse}, audio tagging \cite{Yong:17:cgrnnisfat}, and many music related applications \cite{Yoonchang:17:dcnnpirpm,Keunwoo:16:crnnmc,Filip:16:fcdammcr}. Convolutional denoising autoencoders (CDAEs) are also a special type of CNNs that can be used to discover robust localized low-dimensional patterns that repeat themselves over the input \cite{Jonathan:11:scaehfe,Bo:17:scdaefr}. CDAEs differ from conventional DAEs as their parameters (weights) are shared, which makes the CDAEs have fewer parameters than DAEs. The ability of CDAEs to extract repeating patterns in the input makes them suitable to be used to extract speech signals from background noise and music signals for speech enhancement and recognition \cite{se:16:fcnnse,Mengyuan:16:mrcdasr}. 
 % signal that is embedded with speech signals to improve the quality of the speech recognition system \cite{Mengyuan:16:mrcdasr}. The results in \cite{Mengyuan:16:mrcdasr} show that CDAE works better than DAE in removing the background music signals from the speech signal. Fully convolutional denoising auto-encoders (all the network layers are composed of convolutional units) were used for speech enhancement \cite{se:16:fcnnse} that maps the distorted speech signal to its clean speech signal. The results in \cite{se:16:fcnnse} show that CDAE works as well as the fully connected feedforward neural networks (FNNs) and recurrent neural networks (RNNs) even when the number of parameters in the CDAE is much less than the number of parameters in FNNs and RNNs.
@@ -247,7 +256,10 @@ In our future work, we will investigate the effect of changing the parameters in
 % 
 %\vfill\pagebreak
 %
-\bibliographystyle{IEEEbib}
-\bibliography{refs}
+%\bibliographystyle{IEEEbib}
+%\bibliography{refs}
+
+\printbibheading[title={References},heading=bibnumbered]
+\printbibliography[heading=none]
 
 \end{document}
