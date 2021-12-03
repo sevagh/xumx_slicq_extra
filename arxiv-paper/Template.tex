@@ -3,6 +3,7 @@
 %          IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
 \documentclass{article}
+\usepackage{flushend}
 \usepackage{spconf,amsmath,graphicx}
 \usepackage{subcaption}
 \usepackage[
@@ -22,13 +23,12 @@
 
 % Title.
 % ------
-\title{Single Channel Audio Source Separation using Convolutional Denoising Autoencoders}
+\title{Music demixing with the sliCQ transform}
 %
 % Single address.
 % ---------------
-\name{Emad M. Grais and Mark D. Plumbley}
-\address{Centre for Vision, Speech and Signal Processing, University of Surrey, Guildford, UK.}
-% \email{\small \tt \{grais, m.plumbley\}@surrey.ac.uk}
+\name{Sevag Hanssian}
+\address{McGill University, Montr{\'e}al, Canada}
 %
 % For example:
 % ------------
@@ -55,210 +55,68 @@
 \maketitle
 %
 \begin{abstract}
-Deep learning techniques have been used recently to tackle the audio source separation problem. In this work, we propose to use deep fully convolutional denoising autoencoders (CDAEs) for monaural audio source separation. We use as many CDAEs as the number of sources to be separated from the mixed signal. Each CDAE is trained to separate one source and treats the other sources as background noise. The main idea is to allow each CDAE to learn suitable spectral-temporal filters and features to its corresponding source. Our experimental results show that CDAEs perform source separation slightly better than the deep feedforward neural networks (FNNs) even with fewer parameters than FNNs.
+	Music source separation, or music demixing, is the task of decomposing a song into its constituent sources, which are typically isolated instruments (e.g., drums, bass, and vocals). The Music Demixing Challenge\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} \cite{mdx21} was created to inspire new demixing research. Open-Unmix (UMX) \cite{umx}, and the improved variant CrossNet-Open-Unmix (X-UMX) \cite{xumx}, were included in the challenge as the baselines. Both models use the Short-Time Fourier Transform (STFT) as the representation of music signals.
+
+	The time-frequency uncertainty principle states that the STFT of a signal cannot be maximally precise in both time and frequency \cite{gabor1946}. The tradeoff in time-frequency resolution can significantly affect music demixing results \cite{tftradeoff1}. Our proposed adaptation of UMX replaced the STFT with the sliCQT \cite{slicq}, a time-frequency transform with varying time-frequency resolution. Unfortunately, our model xumx-sliCQ\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} achieved lower demixing scores than UMX.
+
 \end{abstract}
 %
 \begin{keywords}
-Fully convolutional denoising autoencoders, single channel audio source separation, stacked convolutional autoencoders, deep convolutional neural networks, deep learning.
+Convolutional denoising autoencoders, audio source separation, time-frequency uncertainty principle, time-frequency resolution, constant-Q transform, nonstationary Gabor transform
 \end{keywords}
 %
 \section{Introduction}
 \label{sec:intro}
-Different types of deep neural networks (DNNs) have been used to tackle the single channel source separation (SCSS) problem for audio mixtures \cite{gabor1946}.
 
-For their ability in extracting robust spectral-temporal structures of different audio signals \cite{Honglak:09:uflaccdbn}, convolutional neural networks (CNN) have been used successfully to learn useful features in many audio processing applications such as: speech recognition \cite{Yanmin:16:vdcnnnrsr}, speech enhancement \cite{Szu:16:snrcnnmse}, audio tagging \cite{Yong:17:cgrnnisfat}, and many music related applications \cite{Yoonchang:17:dcnnpirpm,Keunwoo:16:crnnmc,Filip:16:fcdammcr}. Convolutional denoising autoencoders (CDAEs) are also a special type of CNNs that can be used to discover robust localized low-dimensional patterns that repeat themselves over the input \cite{Jonathan:11:scaehfe,Bo:17:scdaefr}. CDAEs differ from conventional DAEs as their parameters (weights) are shared, which makes the CDAEs have fewer parameters than DAEs. The ability of CDAEs to extract repeating patterns in the input makes them suitable to be used to extract speech signals from background noise and music signals for speech enhancement and recognition \cite{se:16:fcnnse,Mengyuan:16:mrcdasr}. 
-% signal that is embedded with speech signals to improve the quality of the speech recognition system \cite{Mengyuan:16:mrcdasr}. The results in \cite{Mengyuan:16:mrcdasr} show that CDAE works better than DAE in removing the background music signals from the speech signal. Fully convolutional denoising auto-encoders (all the network layers are composed of convolutional units) were used for speech enhancement \cite{se:16:fcnnse} that maps the distorted speech signal to its clean speech signal. The results in \cite{se:16:fcnnse} show that CDAE works as well as the fully connected feedforward neural networks (FNNs) and recurrent neural networks (RNNs) even when the number of parameters in the CDAE is much less than the number of parameters in FNNs and RNNs.
+The STFT is computed by applying the Discrete Fourier Transform on fixed-size windows of the input signal. From both auditory and musical motivations, variable-size windows are preferred, with long windows in low-frequency regions to capture detailed harmonic information with a high frequency resolution, and short windows in high-frequency regions to capture transients with a high time resolution \cite{doerflerphd}. The sliCQ Transform (sliCQT) \cite{slicq} is a realtime variant of the Nonstationary Gabor Transform (NSGT) \cite{balazs}. These are time-frequency transforms with complex Fourier coefficients and perfect inverses that use varying windows to achieve nonlinear time or frequency resolution. An example application of the NSGT/sliCQT is an invertible Constant-Q Transform (CQT) \cite{jbrown}.
 
-Motivated by the aforementioned successes of using neural networks with convolutional layers in a variety of audio signal processing applications, we propose in this paper to use deep fully convolutional denoising autoencoders, where all the layers of the CDAEs are composed of convolutional units, for single channel source separation (SCSS). The main idea in this paper is to train a CDAE to extract one target source from the mixture and treats the other sources as background noise that needs to be suppressed. This means we need as many CDAEs as the number of sources that need to be separated from the mixed signal. This is a very challenging task because each CDAE has to deal with highly nonstationary background signals/noise. Each CDAE sees the magnitude spectrograms as 2D segments which helps in learning the spectral and temporal information for the audio signals. From the ability of CDAEs in learning noise robust features, in this work, we train each CDAE to learn unique spectral-temporal patterns for its corresponding target source. Each trained CDAE is then used to extract/separate the related patterns of its corresponding target source from the mixed signal.
+\section{Methodology}
+\label{sec:method}
 
-This paper is organized as follows: Section \ref{fcda} shows a brief introduction about CDAEs. The proposed approach of using CDAEs for SCSS is presented in Section \ref{overall}. The experiments and discussions are shown in Section \ref{sec:exp}. %In section \ref{pf} we present the SCSS problem. 
+In music demixing, the oracle estimator represents the upper limit of performance using ground truth signals. In UMX, the phase of the STFT is discarded and the estimated magnitude STFT of the target is combined with the phase of the mix for the first estimate of the waveform. This is sometimes referred to as the "noisy phase" \cite{noisyphase1}, described by equation \eqref{eq:noisyphaseoracle}.
+\begin{equation}\label{eq:noisyphaseoracle}
+\hat{X}_{\text{target}} = |X_{\text{target}}| \cdot \angle{X_{\text{mix}}}
+\end{equation}
+
+The sliCQT parameters were chosen randomly in a 60-iteration search for the largest median SDR across the four targets (vocals, drums, bass, other) from the noisy-phase waveforms of the MUSDB18-HQ \cite{musdb18hq} validation set. The sliCQT parameters of 262 frequency bins on the Bark scale between 32.9--22050 Hz achieved 7.42 dB in the noisy phase oracle, beating the 6.23 dB of the STFT with the UMX window and overlap of 4096 and 1024 samples respectively. STFT and sliCQT spectrograms of a glockenspiel signal\footnote{\url{https://github.com/ltfat/ltfat/blob/master/signals/gspi.wav}} are shown in Figure \ref{fig:spectrograms}.
 
 \begin{figure*}[h]
- \includegraphics[width=1\linewidth,height=4.5cm]{CDAE1.eps}%chart1_email
-\caption{\label{fig:cdae1}{The overview of the proposed structure of a convolutional denoising auto-encoder (CDAE) that separates one target source from the mixed signal. ``Conv.'' denotes a 2D convolutional layer, ReLU denotes a rectified linear unit as an activation function. We use a CDAE for each source.}}
-%\end{center}
+	\includegraphics[width=\textwidth]{./spectrograms_comparison.png}
+	\caption{STFT and sliCQT spectrograms of the musical glockenspiel signal}
+	\label{fig:spectrograms}
 \end{figure*}
 
+The STFT outputs a single time-frequency matrix where all of the frequency bins are spaced uniformly apart and have the same time resolution. The sliCQT groups frequency bins, which may be nonuniformly spaced, in a ragged list of time-frequency matrices, where each matrix contains frequency bins that share the same time resolution. In xumx-sliCQ, convolutional layers adapted from an STFT-based vocal separation model \cite{plumbley2} were applied separately to each time-frequency matrix, shown in Figure \ref{fig:ragged}.
 
-\section{Fully convolutional denoising autoencoders}
-\label{fcda}
-Fully convolutional autoencoders (CAEs) \cite{Jonathan:11:scaehfe,Bo:17:scdaefr} are composed of two main parts, the encoder part and the decoder part. The encoder part maps the input data into low dimensional features. The decoder part reconstructs the input data from the low dimensional features. Convolutional denoising autoencoders (CDAEs) are similar to CAEs but CDAEs are trained from corrupted input signals and the encoder is used to extract noise robust features that the decoder can use to reconstruct a cleaned-up version of the input data \cite{se:16:fcnnse,Mengyuan:16:mrcdasr}. The encoder part in CDAEs is composed of repetitions of a convolutional layer, an activation layer, and a pooling layer as shown in Fig. \ref{fig:cdae1}. The convolutional layers consist of a set of filters that extract features from their input layers, the activation layer in this work is the rectified linear unit that imposes nonlinearity to the feature maps. The pooling in this work is chosen to be max-pooling \cite{Dominik:10:epocaor}. The max-pooling does the down-sampling of the latent representation by a constant factor taking the maximum value within a certain scope of the mapping space and generates a new mapping space with a reduced dimension. %Considering the maximum values only can be seen as selecting the important information in the mapping space and ignore the small values that maybe related to the noise. % Maxpooling layer \cite{Dominik:10:epocaor} does the down-sampling on the feature maps (the latent representation) of the previous layer and generates new ones with a reduced dimension. This helps improving filter selectivity, as the activation of each neuron in the latent representation is determined by the match between the feature and the input field over the region of interest. 
-The final goal of the  encoder part is to extract noise robust low dimensional features from the input data. The max-pooling is the layer that reduces the dimensionality of the mapping space. The decoder part consists of repetitions of a convolutional layer, an activation layer, and an up-sampling layer. The up-sampling layer does the up-sampling on the feature maps of the previous layer and generates new ones with high dimension. In this work, the data are 2D signals (magnitude spectrograms). The filtering, pooling, and up-sampling are all 2D operators. % The decoder part takes the low dimensional features (output of the encoder) to reconstruct the cleaned-up version of the input data.
-%
-%\section{Problem formulation of audio SCSS}
-%\label{pf}
-%Given a mixture of $I$ sources as $y(t) = \sum_{i=1}^I s_i(t)$, the aim of audio SCSS is to estimate the sources $s_i(t), \ \forall{i}$, from the mixed signal $y(t)$. Usually the estimate $\hat{S}_i(n,f)$ for source $i$ in the short time Fourier transform (STFT) domain can be found by predicting a time-frequency mask $M_i(n,f)$ that scales the mixed signal according to the contribution of source $i$ in the mixed signal as follows \cite{Erdogan:15:psrbssdrnn,Simpson:15:dkevmmcdnn,emad:12:stpsnmfscss}: 
-%\begin{equation}
-%\label{est_trgt1_pf}
-%\footnotesize
-%{
-%\hat {S}_i(n,f)=M_i(n,f) \times Y(n,f)
-%}
-%\end{equation}
-%where $Y(n,f)$ is the STFT of the observed mixed signal $y(t)$, while $n$ and $f$ are the time and frequency indices respectively. The mask $M_i(n,f)$ takes real values between zero and one. The main goal here is to predict masks $M_i(n,f), \ \forall{i}$, that separate the sources from the mixed signal. 
-%In this framework, the magnitude spectrogram of the mixed signal is approximated as a sum of the magnitude spectra of the estimated sources \cite{Emad:16:scassdnne,Virtanen:07:msssbnmfwtcasc} as follows:
-%\begin{equation}
-%\label{stftangl_2}
-%\left|Y(n,f)\right|\approx \sum_{i=1}^I\left| \hat{S}_i(n,f)\right|.
-%\end{equation}
-%For the rest of this paper, we denote the magnitude spectrograms and the masks in a matrix form as $\bY$, $\hat \bS_i$, and $\mathbf{M}_i$.
+\begin{figure*}[h]
+	\includegraphics[width=\textwidth]{./xumx_slicq_pertarget.png}
+	\caption{Example of convolutional layers applied to a ragged sliCQT}
+	\label{fig:ragged}
+\end{figure*}
 
-\section{The proposed approach of using CDAEs for SCSS}
-\label{overall}
-Given a mixture of $I$ sources as $y(t) = \sum_{i=1}^I s_i(t)$, the aim of audio SCSS is to estimate the sources $s_i(t), \ \forall{i}$, from the mixed signal $y(t)$ \cite{emad:12:avsrwbmscss,emad:12:stpsnmfscss}. We work here in the short-time Fourier transform (STFT) domain. Given the STFT of the mixed signal $y(t)$, the main goal is to estimate the STFT of each source in the mixture.
+\section{Results}
+\label{sec:results}
 
-In this work we propose to use CDAEs for source separation. We propose to use as many CDAEs as the number of sources to be separated from the mixed signal. Each CDAE sees the mixed signal as a combination of its target source and background noise. The main aim of each CDAE is to estimate a clean signal for its corresponding source from the other background sources that exist in the mixed signal. This is a challenging task for each CDAE since each CDAE deals with highly nonstationary background noise (other sources in the mixture). Each CDAE is trained to map the magnitude spectrogram of the mixture into the magnitude spectrogram of its corresponding target source. Each CDAE in this work is a fully 2D convolutional deep neural network without any fully connected layer, which keeps the number of parameters to be optimized for each CDAE very small. Also using fully 2D convolutional layers allows neat 2D spectral-temporal representations for the data through all the layers in the network while considering the spectral-temporal representations in the case of using fully connected layers requires stacking multiple consecutive frames to form very long feature vectors. The inputs and outputs of the CDAEs are 2D-segments from the magnitude spectrograms of the mixed and target signals respectively. Therefore, the CDAEs span multiple time frames to capture the spectral-temporal characteristics of each source. The number of frames that each input segment has is $N$ and the number of frequency bins is $F$. In this work, $F$ is the dimension of the whole spectral frame.  
-%
-%Figure \ref{fig:cdae1} shows the overview of the proposed approach of using a CDAE for separating a target source from the mixed signal.
-%
-\subsection{Training the CDAEs for source separation}
-\label{sec:train}
-Let's assume we have training data for the mixed signals and their corresponding clean/target sources. Let $\mathbf{Y}_{\mbox{tr}}$ be the magnitude spectrogram of the mixed signal and $\mathbf{S}_i$ be the magnitude spectrogram of the clean source $i$. The subscript ``tr'' denotes the training data. The CDAE that separates source $i$ from the mixture is trained to minimize the following cost function:
-\begin{equation}
-\label{cost_mask}
-C_i =\sum_{n,f}\left( \mathbf{Z}_i\left(n,f\right) - \mathbf{S}_i\left(n,f\right) \right)^2
-\end{equation}
-where $\mathbf{Z}_i$ is the actual output of the last layer of the CDAE of source $i$, $\mathbf{S}_i$ is the reference clean output signal for source $i$, $n$, and $f$ are the time and frequency indices respectively. The input of all the CDAEs is the magnitude spectrogram $\mathbf{Y}_{\mbox{tr}}$ of the mixed signal. 
+Our model, xumx-sliCQ, was trained on MUSDB18-HQ. On the test set, xumx-sliCQ achieved a median SDR of 3.6 dB versus the 4.64 dB of UMX and 5.54 dB of X-UMX, performing worse than the original STFT-based models. The overall system architecture of xumx-sliCQ is similar to UMX and X-UMX, shown in Figure \ref{fig:blockdiagrams}.
 
-Note that the input and output instants of the CDAEs are 2D-segments from the spectrograms of the mixed and target signals respectively. Each segment is composed of $N$ consecutive spectral frames taken from the magnitude spectrograms. This allows the CDAEs to learn unique spectral-temporal patterns for each source. 
-%
-%\begin{figure}[h]
-% \includegraphics[width=1\linewidth]{mask_overview2.eps}%chart1_email
-%\caption{\label{fig:overflow}\eightpt{The Overview of the proposed method of using many CDAEs for separating many sources from their mixture.}}
-%\end{center}
-%\end{figure}
-%
-\subsection{Testing the CDAEs for source separation}
-\label{sec:test} 
-Given the trained CDAEs, the magnitude spectrogram $\mathbf{Y}$ of the mixed signal is passed through all the trained CDAEs. The output of the CDAE of source $i$ is the estimate $\mathbf{\tilde{S}}_i$ of the spectrogram of source $i$. %The time domain estimate for source $\hat s_i(t)$ is computed using the inverse STFT of $\hat {\bS}_i$ with the phase angle of the STFT of the mixed signal.
-
-\section{Experiments and Discussion}
-\label{sec:exp}
-We applied our proposed single channel source separation (SCSS) using CDAEs approach to separate audio sources from a group of songs from the SiSEC-2015-MUS-task dataset \cite{ono:15:tsisec}. The dataset has 100 stereo songs with different genres and instrumentations. To use the data for the proposed SCSS approach, we converted the stereo songs into mono by computing the average of the two channels for all songs and sources in the data set. Each song is a mixture of vocals, bass, drums, and other musical instruments. We used our proposed algorithm to separate each song into vocals, bass, drums and other instruments. The other instruments (\textit{other} for short) here (sources that are not vocal, bass, or drums) are treated as one source. We trained four CDAEs for the four sources (vocals, bass, drums, and other). 
-
-The first 50 songs were used as training and validation datasets to train all the networks for separation, and the last 50 songs were used for testing. The data was sampled at 44.1kHz. The magnitude spectrograms for the data were calculated using the STFT, a Hanning window with 2048 points length and overlap interval of 512 was used and the FFT was taken at 2048 points, the first 1025 FFT points only were used as features since the conjugate of the remaining 1024 points are involved in the first points.
-
-For the input and output data for the CDAEs, we chose the number of spectral frames in each 2D-segment to be 15 frames. This means the dimension of each input and output instant for each CDAE is 15 (time frames) $\times$ 1025 (frequency bins). Thus, each input and output instant (the 2D-segments from the spectrograms) spans around 370 msec of the waveforms of the data.  
-%
-\begin{table}
-\scalebox{0.95}
-{
-\begin{tabular}{ |p{3cm}||p{2.5cm}|p{2cm}|}
- \hline
- \multicolumn{3}{|c|}{CDAE model summary} \\
- \hline
- \multicolumn{3}{|c|}{The input data with size 15 frames and 1025 frequency bins} \\
- \hline
- Layer (type)         & Number of filters & output shape \\
-  \hline
- Convolution2D(3,3)   & 12    & (15, 1025) \\
-  Max-Pooling2D(3,5)    &        & (5, 205) \\
-  \hline 
- Convolution2D        & 20     & (5, 205) \\
-  Max-Pooling2D(1,5)    &        & (5, 41) \\
- \hline 
- Convolution2D        & 30     & (5, 41) \\
-  \hline 
- Convolution2D        & 40     & (5, 41) \\
-  \hline 
- Convolution2D        & 30     & (5, 41) \\
-  \hline 
- Convolution2D        & 20      & (5, 41) \\
-  Up-Sampling2D(1,5)   &        & (5, 205) \\
-  \hline 
-Convolution2D(3,3)    & 12      & (5, 205) \\
-Up-Sampling2D(3,5)     &       & (15, 1025) \\
-\hline 
- Convolution2D        & 1      & (15, 1025) \\
-  \hline
- \multicolumn{3}{|c|}{The output data with size 15 frames and 1025 frequency bins} \\
- \multicolumn{3}{|c|}{Total number of parameters: 37,101}\\
- \hline
-\end{tabular}
-}
-\caption{{The detail structure of each CDAE. The output shape is shown as (time-frame , frequency). ``Convolution2D(3,3)'' denotes 2D convolutional layer with filter size 3$\times$3. ``Max-Pooling2D(3,5)'' denotes down-sampling by 3 in the time-frame direction and by 5 in the frequency direction. ``Up-Sampling2D(3,5)'' denotes up-sampling by 3 in the time-frame direction and by 5 in the frequency direction.}}
-\label{table:cdae} % is used to refer this table in the text
-\end{table}
-
-For the CDAEs, each CDAE has seven hidden 2D convolutional layers with rectified linear unit (ReLU) as an activation function. The details of the dimensions of the input, convolutional, max-pooling, up-sampling and output layers of each CDAE are shown in Table \ref{table:cdae}. The dimensions are shown as time-frames $\times$ frequency. The size of each filter is 3$\times$3 as in \cite{Yanmin:16:vdcnnnrsr,Filip:16:fcdammcr}. ``Max-Pooling2D(3,5)'' in Table \ref{table:cdae}, denotes down-sampling the feature maps by 3 in the time-frame direction and by 5 in the frequency direction of the 2D feature maps. ``Up-Sampling2D(3,5)'' in Table \ref{table:cdae}, denotes up-sampling the feature maps by 3 in the time-frame direction and by 5 in the frequency direction. The output layer is also a convolutional layer with ReLU that its size was adjusted to match the size of each 2D output segment (15$\times$1025) of the spectrogram. As can be seen from Table \ref{table:cdae}, each CDAE has 37,101 parameters. 
-
-\begin{table}[]
-\centering
-\caption{The number of parameters for each FNN and CDAE.}
-\label{table:parmtrs}
-\begin{tabular}{ll}
-\hline
-FNN & 4,206,600  \\
-\hline
-CDAE & 37,101  \\
-\hline
-\end{tabular}
-\end{table}
-
-We compared our proposed SCSS using CDAEs approach for SCSS with using deep fully connected feedforward neural networks (FNN) for SCSS approach. Four FNNs were used and each FNN was used to separate one source. Each FNN has three hidden layers with ReLU as activation functions. Each hidden layer has 1025 nodes. The parameters of the networks are tuned based on our previous work on the same dataset \cite{Emad:16:scassdnne, grais:16:cmescassdnn}. As shown in Table \ref{table:parmtrs}, the number of parameters in each FNN is 4,206,600 parameters which is greater than 100 times the number of parameters in each CDAE.
-
-
-\begin{figure}
-\centering
-   \begin{subfigure}[b]{0.43\textwidth}
-   \includegraphics[width=0.99\linewidth]{avr2_sdr_interspeech2017.eps} 
-   \caption{Normalized SDR in dB}\hfill \hfill\hfill\hfill\hfill\hfill
-   \label{fig:dnn1} 
-\end{subfigure}
-
-\begin{subfigure}[b]{0.43\textwidth}
-   \includegraphics[width=0.99\linewidth]{avr2_sir_interspeech2017.eps} 
-   \caption{Normalized SIR in dB}\hfill\hfill\hfill\hfill\hfill\hfill 
-   \label{fig:dnn2}
-\end{subfigure}
-
-\begin{subfigure}[b]{0.43\textwidth}
-   \includegraphics[width=0.99\linewidth]{avr2_sar_interspeech2017.eps}
-   \caption{SAR in dB}\hfill\hfill
-   \label{fig:dnn3} 
-\end{subfigure}
-
-\caption[]{(a) The normalized SDR, (b) the normalized SIR, and (c) SAR values in dB of using deep fully connected feedforward neural networks (FNNs) and the proposed method of using deep fully convolutional denoising autoencoders (CDAEs) for source separation.}
-\label{fig:dnn_dnn} 
-\end{figure}
-
-The parameters for all the networks were initialized randomly. All the networks were trained using backpropagation with Nesterovs accelerated gradient \cite{Nesterov:83:mscppcr} as recommended by \cite{icml2013_sutskever13} with parameters: $\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=1e-08$, schedule-decay$=0.004$, batch size 100, and a learning rate starts with $0.002$ and reduced by a factor of 10 when the values of the cost function do not decrease on the validation set for 3 consecutive epochs. The maximum number of epochs is 100. We implemented our proposed algorithm using Keras based on Theano \cite{chollet2015keras,Bastien:12:theano1}.
-
-Since in this work we separate all four sources from the mixed signals, it is usually preferred to separate the sources from the mixed signal by building spectral masks that scale the mixed signal according to the contribution of each source in the mixed signal \cite{arie:16:masswdnn,Huang:14:svsmrdrnn}. The masks make sure that the sum of the estimated sources adds up to the mixed signal \cite{erdogan:10:sbsmsusacp,grais:14:ssrnmfmmse}. Here we used the output spectrograms $\mathbf{\tilde{S}}_i,\ \forall i$ of the networks to build spectral masks as follows:
-\begin{equation}
-\label{mask}
-\footnotesize{
-\mathbf{M}_i (n,f)= \frac{\mathbf{\tilde{S}}_i(n,f)}{\sum_j^I \mathbf{\tilde{S}}_j(n,f)}, \ \ \forall i.
-}
-\end{equation}
-The final estimate for source $i$ can be found as
-\begin{equation}
-\label{mask}
-\footnotesize{
-\mathbf{\hat{S}}_i(n,f) =  \mathbf{M}_i (n,f) \times \mathbf{Y}(n,f)
-}
-\end{equation}
-where $\mathbf{Y}(n,f)$ is the magnitude spectrogram of the mixed signal at frame $n$ and frequency $f$. The time domain estimate for source $\hat s_i(t)$ is computed using the inverse STFT of $\hat {\mathbf{S}}_i$ with the phase angle of the STFT of the mixed signal.
-
-The quality of the separated sources was measured using the signal to distortion ratio (SDR), signal to interference ratio (SIR), and signal to artefact ratio (SAR) \cite{vincent:06:pmi}. SIR indicates how well the sources are separated based on the remaining interference between the sources after separation. SAR indicates the artefacts caused by the separation algorithm in the estimated separated sources. SDR measures how distorted the separated sources are. The SDR values are usually considered as the overall performance evaluation for any source separation approach \cite{vincent:06:pmi}. Achieving high SDR, SIR, and SAR indicates good separation performance. 
-
-Figs. \ref{fig:dnn1} and \ref{fig:dnn2} show the box-plots of the normalized SDR and SIR values respectively. The normalization was done by subtracting the SDR and SIR values of the mixed signal from their corresponding values of the estimated sources \cite{alexey:07:aobmfscssaiatvmsips}. Fig. \ref{fig:dnn3} shows the box-plots of the SAR values of the separated sources using FNNs and CDAEs. We show the SAR values without normalization because SAR for the mixed signal is usually very high. 
-
-As can be seen from Fig. \ref{fig:dnn_dnn}, CDAEs with few parameters improve the quality of the sources by achieving positive normalized SDR and SIR values and high SAR values for the separated sources. We can also see that CDAEs work significantly better than FNNs for drums, which is considered as a difficult source to be separated \cite{Stefan:17:imssbdnntdanb,arie:16:masswdnn}. For the SDR and SIR, the performance of FNNs and CDAEs is almost the same for the vocals and bass sources. For SAR, the performance of CDAEs and FNNs is the same for bass, but CDAEs perform better than FNNs in the remaining sources. In general, it is not easy to have a fair comparison between the two methods since FNNs have more parameters than CDAEs and CDAEs were applied on spectral-temporal segments (without overlapping) while the FNNs were applied on individual spectral frames. %FNNs performs better than CDAEs on the other sources' case. The other sources here represent all sources that appear in the songs that are not vocals, drums, and bass, which is a variety of sources that change from one song to another. 
-
-\section{Conclusions}
-In this work we proposed a new approach for single channel source separation (SCSS) of audio mixtures. The new approach is based on using deep fully convolutional denoising autoencoders (CDAEs). We used as many CDAEs as the number of sources to be separated from the mixed signal. Each CDAE learns unique patterns for each source and uses this information to separate the related components of each source from the mixed signal. The experimental results indicate that using CDAEs for SCSS is a promising approach and with very few parameters can achieve competitive results with the feedforward neural networks. 
-
-In our future work, we will investigate the effect of changing the parameters in the CDAE including: the size of the filters, the number of filters in each layer, the max-pooling and up-sampling ratios, the number of frames in each input/output segment, and the number of layers on the quality of the separated sources. We will also investigate the possibility of using CDAEs for the multi-channel audio source separation problem using multi-channel convolutional neural networks.     
+\begin{figure*}[h]
+	\centering
+	\subfloat[UMX, single target]{\includegraphics[width=0.75\textwidth]{./umx_clean.png}}\\
+	\vspace{1em}
+	\subfloat[xumx-sliCQ, single target]{\includegraphics[width=0.75\textwidth]{./xumx_slicq_clean.png}}
+	\caption{Comparing UMX and xumx-sliCQ}
+	\label{fig:blockdiagrams}
+\end{figure*}
 
 \section{Acknowledgements}
- This work is supported by grants EP/L027119/1 and EP/L027119/2 from the UK Engineering and Physical Sciences Research Council (EPSRC).
+Thanks to my colleagues Néstor Nápoles López and Timothy Raja de Reuse, and to my master's thesis supervisor Prof. Ichiro Fujinaga, for help throughout the creation of xumx-sliCQ. Thanks to the MDX 21 challenge for creating a motivational environment for learning more about music demixing.
 % 
-%\vfill\pagebreak
+\clearpage\vfill\pagebreak
 %
 %\bibliographystyle{IEEEbib}
 %\bibliography{refs}
 
+\raggedend
 \printbibheading[title={References},heading=bibnumbered]
 \printbibliography[heading=none]
 
