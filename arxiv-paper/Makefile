@@ -5,7 +5,7 @@ texpdf:
 
 arxiv-dev: export LATEXMK_FLAGS="-pvc"
 arxiv-dev: arxiv
-arxiv: tex_fname="Template.tex"
+arxiv: tex_fname="paper.tex"
 arxiv: texpdf
 
 all: arxiv

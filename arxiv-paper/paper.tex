@@ -73,7 +73,7 @@ The STFT is computed by applying the Discrete Fourier Transform on fixed-size wi
 \section{Methodology}
 \label{sec:method}
 
-In music demixing, the oracle estimator represents the upper limit of performance using ground truth signals. In UMX, the phase of the STFT is discarded and the estimated magnitude STFT of the target is combined with the phase of the mix for the first estimate of the waveform. This is sometimes referred to as the "noisy phase" \cite{noisyphase1}, described by equation \eqref{eq:noisyphaseoracle}.
+In music demixing, the oracle estimator represents the upper limit of performance using ground truth signals. In UMX, the phase of the STFT is discarded and the estimated magnitude STFT of the target is combined with the phase of the mix for the first estimate of the waveform. This is sometimes referred to as the ``noisy phase'' \cite{noisyphase1}, described by equation \eqref{eq:noisyphaseoracle}.
 \begin{equation}\label{eq:noisyphaseoracle}
 \hat{X}_{\text{target}} = |X_{\text{target}}| \cdot \angle{X_{\text{mix}}}
 \end{equation}
@@ -86,11 +86,11 @@ The sliCQT parameters were chosen randomly in a 60-iteration search for the larg
 	\label{fig:spectrograms}
 \end{figure*}
 
-The STFT outputs a single time-frequency matrix where all of the frequency bins are spaced uniformly apart and have the same time resolution. The sliCQT groups frequency bins, which may be nonuniformly spaced, in a ragged list of time-frequency matrices, where each matrix contains frequency bins that share the same time resolution. In xumx-sliCQ, convolutional layers adapted from an STFT-based vocal separation model \cite{plumbley2} were applied separately to each time-frequency matrix, shown in Figure \ref{fig:ragged}.
+The STFT outputs a single time-frequency matrix where all of the frequency bins are spaced uniformly apart and have the same time resolution. The sliCQT groups frequency bins, which may be nonuniformly spaced, in a ragged list of time-frequency matrices, where each matrix contains frequency bins that share the same time resolution. In xumx-sliCQ, a Convolutional Denoising Autoencoder (CDAE) architecture (adapted from STFT-based music source separation models \cite{plumbley1, plumbley2}) was applied separately to each time-frequency matrix, shown in Figure \ref{fig:ragged}. Note how the sliCQT must be overlap-added to create a meaningful spectrogram; the inverse of the overlap-add, or de-overlap, was learned with a final transposed convolutional layer after the CDAE layers.
 
 \begin{figure*}[h]
 	\includegraphics[width=\textwidth]{./xumx_slicq_pertarget.png}
-	\caption{Example of convolutional layers applied to a ragged sliCQT}
+	\caption{Convolutional denoising autoencoders (CDAE) applied to the ragged sliCQT}
 	\label{fig:ragged}
 \end{figure*}
 
