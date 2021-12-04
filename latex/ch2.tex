@@ -573,6 +573,7 @@ In machine learning, the input data is typically split into a training set and a
 \textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that models from the field of computer vision, originally designed for 2D images where pixels are related spatially, may not exactly fit audio waveforms where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains \parencite{audiodeeplearning}.
 
 \subsubsection{Convolutional neural networks (CNN)}
+\label{sec:cnn}
 
 Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' \parencite[3]{audiodeeplearning}. These are useful for both images and audio according because of their ability to exploit spatial or temporal correlation in data \parencite{cnns}. Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel slides over the pixels of the input image.
 
@@ -589,6 +590,15 @@ Convolutional neural networks (CNN) ``are based on convolving their input with l
 	\end{minipage}
 \end{figure}
 
+Figure \ref{fig:convtranspose} shows how a convolutional and transpose convolutional or deconvolutional layer are the inverse operation of each other.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./images-neural/convtranspose.png}
+	\caption{Deconvolution operation \parencite[11]{convtranspose}}
+	\label{fig:convtranspose}
+\end{figure}
+
 The network architecture and feature map for an audio CNN is shown in Figure \ref{fig:audiocnn}, where the extracted feature map is visualized in the spectral domain.
 
 \begin{figure}[ht]
@@ -599,7 +609,30 @@ The network architecture and feature map for an audio CNN is shown in Figure \re
 	\label{fig:audiocnn}
 \end{figure}
 
-Finally, we note that for audio applications, both 1D convolutions (also referred to as temporal convolutions) applied directly to the audio waveform and 2D convolutions applied to time-frequency transforms (most commonly the STFT) are both used \parencite{tcn, 2dconv}.
+We note that for audio applications, both 1D convolutions (also referred to as temporal convolutions) applied directly to the audio waveform and 2D convolutions applied to time-frequency transforms (most commonly the STFT) are both used \parencite{tcn, 2dconv}. To describe convolutional layers, \citeauthor{convguide} state that ``images, sound clips and many other similar kinds of data have an intrinsic structure,'' and share the following properties \parencite[6]{convguide}:
+
+\begin{tight_enumerate}
+	\item
+		They are stored as multi-dimensional arrays (e.g. the STFT or sliCQT)
+	\item
+		They feature one or more axes for which ordering matters (e.g., time and frequency for a spectrogram)
+	\item
+		The channel axis is used to access different views of the data (e.g., the left and right channels of a stereo audio track)
+\end{tight_enumerate}
+
+The STFT and sliCQT of stereo (2-channel) music produce a 2-channel spectrogram, such that the total dimensions of the 2D time-frequency spectrogram are $\text{time} \times \text{frequency} \times \text{channel}$. The 2D convolution kernels slide across the spectrograms to learn a feature representation, and the number of output channels determines how many feature maps are created. 
+
+The kernel parameters define the size and movement of the 2D convolution kernel in the time and frequency dimensions in each output channel. Besides the kernel size, the kernel has these additional parameters: stride, dilation, and padding \parencite{convguide}. Figure \ref{fig:convdiags} shows the behavior of these different kernel parameters. The stride is the amount by which the kernel moves; a stride larger than one implies \textit{subsampling}, because it dictates how much of the output is retained \parencite{convguide}. The dilation defines ``holes'' or gaps in the kernel to increase the receptive field \parencite{convguide}, which is a computationally cheap way to increase the amount of data points considered in a feature map. The padding defines zeros concatenated to the beginning and end of an axis.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[2D convolution kernel]{\includegraphics[width=\textwidth]{./images-neural/conv1.png}}\\
+	\subfloat[2D convolution kernel with padding > 0]{\includegraphics[width=\textwidth]{./images-neural/conv2.png}}\\
+	\subfloat[2D convolution kernel with stride > 1]{\includegraphics[width=\textwidth]{./images-neural/conv3.png}}\\
+	\subfloat[2D convolution kernel with dilation > 1]{\includegraphics[width=\textwidth]{./images-neural/conv4.png}}
+	\caption{Different behaviors of kernel parameters \parencite[14, 29]{convguide}}
+	\label{fig:convdiags}
+\end{figure}
 
 \subsubsection{Recurrent neural networks (RNN)}
 
@@ -722,7 +755,7 @@ The underlying values are stored in formats that allow for efficient numerical c
 
 In PyTorch and Tensorflow (and in general machine learning), a similar concept to the ndarray is the tensor. The tensor originates from the field of physics \parencite{whatistensor}. The tensor is also an n-dimensional numerical array, and NumPy ndarrays are interchangeable with both PyTorch and Tensorflow tensors.\footnote{\url{https://www.tensorflow.org/guide/tf_numpy}, \url{https://pytorch.org/tutorials/beginner/blitz/tensor_tutorial.html}}
 
-Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example \Verb#torch.cos()# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning constructs supported by these libraries are represented as tensors.
+Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example, \Verb#torch.cos()# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning constructs supported by these libraries are represented as tensors.
 
 \subsubsection{Package managers for Python}
 
@@ -1227,7 +1260,7 @@ A visualization of the multi-domain loss (MDL) and combination loss (CL) for fou
 \subsubsection{Convolutional denoising autoencoder (CDAE)}
 \label{sec:cdae}
 
-While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing \parencite{plumbley1, plumbley2}. The architectures are shown in Figure \ref{fig:cdaes}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT.
+While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing \parencite{plumbley1, plumbley2}. The architectures are shown in Figure \ref{fig:cdaes}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT. We refer the readers to section \ref{sec:cnn} for details on convolutional and deconvolutional layers and their various parameters.
 
 \begin{figure}[ht]
 	\centering
@@ -1237,39 +1270,9 @@ While the discussed Open-Unmix model is based on sequence2sequence ideas with a 
 	\label{fig:cdaes}
 \end{figure}
 
-CDAEs are symmetric: a stack of convolutional layers in the encoder are applied to the input spectrogram to extract spectral audio features with sliding 2D (frequency filter, time filter) kernels. The corresponding reverse stack of transpose convolution (or deconvolution) layer in the decoder use the same size of filter (in reverse order) to grow the feature map back to the original spectrogram. For example, a 2-layer encoder/decoder might consist of the following layers: $\text{Conv}(11,42) \rightarrow \text{Conv}(3,5) \rightarrow \text{ConvTranspose}(3,5) \rightarrow \text{ConvTranspose}(11,42)$. Figure \ref{fig:convtranspose} shows how a convolutional and transpose convolutional or deconvolutional layer apply inverse operations.
+CDAEs are symmetric: a stack of convolutional layers in the encoder are applied to the input spectrogram to extract spectral audio features with sliding 2D (frequency filter, time filter) kernels. The corresponding reverse stack of transpose convolution (or deconvolution) layer in the decoder use the same size of filter (in reverse order) to grow the feature map back to the original spectrogram. For example, a 2-layer encoder/decoder might consist of the following layers: $\text{Conv}(11,42) \rightarrow \text{Conv}(3,5) \rightarrow \text{ConvTranspose}(3,5) \rightarrow \text{ConvTranspose}(11,42)$.
 
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.8\textwidth]{./images-neural/convtranspose.png}
-	\caption{Deconvolution operation \parencite[11]{convtranspose}}
-	\label{fig:convtranspose}
-\end{figure}
-
-To describe convolutional layers, \citeauthor{convguide} state that ``images, sound clips and many other similar kinds of data have an intrinsic structure,'' and share the following properties \parencite[6]{convguide}:
-
-\begin{tight_enumerate}
-	\item
-		They are stored as multi-dimensional arrays (e.g. the STFT or sliCQT)
-	\item
-		They feature one or more axes for which ordering matters (e.g., time and frequency for a spectrogram)
-	\item
-		The channel axis is used to access different views of the data (e.g., the left and right channels of a stereo audio track)
-\end{tight_enumerate}
-
-The STFT and sliCQT of stereo (2-channel) music produce a 2-channel spectrogram, such that the total dimensions of the 2D time-frequency spectrogram are $\text{time} \times \text{frequency} \times \text{channel}$. The 2D convolution kernels slide across the spectrograms to learn a feature representation, and the number of output channels determines how many feature maps are created. Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$.
-
-The kernel parameters define the size and movement of the 2D convolution kernel in the time and frequency dimensions in each output channel. Besides the kernel size, the kernel has these additional parameters: stride, dilation, and padding \parencite{convguide}. Figure \ref{fig:convdiags} shows the behavior of these different kernel parameters. The stride is the amount by which the kernel moves; a stride larger than one implies \textit{subsampling}, because it dictates how much of the output is retained \parencite{convguide}. The dilation defines ``holes'' or gaps in the kernel to increase the receptive field \parencite{convguide}, which is a cheap way to increase the amount of data points considered in a feature map. The padding defines zeros concatenated to the beginning and end of an axis.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[2D convolution kernel]{\includegraphics[width=\textwidth]{./images-neural/conv1.png}}\\
-	\subfloat[2D convolution kernel with padding > 0]{\includegraphics[width=\textwidth]{./images-neural/conv2.png}}\\
-	\subfloat[2D convolution kernel with stride > 1]{\includegraphics[width=\textwidth]{./images-neural/conv3.png}}\\
-	\subfloat[2D convolution kernel with dilation > 1]{\includegraphics[width=\textwidth]{./images-neural/conv4.png}}
-	\caption{Different behaviors of kernel parameters \parencite[14, 29]{convguide}}
-	\label{fig:convdiags}
-\end{figure}
+Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$.
 
 We will note that each of the papers gives us different ideas with how to adapt STFT-based convolutional models to fit the sliCQT. The model introduced in \textcite{plumbley1} shows a simple case of a 2D time and frequency filter applied to the STFT, which can be applied to any time-frequency transform. The model introduced in \textcite{plumbley2} varies the size of time and frequency filter to fit the Constant-Q Transform, which as discussed in section \ref{sec:cqt} analyzes music with higher frequency resolution in the low frequency region, and higher time resolution in the high frequency region.
 

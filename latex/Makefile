@@ -14,11 +14,6 @@ proposal-dev: proposal
 proposal: tex_fname="proposal.tex"
 proposal: texpdf
 
-chapter-dev: export LATEXMK_FLAGS="-pvc"
-chapter-dev: chapter
-chapter: tex_fname="report_${CHAPTER}.tex"
-chapter: texpdf
-
 mml21paper-dev: export LATEXMK_FLAGS="-pvc"
 mml21paper-dev: mml21paper
 mml21paper: tex_fname="mml21_paper.tex"

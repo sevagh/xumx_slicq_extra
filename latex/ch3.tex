@@ -48,7 +48,7 @@ In this section, we will describe the steps taken to use the sliCQT as the input
 
 First, section \ref{sec:improvelib} will show the addition of new frequency scales that are interesting for music applications that were described in section \ref{sec:fscales}. Recall from section \ref{sec:theorynsgt} that the NSGT/sliCQT can be thought of as filterbanks, and the chosen frequency scale is the most important parameter that defines the spectral representation of the musical signal, which influences the results of the downstream application.
 
-Next, section \ref{sec:torchgpu} will show the modifications made to the library to compute the transform with PyTorch on the GPU, so that it can be used in the UMX neural network code. Following that, section \ref{sec:slicqtutil} will describe additional necessary utilities added to the PyTorch sliCQT, including an overlap-add utility as described in section \ref{sec:theoryslicqt}, as well as the related spectrogram plotting code.
+Next, section \ref{sec:torchslicq} will show the modifications made to the library to compute the transform with PyTorch on the GPU, so that it can be used in the UMX neural network code. Following that, section \ref{sec:slicqtutil} will describe additional necessary utilities added to the PyTorch sliCQT, including an overlap-add utility as described in section \ref{sec:theoryslicqt}, as well as the related spectrogram plotting code.
 
 Finally, in section \ref{sec:slicqparamsrch}, we describe the parameter search that was run to choose sliCQT parameters that may perform best in a music demixing application. Section \ref{sec:fasterbsscupy} describes modifications made to the BSS eval metrics library to make it run faster on the GPU, with the aim to speed up the parameter search process.
 
@@ -125,7 +125,7 @@ In addition to the frequency scale, the user must specify the slice length and t
 The NSGT library already contains code which warns the user if their chosen values for the slice length and transition area cannot support their desired frequency scale. The warning code was adapted to allow users to automatically choose an appropriate slice length and transition area for their frequency scale, so that users can use the sliCQT with fewer parameters.\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L36}}
 
 \subsubsection{Computing the sliCQT on the GPU with PyTorch}
-\label{sec:torchgpu}
+\label{sec:torchslicq}
 
 In this section, we will describe the procedure for porting the CPU-based code of the reference NSGT/sliCQT library to the GPU using PyTorch. This is needed to be able to use the sliCQT in the PyTorch GPU code of UMX. All the modifications to the library were made in my copy of the library,\footnote{\url{https://github.com/sevagh/nsgt}} and the same library was embedded inside the xumx-sliCQ code.\footnote{\url{https://github.com/sevagh/xumx-sliCQ}}.
 
@@ -151,7 +151,7 @@ The matrix form is created by zero-padding the tensors with a lower time resolut
 	\label{fig:raggedvszpad}
 \end{figure}
 
-In the upcoming section \ref{sec:raggedvszpmatrix}, we will justify why the ragged form of the sliCQT was chosen instead of the zero-padded matrix form in the final neural network, xumx-sliCQ.
+In the upcoming section \ref{sec:slicqdim}, we will justify why the ragged form of the sliCQT was chosen instead of the zero-padded matrix form in the final neural network, xumx-sliCQ.
 
 \subsubsection{Overlap-add and spectrogram utilities in the sliCQT library}
 \label{sec:slicqtutil}
@@ -212,7 +212,7 @@ The performance of the MPI (mixed-phase inversion) and the IRM1 (soft magnitude 
 \subsubsection{Speeding up the parameter search using the GPU and CuPy}
 \label{sec:fasterbsscupy}
 
-Like in section \ref{sec:torchgpu}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS eval metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. We would benefit from a speedup of the parameter search script to get results faster. For that reason we explored a speedup using the GPU.
+Like in section \ref{sec:torchslicq}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS eval metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package. We would benefit from a speedup of the parameter search script to get results faster. For that reason we explored a speedup using the GPU.
 
 The bottlenecks of the library use NumPy and SciPy operations, which are Python numerical computation libraries that use the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides replacement functions of NumPy and SciPy which run on NVIDIA GPUs using the CUDA compute framework.\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch was used to replace NumPy code in the earlier section \ref{sec:torchslicq}, CuPy is intended to be a direct replacement of NumPy and SciPy and thus represents an easier porting effort. Also, the MPI oracle testbench will not be used inside the xumx-sliCQ neural network, so it doesn't need to use PyTorch.
 
@@ -231,15 +231,10 @@ As mentioned, Open-Unmix has a reference PyTorch implementation\footnote{\url{ht
 
 After the X-UMX modifications are described, we will look at which parts of Open-Unmix need to incorporate the PyTorch implementation of the sliCQT that was described in section \ref{sec:torchslicq}.\footnote{\url{https://github.com/sevagh/nsgt}} Finally, we will show how we adapted the STFT-based convolutional denoising autoencoder (CDAE) model architectures that were described in section \ref{sec:cdae} to the sliCQT.
 
-\subsubsection{sliCQT ragged and zero-padded matrix comparison}
-\label{sec:raggedvszpmatrix}
+\subsubsection{sliCQT dimensionality analysis and neural network design choices}
+\label{sec:slicqdim}
 
-\todo[inline]{you know what to do}
-
-\subsubsection{Bi-LSTM and CNN architecture comparison}
-\label{sec:lstmvsconv}
-
-\todo[inline]{you know what to do}
+In \ref{sec:slicqparamsrch}, it was
 
 \subsubsection{Replacing the STFT with the sliCQT in UMX}
 \label{sec:replacestft}
