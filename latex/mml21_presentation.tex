@@ -72,60 +72,135 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Source separation}
+	\frametitle{History of audio source separation}
 	\begin{enumerate}
 		\item
-			Audio source separation is the task of extracting an estimate of a single isolated source from audio
-			\begin{itemize}
-				\item
-					E.g., cocktail party
-			\end{itemize}
+			Computational source separation has a history of at least 50 years \footcite{musicmask, musicsepintro1}
 		\item
-			In music demixing (or unmixing), we estimate multiple sources from mixed music, which are summed to get back the original mix
-			\begin{itemize}
-				\item
-					Think reverse of the recording studio, where stems are recorded separately and mixed together create the mix
-				\item
-					Linear sum is the simplest case
-			\end{itemize}
+			In computational auditory scene analysis (CASA) and blind source separation (BSS), the mixed audio contains unknown sources that must be separated
 	\end{enumerate}
-	\begin{figure}[ht]
+	Classic example: cocktail party speech separation\footnote{\url{https://gowrishankar.info/blog/cocktail-party-problem-eigentheory-and-blind-source-separation-using-ica/}}
+	\begin{figure}
 		\centering
-		\vspace{-0.5em}
-		\includegraphics[width=\textwidth]{./images-mss/mixdemix.png}
+		\includegraphics[width=10cm]{./images-mml-presentation/bss.png}
 	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Music demixing}
+	\frametitle{Music source separation}
+	\begin{enumerate}
+		\item
+			Older techniques for speech denoising, like ICA (independent component analysis), don't work well for music: musical sources are characterized by a rich nonstationary spectrotemporal structure. Musical sounds exhibit highly synchronous evolution and overlap in over both time and frequency. Instruments are correlated (e.g., a chorus of singers) and there are more instruments than channels in the mixture \footcite[1]{musicsepintro1}
+		\item
+			Musical source models: ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with \textbf{time-frequency masks}
+		\item
+			Estimate masks with Kernel Additive Modeling (KAM)\footcite{fitzgerald1}, NMF (Nonnegative Matrix Factorization), or most popularly these days, DNN (Deep Neural Networks)
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music source separation with spectrograms}
+	\begin{figure}
+		\centering
+		\subfloat{\includegraphics[width=5.25cm]{./images-mss/mss1.png}}
+		\subfloat{\includegraphics[width=5.5cm]{./images-mss/mss2.png}}\\
+		\subfloat{\includegraphics[width=6.75cm]{./images-mss/mssdnn.png}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music demixing or unmixing}
 	In music demixing (or unmixing), we estimate multiple sources from mixed music, which are summed to get back the original mix
 	\begin{itemize}
 		\item
-			Think of reversing the mixing process of the recording studio, where stems are recorded separately
+			Multiple ``music source separation'' subproblems, 1 for each source
 		\item
-			Linear sum is the simplest case, mix = sum(sources)
+			Sources defined by the dataset: vocals, drums, bass, other for MUSDB18-HQ \footcite{musdb18hq}
+		\item
+			Think of reversing the mixing process of the recording studio, where stems are recorded separately. Linear sum: mix = sum(sources)
 	\end{itemize}
 	\begin{figure}[ht]
 		\centering
 		\vspace{-0.5em}
-		\includegraphics[width=\textwidth]{./images-mss/mixdemix.png}
+		\includegraphics[width=10cm]{./images-mss/mixdemix.png}
 	\end{figure}
 \end{frame}
 
+\begin{frame}
+	\frametitle{MDX 21}
+	\begin{enumerate}
+		\item
+			Previously, music demixing systems were submitted to and evaluated at SiSEC (Signal Separation Evaluation Campaign) \footcite{sisec2016, sisec2018}
+		\item
+			This year: MDX (Music Demixing Challenge) ISMIR 2021 @ AICrowd: \url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}
+		\item
+			Challenge rules:
+			\begin{itemize}
+				\item
+					Leaderboard A train only on MUSDB18-HQ
+				\item
+					Leaderboard B train on any data
+				\item
+					Hidden dataset (MDXDB21), recorded in-house by Sony
+				\item
+					Use BSS eval metrics (SDR specifically) to rank systems \footcite{bss, bss2}
+			\end{itemize}
+		\item
+			Follow-up: MDX21 workshop, satellite @ ISMIR 2021: \url{https://mdx-workshop.github.io/}
+	\end{enumerate}
+\end{frame}
 
 \begin{frame}
-	\frametitle{Improving harmonic/percussive source separation (HPSS)}
+	\frametitle{Phase performance ceiling}
+	\begin{enumerate}
+		\item
+			Simplifying assumption: estimate magnitude spectrograms, use the phase of the original mixed audio. Called ``noisy phase'' \footcite{noisyphase1}. Done by both Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX) \footcite{umx, xumx}, near-SOTA models which were baselines in the MDX challenge
+		\item
+			Why? Phase is hard to model!\footnote{\url{https://source-separation.github.io/tutorial/basics/phase.html\#why-we-don-t-model-phase}}
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=7.5cm]{./images-mss/whynophase.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Current trends and top performers}
+	\begin{enumerate}
+		\item
+			Spectrogram-based model that considers phase and uses a complex time-frequency mask to apply to the complex spectrogram\footcite{kong2021decoupling}
+		\item
+			Waveform-based models that implicitly contains the phase e.g. Demucs, Wave-U-Net \footcite{demucs, waveunet, endtoend}
+		\item
+			\textbf{MDX21 first place}: improved Demucs (hybrid waveform and spectrogram model) \footcite{demucsplus}
+		\item
+			\textbf{MDX21 second place}: KUIELAB-MDX-Net, blending Demucs, Wave-U-Net, and TFC-TDF-U-Net \footcite{choi_2020}
+		\item
+			\textbf{MDX21 third place}: blending Demucs and X-UMX
+	\end{enumerate}
+	Properties in common: blending different networks, using phase (either waveforms or with complex masks), mixing spectral and waveform models
+\end{frame}
+
+\begin{frame}
+	\frametitle{Time-frequency uncertainty principle}
+	\begin{enumerate}
+		\item
+			``Although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \footcite[432]{gabor1946}
+		\item
+			This is because time and frequency are Fourier duals of each other, i.e. mutually exclusive domains
+
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Time-frequency transforms}
 	\begin{enumerate}
 	\item
-		Short-time Fourier Transform (STFT) window size matters per-target\footfullcite{tftradeoff1, tftradeoff2}
+		Short-time Fourier Transform (STFT) window size matters per-target\footcite{tftradeoff1, tftradeoff2}
 	\item
-		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footfullcite{cqtransient}
+		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footcite{cqtransient}
 	\item
-		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footfullcite{doerflerphd}
-	\item
-		window=4096 for harmonic, window=256 for percussive in HPSS\footfullcite{driedger}
-	\item
-		Constant-Q Transform (CQT) and multiple STFTs in HPSS\footfullcite{fitzgerald2}
+		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footcite{doerflerphd}
 	\item
 		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
 	\end{enumerate}
@@ -200,7 +275,7 @@
 	\item
 		Uses UMX\footcite{umx} PyTorch template + CrossNet-Open-Unmix (X-UMX)\footcite{xumx}
 	\item
-		Replace STFT with sliCQT, replace Bi-LSTM with convolutions\footfullcite{plumbley2}
+		Replace STFT with sliCQT, replace Bi-LSTM with convolutions\footcite{plumbley2}
 \end{enumerate}
 	\begin{figure}[ht]
 		\centering
