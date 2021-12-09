@@ -13,7 +13,6 @@ all: arxiv
 clean:
 	latexmk -C
 	-rm *.lol
-	-rm *.bbl
 	-rm *.run.xml
 	-rm -r _minted*
 	-rm *.nav

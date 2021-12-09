@@ -1,0 +1,74 @@
+\begin{thebibliography}{10}
+
+\bibitem{mdx21}
+Y.~Mitsufuji, G.~Fabbro, S.~Uhlich, and F.-R.~St{\"o}ter,
+\newblock ``{Music} demixing challenge at ISMIR 2021,''
+\newblock in {\em arXiv:2108.13559}, 2021.
+
+\bibitem{umx}
+F.-R.~St{\"o}ter, S.~Uhlich, A.~Liutkus, and Y.~Mitsufuji,
+\newblock ``{Open-Unmix:} A reference implementation for music source separation,''
+\newblock in {\em Journal of Open Source Software}, vol. 4 (41),
+  pp. 1667, 2019.
+
+\bibitem{xumx}
+R.~Sawata, S.~Uhlich, S.~Takahashi, and Y.~Mitsufuji,
+\newblock ``{All for one and one for all}: improving music separation by bridging networks,''
+\newblock in {\em arXiv:2010.04228}, 2021.
+
+\bibitem{gabor1946}
+D.~Gabor,
+\newblock ``{Theory} of communication,''
+\newblock in {\em Journal of Institution of Electrical Engineers}, vol. 93 (3),
+  pp. 429--457, 1946.
+
+\bibitem{tftradeoff1}
+A.~Simpson,
+\newblock ``{Time-frequency trade-offs} for audio source separation with binary masks,''
+\newblock in {\em arXiv:1504.07372}, 2015.
+
+\bibitem{slicq}
+N.~Holighaus, M.~D{\"o}rfler, G.~A. Velasco, and T.~Grill,
+\newblock ``{A framework for invertible}, real-time constant-Q transforms,''
+\newblock in {\em IEEE Transactions on Audio, Speech, and Language Processing}, vol. 21 (4),
+  pp. 775--785, 2013.
+
+\bibitem{doerflerphd}
+M.~D{\"o}rfler,
+\newblock ``{Gabor analysis} for a class of signals called music,''
+\newblock {\em PhD dissertation}, Numerical Harmonic Analysis Group,
+  University of Vienna, 2002.
+
+\bibitem{balazs}
+P.~Balazs, M.~D{\"o}rfler, F.~Jaillet, N.~Holighaus, and G.~A. Velasco,
+\newblock ``{Theory, implementation and applications} of nonstationary Gabor frames,''
+\newblock in {\em Journal of Computational and Applied Mathematics}, vol. 236 (6),
+  pp. 1481--1496, 2011.
+
+\bibitem{jbrown}
+J.~Brown,
+\newblock ``{Calculation} of a constant Q spectral transform,''
+\newblock in {\em Journal of the Acoustical Society of America}, vol. 89 (1),
+  pp. 425--434, 1991.
+
+\bibitem{noisyphase1}
+G.~Wichern, J.~Antognini, M.~Flynn, L.~R. Zhu, E.~McQuinn, D.~Crow, E.~Manilow, and J.~{Le Roux},
+\newblock ``{WHAM!}: extending speech separation to noisy environments,''
+\newblock in {\em arXiv:1907.01160}, 2019.
+
+\bibitem{musdb18hq}
+Z.~Rafii, A.~Liutkus, F.-R.~St{\"o}ter, S.~I. Mimilakis, and R.~Bittner,
+\newblock ``{MUSDB18-HQ}: an uncompressed version of MUSDB18,''
+\newblock \url{https://doi.org/10.5281/zenodo.3338373}, 2019.
+
+\bibitem{plumbley1}
+E.~M. Grais, and M.~D. Plumbley,
+\newblock ``{Single channel} audio source separation using convolutional denoising autoencoders,''
+\newblock in {\em IEEE Global Conference on Signal and Information Processing}, pp. 1265--1269, 2017.
+
+\bibitem{plumbley2}
+E.~M. Grais, F.~Zhao, and M.~D. Plumbley,
+\newblock ``{Multi-band} multi-resolution fully convolutional neural networks for singing voice separation,''
+\newblock in {\em 28th European Signal Processing Conference}, pp. 261--265, 2021.
+
+\end{thebibliography}

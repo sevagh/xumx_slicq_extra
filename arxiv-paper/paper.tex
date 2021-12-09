@@ -3,18 +3,15 @@
 %          IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
 \documentclass{article}
-\usepackage{flushend}
-\usepackage{spconf,amsmath,graphicx}
-\usepackage{subcaption}
-\usepackage[
-    %backend=biber, 
-    natbib=true,
-    style=numeric,
-    sorting=none,
-    url=false,
-    doi=false
-]{biblatex}
-\addbibresource{citations.bib}
+\usepackage{spconf,amsmath,graphicx,subcaption,flushend}
+\usepackage[svgnames]{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks   = true, %Colours links instead of ugly boxes
+  urlcolor     = DarkBlue, %Colour for external hyperlinks
+  linkcolor    = black, %Colour of internal links
+  citecolor   = black %Colour of citations
+}
 
 % Example definitions.
 % --------------------
@@ -109,15 +106,12 @@ Our model, xumx-sliCQ, was trained on MUSDB18-HQ. On the test set, xumx-sliCQ ac
 \end{figure*}
 
 \section{Acknowledgements}
-Thanks to my colleagues Néstor Nápoles López and Timothy Raja de Reuse, and to my master's thesis supervisor Prof. Ichiro Fujinaga, for help throughout the creation of xumx-sliCQ. Thanks to the MDX 21 challenge for creating a motivational environment for learning more about music demixing.
+Thanks to my colleagues N{\'e}stor N{\'a}poles L{\'o}pez and Timothy Raja de Reuse, and to my master's thesis supervisor Prof. Ichiro Fujinaga, for help throughout the creation of xumx-sliCQ. Thanks to the MDX 21 challenge for creating a motivational environment for learning more about music demixing.
 % 
-\clearpage\vfill\pagebreak
+\clearpage\vfill
 %
-%\bibliographystyle{IEEEbib}
-%\bibliography{refs}
-
-\raggedend
-\printbibheading[title={References},heading=bibnumbered]
-\printbibliography[heading=none]
+\flushend
+\bibliographystyle{IEEEbib}
+\bibliography{refs}
 
 \end{document}
