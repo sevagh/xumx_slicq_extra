@@ -72,89 +72,41 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{History of audio source separation}
+	\frametitle{Music source separation, demixing, and unmixing}
+	Music source separation:
 	\begin{enumerate}
 		\item
-			Computational source separation has a history of at least 50 years \footcite{musicmask, musicsepintro1}
+			Extract an estimate of isolated sources (or targets) from mixed musical audio (e.g., harmonic/percussive, vocals, drums, bass, piano)
 		\item
-			In computational auditory scene analysis (CASA) and blind source separation (BSS), the mixed audio contains unknown sources that must be separated
+			Popular approach: musical source models, which are ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with \textbf{time-frequency masks}, nowadays estimated with DNN (Deep Neural Networks)
 	\end{enumerate}
-	Classic example: cocktail party speech separation\footnote{\url{https://gowrishankar.info/blog/cocktail-party-problem-eigentheory-and-blind-source-separation-using-ica/}}
-	\begin{figure}
+	In music demixing (or unmixing), we estimate multiple sources (vocals, drums, bass, other\footcite{musdb18hq}) that can be summed back to the original mix. Multiple MSS subproblems, reversing the linear mixing of stems in the recording studio (stem datasets can be used for mixing and demixing)
+	\begin{figure}[ht]
 		\centering
-		\includegraphics[width=10cm]{./images-mml-presentation/bss.png}
+		\vspace{-0.5em}
+		\includegraphics[width=7.5cm]{./images-mss/mixdemix.png}
 	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Music source separation}
-	\begin{enumerate}
-		\item
-			Older techniques for speech denoising, like ICA (independent component analysis), don't work well for music: musical sources are characterized by a rich nonstationary spectrotemporal structure. Musical sounds exhibit highly synchronous evolution and overlap in over both time and frequency. Instruments are correlated (e.g., a chorus of singers) and there are more instruments than channels in the mixture \footcite[1]{musicsepintro1}
-		\item
-			Musical source models: ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with \textbf{time-frequency masks}
-		\item
-			Estimate masks with Kernel Additive Modeling (KAM)\footcite{fitzgerald1}, NMF (Nonnegative Matrix Factorization), or most popularly these days, DNN (Deep Neural Networks)
-	\end{enumerate}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Music source separation with spectrograms}
 	\begin{figure}
 		\centering
-		\subfloat{\includegraphics[width=5.25cm]{./images-mss/mss1.png}}
-		\subfloat{\includegraphics[width=5.5cm]{./images-mss/mss2.png}}\\
-		\subfloat{\includegraphics[width=6.75cm]{./images-mss/mssdnn.png}}
+		\vspace{-1.25em}
+		\subfloat{\includegraphics[width=4.25cm]{./images-mss/mss1.png}}
+		\subfloat{\includegraphics[width=4.5cm]{./images-mss/mss2.png}}\\
+		\vspace{-1em}
+		\subfloat{\includegraphics[width=8.75cm]{./images-mss/mask_simple.png}}\\
+		\vspace{-0.75em}
+		\subfloat{\includegraphics[width=6.5cm]{./images-mss/mssdnn.png}}
 	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Music demixing or unmixing}
-	In music demixing (or unmixing), we estimate multiple sources from mixed music, which are summed to get back the original mix
-	\begin{itemize}
-		\item
-			Multiple ``music source separation'' subproblems, 1 for each source
-		\item
-			Sources defined by the dataset: vocals, drums, bass, other for MUSDB18-HQ \footcite{musdb18hq}
-		\item
-			Think of reversing the mixing process of the recording studio, where stems are recorded separately. Linear sum: mix = sum(sources)
-	\end{itemize}
-	\begin{figure}[ht]
-		\centering
-		\vspace{-0.5em}
-		\includegraphics[width=10cm]{./images-mss/mixdemix.png}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{MDX 21}
-	\begin{enumerate}
-		\item
-			Previously, music demixing systems were submitted to and evaluated at SiSEC (Signal Separation Evaluation Campaign) \footcite{sisec2016, sisec2018}
-		\item
-			This year: MDX (Music Demixing Challenge) ISMIR 2021 @ AICrowd: \url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}
-		\item
-			Challenge rules:
-			\begin{itemize}
-				\item
-					Leaderboard A train only on MUSDB18-HQ
-				\item
-					Leaderboard B train on any data
-				\item
-					Hidden dataset (MDXDB21), recorded in-house by Sony
-				\item
-					Use BSS eval metrics (SDR specifically) to rank systems \footcite{bss, bss2}
-			\end{itemize}
-		\item
-			Follow-up: MDX21 workshop, satellite @ ISMIR 2021: \url{https://mdx-workshop.github.io/}
-	\end{enumerate}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Phase performance ceiling}
 	\begin{enumerate}
 		\item
-			Simplifying assumption: estimate magnitude spectrograms, use the phase of the original mixed audio. Called ``noisy phase'' \footcite{noisyphase1}. Done by both Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX) \footcite{umx, xumx}, near-SOTA models which were baselines in the MDX challenge
+			Simplifying assumption: estimate magnitude spectrograms, use the phase of the original mixed audio. Called ``noisy phase'' \footcite{noisyphase1}. Done by both Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX) \footcite{umx, xumx}, popular \& near-SOTA models
 		\item
 			Why? Phase is hard to model!\footnote{\url{https://source-separation.github.io/tutorial/basics/phase.html\#why-we-don-t-model-phase}}
 	\end{enumerate}
@@ -165,220 +117,118 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Current trends and top performers}
+	\frametitle{MDX 21 winners and current trends}
 	\begin{enumerate}
 		\item
-			Spectrogram-based model that considers phase and uses a complex time-frequency mask to apply to the complex spectrogram\footcite{kong2021decoupling}
+			Previously, music demixing systems were submitted to and evaluated at SiSEC (Signal Separation Evaluation Campaign). This year: MDX (Music Demixing Challenge) ISMIR 2021 @ AICrowd, follow-up MDX21 workshop, satellite @ ISMIR 2021
 		\item
-			Waveform-based models that implicitly contains the phase e.g. Demucs, Wave-U-Net \footcite{demucs, waveunet, endtoend}
+			\textbf{ISMIR 2021}: Model that uses the complex spectrogram (i.e. includes phase) and uses complex masks\footcite{kong2021decoupling}
 		\item
-			\textbf{MDX21 first place}: improved Demucs (hybrid waveform and spectrogram model) \footcite{demucsplus}
-		\item
-			\textbf{MDX21 second place}: KUIELAB-MDX-Net, blending Demucs, Wave-U-Net, and TFC-TDF-U-Net \footcite{choi_2020}
-		\item
-			\textbf{MDX21 third place}: blending Demucs and X-UMX
+			\textbf{MDX21}: 1: Demucs++\footcite{demucsplus} (waveforms + complex spectrogram), 2: KUIELAB-MDX-Net \footcite{choi2021} (waveforms + magnitude spectrogram), 3: Danna-Sep\footcite{dannasep} (waveform + magnitude spectrogram, use complex spectrogram in loss function)
 	\end{enumerate}
-	Properties in common: blending different networks, using phase (either waveforms or with complex masks), mixing spectral and waveform models
+	Properties in common: blending networks, waveforms (implicitly includes phase), complex spectrograms/masks, mixing spectrogram and waveform models
 \end{frame}
 
 \begin{frame}
-	\frametitle{Time-frequency uncertainty principle}
+	\frametitle{Time-frequency analysis and the uncertainty principle}
 	\begin{enumerate}
+		\item
+			Interesting sounds (music, speech) have frequencies that vary with time, yet Fourier analysis has no temporal information (infinite sinusoids)
+		\item
+			Short-time Fourier transform (STFT) splits the audio into windows and gets the frequencies of each frame with a Fourier transform
 		\item
 			``Although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \footcite[432]{gabor1946}
 		\item
-			This is because time and frequency are Fourier duals of each other, i.e. mutually exclusive domains
+			Because time and frequency are Fourier duals of each other, i.e. mutually exclusive domains
 
 	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.75em}
+		\includegraphics[width=7.5cm]{./images-tftheory/gabor3.png}
+	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Time-frequency transforms}
+	\frametitle{TF tradeoff in the STFT}
+	Change window size to create time-frequency tradeoff:
+	\begin{figure}[ht]
+		\centering
+		\vspace{-1.25em}
+		\subfloat{\includegraphics[height=2.75cm]{./images-gspi/glock_stft_4096.png}}
+		\hspace{0.5em}
+		\subfloat{\includegraphics[height=2.75cm]{./images-gspi/glock_stft_256.png}}\\
+		\vspace{-0.75em}
+		\subfloat{\includegraphics[height=2.25cm]{./images-tftheory/gabor4.png}}
+		\vspace{-0.25em}
+	\end{figure}
+	In music source separation, window size matters per-target.\footcite{tftradeoff1} Short-window for percussion, long-window for harmonic\footcite{driedger}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Constant-Q transform}
 	\begin{enumerate}
 	\item
-		Short-time Fourier Transform (STFT) window size matters per-target\footcite{tftradeoff1, tftradeoff2}
-	\item
-		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footcite{cqtransient}
-	\item
-		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footcite{doerflerphd}
+		From musical and auditory perspectives, we want high frequency resolution at low frequencies (for the harmonic basis) and high time resolution at high frequency (percussion, transients) \footcite{cqtransient, doerflerphd}
 	\item
 		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+	\item
+		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, sliCQ Transform\footcite{slicq}; motivated by the CQT, but can use arbitrary frequency scales
+	\item
+		TF transforms with Fourier coefficients, perfect inverse, and varying windows to create a varying time-frequency resolution
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Short-time Fourier Transform vs. Constant-Q Transform}
+	\frametitle{STFT vs. sliCQT}
 	\begin{figure}[ht]
 		\centering
-		\vspace{-1em}
-		\subfloat[STFT, window = 256]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft_256.png}}
-		\subfloat[STFT, window = 1024]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft_1024.png}}
-		\subfloat[STFT, window = 4096]{\includegraphics[height=3.3cm]{./images-gspi/glock_stft_4096.png}}
-		\vspace{-0.5em}
-		\subfloat[CQT, 12 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt12.png}}
-		\subfloat[CQT, 24 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt24.png}}
-		\subfloat[CQT, 48 bins/octave]{\includegraphics[height=3.3cm]{./images-gspi/glock_cqt48.png}}
-		\vspace{-0.5em}
+		\includegraphics[height=3.3cm]{./images-mml-presentation/spectrograms_comparison.png}
+		\vspace{-0.85em}
 	\end{figure}
+	\begin{enumerate}
+		\item
+			Note the sliCQT has appropriate time-frequency resolution by auditory or musical principles, containing the best of a short-window and long-window STFT and resulting in increased musical information
+		\item
+			Parameters found by maximizing the noisy-phase, i.e., find the sliCQT where discarding the phase isn't such a big deal. \textbf{7.42 dB} vs. 6.23 dB of STFT (median on all 4 targets on MUSDB18-HQ validation set)
+		\item
+			Goal: improve UMX\footcite{umx} by replacing STFT with sliCQT
+	\end{enumerate}
 \end{frame}
 
-\note{
-	\begin{itemize}
-		\item
-			small window STFT has blurry frequency bins, sharp temporal events
-		\item
-			long window STFT loses some of the frequency components of the glockenspiel
-		\item
-			CQT has sharp temporal events and more frequency contents for any bins-per-octave
-	\end{itemize}
-}
-
 \begin{frame}
-	\frametitle{My approach -- sliCQ}
+	\frametitle{xumx-sliCQ}
 	\begin{enumerate}
-	\item
-		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, realtime sliCQ Transform\footcite{invertiblecqt, slicq, variableq1}
-	\item
-		STFT-like transforms with windows that vary with time
-	\item
-		CQT motivates the NSGT/sliCQ, but can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.)
-	\item
-		Outputs the familiar Fourier coefficients with perfect inverse
-	\item
-		Competition goal: use sliCQ in Open-Unmix (UMX)
+		\item
+			My model submitted to the MDX21 challenge and workshop: \url{https://github.com/sevagh/xumx-sliCQ}
+		\item
+			Use Convolutional Denoising Autoencoder\footcite{plumbley1, plumbley2} neural architecture
+		\item
+			Scored 3.6 dB vs. 4.6 dB (UMX) and 5.54 dB (X-UMX); there is still room for improvement
 	\end{enumerate}
 	\begin{figure}[ht]
 		\centering
+		\vspace{-1.15em}
+		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/generic_mdx.png}}\\
 		\vspace{-0.5em}
-		\includegraphics[height=2.5cm]{./images-gspi/gspi_xumx_slicq_params.png}
+		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/umx_clean.png}}\\
 		\vspace{-0.5em}
-		\caption{sliCQ: 262-bin Bark scale, 32.9--22050 Hz}
-		\vspace{-0.5em}
-	\end{figure}
-\end{frame}
-\note{
-	\begin{itemize}
-		\item
-			Optimal time-frequency resolution per frequency bin might improve results
-		\item
-			Bridge the gap between spectral models and waveform models (by improving their time-frequency resolution)
-	\end{itemize}
-}
-
-\begin{frame}
-	\frametitle{My approach -- xumx-sliCQ}
-	\begin{enumerate}
-	\item
-		xumx-sliCQ: \url{https://github.com/sevagh/xumx-sliCQ}
-	\item
-		PyTorch fork of NSGT/sliCQ: \url{https://github.com/sevagh/nsgt}
-	\item
-		Uses UMX\footcite{umx} PyTorch template + CrossNet-Open-Unmix (X-UMX)\footcite{xumx}
-	\item
-		Replace STFT with sliCQT, replace Bi-LSTM with convolutions\footcite{plumbley2}
-\end{enumerate}
-	\begin{figure}[ht]
-		\centering
-		\includegraphics[height=3.5cm]{./images-blockdiagrams/xumx_slicq_system_compressed.png}
-		\vspace{-1em}
+		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/xumx_slicq_clean.png}}
 	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{What worked vs. didn't work}
-	sliCQT has a matrix form with zero-padding; poor neural network convergence; different frequency bins = different temporal frame rate\\
-	Use ragged form, write different conv layers for each time-frequency resolution block:
+	\frametitle{sliCQT challenges}
+	Working with a ragged/nonuniform time-frequency transform, noninvertible 50\% overlap-add
 	\begin{figure}[ht]
 		\centering
-		\includegraphics[height=5cm]{./images-blockdiagrams/slicq_shape.png}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Competition results}
-	\begin{enumerate}
-	\item
-		Luck-based approach with network copied from STFT models
-	\item
-		Invitation to demixing researchers: more rigorous, data-driven approaches to the sliCQT parameter search and network architectures
-	\end{enumerate}
-	\begin{figure}[ht]
-		\centering
-		\includegraphics[width=8cm]{./images-misc/leaderboard_header.png}\\
+		\vspace{-0.75em}
+		\subfloat{\includegraphics[width=5cm]{./images-gspi/gspi_overlap_flatten.png}}
+		\hspace{0.25em}
+		\subfloat{\includegraphics[width=6.75cm]{./images-blockdiagrams/slicq_shape.png}}\\
 		\vspace{-0.25em}
-		\includegraphics[width=8cm]{./images-misc/leaderboard_myplace.png}
-		\caption{Leaderboard A position of xumx-sliCQ}
-		\vspace{-1em}
+		\subfloat{\includegraphics[width=10cm]{./images-blockdiagrams/xumx_slicq_pertarget_largefont.png}}
 	\end{figure}
-
-\end{frame}
-
-\begin{frame}
-	\frametitle{My impressions on the competition}
-	\begin{enumerate}
-	\item
-	 ``It is definitely a great environment to push the limit, had it been for a paper, I would have stopped sooner.'' -- defossez
-	 \item
-		 There was a lot of active discussion on the board and everything felt set up for participants to succeed
-	 \item
-		 GitLab submission process worked well, submissions were easy, and the containers had important Python libraries already installed
-	 \item
-		 I look forward to the 2022 competition
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Magnitude mask above 1}
-	Common approaches to music source separation (MSS):
-	\begin{enumerate}
-		\item
-			Get spectrogram of mix
-		\item
-			Take magnitude
-		\item
-			Multiply by a mask $\in [0, 1]$ to get source estimate
-		\item
-			Why $[0, 1]$? DFT/STFT is a linear operation: $x_{a} = x_{b} + x_{c}, |X_{a}| = |X_{b}| + |X_{c}|$\\
-			$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
-			if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
-	\end{enumerate}
-	\begin{figure}
-	\centering
-	\includegraphics[height=3cm]{./images-mss/mask_simple.png}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Phase!}
-	Common approaches to MSS discard the phase; it's difficult to learn relationships from phase
-	\begin{figure}
-	\centering
-	\includegraphics[height=3cm]{./images-mss/whynophase.png}
-	\end{figure}
-	This paper considers the phase, and uses a complex mask to estimate the magnitude and phase of the spectrogram\\
-	$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
-	if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
-	\textbf{Yes!} 
-	\begin{quote}
-		|M(t,f)| can be larger than 1... this may happen when S(t,f) and N(t,f) are out of phase, since that makes the magnitude of mixture to be smaller than that of (individual) signal
-	\end{quote}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Results}
-	\begin{figure}
-	\centering
-	\includegraphics[height=3cm]{./images-misc/ismir2021-phasepaper.png}
-	\end{figure}
-
-	\begin{enumerate}
-		\item
-			We showed that previous MSS methods have upper bound of the performance due to a strong assumption on the magnitude of the masks
-		\item
-			We also showed that accurate phase estimation and unbound complex ideal ratio masks (cIRMs) are important for MSS
-		\item
-			Finally, we analyzed the distribution of cRIMs for MSS and showed that 22\% of cIRMs have magnitude larger than one
-	\end{enumerate}
 \end{frame}
 
 \end{document}
