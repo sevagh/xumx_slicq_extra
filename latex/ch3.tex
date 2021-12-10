@@ -4,6 +4,8 @@
 \section{Methodology}
 \label{sec:methodology}
 
+\todo[inline]{apply ich corrections of ch3: section introductions, etc.: in this section..., will be seen in the next section..., etc., delete code snippets if they dont help}
+
 The proposed adaptation of Open-Unmix to use the sliCQ Transform (sliCQT) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} and is the subject and main result of this thesis. xumx-sliCQ is pronounced like ``X-U-M-X-slice-Q.''
 
 Decisions for the methodology were influenced by the limitations of the computer that xumx-sliCQ was developed on, e.g., the maximum GPU memory available. Refer to appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer.
@@ -234,6 +236,15 @@ After the X-UMX modifications are described, we will look at which parts of Open
 \subsubsection{sliCQT dimensionality analysis and neural network design choices}
 \label{sec:slicqdim}
 
+\todo[inline]{
+Zero-pad: slicqt dimensionality analysis + matrixform fails inference on full tracks cause of its size, and MDX21 and UMX both use full tracks - important. print dims from script
+use CDAE papers for low parameter
+\url{https://vtechworks.lib.vt.edu/bitstream/handle/10919/98619/Messou_EJ_T_2020.pdf?sequence=1&isAllowed=y}
+\url{https://arxiv.org/pdf/2010.02178.pdf}
+\url{https://towardsdatascience.com/the-fall-of-rnn-lstm-2d1594c74ce0}
+\url{https://www.researchgate.net/publication/313732034_Monoaural_Audio_Source_Separation_Using_Deep_Convolutional_Neural_Networks}
+}
+
 In \ref{sec:slicqparamsrch}, it was
 
 \subsubsection{Replacing the STFT with the sliCQT in UMX}
@@ -389,6 +400,8 @@ The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ 
 
 \subsection{Post-processing}
 \label{sec:postprocessing}
+
+\todo[inline]{create a good post-processing diagram, copy from sliceq22 ideas}
 
 After the \Verb#OpenUnmix# class outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step needs to be applied. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the four target magnitude spectrograms.
 

@@ -905,6 +905,8 @@ A simple case of music source separation is harmonic/percussive source separatio
 
 Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals. The median filters are shown in Figure \ref{fig:fitz1}.
 
+\todo[inline]{put a mixed spectrogram here}
+
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.675\textwidth]{./images-hpss/mix_stft_medianfilters.png}
@@ -914,6 +916,8 @@ Median filtering is a technique for image processing where a pixel is replaced b
 
  
 \textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in section \ref{sec:masksandoracles}. The results of binary-masked median-filtering harmonic/percussive source separation is shown in Figure \ref{fig:fitz12}.
+
+\todo[inline]{put a mixed spectrogram here}
 
 \begin{figure}[ht]
 	\centering
