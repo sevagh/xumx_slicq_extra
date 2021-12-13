@@ -20,7 +20,7 @@
     style=verbose-ibid,
     maxcitenames=1, %remove this outside of toy presentations
 ]{biblatex}
-\addbibresource{citations.bib}
+\addbibresource{citations_presentation.bib}
 \usepackage{pgfpages}
 \usepackage{xcolor}
 \definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
@@ -32,15 +32,17 @@
 
 \title{Music demixing with the sliCQ transform}
 \author{Sevag Hanssian}
-%\date{August 21, 2021}
-\date{}
+\date{December 15, 2021}
+%\date{}
 \setbeamertemplate{navigation symbols}{}
 
 \AtEveryBibitem{%
   \clearfield{pages}%
+  \clearfield{school}%
   \clearfield{volume}%
   \clearfield{number}%
   \clearlist{journal}%
+  \clearfield{journal}%
   \clearfield{booktitle}%
 }
 
@@ -49,6 +51,7 @@
 \AtEveryCitekey{%
   \clearfield{pages}%
   \clearfield{volume}%
+  \clearfield{school}%
   \clearfield{number}%
   \clearfield{doi}%
   \clearfield{journal}%
@@ -63,6 +66,12 @@
 \ifentrytype{inproceedings}{
     \clearfield{booktitle}%
 }{}
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{phdthesis}{
+    \clearfield{school}%
+}{}
 }
 
 \begin{document}
@@ -73,23 +82,19 @@
 
 \begin{frame}
 	\frametitle{Music source separation, demixing, and unmixing}
-	Music source separation:
-	\begin{enumerate}
-		\item
-			Extract an estimate of isolated sources (or targets) from mixed musical audio (e.g., harmonic/percussive, vocals, drums, bass, piano)
-		\item
-			Popular approach: musical source models, which are ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with \textbf{time-frequency masks}, nowadays estimated with DNN (Deep Neural Networks)
-	\end{enumerate}
-	In music demixing (or unmixing), we estimate multiple sources (vocals, drums, bass, other\footcite{musdb18hq}) that can be summed back to the original mix. Multiple MSS subproblems, reversing the linear mixing of stems in the recording studio (stem datasets can be used for mixing and demixing)
+	Music source separation: extract an estimate of an isolated source (or target) from mixed musical audio (e.g., harmonic/percussive, vocals, drums, bass, piano)\\
+	Music demixing (or unmixing): estimate multiple sources (vocals, drums, bass, other\footcite{musdb18hq}) that can be summed back to the original mix. Multiple MSS subproblems, reversing the linear mixing of stems in the recording studio (stem datasets can be used for mixing and demixing)
 	\begin{figure}[ht]
 		\centering
-		\vspace{-0.5em}
+		\vspace{-0.25em}
 		\includegraphics[width=7.5cm]{./images-mss/mixdemix.png}
+		\vspace{-0.75em}
 	\end{figure}
+	Popular approach: musical source models, which are ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with \textbf{time-frequency masks}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Music source separation with spectrograms}
+	\frametitle{Music source separation with DNN and spectrograms}
 	\begin{figure}
 		\centering
 		\vspace{-1.25em}
@@ -98,7 +103,7 @@
 		\vspace{-1em}
 		\subfloat{\includegraphics[width=8.75cm]{./images-mss/mask_simple.png}}\\
 		\vspace{-0.75em}
-		\subfloat{\includegraphics[width=6.5cm]{./images-mss/mssdnn.png}}
+		\subfloat{\includegraphics[width=7.5cm]{./images-mss/mssdnn.png}}
 	\end{figure}
 \end{frame}
 
@@ -117,88 +122,43 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{MDX 21 winners and current trends}
-	\begin{enumerate}
-		\item
-			Previously, music demixing systems were submitted to and evaluated at SiSEC (Signal Separation Evaluation Campaign). This year: MDX (Music Demixing Challenge) ISMIR 2021 @ AICrowd, follow-up MDX21 workshop, satellite @ ISMIR 2021
-		\item
-			\textbf{ISMIR 2021}: Model that uses the complex spectrogram (i.e. includes phase) and uses complex masks\footcite{kong2021decoupling}
-		\item
-			\textbf{MDX21}: 1: Demucs++\footcite{demucsplus} (waveforms + complex spectrogram), 2: KUIELAB-MDX-Net \footcite{choi2021} (waveforms + magnitude spectrogram), 3: Danna-Sep\footcite{dannasep} (waveform + magnitude spectrogram, use complex spectrogram in loss function)
-	\end{enumerate}
-	Properties in common: blending networks, waveforms (implicitly includes phase), complex spectrograms/masks, mixing spectrogram and waveform models
-\end{frame}
-
-\begin{frame}
-	\frametitle{Time-frequency analysis and the uncertainty principle}
-	\begin{enumerate}
-		\item
-			Interesting sounds (music, speech) have frequencies that vary with time, yet Fourier analysis has no temporal information (infinite sinusoids)
-		\item
-			Short-time Fourier transform (STFT) splits the audio into windows and gets the frequencies of each frame with a Fourier transform
-		\item
-			``Although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \footcite[432]{gabor1946}
-		\item
-			Because time and frequency are Fourier duals of each other, i.e. mutually exclusive domains
-
-	\end{enumerate}
-	\begin{figure}[ht]
-		\centering
-		\vspace{-0.75em}
-		\includegraphics[width=7.5cm]{./images-tftheory/gabor3.png}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{TF tradeoff in the STFT}
-	Change window size to create time-frequency tradeoff:
+	\frametitle{Time-frequency uncertainty principle in the STFT}
+	``Although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \footcite[432]{gabor1946}. Change window size to trade off time and frequency:
 	\begin{figure}[ht]
 		\centering
 		\vspace{-1.25em}
-		\subfloat{\includegraphics[height=2.75cm]{./images-gspi/glock_stft_4096.png}}
-		\hspace{0.5em}
-		\subfloat{\includegraphics[height=2.75cm]{./images-gspi/glock_stft_256.png}}\\
-		\vspace{-0.75em}
-		\subfloat{\includegraphics[height=2.25cm]{./images-tftheory/gabor4.png}}
-		\vspace{-0.25em}
+		\subfloat{\includegraphics[height=2.25cm]{./images-gspi/glock_stft_1024.png}}
+		\subfloat{\includegraphics[height=2.25cm]{./images-gspi/glock_stft_4096.png}}
+		\subfloat{\includegraphics[height=2.25cm]{./images-gspi/glock_stft_256.png}}\\
+		\vspace{-1.5em}
+		\subfloat{\includegraphics[height=2.25cm]{./images-tftheory/gabor3_2.png} \includegraphics[height=2.05cm]{./images-tftheory/gabor4.png}}
+		\vspace{-1em}
 	\end{figure}
-	In music source separation, window size matters per-target.\footcite{tftradeoff1} Short-window for percussion, long-window for harmonic\footcite{driedger}
+	In music source separation, window size matters per-target.\footcite{tftradeoff1} Short-window for percussion, long-window for harmonic
 \end{frame}
 
 \begin{frame}
-	\frametitle{Constant-Q transform}
+	\frametitle{CQT, NSGT, sliCQT}
 	\begin{enumerate}
 	\item
-		From musical and auditory perspectives, we want high frequency resolution at low frequencies (for the harmonic basis) and high time resolution at high frequency (percussion, transients) \footcite{cqtransient, doerflerphd}
+		For musical and auditory reasons, we want high frequency resolution at low frequencies and high time resolution at high frequencies \footcite{doerflerphd}
 	\item
-		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+		CQT\footcite{jbrown} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
 	\item
-		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, sliCQ Transform\footcite{slicq}; motivated by the CQT, but can use arbitrary frequency scales
-	\item
-		TF transforms with Fourier coefficients, perfect inverse, and varying windows to create a varying time-frequency resolution
+		Nonstationary Gabor Transform (NSGT) and sliCQT\footcite{balazs, slicq} are TF transforms with Fourier coefficients, perfect inverse, and varying windows to create a varying time-frequency resolution
 	\end{enumerate}
-\end{frame}
-
-\begin{frame}
-	\frametitle{STFT vs. sliCQT}
 	\begin{figure}[ht]
 		\centering
-		\includegraphics[height=3.3cm]{./images-mml-presentation/spectrograms_comparison.png}
-		\vspace{-0.85em}
+		\vspace{-0.75em}
+		\includegraphics[height=3cm]{./images-mml-presentation/spectrograms_comparison.png}
 	\end{figure}
-	\begin{enumerate}
-		\item
-			Note the sliCQT has appropriate time-frequency resolution by auditory or musical principles, containing the best of a short-window and long-window STFT and resulting in increased musical information
-		\item
-			Parameters found by maximizing the noisy-phase, i.e., find the sliCQT where discarding the phase isn't such a big deal. \textbf{7.42 dB} vs. 6.23 dB of STFT (median on all 4 targets on MUSDB18-HQ validation set)
-		\item
-			Goal: improve UMX\footcite{umx} by replacing STFT with sliCQT
-	\end{enumerate}
 \end{frame}
 
 \begin{frame}
 	\frametitle{xumx-sliCQ}
 	\begin{enumerate}
+		\item
+			My goal: improve Open-Unmix by replacing STFT with sliCQT
 		\item
 			My model submitted to the MDX21 challenge and workshop: \url{https://github.com/sevagh/xumx-sliCQ}
 		\item
@@ -218,17 +178,16 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{sliCQT challenges}
-	Working with a ragged/nonuniform time-frequency transform, noninvertible 50\% overlap-add
-	\begin{figure}[ht]
-		\centering
-		\vspace{-0.75em}
-		\subfloat{\includegraphics[width=5cm]{./images-gspi/gspi_overlap_flatten.png}}
-		\hspace{0.25em}
-		\subfloat{\includegraphics[width=6.75cm]{./images-blockdiagrams/slicq_shape.png}}\\
-		\vspace{-0.25em}
-		\subfloat{\includegraphics[width=10cm]{./images-blockdiagrams/xumx_slicq_pertarget_largefont.png}}
-	\end{figure}
+	\frametitle{MDX 21 winners and current trends}
+	\begin{enumerate}
+		\item
+			Previously, music demixing systems were submitted to and evaluated at SiSEC (Signal Separation Evaluation Campaign). This year: MDX (Music Demixing Challenge) ISMIR 2021 @ AICrowd, follow-up MDX21 workshop, satellite @ ISMIR 2021
+		\item
+			\textbf{ISMIR 2021}: Model that uses the complex spectrogram (i.e. includes phase) and uses complex masks\footcite{kong2021decoupling}
+		\item
+			\textbf{MDX21}: 1: Demucs++\footcite{demucsplus} (waveforms + complex spectrogram), 2: KUIELAB-MDX-Net \footcite{choi2021} (waveforms + magnitude spectrogram), 3: Danna-Sep\footcite{dannasep} (waveform + magnitude spectrogram, use complex spectrogram in loss function)
+	\end{enumerate}
+	Properties in common: blending networks, waveforms (implicitly includes phase), complex spectrograms/masks, mixing spectrogram and waveform models
 \end{frame}
 
 \end{document}
