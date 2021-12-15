@@ -1,6 +1,6 @@
 \documentclass[letter,12pt]{article}
 \usepackage[svgnames]{xcolor}
-\usepackage[left=2.5cm, right=2.5cm, top=2cm, bottom=2cm]{geometry}
+\usepackage[left=2.5cm, right=2.5cm, top=2cm, bottom=2.5cm]{geometry}
 \usepackage{hyperref}
 \hypersetup{
   colorlinks   = true, %Colours links instead of ugly boxes
@@ -47,10 +47,9 @@ Schulich School of Music, McGill University, Montr{\'e}al, Canada\\
 \begin{document}
 
 \maketitle
+\thispagestyle{empty}
 
-Music demixing is the task of decomposing a song into its constituent sources, which are typically isolated instruments (e.g., drums, bass, and vocals). Open-Unmix (UMX) \parencite{umx} and CrossNet-Open-Unmix (X-UMX) \parencite{xumx} are models for music demixing that use the Short-Time Fourier Transform (STFT) to represent musical signals, but the time-frequency uncertainty principle states that the STFT of a signal cannot have maximal resolution in both time and frequency \parencite{gabor1946}. The tradeoff in time-frequency resolution can significantly affect music demixing results \parencite{tftradeoff1}.
-
-The STFT is computed by applying the Discrete Fourier Transform on fixed-size windows of the input signal, but for auditory and musical considerations, variable-sized windows are preferred to vary the time-frequency resolution by frequency region \parencite{doerflerphd}. Our proposed adaptation of UMX and X-UMX, called xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} replaces the STFT with the sliCQT \parencite{slicq}, an invertible transform with varying time-frequency resolution. It uses a convolutional network architecture \parencite{plumbley2} trained on the MUSDB18-HQ \parencite{musdb18hq} dataset. On the test set, xumx-sliCQ achieved a median SDR of 3.6 dB versus the 4.64 dB of UMX and 5.54 dB of X-UMX, unfortunately performing worse than the original STFT-based models.
+Music demixing is the task of decomposing a song into its constituent sources, which are typically isolated instruments (e.g., drums, bass, and vocals). Open-Unmix (UMX) \parencite{umx} and CrossNet-Open-Unmix (X-UMX) \parencite{xumx} are models for music demixing that use the Short-Time Fourier Transform (STFT) to represent musical signals, but the time-frequency uncertainty principle states that the STFT of a signal cannot have maximal resolution in both time and frequency \parencite{gabor1946}. The tradeoff in time-frequency resolution can significantly affect music demixing results \parencite{tftradeoff1}. The STFT is computed by applying the Discrete Fourier Transform on fixed-size windows of the input signal, but for auditory and musical considerations, variable-sized windows are preferred to vary the time-frequency resolution by frequency region \parencite{doerflerphd}. Our proposed adaptation of UMX and X-UMX, called xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} replaces the STFT with the sliCQT \parencite{slicq}, an invertible transform with varying time-frequency resolution. It uses a convolutional network architecture \parencite{plumbley2} trained on the MUSDB18-HQ \parencite{musdb18hq} dataset. On the test set, xumx-sliCQ achieved a median SDR of 3.6 dB versus the 4.64 dB of UMX and 5.54 dB of X-UMX, unfortunately performing worse than the original STFT-based models.
 
 \begingroup
 \setstretch{0.9}
