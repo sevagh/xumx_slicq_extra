@@ -111,7 +111,7 @@
 	\frametitle{Phase performance ceiling}
 	\begin{enumerate}
 		\item
-			Simplifying assumption: estimate magnitude spectrograms, use the phase of the original mixed audio. Called ``noisy phase'' \footcite{noisyphase1}. Done by both Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX) \footcite{umx, xumx}, popular \& near-SOTA models
+			Simplifying assumption: estimate magnitude spectrograms, use the phase of the original mixed audio. Called ``noisy phase'' \footcite{noisyphase1}. Done by Open-Unmix (UMX), CrossNet-Open-Unmix (X-UMX) \footcite{umx, xumx}, and many other popular \& near-SOTA models
 		\item
 			Why? Phase is hard to model!\footnote{\url{https://source-separation.github.io/tutorial/basics/phase.html\#why-we-don-t-model-phase}}
 	\end{enumerate}
@@ -122,17 +122,17 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Time-frequency uncertainty principle in the STFT}
-	``Although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \footcite[432]{gabor1946}. Change window size to trade off time and frequency:
+	\frametitle{Time-frequency tradeoff in the STFT and MDX}
+	Joint time-frequency analysis is important for signals whose frequencies change with time.\footcite{gabor1946} Take the Fourier transform of local windows of the signal, i.e., the STFT. Change window size to trade off time and frequency:
 	\begin{figure}[ht]
 		\centering
-		\vspace{-1.25em}
-		\subfloat{\includegraphics[height=2.25cm]{./images-gspi/glock_stft_1024.png}}
-		\subfloat{\includegraphics[height=2.25cm]{./images-gspi/glock_stft_4096.png}}
-		\subfloat{\includegraphics[height=2.25cm]{./images-gspi/glock_stft_256.png}}\\
 		\vspace{-1.5em}
-		\subfloat{\includegraphics[height=2.25cm]{./images-tftheory/gabor3_2.png} \includegraphics[height=2.05cm]{./images-tftheory/gabor4.png}}
+		\subfloat{\includegraphics[height=2cm]{./images-tftheory/gabor3.png} \includegraphics[height=1.75cm]{./images-tftheory/gabor4.png}}\\
 		\vspace{-1em}
+		\subfloat{\includegraphics[height=2.7cm]{./images-mml-presentation/glock_stft_1024.png}}
+		\subfloat{\includegraphics[height=2.7cm]{./images-mml-presentation/glock_stft_4096.png}}
+		\subfloat{\includegraphics[height=2.7cm]{./images-mml-presentation/glock_stft_256.png}}
+		\vspace{-1.25em}
 	\end{figure}
 	In music source separation, window size matters per-target.\footcite{tftradeoff1} Short-window for percussion, long-window for harmonic
 \end{frame}
@@ -146,11 +146,13 @@
 		CQT\footcite{jbrown} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
 	\item
 		Nonstationary Gabor Transform (NSGT) and sliCQT\footcite{balazs, slicq} are TF transforms with Fourier coefficients, perfect inverse, and varying windows to create a varying time-frequency resolution
+	\item
+		sliCQT params chosen for max quality of the noisy-phase waveform
 	\end{enumerate}
 	\begin{figure}[ht]
 		\centering
-		\vspace{-0.75em}
-		\includegraphics[height=3cm]{./images-mml-presentation/spectrograms_comparison.png}
+		\vspace{-0.5em}
+		\includegraphics[height=2.7cm]{./images-mml-presentation/spectrograms_comparison.png}
 	\end{figure}
 \end{frame}
 
