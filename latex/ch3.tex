@@ -137,23 +137,10 @@ The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} packag
 
 Many internal methods, functions, and utilities were modified during the port to PyTorch, and each in turn was also modified to take a \Verb#device# parameter. As these are internal to the library and not intended to be used directly by the end user, they won't be described here.
 
-\subsubsection{Ragged and matrix forms of sliCQT}
+\subsubsection{Ragged form of the sliCQT}
 \label{sec:slicqtshape}
 
-After the port to PyTorch, the matrix form is a single tensor where each row represents a frequency bin, and the total number of columns represents the maximum time resolution from the highest frequency bin. Every lower frequency bin had zero-padding applied to have a row of time coefficients with the same length as the highest frequency bin. The non-matrix form could be referred to the ragged or jagged form, from its non-rectangular shape.
-
-As was shown in Figure \ref{fig:raggedslicqt} in section \ref{sec:theorynsgt}, frequency bins that share the same time resolution are grouped together in a rectangular matrix. This results in a list of tensors or matrices, where each tensor contains a block of frequency bins that share the same time resolution, and thus have the same length of time coefficients.
-
-The matrix form is created by zero-padding the tensors with a lower time resolution to fit the higher time resolution frequency bins. The ragged and zero-padded matrix forms are compared in Figure \ref{fig:raggedvszpad}.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/slicq_zeropad.png}
-	\caption{Ragged and zero-padded matrix forms of the sliCQT}
-	\label{fig:raggedvszpad}
-\end{figure}
-
-In the upcoming section \ref{sec:slicqdim}, we will justify why the ragged form of the sliCQT was chosen instead of the zero-padded matrix form in the final neural network, xumx-sliCQ.
+After the port to PyTorch, the transform can be referred to as ``ragged'' or ``jagged,'' from its non-rectangular shape. As was shown in Figure \ref{fig:raggedslicqt} in section \ref{sec:raggedtf}, frequency bins that share the same time resolution are grouped together in a rectangular matrix. This results in a list of tensors or matrices, where each tensor contains a block of frequency bins that share the same time resolution, and thus have the same length of time coefficients.
 
 \subsubsection{Overlap-add and spectrogram utilities in the sliCQT library}
 \label{sec:slicqtutil}
@@ -237,15 +224,12 @@ After the X-UMX modifications are described, we will look at which parts of Open
 \label{sec:slicqdim}
 
 \todo[inline]{
-Zero-pad: slicqt dimensionality analysis + matrixform fails inference on full tracks cause of its size, and MDX21 and UMX both use full tracks - important. print dims from script
-use CDAE papers for low parameter
+Zero-pad: slicqt dimensionality analysis, big transform = use CDAE papers for low parameter
 \url{https://vtechworks.lib.vt.edu/bitstream/handle/10919/98619/Messou_EJ_T_2020.pdf?sequence=1&isAllowed=y}
 \url{https://arxiv.org/pdf/2010.02178.pdf}
 \url{https://towardsdatascience.com/the-fall-of-rnn-lstm-2d1594c74ce0}
 \url{https://www.researchgate.net/publication/313732034_Monoaural_Audio_Source_Separation_Using_Deep_Convolutional_Neural_Networks}
 }
-
-In \ref{sec:slicqparamsrch}, it was
 
 \subsubsection{Replacing the STFT with the sliCQT in UMX}
 \label{sec:replacestft}

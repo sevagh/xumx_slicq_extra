@@ -386,20 +386,6 @@ The NSGT coefficients for a signal of length $L$ are given by an FFT of length $
 
 We believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales \parencite{melbook}, or the Variable-Q scale based on the psychoacoustic ERBlet transform \parencite{variableq1, variableq2}. In essence the NSGT can be thought of as a filterbank \parencite{variableq1}. 
 
-\citeauthor{klapuricqt} state that the consequence of nonuniform frequency analysis, such as that seen in the CQT or NSGT, leads to
-\begin{quote}
-	... a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized \parencite[1]{klapuricqt}.
-\end{quote}
-
-This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in Figure \ref{fig:raggedslicqt}. In the reference library, a list of time-frequency coefficients per frequency bin is returned, and a parameter called \Verb#matrixform# ensures that each item in the list of time-frequency coefficients has the same length by applying zero-padding to create a rectangular matrix.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/nsgtf_loop.py\#L51}}
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.9\textwidth]{./images-misc/slicq_shape.png}
-	\caption{Illustration of frequency bins grouped by their time resolutions in the NSGT}
-	\label{fig:raggedslicqt}
-\end{figure}
-
 Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show different configurations of the NSGT of the glockenspiel signal, to demonstrate the diversity of the transform. A high and low frequency resolution NSGT, using 100 and 500 total frequency bins respectively, is generated for the Constant-Q/logarithmic scale for music, and the mel psychoacoustic scale, using a frequency range of 20--22,050 Hz. Details of the frequency scales used to generate the NSGT spectrograms are shown in Table \ref{table:nsgtfreqsandqs}.
 
 \begin{figure}[ht]
@@ -511,6 +497,23 @@ Note the terminology of the sliCQT, which uses slice length instead of the windo
 	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_proper.png}}
 	\caption{sliCQT spectrograms demonstrating the slice half-overlap}
 	\label{fig:slicqoverlaps}
+\end{figure}
+
+\subsubsection{Ragged time-frequency transforms}
+\label{sec:raggedtf}
+
+\citeauthor{klapuricqt} state that the consequence of nonuniform frequency analysis, such as that seen in the CQT or NSGT, leads to
+\begin{quote}
+	... a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized \parencite[1]{klapuricqt}.
+\end{quote}
+
+This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in Figure \ref{fig:raggedslicqt}. In the reference library, frequency bins are grouped together by their time resolution, and a ragged or jagged list of time-frequency matrices is returned.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{./images-misc/slicq_shape.png}
+	\caption{Illustration of the ragged NSGT, where frequency bins grouped by their time resolutions in the NSGT and sliCQT}
+	\label{fig:raggedslicqt}
 \end{figure}
 
 \newpagefill
