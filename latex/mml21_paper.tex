@@ -1,0 +1,62 @@
+\documentclass[letter,12pt]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage[left=2cm, right=2cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks   = true, %Colours links instead of ugly boxes
+  urlcolor     = DarkBlue, %Colour for external hyperlinks
+  linkcolor    = black, %Colour of internal links
+  citecolor   = black %Colour of citations
+}
+\usepackage{setspace}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+%\usepackage[backend=biber,authordate,annotation,url=false,doi=false]{biblatex-chicago}
+%\addbibresource{citations.bib}
+\usepackage[
+    %backend=biber, 
+    natbib=true,
+    style=numeric,
+    sorting=none,
+]{biblatex}
+\addbibresource{citations.bib}
+
+\input{variables.tex}
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+%\renewcommand*{\postvolpunct}{\addcolon\addspace}
+
+\title{\vspace{-2.25em}\textbf{\ThesisTitle}\vspace{-0.75em}}
+\author{Sevag Hanssian}
+\date{
+\vspace{-0.75em}
+\small{
+Distributed Digital Music Archives \& Libraries Lab\\
+Schulich School of Music, McGill University, Montr{\'e}al, Canada\\
+}
+\footnotesize{sevag.hanssian@mail.mcgill.ca}
+\vspace{-1.25em}
+}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+Music demixing is the task of decomposing a song into its constituent sources, which are typically isolated instruments (e.g., drums, bass, and vocals). Open-Unmix (UMX) \parencite{umx} and CrossNet-Open-Unmix (X-UMX) \parencite{xumx} are models for music demixing that use the Short-Time Fourier Transform (STFT) to represent musical signals, but the time-frequency uncertainty principle states that the STFT of a signal cannot have maximal resolution in both time and frequency \parencite{gabor1946}. The tradeoff in time-frequency resolution can significantly affect music demixing results \parencite{tftradeoff1}. The STFT is computed by applying the Discrete Fourier Transform on fixed-size windows of the input signal, but for auditory and musical considerations, variable-sized windows are preferred to vary the time-frequency resolution by frequency region \parencite{doerflerphd}. Our proposed adaptation of UMX and X-UMX, called xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} replaces the STFT with the sliCQT \parencite{slicq}, an invertible transform with varying time-frequency resolution. It uses a convolutional network architecture \parencite{plumbley2} trained on the MUSDB18-HQ \parencite{musdb18hq} dataset. On the test set, xumx-sliCQ achieved a median SDR of 3.6 dB versus the 4.64 dB of UMX and 5.54 dB of X-UMX, unfortunately performing worse than the original STFT-based models.
+
+\begingroup
+\setstretch{0.9}
+\setlength\bibitemsep{0.015em}
+%\printbibheading[title={References},heading=bibnumbered]
+%\printbibliography[heading=none]
+\printbibliography
+\endgroup
+
+\end{document}
