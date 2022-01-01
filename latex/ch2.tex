@@ -1090,14 +1090,14 @@ To estimate the time domain waveform from an oracle mask, the complex STFT of th
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \text{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
 
-\subsubsection{Noisy phase or mixed phase inversion (MPI)}
+\subsubsection{Noisy phase or mix-phase inversion (MPI)}
 \label{sec:noisyphaseoracle}
 
 As mentioned in section \ref{sec:masksandoracles}, many music demixing systems prefer to only estimate magnitude spectrograms, and discard the phase. These systems use the phase of the mixed audio combined with the magnitude of the estimated source to create an audio waveform.
 
 In demixing or source separation literature, this strategy is referred to as the ``noisy phase'' \parencite{noisyphase1, noisyphase2}. The name originates from speech separation, where a common task is to separate speech from noise. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, and we will use the term ``mix-phase inversion'' (MPI) to refer to the same idea.
 
-Equations \eqref{equation:mpineural} show how the mixed phase and estimated source magnitude are used to create a waveform by some arbitrary music demixing system:
+Equations \eqref{equation:mpineural} show how the phase of the mixture and magnitude of the estimated source are used to create a waveform by some arbitrary music demixing system:
 \begin{align}\tag{29}\label{equation:mpineural}
 	\nonumber & X_{\text{mix}} = \text{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \text{MusicDemixingSystem}(x_{\text{mix}})\\
