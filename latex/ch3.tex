@@ -333,15 +333,35 @@ For simplicity, having a single training loop and single trained model to perfor
 
 The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4}$ in training, where $y_{1-4}$ are the ground-truth waveforms of all four isolated targets.
 
+, we use the auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR) \parencite{roux2018sdr} loss function for time-domain audio waveforms. SI-SDR is a simpler and more robust variant of SDR which improves on some failure cases of SDR \parencite{roux2018sdr}.  The SI-SDR loss is shown in equation \eqref{equation:sisdr}:
+\begin{align}
+	& \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{33}\label{equation:sisdr}
+\end{align}
+
 \newpagefill
 
 \subsection{Post-processing}
 \label{sec:postprocessing}
 
-\todo[inline]{create a good post-processing diagram, copy from sliceq22 ideas}
-
 After the neural network outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step can be applied to improve the estimates. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the four target magnitude spectrograms.
 
-Performing the Wiener-EM step on the sliCQT can be done in two ways. It can be done on each sub-matrix of the ragged sliCQT, or the ragged sliCQT can be padded with zeros to fit into a single rectangular matrix to perform Wiener-EM on the entire sliCQT at once in a single matrix. Each strategy resulted in a different music demixing quality and execution time, which will be discussed in section \ref{sec:wienerconfigs}.
+In the first strategy, we can use the sliCQT to get a first estimate of the waveform using the mix phase, and then swap into the STFT domain to do Wiener-EM with the STFT, like in the original UMX, called ``STFT-Wiener-EM.'' In the other strategy, we can perform the Wiener-EM step on the sliCQT directly, called ``sliCQT-Wiener-EM.'' It can be done on each sub-matrix of the ragged sliCQT separatetly, or the ragged sliCQT can be padded with zeros to fit into a single rectangular matrix to perform Wiener-EM on the single matrix.
+
+Figure \ref{fig:wienerempostprocstft} shows STFT-Wiener-EM, and Figure \ref{fig:wienerempostprocslicqt} shows the two sub-strategies for sliCQT-Wiener-EM post-processing. Both figures show a simplified case of two sources, A and B. The real Wiener-EM is done with four sources (vocals, drums, bass, other), but the process is similar. Each strategy resulted in a different music demixing quality and execution time, which will be discussed in section \ref{sec:wienerconfigs}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/wienerem_stft.png}
+	\caption{STFT-Wiener-EM; Wiener-EM is applied in the STFT domain after swapping from the sliCQT to the time-domain waveforms}
+	\label{fig:wienerempostprocstft}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Ragged sliCQT-Wiener-EM: Wiener-EM is applied on each sub-matrix separately]{\includegraphics[width=\textwidth]{./images-blockdiagrams/wienerem_slicqt_ragged.png}}\\
+	\subfloat[Zero-padded sliCQT-Wiener-EM: Wiener-EM is applied on the whole zero-padded matrix]{\includegraphics[width=\textwidth]{./images-blockdiagrams/wienerem_slicqt_zeropad.png}}
+	\caption{Different strategies for sliCQT-Wiener-EM post-processing}
+	\label{fig:wienerempostprocslicqt}
+\end{figure}
 
 \end{document}
