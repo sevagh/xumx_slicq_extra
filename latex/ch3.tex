@@ -212,7 +212,7 @@ The replacement of the NumPy or SciPy function is as simple as using the CuPy eq
 
 As mentioned, Open-Unmix has a reference PyTorch implementation\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} on which xumx-sliCQ, the neural network of this thesis, will be based.
 
-First, in section \ref{sec:replacestft}, we will look at how the Open-Unmix PyTorch code needs to be modified in xumx-sliCQ to replace the STFT with the ragged sliCQT described in section \ref{sec:torchslicq}.
+First, in section \ref{sec:replacestft}, we will look at how the Open-Unmix PyTorch code needs to be modified in xumx-sliCQ to replace the STFT with the ragged sliCQT described in section \ref{sec:slicqtshape}.
 
 Next, in section \ref{sec:slicqdim}, we will describe the increased dimensionality of the sliCQT over the STFT and why it justifies the use of a convolutional architecture over the Bi-LSTM architecture of Open-Unmix. In section \ref{sec:convlayers}, we will show how the STFT-based convolutional denoising autoencoder (CDAE) architectures described in section \ref{sec:cdae} were adapted to work on the ragged sliCQT in xumx-sliCQ.
 
@@ -221,13 +221,26 @@ Finally, in section \ref{sec:xumxinc} we will show how we incorporated the Cross
 \subsubsection{Replacing the STFT with the sliCQT in UMX}
 \label{sec:replacestft}
 
-\todo[inline]{in section 2 whatever, we described umx}
-
-These are are the places in the Open-Unmix PyTorch template where the STFT must be replaced with the sliCQT. Moreover, it was mentioned that the ragged sliCQT will be used, which is a list of time-frequency matrices for frequency bins that share the same time resolution, and not a single rectangular matrix like the STFT. This arises from the different temporal frame rates of each frequency bin which is the desire of the NSGT/sliCQT (or CQT). This means that all of the operations which expect a single rectangular real-valued matrix of the STFT returns need to be modified to work on a list of matrices instead.
-
 Figure \ref{fig:umxandxumxslicq} showed the proposed modifications to the base UMX architecture to use the sliCQT in place of the STFT in the input representation.
 
-The shape of the sliCQT is 3D, which is overlap-added. Then, the 2D time-frequency matrix can be used just like an STFT, as an input to an LSTM or any other neural network layer. A necessary consideration in the network design is the non-invertibility of the overlap-add procedure, since the original transform shape is needed to synthesize an audio waveform. The neural network needs a strategy to compute a non-overlap-added estimate from the overlap-added mixed input spectrogram. This was achieved with an additional transpose convolutional layer, which will be covered in greater detail in the next section \ref{sec:convlayers}.
+In sections \ref{sec:raggedtf} and \ref{sec:slicqtshape}, it was mentioned that the ragged sliCQT has a different datastructure than the single rectangular matrix of the STFT, consisting of a list of rectangular matrices. This arises from the different temporal frame rates of different frequency bins, which is a desired characteristic of the NSGT/sliCQT (or CQT).
+
+Additionally, the sliCQT coefficients are returned with the time coefficients distributed into adjacent slices, and these slices have a 50\% overlap-add with their neighboring slices. The overlap-add was described in section \ref{sec:theoryslicqt} on the theoretical background of the sliCQT, and an implementation of the overlap-add procedure and spectrogram plotting code was discussed in \ref{sec:slicqtutil}.
+
+Figure \ref{fig:slicqt3d} shows these two distinct characteristics of the sliCQT, and how it compares to the STFT.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[3D sliCQT before overlap-add]{\includegraphics[width=0.65\textwidth]{./images-blockdiagrams/slicq3ddatastructure.png}}\\
+	\subfloat[2D sliCQT after overlap-add]{\includegraphics[width=0.85\textwidth]{./images-blockdiagrams/slicq2ddatastructure.png}}\\
+	\subfloat[2D STFT]{\includegraphics[width=0.35\textwidth]{./images-blockdiagrams/stft2ddatastructure.png}}
+	\caption{Different temporal framerates per groups of frequency bins in the sliCQT, compared to the STFT}
+	\label{fig:slicqt3d}
+\end{figure}
+
+First, the sliCQT must always be overlap-added to go from the 3D sliced datastructure to the familiar 2D time-frequency datastructure. Then, all of the operations of UMX which expect a single rectangular matrix of the STFT need to be modified to work on a list of matrices instead, where each separate matrix in the list consists of a group of frequency bins that share the same temporal framerate, ordered from the lowest to highest frequency bins.
+
+A necessary consideration in the network design is the non-invertibility of the overlap-add procedure, since the original 3D sliced datastructure is needed to synthesize an audio waveform. The neural network needs a strategy to compute a 3D de-overlap-added estimate from the 2D overlap-added spectrogram. This was achieved with a final transpose convolutional layer at the end of the neural network, which will be covered in greater detail in the next section \ref{sec:convlayers}.
 
 \subsubsection{sliCQT dimensionality analysis and neural network design choices}
 \label{sec:slicqdim}
@@ -243,7 +256,7 @@ Zero-pad: slicqt dimensionality analysis, big transform = use CDAE papers for lo
 \subsubsection{Defining the convolutional layers of the CDAE}
 \label{sec:convlayers}
 
-The convolutional denoising autoencoder (CDAE) models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. In the early experiments, they showed more promising results than the bi-LSTM model. The bi-LSTM model was first adapted to work on each time bucket of the ragged list of the sliCQT, but the longest time resolution (highest frequency bin) was prohibitively slow in both training and inference. Convolutional layers are a simple way of defining 2D time-frequency filters that slide over the 2D time-frequency matrices that correspond to different time buckets of the ragged sliCQT. The diagram in Figure \ref{fig:cdaeslicqt} shows how the convolutional layers should be applied to the ragged sliCQT.
+The convolutional denoising autoencoder (CDAE) models of \textcite{plumbley1, plumbley2} were used in xumx-sliCQ. Convolutional layers are a simple way of defining 2D time-frequency filters that slide over the 2D time-frequency matrices that correspond to different time buckets of the ragged sliCQT. The diagram in Figure \ref{fig:cdaeslicqt} shows how the convolutional layers should be applied to the ragged sliCQT.
 
 \begin{figure}[ht]
 	\centering
@@ -256,7 +269,7 @@ Using the values from \textcite{plumbley2}, the two layers of convolution in the
 
 Different buckets in the ragged transform may have different dimensions for time and frequency, so the 2D convolution filter sizes are different depending on the input size. The training input is split into one second sequences, which is the same sequence size used in both CDAE papers \parencite{plumbley1, plumbley2}. This means that the ragged sliCQT dimensions (frequency bins and time coefficients) for one second of audio dictate the maximum size of time and frequency kernel that can be applied in each convolution layer. After each layer, a 2D batch normalization (BN) and nonlinear activation function, specifically the rectified linear unit (ReLU) activation, are applied \parencite{plumbley2}.
 
-Note that after the encoder-decoder layers for the sliCQT, we need to add a ``growth layer.'' This is the inverse of the slice overlap-add procedure with learnable parameters. It uses a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers three time coefficients to produce six time coefficients. The final activation is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask which can then be applied to the input mixed magnitude spectrogram.
+Note that after the encoder-decoder layers for the sliCQT, we need to add a ``growth layer.'' This is the inverse of the slice overlap-add procedure with learnable parameters. It uses a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers three time coefficients to produce six time coefficients. The effect is to double the number of time coefficients, which is a reversal of the 50\% reduction of time coefficients from the overlap-add procedure. Finally, the 2D tensor is reshaped to the original 3D shape. The final activation is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask which can then be applied to the input mixed magnitude 3D sliCQT spectrogram.
 
 The exact parameters and configuration of the convolutional kernels and layers are described in Tables \ref{table:convtable1}, \ref{table:convtable2}, \ref{table:convtable3}, \ref{table:convtable4}, and \ref{table:convtable5}. The parameters were initially chosen from the kernel values and layers in \textcite{plumbley1, plumbley2}. The parameters were repeatedly modified in an informal hyperparameter tuning process during my submissions to the ISMIR 2021 Music Demixing Challenge. The various tested networks can be viewed in the submission repository here.\footnote{\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}} The design was also constrained by the time limits of the network inference in the challenge. For example, dilations in the time dimension were chosen to efficiently increase the temporal receptive field on the sliCQT without slowing down the inference step.
 
@@ -326,6 +339,8 @@ The exact parameters and configuration of the convolutional kernels and layers a
 
 \subsubsection{Combining the target networks like X-UMX}
 \label{sec:xumxinc}
+
+\todo[inline]{unfuck this}
 
 This section will describe how the UMX models for the four targets are trained together to apply the X-UMX loss functions, as shown in Figure \ref{fig:xumxcl}.
 

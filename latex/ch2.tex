@@ -1295,10 +1295,19 @@ While the discussed Open-Unmix model is based on sequence2sequence ideas with a 
 	\label{fig:cdaes}
 \end{figure}
 
-CDAEs are symmetric: a stack of convolutional layers in the encoder are applied to the input spectrogram to extract spectral audio features with sliding 2D (frequency filter, time filter) kernels. The corresponding reverse stack of transpose convolution (or deconvolution) layer in the decoder use the same size of filter (in reverse order) to grow the feature map back to the original spectrogram. For example, a 2-layer encoder/decoder might consist of the following layers: $\text{Conv}(11,42) \rightarrow \text{Conv}(3,5) \rightarrow \text{ConvTranspose}(3,5) \rightarrow \text{ConvTranspose}(11,42)$.
+CDAEs are symmetric: a stack of convolutional layers in the encoder are applied to the input spectrogram to extract spectral audio features with sliding 2D (frequency filter, time filter) kernels. The corresponding reverse stack of transpose convolution (or deconvolution) layer in the decoder use the same size of filter (in reverse order) to grow the feature map back to the original spectrogram. The number of channels of each layer determines the feature maps of the hidden layers. For example, a 2-layer encoder/decoder for 2-channeled stereo spectrogram inputs might consist of the following layers:
 
-Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$.
+\begin{itemize}
+	\item
+		$\text{Conv}(\text{in\_channels}=2, \text{out\_channels}=12, \text{filter}=(11,42))$
+	\item
+		$\text{Conv}(\text{in\_channels}=12, \text{out\_channels}=24, \text{filter}=(3,5))$
+	\item
+		$\text{ConvTranspose}(\text{in\_channels}=24, \text{out\_channels}=12, \text{filter}=(3,5))$
+	\item
+		$\text{ConvTranspose}(\text{in\_channels}=12, \text{out\_channels}=2, \text{filter}=(11,42))$
+\end{itemize}
 
-We will note that each of the papers gives us different ideas with how to adapt STFT-based convolutional models to fit the sliCQT. The model introduced in \textcite{plumbley1} shows a simple case of a 2D time and frequency filter applied to the STFT, which can be applied to any time-frequency transform. The model introduced in \textcite{plumbley2} varies the size of time and frequency filter to fit the Constant-Q Transform, which as discussed in section \ref{sec:cqt} analyzes music with higher frequency resolution in the low frequency region, and higher time resolution in the high frequency region.
+We note that each of the papers gives us different ideas with how to adapt STFT-based convolutional models to fit the sliCQT. The model introduced in \textcite{plumbley1} shows a simple case of a 2D time and frequency filter applied to the STFT, which can be applied to any time-frequency transform. The model introduced in \textcite{plumbley2} varies the size of time and frequency filter to fit the Constant-Q Transform, which as discussed in section \ref{sec:cqt} analyzes music with higher frequency resolution in the low frequency region, and higher time resolution in the high frequency region.
 
 \end{document}
