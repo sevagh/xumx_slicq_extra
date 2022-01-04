@@ -253,6 +253,8 @@ Zero-pad: slicqt dimensionality analysis, big transform = use CDAE papers for lo
 \url{https://www.researchgate.net/publication/313732034_Monoaural_Audio_Source_Separation_Using_Deep_Convolutional_Neural_Networks}
 }
 
+\newpagefill
+
 \subsubsection{Defining the convolutional layers of the CDAE}
 \label{sec:convlayers}
 
@@ -337,21 +339,25 @@ The exact parameters and configuration of the convolutional kernels and layers a
 \end{tabular}
 \end{table}
 
+\newpagefill
+
 \subsubsection{Combining the target networks like X-UMX}
 \label{sec:xumxinc}
 
-\todo[inline]{unfuck this}
+This section will describe how the xumx-sliCQ code was modified to combined and train the four target models together. It will also describe how the X-UMX loss functions, shown in section \ref{sec:xumx}, were implemented.
 
-This section will describe how the UMX models for the four targets are trained together to apply the X-UMX loss functions, as shown in Figure \ref{fig:xumxcl}.
+For simplicity, having a single training loop and single trained model to perform the separation is easier than training four independent models. For this reason, and that the music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of UMX.
 
-For simplicity, having a single training loop and single trained model to perform the separation is easier to consider than four independent models. For this reason, and that the final music demixing performance of X-UMX is higher than UMX, we chose to use the X-UMX variant of UMX.
+The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. In xumx-sliCQ, the MUSDB18-HQ data loader was modified to return the mixed waveform and all four targets, $(x, y_{\text{vocals}}, y_{\text{bass}}, y_{\text{drums}}, y_{\text{other}})$. Four copies of the CDAE neural network described in the previous section \ref{sec:convlayers} are created in the xumx-sliCQ training script, and each one is trained using a $(x, y_{\text{target}})$ pair for its source.
 
-The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. With CrossNet-Open-Unmix, the MUSDB18-HQ data loader needs to return $(x, y_{1}, y_{2}, y_{3}, y_{4}$ in training, where $y_{1-4}$ are the ground-truth waveforms of all four isolated targets.
-
-, we use the auraloss Python package,\footnote{\url{https://github.com/csteinmetz1/auraloss}} which implements the SI-SDR (scale-invariant SDR) \parencite{roux2018sdr} loss function for time-domain audio waveforms. SI-SDR is a simpler and more robust variant of SDR which improves on some failure cases of SDR \parencite{roux2018sdr}.  The SI-SDR loss is shown in equation \eqref{equation:sisdr}:
+To implement the time-domain SDR loss, we use the auraloss Python package.\footnote{\url{https://github.com/csteinmetz1/auraloss}} We used the SI-SDR (scale-invariant SDR) \parencite{roux2018sdr} variant of SDR as the loss function. SI-SDR is a simpler and more robust variant of SDR which improves on some failure cases of SDR \parencite{roux2018sdr}. Notably, there is a scale-invariant factor introduced such that differences in scale (i.e., loudness of the waveform) don't significantly affect the SDR. The SI-SDR loss is shown in equation \eqref{equation:sisdr}:
 \begin{align}
 	& \text{SI-SDR}(x, \hat{x}) = 10 \log_{10}\Big(\frac{||\frac{\hat{x}^{T}x}{||x||^{2}} x||^{2}}{||\frac{\hat{x}^{T}x}{||x||^{2}} x - \hat{x}||^{2}}\Big)\tag{33}\label{equation:sisdr}
 \end{align}
+
+Contrasted with equation \eqref{equation:sdrinstr} shown for the SDR score in section \ref{sec:evalbss}, we note the addition of the factor $\frac{\hat{x}^{T}x}{||x||^{2}}$ to implement the scale invariance.
+
+The inference in xumx-sliCQ is the same as UMX, with the combined four-target model outputting four estimated magnitude spectrograms, followed by the post-processing Wiener-EM step that will be described in the next section \ref{sec:postprocessing}.
 
 \newpagefill
 
