@@ -13,32 +13,11 @@ This section contains the results of the experiments described in the previous s
 The following sections show benchmark results to demonstrate the speedup of the sliCQT and BSS eval libraries achieved from their GPU ports described in sections \ref{sec:torchslicq} and \ref{sec:fasterbsscupy} respectively.
 
 \subsubsection{Faster NSGT/sliCQT with PyTorch}
+\label{sec:torchslicqresults}
 
 In section \ref{sec:torchslicq}, it was described that the sliCQT Python library uses the CPU-based NumPy library, and that it was necessary to port the code to the GPU-enabled PyTorch deep learning framework to allow it to run directly on the GPU in the deep neural network of Open-Unmix.
 
-The first benchmark script is for the PyTorch implementation of the NSGT/sliCQT library from section \ref{sec:torchslicq}. My copy of the library contains the PyTorch implementation and the benchmark scripts.\footnote{\url{https://github.com/sevagh/nsgt}, \url{https://github.com/sevagh/nsgt/blob/main/examples/benchmark.py}, \url{https://github.com/sevagh/nsgt/blob/main/examples/run_bench.sh}} The benchmark performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a 3:54 minute mixed song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super. The computation time was measured and averaged across 100 iterations. The cost of the memory transfer of the song to the GPU was not included in the measurement. Tables \ref{table:nsgttorchresultsmatrix} and \ref{table:nsgttorchresultsragged} show the benchmark results for the matrix and ragged sliCQT respectively.
-
-\begin{table}[ht]
-	\centering
-	\caption{Execution times for the matrix form of the forward + backward sliCQT}
-	\label{table:nsgttorchresultsmatrix}
-	\begin{tabular}{ |l|l|l|l| }
-	 \hline
-		NSGT library & Device & Time (s) \\
-	 \hline
-	 \hline
-		Original & CPU, multithreaded & 60.56  \\
-	 \hline
-		Original & CPU, single-threaded & 9.50  \\
-	 \hline
-		PyTorch & CPU & 3.10  \\
-	 \hline
-		PyTorch & GPU (NVIDIA 2070 Super) & 2.62 \\
-	 \hline
-		PyTorch & GPU (NVIDIA 3080 Ti) &  2.40 \\
-	 \hline
-\end{tabular}
-\end{table}
+The first benchmark script is for the PyTorch implementation of the NSGT/sliCQT library from section \ref{sec:torchslicq}. My copy of the library contains the PyTorch implementation and the benchmark scripts.\footnote{\url{https://github.com/sevagh/nsgt}, \url{https://github.com/sevagh/nsgt/blob/main/examples/benchmark.py}, \url{https://github.com/sevagh/nsgt/blob/main/examples/run_bench.sh}} The benchmark performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a 3:54 minute mixed song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super. The computation time was measured and averaged across 100 iterations. The cost of the memory transfer of the song to the GPU was not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results for the ragged sliCQT.
 
 \begin{table}[ht]
 	\centering
@@ -62,19 +41,15 @@ The first benchmark script is for the PyTorch implementation of the NSGT/sliCQT 
 \end{tabular}
 \end{table}
 
-The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the ragged transform is a list of tensors. To perform operations on the ragged transform requires looping over the list which negates some of the benefits of GPU parallelism. Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance beats both.
-
 \subsubsection{Faster BSS metrics with CuPy}
+\label{sec:bssmetricsresults}
 
 In section \ref{sec:fasterbsscupy}, it was described that the BSS eval step was the slowest part of evaluating oracle performance, which is the core step in the sliCQT parameter search. Replacing the CPU-based NumPy and SciPy libraries with the GPU-enabled CuPy library for math operations would speed up the oracle evaluations and allow the sliCQT parameter search script to run more efficiently.
 
 The second benchmark script is for the GPU-accelerated BSS metrics computation using the CuPy library from section \ref{sec:fasterbsscupy}. Recall that the copy of the library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} contains the modifications made for this thesis. For the 14 validation tracks of MUSDB18-HQ, the benchmark script\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}}  creates a random estimate (using \Verb#numpy.randn# to create an audio signal) and computes the BSS metrics. It measures the time for each BSS metric computation, summed across 14 tracks and repeated for 10 iterations. The final time is the total time for all 14 tracks, divided by 10 to account for the iterations. Three copies of the script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on a Ryzen 5950X with 64GB RAM, one with the argument \Verb#--cuda-device=0# to use the NVIDIA 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
 
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the NVIDIA 3080 Ti GPU and 738.39 seconds with the weaker NVIDIA 2070 Super GPU. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU.
-
-\newpagefill
-
 \subsection{Best sliCQT parameters with MPI oracle}
+\label{sec:slicqparamresults}
 
 As described in section \ref{sec:slicqparamsrch}, a random parameter search was undertaken to choose the parameters of the sliCQT. The parameter search script\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/scripts/slicq_explore.py}, \url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/docs/slicq_params.md}} computes the median SDR score of the MPI oracle across all four targets and the 14 validation tracks of MUSDB18-HQ. The script ran for 60 iterations using random combinations of sliCQT parameters chosen from the ranges in Table \ref{table:slicqparams} in section \ref{sec:slicqparamsrch}.
 
@@ -99,17 +74,25 @@ The full oracle evaluation on these sliCQT parameters are shown in the boxplot i
 
 The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in section \ref{sec:improvelib}.
 
-The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, beating the 6.23 dB achieved by the STFT with the UMX default window and overlap of 4,096 and 1,024 samples respectively. This indicates that a music demixing system that uses the sliCQT with these parameters has the potential to surpass STFT-based performance.
-
-Keep in mind that to translate this theoretical boost to a real advantage in the final model, a neural network architecture must be chosen that can produce a good estimate of the target magnitude sliCQT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b). We hope that this added information gives the neural network an advantage when learning how to demix music from the sliCQT representation over the STFT.
-
-\newpagefill
+The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, beating the 6.23 dB achieved by the STFT with the UMX default window and overlap of 4,096 and 1,024 samples respectively.
 
 \subsection{xumx-sliCQ neural network}
 
 This section will show the training procedure and final trained performance of the xumx-sliCQ neural network, whose design was described in section \ref{sec:neuralnet}.
 
+\subsubsection{Discarding the Bi-LSTM architecture}
+
+\todo[inline]{
+53 minute epoch on bi-lstm vs. 6 minute on cdae\\
+put full details of epoch length\\
+Training batch: 100\%|████████████████████████████████████████████████████████████████████████| 172/172 [13:23<00:00,  4.67s/it]\\
+Training batch: 100\%|████████████████████████████████████████████████████████████████████████| 172/172 [13:23<00:00,  4.63s/it\\
+Validation batch:  14\%|██████████▎                                                             | 2/14 [06:40<40:04, 200.35s/it]
+}
+
 \subsubsection{Learning parameters and training curves}
+
+\todo[inline]{better, full hyperparam list}
 
 This section will cover the details of the hyperparameters of xumx-sliCQ related to the learning of the neural network.
 
@@ -126,8 +109,6 @@ xumx-sliCQ reports 6,669,912 trainable parameters in total from the torchinfo\fo
 	\caption{Tensorboard loss curves for xumx-sliCQ, 1,000 epochs}
 	\label{fig:networkloss}
 \end{figure}
-
-\newpagefill
 
 \subsubsection{Wiener-EM post-processing results}
 \label{sec:wienerconfigs}
@@ -157,12 +138,6 @@ Note that the default number of iterations for the Wiener-EM step is one, in UMX
 	 \hline
 \end{tabular}
 \end{table}
-
-To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged form, with a negligible drop in SDR. For this reason, the zero-padded sliCQ-Wiener-EM is the chosen implementation of sliCQT-based Wiener-EM in the final model, and the ragged sliCQ-Wiener-EM was discarded for being too computationally slow.
-
-In xumx-sliCQ, a parameter called \Verb#slicq_wiener#\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/model.py\#L380}} was added to switch between the zero-padded sliCQ-Wiener-EM and STFT-Wiener-EM strategies. The default chosen is STFT-Wiener-EM for the best tradeoff of music demixing performance and execution speed.
-
-For both STFT and sliCQT-based Wiener-EM, two iterations were worse than one iteration. The computation time of the inference step will be shown in section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQT Wiener-EM.
 
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
@@ -200,10 +175,6 @@ To maximize result reproducibility, all pretrained models and code were download
 	\label{fig:bssboxplot}
 \end{figure}
 
-The table shows that xumx-sliCQ performed worse than UMX and X-UMX, with both configurations of Wiener-EM.
-
-\newpagefill
-
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
 
@@ -221,22 +192,20 @@ The time to perform the separation of a mixed song into four stems (including th
 
 \begin{table}[ht]
 	\centering
-	\caption{Execution times for the inference of the models}
+	\caption{Execution times of CPU inference and model sizes}
 	\label{table:infperf}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
-		Model & Device & Time (s) \\
+		Model & Size on disk & Time (s) \\
 	 \hline
 	 \hline
-		UMX & CPU & 27.26  \\
+		UMX & 136 MB & 27.26  \\
 	 \hline
-		xumx-sliCQ, STFT-WEM & CPU & 55.59  \\
+		xumx-sliCQ, STFT-WEM & 28 MB & 55.59  \\
 	 \hline
-		xumx-sliCQ, sliCQT-WEM & CPU & 104.54  \\
+		xumx-sliCQ, sliCQT-WEM & 28 MB & 104.54  \\
 	 \hline
 \end{tabular}
 \end{table}
-
-The STFT-WEM configuration of xumx-sliCQ runs \textasciitilde2x slower than UMX, and the sliCQT-WEM configuration runs \textasciitilde4x slower than UMX. We note that the sliCQT-WEM configuration only adds \textasciitilde0.1 dB to the median SDR score compared to the STFT-WEM variant, which is a poor tradeoff considering it doubles the running time.
 
 \end{document}

@@ -237,36 +237,34 @@ A necessary consideration in the network design is the non-invertibility of the 
 \subsubsection{sliCQT neural network architectures}
 \label{sec:slicqarches}
 
-In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented.
+In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented. Figure \ref{fig:cdaeslicqt} shows how both the Bi-LSTM and CDAE network architectures should be applied to the ragged sliCQT. Instead of having a single neural network operate on the single matrix of the STFT, which includes all of the frequency bins at the same temporal frame rate, we must create a neural network for each of the sub-matrices of the ragged sliCQT.
 
-In the original UMX, the neural network architecture is a dense (i.e., linear) encoder-decoder with a Bi-LSTM. The purpose of the dense encoder/decoder with the STFT is to reduce the 2049 frequency bins of the STFT into a smaller dimension set of 512 values, which are then used as the input and output of the Bi-LSTM. In the case of the sliCQT, the output frequency bins are less numerous than the STFT. As described in section \ref{sec:slicqparamsrch}, the maximum frequency bins of the sliCQT were capped at 300, which is a small enough value to use directly as the input to the Bi-LSTM without needing to be encoded to a lower dimension with dense layers.
+Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQT, and need a de-overlap layer which is discussed in section \ref{sec:deoverlap}.
 
-Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT with the UMX default 2049 frequency bins, and how it should be adapted to a sliCQT that has a smaller set of frequency bins $f << 2049$.
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget_cdae_bilstm.png}
+	\caption{Block diagram of the individual CNNs of xumx-sliCQ, using a simplified ragged sliCQT for demonstration purposes}
+	\label{fig:cdaeslicqt}
+\end{figure}
+
+In the original UMX, the neural network architecture is a dense (i.e., linear) encoder-decoder with a Bi-LSTM. The STFT in UMX uses a window size of 4096, which results in 2049 output frequency bins. The purpose of the dense encoder/decoder with the STFT is to reduce the 2049 frequency bins into a smaller dimension set of 512 values, which are then used as the input and output of the Bi-LSTM. In the case of the sliCQT, the output frequency bins are less numerous than the STFT. As described in section \ref{sec:slicqparamsrch}, the maximum frequency bins of the sliCQT were capped at 300, which is a small enough value to use directly as the input to the Bi-LSTM without needing to be encoded to a lower dimension with dense layers.
+
+Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT with the UMX default 2049 frequency bins, and how it should be adapted to a sliCQT that has a smaller set of frequency bins $f \ll 2049$.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
-	\subfloat[Bi-LSTM architecture for the sliCQT with $f << 2049$ frequency bins]{\includegraphics[width=0.65\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
+	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins]{\includegraphics[width=0.6\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
 	\caption{The original UMX Bi-LSTM for the STFT, and the variant adapted for the sliCQT}
 	\label{fig:umxnetworkdetails}
 \end{figure}
 
 As discussed in sections \ref{sec:cnn} and \ref{sec:cdae}, convolutional layers, and specifically convolutional denoising autoencoders (CDAE), are simple ways of defining 2D time-frequency filters that slide over a 2D time-frequency matrix of Fourier coefficients. The convolutional denoising autoencoder (CDAE) models of \textcite{plumbley1, plumbley2} were adapted for use in xumx-sliCQ.
 
-Figure \ref{fig:cdaeslicqt} shows how both the Bi-LSTM and CDAE network architectures should be applied to the ragged sliCQT. Instead of having a single neural network operate on the single matrix of the STFT, which includes all of the frequency bins at the same temporal frame rate, we must create a neural network for each of the sub-matrices of the ragged sliCQT.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget_cdae_bilstm.png}
-	\caption{Block diagram of the individual CNNs of xumx-sliCQ}
-	\label{fig:cdaeslicqt}
-\end{figure}
-
 Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$. The sub-matrices of the ragged sliCQT may have different dimensions for time and frequency, due to their varying frequency bins and temporal framerates, so the 2D convolution filter sizes are adapted to the input size. After each layer, a 2D batch normalization (BN) and nonlinear activation function, specifically the rectified linear unit (ReLU) activation, are applied \parencite{plumbley2}.
 
 The exact parameters and configuration of the convolutional kernels and layers are described in Tables \ref{table:convtable1}, \ref{table:convtable2}, \ref{table:convtable3}, and \ref{table:convtable4}. The parameters were initially chosen from the kernel values and layers in \textcite{plumbley1, plumbley2}. The parameters were repeatedly modified in an informal hyperparameter tuning process during my submissions to the ISMIR 2021 Music Demixing Challenge. The various tested networks can be viewed in the submission repository here.\footnote{\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}} The design was also constrained by the time limits of the network inference in the challenge. For example, dilations in the time dimension were chosen to efficiently increase the temporal receptive field on the sliCQT without slowing down the inference step.
-
-Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQT, and need a de-overlap layer which is shown above in Figure \ref{fig:cdaeslicqt}. The de-overlap layer is discussed in section \ref{sec:deoverlap}.
 
 \begin{table}[ht]
 	\centering
@@ -320,6 +318,10 @@ Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQ
 	 \hline
 \end{tabular}
 \end{table}
+
+Another detail of the original UMX neural network architecture is the bandwidth parameter, which is set to a default value of 16,000 Hz. This controls the maximum STFT frequency bin which is passed through the network; frequency bins above the one corresponding to 16,000 Hz are cropped before passing the spectrogram into the network.
+
+We used the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ. In the ragged sliCQT, the sub-matrices of the ragged transform that contain frequency bins above 16,000 Hz are passed through the neural networkunchanged, to achieve the same effect.
 
 \newpagefill
 
