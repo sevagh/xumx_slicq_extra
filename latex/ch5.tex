@@ -12,13 +12,11 @@ This section contains the discussion of the results shown in section \ref{sec:ex
 
 \subsubsection{GPU acceleration benchmarks}
 
-Table \ref{table:nsgttorchresultsragged} from section \ref{sec:torchslicqresults} contained the benchmark results for the PyTorch implementation of the ragged sliCQT compared to the original library.
+Table \ref{table:nsgttorchresultsragged} from section \ref{sec:gpuresults} contained the benchmark results for the PyTorch implementation of the ragged sliCQT compared to the original library.
 
 The execution time of the transform improved with PyTorch. The GPUs have an advantage over the CPU in the matrix form of the transform, but not in the ragged form. This can be explained by the fact that the ragged transform is a list of tensors. To perform operations on the ragged transform requires looping over the list which negates some of the benefits of GPU parallelism. Even though the GPU is not faster than the CPU for the tested parameters of ragged sliCQT, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance beats both.
 
-Section \ref{sec:bssmetricsresults} described the benchmarking of the GPU-accelerated BSS metrics library developed for xumx-sliCQ.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}}
-
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the NVIDIA 3080 Ti GPU and 738.39 seconds with the weaker NVIDIA 2070 Super GPU. The speedup from CuPy is \textasciitilde 2-2.5x over the Ryzen 5950X CPU.
+Section \ref{sec:gpuexperiments} also described the benchmarking of the GPU-accelerated BSS metrics library developed for xumx-sliCQ.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} The results showed that a \textasciitilde2-2.5x time savings can be expected over the CPU, which represent a significant reduction in the time taken to compute BSS evaluations of music demixing systems, that can be useful for various evaluation campaigns like SiSEC \parencite{sisec2018} or MDX \parencite{mdx21}.
 
 \subsubsection{Best sliCQT parameters}
 
@@ -26,8 +24,14 @@ This indicates that a music demixing system that uses the sliCQT with these para
 
 Keep in mind that to translate this theoretical boost to a real advantage in the final model, a neural network architecture must be chosen that can produce a good estimate of the target magnitude sliCQT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b). We hope that this added information gives the neural network an advantage when learning how to demix music from the sliCQT representation over the STFT.
 
+\subsubsection{xumx-sliCQ neural network}
+\label{sec:netdiscuss}
 
-\subsubsection{Wiener-EM post-processing}
+Table \ref{table:bsseval} from section \ref{sec:demixresults} showed that xumx-sliCQ performed worse than UMX and X-UMX, with both configurations of Wiener-EM.
+
+It was \textasciitilde4.9x smaller on disk than UMX,\todo{and size on disk}
+
+Section \ref{sec:inferenceperf} described the running time analysis of the inference of xumx-sliCQ. The STFT-WEM configuration of xumx-sliCQ runs \textasciitilde2x slower than UMX, and the sliCQT-WEM configuration runs \textasciitilde4x slower than UMX. We note that the sliCQT-WEM configuration only adds \textasciitilde0.1 dB to the median SDR score compared to the STFT-WEM variant, which is a poor tradeoff considering it doubles the running time.
 
 To briefly discuss these results, the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged form, with a negligible drop in SDR. For this reason, the zero-padded sliCQ-Wiener-EM is the chosen implementation of sliCQT-based Wiener-EM in the final model, and the ragged sliCQ-Wiener-EM was discarded for being too computationally slow.
 
@@ -35,41 +39,23 @@ In xumx-sliCQ, a parameter called \Verb#slicq_wiener#\footnote{\url{https://gith
 
 For both STFT and sliCQT-based Wiener-EM, two iterations were worse than one iteration. The computation time of the inference step will be shown in section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQT Wiener-EM.
 
-\subsubsection{Music demixing and inference performance}
-
-Table \ref{table:bsseval} from section \ref{sec:demixresults} showed that xumx-sliCQ performed worse than UMX and X-UMX, with both configurations of Wiener-EM.
-
-Section \ref{sec:inferenceperf} described the running time analysis of the inference of xumx-sliCQ. The STFT-WEM configuration of xumx-sliCQ runs \textasciitilde2x slower than UMX, and the sliCQT-WEM configuration runs \textasciitilde4x slower than UMX. We note that the sliCQT-WEM configuration only adds \textasciitilde0.1 dB to the median SDR score compared to the STFT-WEM variant, which is a poor tradeoff considering it doubles the running time.
-
 \subsection{Conclusion}
 \label{sec:conclusion}
 
-The creation of xumx-sliCQ led to several contributions to the current Python ecosystem for music demixing. First, the GPU-accelerated BSS metrics evaluation will be useful for as long as BSS is used in large-scale evaluations of music demixing systems, and it was showed that \textasciitilde2-2.5x time savings can be expected. Second, the PyTorch implementation of the forward and backward NSGT and sliCQT will allow the NSGT/sliCQT to be used in different GPU-based machine learning and deep learning networks.
+\todo[inline]{unfuck these}
 
-The proposed model, xumx-sliCQ, failed to beat Open-Unmix (UMX). It was \textasciitilde4.9x smaller on disk than UMX, but was \textasciitilde2x slower on average to process a song. The median SDR on the test set of MUSDB18-HQ was 3.6 dB, compared to the 4.64 dB of UMX. Additionally, there is a configuration of xumx-sliCQ to improve the performance to 3.71 dB by performing the Wiener-EM post-processing on the sliCQT instead of the STFT, at the cost of being \textasciitilde4x slower than UMX. This result showed that the ragged sliCQT could replace the STFT in a neural network.
+The creation of xumx-sliCQ led to several contributions to the current Python ecosystem for music demixing. First, Second, the PyTorch implementation of the NSGT and sliCQT allow these transforms to be used in GPU machine learning and deep learning networks.
 
-An improved variant of the NSGT/sliCQT was published by \textcite{variableq1}, which is the CQ-NSGT implementation used in the cqt function of the MATLAB Wavelet Toolbox.\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} A matrix form is proposed which uses rasterization, or interpolation, of the low-frequency bins to match the larger size of time coefficients of the high-frequency regions. The paper also proposed to improve the phase of the transform, which may affect the quality of the first waveform estimate from the mix-phase inversion.
-
-After the completion of this thesis, my opinions on the most promising future directions of research are:
-\begin{tight_enumerate}
-	\item
-		Incorporating the ideas from \textcite{variableq1}, including the rasterization/interpolation instead of zero-padding for the matrix form, into the PyTorch NSGT/sliCQT library.\footnote{\url{https://github.com/sevagh/nsgt}}
-	\item
-		Picking sliCQT parameters by a different strategy than the mix-phase inversion (MPI) oracle. For example, there may be a sliCQT representation which a neural network can learn from more effectively, but doesn't score highly on the MPI oracle.
-	\item
-		Designing a different neural network architecture. If the rasterized/interpolated matrix form is more promising than the zero-padded matrix form, this would simplify the network design compared to the current ragged form. However, even if we continue using the ragged form of the transform, there are still many network architectures that can be tried that may be better than the one used in this thesis.
-\end{tight_enumerate}
-
-A design constraint of X-UMX is that the spectrograms for the four targets to have the same shape so that they can be summed in the frequency-domain combination loss. This ruled out an early experiment with different sliCQT parameters per-target. The STFT-based Wiener-EM step is compatible with the multi-sliCQT idea, since the different sliCQTs are swapped into the STFT domain for the iterative refinement step. Similarly, the frequency-domain combination losses of X-UMX can potentially be computed with the STFT after getting the per-target magnitude sliCQT estimates. This way, the improved loss functions of X-UMX would still be compatible with four independent sliCQT networks per-target.
+The proposed model, xumx-sliCQ, failed to beat the music demixing performance of Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX), but it demonstrates a working prototype of sliCQT-based music demixing.
 
 \subsection{Summary and outlook}
 
-The STFT has known limitations that arise from its fixed time-frequency resolution. Methods of spectral music demixing that use the STFT have addressed this limitation by using multiple STFTs or by using different time-frequency transforms like the CQT. Time-domain waveform models, or end-to-end models \parencite{waveunet, demucs, endtoend}, are achieving success as an alternative to spectral models.
+The STFT has known limitations that arise from its fixed time-frequency resolution. Methods of spectral music demixing that use the STFT have addressed this limitation by using multiple STFTs or by using different time-frequency transforms like the CQT. In many STFT-based models for music demixing, the phase is discarded for simplicity and the network operates on the magnitude STFT.
 
-Recall that in spectral models for source separation, the phase is commonly discarded. According to \textcite{endtoend}, attempts to use the phase of the spectrogram could not beat magnitude spectral models, and waveform models have surpassed both since the waveform implicitly contains the phase.
+The advantage of the sliCQT is that it can provide a method for computing a time-frequency transform with the familiar complex-valued Fourier coefficients and a perfect inverse operation for arbitrary frequency scales. The signal or application under study can dictate the frequency scale used. The goal of using the sliCQT in a music demixing application was to see if the improved time-frequency resolution, and an appropriately-chosen frequency scale, could improve the performance of STFT-based models.
 
-The goal of using the sliCQT in a music demixing application was to see if the improved time-frequency resolution characteristics compared to the STFT and an appropriately-chosen frequency scale of analysis could squeeze out more performance from simple magnitude spectrogram models. The resulting neural network showed that it could perform the task of music demixing, but the final trained model could not surpass the original STFT model that it was based on.
+In this thesis, two near-SOTA STFT-based models, Open-Unmix (UMX) and its closely-related variant CrossNet-Open-Unmix (X-UMX), were adapted to use the sliCQT and create a new model for music demixing called xumx-sliCQ. xumx-sliCQ did not surpass UMX and X-UMX, but we believe it represents a promising start to sliCQT-based music demixing techniques.
 
-The power of the sliCQT is that it can provide a method for computing a time-frequency transform with the familiar complex-valued Fourier coefficients and a perfect inverse operation for arbitrary frequency scales. The signal or application under study can dictate the frequency scale used. The potential uses of the sliCQT can be much wider than xumx-sliCQ, and it is the hopes of the author that other researchers explore the sliCQT and see what they can achieve with it.
+Looking towards the future, a direction to explore is using the improved variant of the NSGT/sliCQT \parencite{variableq1}, which is the CQ-NSGT implementation used in the cqt function of the MATLAB Wavelet Toolbox.\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} A matrix form is proposed which uses rasterization, or interpolation, of the low-frequency bins to match the larger size of time coefficients of the high-frequency regions. This would create a single matrix for the sliCQT, eliminating the challenges of working with the ragged shape of the transform in this paper. \textcite{variableq1} also proposed to improve the phase of the transform, which may affect the quality of the time-domain waveform estimate from the mix-phase inversion.
 
 \end{document}

@@ -5,6 +5,7 @@ import tqdm
 import argparse
 import torch
 import museval
+from museval.metrics import disable_cupy
 import numpy as np
 import random
 import time
@@ -134,6 +135,7 @@ if __name__ == '__main__':
         raise ValueError(f'musdb18 data split {args.split} unsupported')
 
     max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
+    disable_cupy()
 
     loaded_models = {
             'umx': umx_separator(
