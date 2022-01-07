@@ -226,6 +226,8 @@ Finally, in section \ref{sec:xumxinc} we will show how we incorporated the X-UMX
 
 In this section, we will describe the changes made to UMX to support the two distinct characteristics of the sliCQT shown in section \ref{sec:torchslicq}: the ragged shape, and the 3D dimensions requiring an overlap-add to produce a 2D time-frequency matrix.
 
+Firstly, UMX uses a sequence duration of six seconds, meaning the training inputs are six second waveforms of audio. In xumx-sliCQ, we chose a smaller value of one second of music, chosen because it is often used in demixing papers \parencite{plumbley1, plumbley2, demucs}. Since the dimensionality of the sliCQT is larger than the STFT, having a smaller one second sequence duration creates less total sliCQT coefficients than a six second sequence duration, which lowers the demands of the training process of the xumx-sliCQ neural network on GPU memory.
+
 In sections \ref{sec:raggedtf} and \ref{sec:torchslicq}, it was mentioned that the ragged sliCQT has a different datastructure than the single rectangular matrix of the STFT, consisting of a list of rectangular matrices. This arises from the different temporal frame rates of different frequency bins, which is a desired characteristic of the NSGT/sliCQT (or CQT).
 
 Additionally, the sliCQT coefficients are returned with the time coefficients distributed into adjacent slices, and these slices have a 50\% overlap-add with their neighboring slices. The overlap-add was described in section \ref{sec:theoryslicqt} on the theoretical background of the sliCQT, and an implementation of the overlap-add procedure and spectrogram plotting code was discussed in \ref{sec:torchslicq}.
@@ -237,7 +239,9 @@ A necessary consideration in the network design is the non-invertibility of the 
 \subsubsection{sliCQT neural network architectures}
 \label{sec:slicqarches}
 
-In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented. Figure \ref{fig:cdaeslicqt} shows how both the Bi-LSTM and CDAE network architectures should be applied to the ragged sliCQT. Instead of having a single neural network operate on the single matrix of the STFT, which includes all of the frequency bins at the same temporal frame rate, we must create a neural network for each of the sub-matrices of the ragged sliCQT.
+In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented.
+
+Figure \ref{fig:cdaeslicqt} shows how both the Bi-LSTM and CDAE network architectures should be applied to the ragged sliCQT. Instead of having a single neural network operate on the single matrix of the STFT, which includes all of the frequency bins at the same temporal frame rate, we must create a neural network for each of the sub-matrices of the ragged sliCQT.
 
 Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQT, and need a de-overlap layer which is discussed in section \ref{sec:deoverlap}.
 
@@ -346,6 +350,8 @@ The data loader of Open-Unmix returns a single target at a time, or an $(x, y)$ 
 To implement the time-domain SDR loss, we use the auraloss Python package.\footnote{\url{https://github.com/csteinmetz1/auraloss}} We used the SI-SDR (scale-invariant SDR) \parencite{roux2018sdr} variant of SDR as the loss function. SI-SDR is a simpler and more robust variant of SDR which improves on some failure cases of SDR \parencite{roux2018sdr}.
 
 The inference in xumx-sliCQ is the same as UMX, with the combined four-target model outputting four estimated magnitude spectrograms, followed by the post-processing Wiener-EM step that will be described in the next section \ref{sec:postprocessing}.
+
+Recall from section \ref{sec:xumx} that X-UMX includes the multi-domain loss (CL), with a mixing coefficient to sum the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0. In xumx-sliCQ, it is set to 0.1 to reflect the observed order of magnitude difference in the coefficients of the STFT and the sliCQT.
 
 \newpagefill
 

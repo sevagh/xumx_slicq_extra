@@ -82,23 +82,65 @@ The slice length and transition length for the 262-bin Bark scale sliCQT with fr
 
 This section will show the hyperparameters, training procedure, and final trained performance of the xumx-sliCQ neural network, whose design was described in section \ref{sec:neuralnet}.
 
-\subsubsection{Parameters and hyperparameters}
+\subsubsection{Hyperparameters in the training script}
 
-\todo[inline]{better, full param list}
+This section will cover the details of the hyperparameters of the xumx-sliCQ training script. Table \ref{table:xumxslicqparams} contains a full list of all the hyperparameters, their default values, and their origin. The origins of the parameters are either copied from UMX, X-UMX, or sections from this thesis which describe new hyperparameters, or values of existing hyerparameters that are different from the default value used in UMX or X-UMX.
 
-This section will cover the details of the hyperparameters of xumx-sliCQ related to the learning of the neural network.
+\begin{table}[ht]
+	\centering
+	\caption{Arguments for the xumx-sliCQ training script to define hyperparameters}
+	\label{table:xumxslicqparams}
+	\begin{tabular}{ |l|l|l| }
+	 \hline
+		Parameter & Default & Origin \\
+	 \hline
+	 \hline
+		Dataset & MUSDB18-HQ & Copied from UMX \\
+	 \hline
+		Learning rate & 1e-3 & Copied from UMX \\
+	 \hline
+		Learning rate decay patience & 80 & Copied from UMX \\
+	 \hline
+		Learning rate decay gamma & 0.3 & Copied from UMX \\
+	 \hline
+		Weight decay & 1e-5 & Copied from UMX \\
+	 \hline
+	 	Seed & 42 & Copied from UMX \\
+	 \hline
+	 	Bandwidth & 16000 Hz & Copied from UMX \\
+	 \hline
+	 	Number of channels & 2 & Copied from UMX \\
+	 \hline
+	 	Number of workers for dataloader & 4 & Copied from UMX \\
+	 \hline
+		Epochs & 1,000 & Copied from X-UMX \\
+	 \hline
+		Patience & 1,000 & Copied from X-UMX \\
+	 \hline
+		Frequency scale & Bark & Sections \ref{sec:slicqparamsrch}, \ref{sec:slicqparamresults} \\
+	 \hline
+		Frequency bins & 262 & Sections \ref{sec:slicqparamsrch}, \ref{sec:slicqparamresults} \\
+	 \hline
+	 	Minimum frequency & 32.9 Hz & Sections \ref{sec:slicqparamsrch}, \ref{sec:slicqparamresults} \\
+	 \hline
+		Sequence duration & 1 s & Section \ref{sec:replacestft} \\
+	 \hline
+		Use Bi-LSTM instead of CDAE & False & Section \ref{sec:slicqarches}  \\
+	 \hline
+		Mixing coefficient & 0.1 & Section \ref{sec:xumxinc} \\
+	 \hline
+\end{tabular}
+\end{table}
 
-The training uses an Adam optimizer which runs for 1,000 iterations (or epochs), with a learning rate of 0.001 and a weight decay of 0.00001. There is also an adaptive learning rate scheduler with a decay patience of 80 and a decay gamma of 0.3. These were copied from UMX and X-UMX, unchanged.
-
-Recall from section \ref{sec:xumxinc} that X-UMX includes the cross-domain loss (CL), with a mixing coefficient between the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0, but in xumx-sliCQ it is set to 0.1 to reflect the observed order of magnitude difference in the MSE loss of the STFT and the sliCQT.
+The optimizer used is the Adam optimizer, with an adaptive learning rate scheduler, unchanged from UMX.
 
 \subsubsection{Network architecture and training}
 
 In this section, we will describe the neural network architectures and training results for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. We will use the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package to get a count of the total trainable parameters of the neural network. We will show the loss curves of the training process with Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a neural network training visualization tool.
 
-For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. We did not complete the training, due to the very high duration per epoch; this decision will be discussed further in section \ref{sec:netdiscuss}.
+For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. We did not complete the training and could not evaluate this configuration, due to the very high duration per epoch; this decision will be discussed further in section \ref{sec:netdiscuss}.
 
-For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable parameters in total. The training time per epoch (including 1 epoch of training and validation) took 350 seconds, or almost 6 minutes, representing a total of 100 hours or 4 days of training. The total training curves for the full 1000 epochs can be seen in Figure \ref{fig:networkloss}. The lowest validation loss achieved was -0.449 at epoch 583.
+For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable parameters in total. The training time per epoch took 350 seconds, or almost 6 minutes, representing a total of 100 hours or 4 days of training. The total training curves for the full 1000 epochs can be seen in Figure \ref{fig:networkloss}. The lowest validation loss achieved was -0.449 at epoch 583.
 
 \begin{figure}[ht]
 	\centering
@@ -108,12 +150,41 @@ For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable paramete
 	\label{fig:networkloss}
 \end{figure}
 
+\subsubsection{Wiener-EM post-processing details}
+\label{sec:wienerconfigs}
+
+We previously discussed in section \ref{sec:postprocessing} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener-EM step that could be done with the sliCQT or the STFT. In this section, we will discuss the execution times and SDR scores of the different configurations of Wiener-EM post-processing.
+
+Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Table \ref{table:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.''
+
+\begin{table}[ht]
+	\centering
+	\caption{SDR of Wiener-EM post-processing with the STFT and sliCQT}
+	\label{table:wienerem}
+	\begin{tabular}{ |l|l|l|l| }
+	 \hline
+		Wiener-EM implementation & Iterations & Median SDR & Execution time (s) \\
+	 \hline
+	 \hline
+		sliCQT, ragged & 1 & 2.221 & 479.104 \\
+	 \hline
+		sliCQT, zero-padded matrix & 1 & 2.216 & 268.061  \\
+	 \hline
+		STFT & 1 & 2.143 & 221.839  \\
+	 \hline
+		sliCQT, ragged & 2 & 1.941 & 775.51  \\
+	 \hline
+		STFT & 2 & 1.827 & 245.906  \\
+	 \hline
+\end{tabular}
+\end{table}
+
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
 In this section, the music demixing results of the trained models UMX, X-UMX, and xumx-sliCQ will be compared.
 
-The BSSv4 scores for the demixing results generated from the evaluation script\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}} were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. ``-WEM'' denotes ``Wiener expectation-maximization,'' the post-processing iterative refinement step of the four targets.
+The BSSv4 scores for the demixing results generated from the evaluation script\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}} were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. The sliCQT-Wiener-EM implementation is the zero-padded matrix form described in sections \ref{sec:postprocessing} and \ref{sec:wienerconfigs}, preferred over the ragged sliCQT-Wiener-EM step due to its faster computation time. Wiener-EM will be abbreviated to WEM in the following tables.
 
 To maximize result reproducibility, all pretrained models and code were downloaded from their public hosted locations shown in Table \ref{table:bsseval} and stored in a separate repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 
@@ -143,35 +214,6 @@ To maximize result reproducibility, all pretrained models and code were download
 	\caption{Boxplot of UMX, X-UMX, and xumx-sliCQ alongside the oracles}
 	\label{fig:bssboxplot}
 \end{figure}
-
-\subsubsection{Wiener-EM post-processing details}
-\label{sec:wienerconfigs}
-
-We previously discussed in section \ref{sec:postprocessing} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener-EM step that could be done with the sliCQT or the STFT. In this section, we will discuss the execution times and SDR scores of the different configurations of Wiener-EM post-processing.
-
-Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Table \ref{table:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.''
-
-\begin{table}[ht]
-	\centering
-	\caption{SDR of Wiener-EM post-processing with the STFT and sliCQT}
-	\label{table:wienerem}
-	\begin{tabular}{ |l|l|l|l| }
-	 \hline
-		Wiener-EM representation & Iterations & Median SDR & Execution time (s) \\
-	 \hline
-	 \hline
-		sliCQT, ragged & 1 & 2.221 & 479.104 \\
-	 \hline
-		sliCQT, zero-padded matrix & 1 & 2.216 & 268.061  \\
-	 \hline
-		STFT & 1 & 2.143 & 221.839  \\
-	 \hline
-		sliCQT, ragged & 2 & 1.941 & 775.51  \\
-	 \hline
-		STFT & 2 & 1.827 & 245.906  \\
-	 \hline
-\end{tabular}
-\end{table}
 
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
