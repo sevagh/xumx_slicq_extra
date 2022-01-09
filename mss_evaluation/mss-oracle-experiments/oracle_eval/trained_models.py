@@ -78,6 +78,7 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass
     end = time.time()
 
     gc.collect()
+    torch.cuda.empty_cache()
 
     print(f'bss evaluation to store in {eval_dir}')
     bss_scores = museval.eval_mus_track(
@@ -85,6 +86,9 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass
         estimates,
         output_dir=eval_dir,
     )
+
+    gc.collect()
+    torch.cuda.empty_cache()
 
     print(bss_scores)
 
@@ -137,7 +141,7 @@ if __name__ == '__main__':
         raise ValueError(f'musdb18 data split {args.split} unsupported')
 
     max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
-    disable_cupy()
+    #disable_cupy()
 
     loaded_models = {
             'umx': umx_separator(
@@ -181,6 +185,7 @@ if __name__ == '__main__':
         tot += time_taken
 
         gc.collect()
+        torch.cuda.empty_cache()
 
         if args.audio_dir:
             mus.save_estimates(est, track, aud_path)

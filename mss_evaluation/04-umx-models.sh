@@ -7,12 +7,13 @@ expdir="exp-04-trained-models-2022"
 scriptdir="./mss-oracle-experiments/oracle_eval"
 
 export MUSDB_PATH=/run/media/sevagh/windows-games/MDX-datasets/MUSDB18-HQ/
+export CUDA_VISIBLE_DEVICES=0
 #export MUSDB_MAX_TRACKS=10
 
 mkdir -p "${expdir}"
 
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=xumx
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=umx
-$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-2022 --track-offset=13
+$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-2022 --track-offset=14
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wslicq
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wstft
