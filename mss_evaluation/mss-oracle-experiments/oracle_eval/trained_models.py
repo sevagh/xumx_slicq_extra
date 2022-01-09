@@ -5,7 +5,7 @@ import tqdm
 import argparse
 import torch
 import museval
-from museval.metrics import disable_cupy
+from museval.metrics import disable_cupy, clear_cupy_cache
 import numpy as np
 import random
 import time
@@ -79,6 +79,7 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass
 
     gc.collect()
     torch.cuda.empty_cache()
+    clear_cupy_cache()
 
     print(f'bss evaluation to store in {eval_dir}')
     bss_scores = museval.eval_mus_track(
@@ -89,6 +90,7 @@ def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass
 
     gc.collect()
     torch.cuda.empty_cache()
+    clear_cupy_cache()
 
     print(bss_scores)
 
@@ -186,6 +188,7 @@ if __name__ == '__main__':
 
         gc.collect()
         torch.cuda.empty_cache()
+        clear_cupy_cache()
 
         if args.audio_dir:
             mus.save_estimates(est, track, aud_path)
