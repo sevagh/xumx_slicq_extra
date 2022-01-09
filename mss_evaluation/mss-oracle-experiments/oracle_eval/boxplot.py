@@ -216,6 +216,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--colors-legend',
         type=str,
+        default=None,
         help='color legend (control vs. full eval)',
     )
 
