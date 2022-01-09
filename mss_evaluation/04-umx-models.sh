@@ -14,6 +14,6 @@ mkdir -p "${expdir}"
 
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=xumx
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=umx
-$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-2022 --track-offset=14
+$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-2022
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wslicq
 #$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wstft
