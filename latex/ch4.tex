@@ -130,6 +130,7 @@ This section will cover the details of the hyperparameters of the xumx-sliCQ tra
 The optimizer used is the Adam optimizer, with an adaptive learning rate scheduler, unchanged from UMX.
 
 \subsubsection{Network architecture and training}
+\label{sec:networktraining}
 
 In this section, we will describe the neural network architectures and training results for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. We will use the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package to get a count of the total trainable parameters of the neural network. We will show the loss curves of the training process with Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a neural network training visualization tool.
 
@@ -150,7 +151,7 @@ For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable paramete
 
 We previously discussed in section \ref{sec:postprocessing} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener-EM step that could be done with the sliCQT or the STFT. In this section, we will discuss the execution times and SDR scores of the different configurations of Wiener-EM post-processing.
 
-Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Table \ref{table:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on a single track, ``Al James - Schoolboy Facination.''
+Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Table \ref{table:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on the first test track of MUSDB18-HQ, ``Al James - Schoolboy Facination.''
 
 \begin{table}[ht]
 	\centering
@@ -198,7 +199,7 @@ To maximize result reproducibility, all pretrained models and code were download
 	 \hline
 		\makecell[l]{xumx-sliCQ \\ sliCQT-WEM} & slicq-wslicq & 3.71 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
-		\makecell[l]{xumx-sliCQ \\ STFT-WEM} & slicq-wstft & 3.60 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+		\makecell[l]{xumx-sliCQ \\ STFT-WEM} & slicq-wstft & 3.6 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
 \end{tabular}
 \end{table}

@@ -1,51 +1,56 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\todo[inline]{section introductions, improve wording of results, cleanup}
-
 \section{Discussion and conclusion}
+
+In this section, we will discuss the results shown in section \ref{sec:experiment}, and conclude this thesis.
 
 \subsection{Discussion of results}
 \label{sec:discussion}
 
-This section contains the discussion of the results shown in section \ref{sec:experiment}.
-
 \subsubsection{GPU acceleration benchmarks}
 
-Table \ref{table:nsgttorchresultsragged} from section \ref{sec:gpuexperiments} contained the benchmark results for the PyTorch implementation of the ragged sliCQT compared to the original library.
+In section \ref{sec:gpuexperiments}, the results of the benchmarks were shown for the two GPU porting efforts, which were the PyTorch port of the NSGT/sliCQT library from section \ref{sec:torchslicq} and the CuPY port of the BSS metrics evaluation library from section \ref{sec:fasterbsscupy} respectively.
 
-The execution time of the transform improved with PyTorch in every case. Even though the sliCQT computed on the GPU is not faster than the CPU for the tested parameters, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. The original library has a multithreaded option which performs worse than the default single-threaded behavior, but the PyTorch CPU performance beats both.
+Table \ref{table:nsgttorchresultsragged} from section \ref{sec:gpuexperiments} contained the benchmark results for the PyTorch implementation of the ragged sliCQT compared to the original library. The execution time of the transform improved with PyTorch in every case. The transform computed with PyTorch on the AMD Ryzen 9 5950X CPU was \textasciitilde4.7x faster than the single-threaded CPU implementation of the original library. The transforms computed with PyTorch on the NVIDIA 2070 Super and NVIDIA 3080 Ti GPUs were \textasciitilde3.5x and \textasciitilde3.7x faster than the single-threaded CPU implementation of the original library respectively.
 
-Section \ref{sec:gpuexperiments} also described the benchmarking of the GPU-accelerated BSS metrics library developed for xumx-sliCQ.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} The results showed that a \textasciitilde2-2.5x time savings can be expected over the CPU, which represent a significant reduction in the time taken to compute BSS evaluations of music demixing systems, that can be useful for various evaluation campaigns like SiSEC \parencite{sisec2018} or MDX \parencite{mdx21}.
+Even though the sliCQT computed with PyTorch on the GPU was not faster than the CPU for the tested parameters, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. We note that the original library has a multithreaded option which performs worse than the default single-threaded behavior, which was an unexpected result. It might be explained by the overhead of multithreading.
+
+Section \ref{sec:gpuexperiments} also described the benchmarking of the GPU-accelerated BSS metrics library using CuPy.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} The results showed a \textasciitilde2x speedup with the NVIDIA 2070 Super and \textasciitilde2.5x speedup with the NVIDIA 3080 Ti over the AMD Ryzen 9 5950X CPU, which represent a significant reduction in the time taken to evaluate music demixing systems. This speedup can be useful for various evaluation campaigns like SiSEC \parencite{sisec2018} or MDX \parencite{mdx21}.
 
 \subsubsection{Best sliCQT parameters}
 
-The sliCQT MPI oracle results achieved a median SDR of 7.42 dB, beating the 6.23 dB achieved by the STFT with UMX settings. This indicates that a music demixing system that uses the sliCQT with these parameters has the potential to surpass STFT-based performance.
+In section \ref{sec:slicqparamresults}, the results of the random grid search for the best-performing sliCQT parameters for the MPI oracle in section \ref{sec:slicqparamsrch} were shown. The best-performing sliCQT chosen by the script had the parameters of 262 bins between 32.9--22050 Hz on the Bark scale.
 
-Keep in mind that to translate this theoretical boost to a real advantage in the final model, a neural network architecture must be chosen that can produce a good estimate of the target magnitude sliCQT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b). We hope that this added information gives the neural network an advantage when learning how to demix music from the sliCQT representation over the STFT.
+The sliCQT MPI oracle results for the above sliCQT achieved a median SDR of 7.42 dB. This surpassed the MPI oracle score of 6.23 dB achieved by the STFT with the UMX settings of a window size of 4096 and overlap of 1024. This indicates that a music demixing system that uses the sliCQT with these parameters has the potential to surpass the STFT-based performance.
+
+Keep in mind that to translate this theoretical boost to a real advantage in the final model, a neural network architecture must be chosen that can produce a good estimate of the target magnitude sliCQT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b). We hope that this added information gives the neural network an advantage when learning how to demix music from the sliCQT representation compared to the STFT.
 
 \subsubsection{xumx-sliCQ neural network}
 \label{sec:netdiscuss}
 
-First, , the zero-padded matrix form of the sliCQ-Wiener-EM was significantly faster than looping over the ragged form, with a negligible drop in SDR. For this reason, the zero-padded sliCQ-Wiener-EM is the chosen implementation of sliCQT-based Wiener-EM in the final model, and the ragged sliCQ-Wiener-EM was discarded for being too computationally slow.
+In section \ref{sec:wienerconfigs}, we showed several implementation choices and configurations for the Wiener-EM post-processing step in the xumx-sliCQ model.
 
-In xumx-sliCQ, a parameter called \Verb#slicq_wiener#\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/model.py\#L380}} was added to switch between the zero-padded sliCQ-Wiener-EM and STFT-Wiener-EM strategies. The default chosen is STFT-Wiener-EM for the best tradeoff of music demixing performance and execution speed.
+Firstly, the zero-padded matrix form of the sliCQT-Wiener-EM was \textasciitilde2x faster than the ragged sliCQT-Wiener-EM, with an almost neglibile improvement of 0.005 dB in the SDR score for the tested track for one iteration. For this reason, the zero-padded sliCQT-Wiener-EM was the chosen implementation of sliCQT-based Wiener-EM in the final model, and the ragged sliCQT-Wiener-EM was discarded for being too computationally slow.
 
-For both STFT and sliCQT-based Wiener-EM, two iterations were worse than one iteration. The computation time of the inference step will be shown in section \ref{sec:inferenceperf} to discuss the tradeoff between the STFT and sliCQT Wiener-EM.
+Next, the STFT-Wiener-EM step with one iteration scored 0.073 dB lower than the zero-padded matrix form of sliCQT-Wiener-EM, but was \textasciitilde1.25x faster. We chose to use the STFT-Wiener-EM strategy as the default for the best tradeoff between music demixing performance and computation time, and to add a parameter called \Verb#slicq_wiener#\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/model.py\#L380}} to use the zero-padded sliCQT-Wiener-EM for a computation time hit but SDR improvement.
 
+For both STFT and sliCQT-based Wiener-EM, two iterations were worse than one iteration, so the default was left at one in xumx-sliCQ.
 
-Table \ref{table:bsseval} from section \ref{sec:demixresults} showed that xumx-sliCQ performed worse than UMX and X-UMX, with both configurations of Wiener-EM.
+In section \ref{sec:demixresults}, the music demixing results for trained xumx-sliCQ model were shown, using the CDAE architecture which was fully trained with 1,000 epochs to the lowest loss of -0.449 epochs shown in section \ref{sec:networktraining}. Both strategies of post-processing were evaluated. Table \ref{table:bsseval} from section \ref{sec:demixresults} showed that xumx-sliCQ performed worse than UMX and X-UMX, with both STFT-Wiener-EM and sliCQT-Wiener-EM post-processing. The median SDR of xumx-sliCQ was 3.6 dB with the STFT-Wiener-EM step, and 3.71 dB with the sliCQT-Wiener-EM. Compared to UMX which scored 4.64 dB and X-UMX which scored 5.54 dB, we can see that xumx-sliCQ failed in its objective to surpass UMX and X-UMX.
 
-Section \ref{sec:inferenceperf} described the running time analysis of the inference of xumx-sliCQ. The STFT-WEM configuration of xumx-sliCQ runs \textasciitilde2x slower than UMX, and the sliCQT-WEM configuration runs \textasciitilde4x slower than UMX. We note that the sliCQT-WEM configuration only adds \textasciitilde0.1 dB to the median SDR score compared to the STFT-WEM variant, which is a poor tradeoff considering it doubles the running time. xumx-sliCQ's advantage is that it is \textasciitilde4.9x smaller on disk than UMX.
+Finally, in section \ref{sec:inferenceperf}, we showed results for the running time of the inference, as well as the size of the trained models on disk. The STFT-Wiener-EM configuration of xumx-sliCQ runs \textasciitilde2x slower than UMX, and the sliCQT-Wiener-EM configuration runs \textasciitilde4x slower than UMX. We note that the sliCQT-Wiener-EM configuration only adds \textasciitilde0.1 dB to the median SDR score compared to the STFT-Wiener-EM variant, which is a poor tradeoff considering it doubles the running time.
+
+We also note that X-UMX shows an anomalously high execution time, measuring at almost \textasciitilde20x slower than UMX, but this is because it uses a different deep learning framework, NNabla, which cannot be directly compared to PyTorch.
+
+xumx-sliCQ's main advantage over UMX and X-UMX is in the size of the trained model. It is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and X-UMX respectively.
 
 \subsection{Conclusion}
 \label{sec:conclusion}
 
-\todo[inline]{unfuck these}
+The creation of xumx-sliCQ led to several contributions to the current Python ecosystem for music demixing. First, the PyTorch implementation of the NSGT/sliCQT allow these transforms to be used in GPU machine learning and deep learning networks, and improves the performance by \textasciitilde3.4-4.7x over the original library, depending on whether the CPU or GPU is used. Second, the CuPy implementation of the BSS metrics library sped up the evaluation of music demixing by 2-2.5x. Finally, xumx-sliCQ demonstrated the first working prototype of a sliCQT-based music demixing neural network using the GPU and PyTorch.
 
-The creation of xumx-sliCQ led to several contributions to the current Python ecosystem for music demixing. First, Second, the PyTorch implementation of the NSGT and sliCQT allow these transforms to be used in GPU machine learning and deep learning networks.
-
-The proposed model, xumx-sliCQ, failed to beat the music demixing performance of Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX), but it demonstrates a working prototype of sliCQT-based music demixing.
+Unfortunately, the proposed model, xumx-sliCQ, failed to beat the BSS metrics scores of Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX).
 
 \subsection{Summary and outlook}
 
