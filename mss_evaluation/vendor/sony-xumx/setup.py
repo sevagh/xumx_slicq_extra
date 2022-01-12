@@ -19,9 +19,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'lameenc==1.2.2',
-        'musdb==0.3.1',
-        'museval==0.3.0',
+        'lameenc==1.3.1',
+        'musdb==0.4.0',
+        'museval==0.4.0',
         'requests>=2.22',
         'scipy>=1.3.1',
         'setuptools>=41.0.0',

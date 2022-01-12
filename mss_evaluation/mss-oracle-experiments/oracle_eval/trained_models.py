@@ -16,12 +16,12 @@ from openunmix.utils import load_separator as umx_separator
 from xumx_sony.test import load_xumx_model as xumx_separator_sony
 from xumx_sony.test import separate as xumx_separate_sony
 from xumx_slicq.utils import load_separator as xumx_slicq_separator
-from xumx_slicq_2022.utils import load_separator as xumx_slicq_2022_separator
+from xumx_slicq_22.utils import load_separator as xumx_slicq_22_separator
 
 umx_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../pretrained_models/umx')
 xumx_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../pretrained_models/x-umx.h5')
 xumx_slicq_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../vendor/xumx-sliCQ/pretrained-model')
-xumx_slicq_2022_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../vendor/xumx-sliCQ-2022/pretrained-model')
+xumx_slicq_22_pretrained_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../vendor/xumx-sliCQ-2022/pretrained-model')
 
 
 def pretrained_model(track, model, eval_dir=None, is_xumx=False, swap_drums_bass=False):
@@ -153,8 +153,8 @@ if __name__ == '__main__':
             'xumx': xumx_separator_sony(
                 model_path=xumx_pretrained_path
             ),
-            'slicq-2022': xumx_slicq_2022_separator(
-                xumx_slicq_2022_pretrained_path,
+            'slicq-22': xumx_slicq_22_separator(
+                xumx_slicq_22_pretrained_path,
             ),
             'slicq-wslicq': xumx_slicq_separator(
                 xumx_slicq_pretrained_path,
