@@ -29,3 +29,7 @@
 	path = mss_evaluation/vendor/xumx-sliCQ-2022
 	url = git@github.com:sevagh/xumx-sliCQ
 	branch = develop
+[submodule "mss_evaluation/vendor/sigsep-mus-eval-cupy-fork"]
+	path = mss_evaluation/vendor/sigsep-mus-eval-cupy-fork
+	url = https://github.com/sevagh/sigsep-mus-eval
+	branch = feat/cupy-accel
