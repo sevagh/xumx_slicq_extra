@@ -1,0 +1,2 @@
+.pth filter=lfs diff=lfs merge=lfs -text
+pretrained-model/xumx_slicq.pth filter=lfs diff=lfs merge=lfs -text
