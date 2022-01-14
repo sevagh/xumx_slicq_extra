@@ -3,7 +3,7 @@
 set -eoxu pipefail
 
 pybin="/home/sevagh/venvs/thesis/bin/python3"
-expdir="exp-04-trained-models-2022"
+expdir="exp-04-trained-models"
 scriptdir="./mss-oracle-experiments/oracle_eval"
 
 export MUSDB_PATH=/run/media/sevagh/WORK/MUSDB18-HQ/
@@ -12,8 +12,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 mkdir -p "${expdir}"
 
-#$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=xumx
-#$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=umx
-$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-22
-#$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wslicq
-#$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wstft
+$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=xumx
+$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=umx
+$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wslicq
+$pybin "${scriptdir}/trained_models.py" --eval_dir="${expdir}/" --model=slicq-wstft
