@@ -2,6 +2,22 @@
 
 A collection of ideas that might improve on my first attempt at [music demixing with the sliCQT](https://github.com/sevagh/xumx-sliCQ) submitted to [MDX 2021](https://mdx-workshop.github.io/)
 
+### :rotating_light: Final update, 2022-01-16
+
+I tried most of the below ideas while stuck indoors for a few weeks. None of them worked. After this, I no longer feel that working on xumx-sliCQ will be fruitful. Here's a list of the archived efforts of December 2021 and January 2022:
+* [Standalone deoverlapnet](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/slicq-standalone-2022-improvements). Problems: specific deoverlapnet per sliCQT configs makes it a pain. I tried a "global" deoverlapnet with a stack of multi-resolution convolution layers, with terrible results. Couldn't breach ~21 dB reconstruction error, which is bad. This includes an interpolated matrix form using both the Torch [interpolate](https://pytorch.org/docs/1.9.1/generated/torch.nn.functional.interpolate.html) functions (forward and reverse), a learned deinterpolation network, and an exact repeated interpolation (like the diagram below).
+* [xumx-sliCQ de-interpolate/deoverlapnet](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-interpolation), using the Torch interpolate and learned deoverlap/deinterpolation layers
+* [xumx-sliCQ deoverlapnet](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-deoverlapnet), using a simple learned deoverlap layer without deinterpolation
+* [xumx-sliCQ ConvNeXt](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-convnext), using the FAIR ConvNeXt architecture: [code](https://github.com/facebookresearch/ConvNeXt), [paper](https://arxiv.org/abs/2201.03545)
+* [xumx-sliCQ repeated interpolation](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-convnext), using a deoverlapnet and repeated interpolation/deinterpolation (exact formula, no errors)
+* [xumx-sliCQ general 2022 update](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-general-gitlab-backup), a backup of miscellaneous 2022 attempts
+
+My thoughts are that none of the below ideas were slam dunks in improving on the original 3.6 dB achieved by xumx-sliCQ. In most cases they took more memory due to the matrixform compared to the ragged form, and having the convolutional kernel slide across all frequency bins didn't seem to improve the demixing performance.
+
+The standalone deoverlapnet did not significantly boost demixing results either, indicating the overlap/deoverlap was not really as big of a problem as I had assumed it to be.
+
+All in all, it seems that trying random neural network architectures and hoping that they work is not a good strategy.
+
 ### Better 2014 sliCQT
 
 In [xumx-sliCQ](https://github.com/sevagh/xumx-sliCQ), the sliCQT used is from the [Holighaus, Dörfler, Velasco, Grill, 2012](https://arxiv.org/abs/1210.0084) paper: "A framework for invertible, real-time constant-Q transforms." A characteristic of time-frequency transforms with varying time-frequency resolution (CQT, sliCQT, NSGT, etc.) is that the different frequency bins may have a different temporal framerate.
