@@ -3,6 +3,7 @@ import os
 import musdb
 import itertools
 import museval
+from museval.metrics import disable_cupy
 import cupy
 from functools import partial
 import numpy as np
@@ -219,6 +220,7 @@ if __name__ == '__main__':
     cupy.cuda.runtime.setDevice(cuda_dev)
 
     random.seed(args.random_seed)
+    disable_cupy()
 
     mus = None
     # initiate musdb

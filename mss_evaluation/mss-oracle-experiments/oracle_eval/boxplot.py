@@ -153,7 +153,7 @@ def save_boxplot(pandas_in, pdf_out, single=False, colors_legend=None, print_med
                     ax.artists[6].set_facecolor('cyan')
 
                 name_to_color = {
-                    'best-slicq': 'magenta',
+                    'chosen-slicqt': 'magenta',
                     #'bad-slicq': 'orangered',
                     'control-stft': 'cyan',
                 }

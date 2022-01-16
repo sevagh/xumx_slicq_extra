@@ -1,7 +1,7 @@
 scipy
 numpy
 cupy-cuda115
-torch
+torch==1.9
 git+git://github.com/sevagh/sigsep-mus-eval@feat/cupy-accel#egg=museval
 git+git://github.com/sevagh/nsgt@main#egg=nsgt
 librosa
