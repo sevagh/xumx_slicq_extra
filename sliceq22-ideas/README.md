@@ -12,11 +12,7 @@ I tried most of the below ideas while stuck indoors for a few weeks. None of the
 * [xumx-sliCQ repeated interpolation](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-repeated-interpolation), using a deoverlapnet and repeated interpolation/deinterpolation (exact formula, no errors)
 * [xumx-sliCQ general 2022 update](https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/umx_experiments/xumx-sliCQ-2022-general-gitlab-backup), a backup of miscellaneous 2022 attempts
 
-My thoughts are that none of the below ideas were slam dunks in improving on the original 3.6 dB achieved by xumx-sliCQ. In most cases they took more memory due to the matrixform compared to the ragged form, and having the convolutional kernel slide across all frequency bins didn't seem to improve the demixing performance.
-
-The standalone deoverlapnet did not significantly boost demixing results either, indicating the overlap/deoverlap was not really as big of a problem as I had assumed it to be.
-
-All in all, it seems that trying random neural network architectures and hoping that they work is not a good strategy.
+My closing thoughts on xumx-sliCQ are that none of the below ideas were slam dunks in improving the 3.6 dB originally achieve by the published version of xumx-sliCQ. In most cases they took more memory for training and inference due to the matrixform compared to the ragged form, and having the convolutional kernel slide across all frequency bins didn't seem to improve the demixing performance. The standalone deoverlapnet did not significantly boost demixing results either, indicating that the overlap/deoverlap was not really as big of a problem as I had assumed it to be.
 
 ### Better 2014 sliCQT
 
