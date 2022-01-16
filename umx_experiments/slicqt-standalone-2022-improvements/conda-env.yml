@@ -1,0 +1,33 @@
+name: slicqt-torch
+
+channels:
+  - default
+  - pytorch
+  - conda-forge
+
+dependencies:
+  - python=3.9
+  - numpy
+  - numba
+  - scipy
+  - conda-forge::cudatoolkit=11.3
+  - conda-forge::cudnn=8.2.0
+  - pytorch::pytorch
+  - pytorch::torchaudio
+  - pytorch::torchvision
+  - tqdm
+  - libsndfile
+  - ffmpeg
+  - pip
+  - pip:
+    - gitpython
+    - matplotlib
+    - line_profiler
+    - tensorboard
+    - memory_profiler
+    - matplotlib
+    - pytest
+    - torchinfo
+    - librosa
+    - "--editable=git+git://github.com/csteinmetz1/auraloss@main#egg=auraloss"
+    - "-e ."

@@ -1,0 +1,486 @@
+import argparse
+import torch
+import subprocess
+import time
+from pathlib import Path
+import tqdm
+import json
+import numpy as np
+import random
+from git import Repo
+import os
+import signal
+import atexit
+import gc
+import io
+import copy
+import sys
+import torchaudio
+import torchinfo
+from contextlib import nullcontext
+import sklearn.preprocessing
+from torch.utils.tensorboard import SummaryWriter
+
+from xumx_slicq_22 import data
+from xumx_slicq_22 import model
+from xumx_slicq_22 import utils
+from xumx_slicq_22 import transforms
+from xumx_slicq_22 import filtering
+from xumx_slicq_22.loss import LossCriterion
+
+tqdm.monitor_interval = 0
+
+
+def loop(args, unmix, encoder, slicqt_cnorm, device, sampler, criterion, optimizer, train=True):
+    # unpack encoder object
+    nsgt, insgt = encoder
+
+    losses = utils.AverageMeter()
+
+    cm = None
+    name = ''
+    if train:
+        unmix.train()
+        cm = nullcontext
+        name = 'Train'
+    else:
+        unmix.eval()
+        cm = torch.no_grad
+        name = 'Validation'
+
+
+    def custom_sampler():
+        for x_mix_long, y_bass_long, y_vocals_long, y_other_long, y_drums_long in sampler:
+            yield from zip(
+                torch.split(x_mix_long, args.max_samples, dim=-1),
+                torch.split(y_bass_long, args.max_samples, dim=-1),
+                torch.split(y_vocals_long, args.max_samples, dim=-1),
+                torch.split(y_other_long, args.max_samples, dim=-1),
+                torch.split(y_drums_long, args.max_samples, dim=-1),
+            )
+
+    total = sum([max(1, 1+int(s[0].shape[-1]//args.max_samples)) for s in sampler])
+
+    pbar = tqdm.tqdm(custom_sampler(), disable=args.quiet, total=total)
+    pbar.set_description(f"{name} batch")
+
+    with cm():
+        for x_mix, y_bass, y_vocals, y_other, y_drums in pbar:
+            x_mix, y_bass, y_vocals, y_other, y_drums = x_mix.to(device), y_bass.to(device), y_vocals.to(device), y_other.to(device), y_drums.to(device)
+            if train:
+                optimizer.zero_grad()
+
+            X = nsgt(x_mix)
+            Xmag = slicqt_cnorm(X)
+            ragged_shapes = [X_.shape for X_ in Xmag]
+
+            Xmag_interp = nsgt.interpolate(Xmag)
+            nb_slices = Xmag_interp.shape[-2]
+
+            Xmag_interp_ola = nsgt.overlap_add(Xmag_interp)
+
+            # interp-ola per target spectrogram...
+            Ymag_bass = slicqt_cnorm(nsgt(y_bass))
+            Ymag_vocals = slicqt_cnorm(nsgt(y_vocals))
+            Ymag_other = slicqt_cnorm(nsgt(y_other))
+            Ymag_drums = slicqt_cnorm(nsgt(y_drums))
+
+            # forward call to MDX with returns 4 targets
+            Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred  = unmix(Xmag_interp_ola, nb_slices, ragged_shapes)
+
+            # nograd to not slow down training with insgt for time-domain SDR loss
+            with torch.no_grad():
+                y_bass_pred = insgt(transforms.phasemix_sep(X, Ymag_bass_pred), x_mix.shape[-1])
+                y_vocals_pred = insgt(transforms.phasemix_sep(X, Ymag_vocals_pred), x_mix.shape[-1])
+                y_other_pred = insgt(transforms.phasemix_sep(X, Ymag_other_pred), x_mix.shape[-1])
+                y_drums_pred = insgt(transforms.phasemix_sep(X, Ymag_drums_pred), x_mix.shape[-1])
+
+            loss = criterion(
+                *(Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred),
+                *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
+                *(y_bass_pred, y_vocals_pred, y_other_pred, y_drums_pred),
+                *(y_bass, y_vocals, y_other, y_drums),
+            )
+
+            if train:
+                loss.backward()
+                optimizer.step()
+
+            losses.update(loss.item(), x_mix.size(1))
+
+    return losses.avg
+
+
+def get_statistics(args, dataset, encoder, cnorm):
+    dataset_scaler = copy.deepcopy(dataset)
+    dataset_scaler.random_chunks = False
+    dataset_scaler.seq_duration = None
+
+    dataset_scaler.samples_per_track = 1
+    dataset_scaler.augmentations = None
+    dataset_scaler.random_track_mix = False
+    dataset_scaler.random_interferer_mix = False
+
+    cnorm = copy.deepcopy(cnorm).to("cpu")
+
+    nsgt = encoder[0]
+    nsgt = copy.deepcopy(nsgt).to("cpu")
+
+    # slicq is a list of tensors so we need a list of scalers
+    scaler = sklearn.preprocessing.StandardScaler()
+
+    pbar = tqdm.tqdm(range(len(dataset_scaler)), disable=args.quiet)
+    for ind in pbar:
+        x = dataset_scaler[ind][0]
+
+        pbar.set_description(f"Compute dataset statistics")
+        # downmix to mono channel
+        Xmag = nsgt.overlap_add(nsgt.interpolate(cnorm(nsgt(x[None, ...]))))
+        Xmag_dim_adjust = np.squeeze(Xmag.mean(1, keepdim=False).permute(0, 2, 1), axis=0)
+        scaler.partial_fit(Xmag_dim_adjust)
+
+    # set inital input scaler values
+    std = np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_))
+    return scaler.mean_, std
+
+
+def main():
+    parser = argparse.ArgumentParser(description="xumx-sliCQ Trainer")
+
+    # Dataset paramaters
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="musdb",
+        choices=[
+            "musdb",
+            "aligned",
+            "sourcefolder",
+            "trackfolder_var",
+            "trackfolder_fix",
+        ],
+        help="Name of the dataset.",
+    )
+    parser.add_argument("--root", type=str, help="root path of dataset")
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="xumx-slicq",
+        help="provide output path base folder name",
+    )
+    parser.add_argument("--model", type=str, help="Path to checkpoint folder")
+    parser.add_argument(
+        "--audio-backend",
+        type=str,
+        default="soundfile",
+        help="Set torchaudio backend (`sox_io` or `soundfile`)",
+    )
+
+    # Training Parameters
+    parser.add_argument("--epochs", type=int, default=1000)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--max-samples", type=int, default=2_000_000)
+    parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
+    parser.add_argument(
+        "--patience",
+        type=int,
+        default=1000,
+        help="maximum number of train epochs (default: 1000)",
+    )
+    parser.add_argument(
+        "--lr-decay-patience",
+        type=int,
+        default=80,
+        help="lr decay patience for plateau scheduler",
+    )
+    parser.add_argument(
+        "--lr-decay-gamma",
+        type=float,
+        default=0.3,
+        help="gamma of learning rate scheduler decay",
+    )
+    parser.add_argument("--weight-decay", type=float, default=0.00001, help="weight decay")
+    parser.add_argument(
+        "--seed", type=int, default=42, metavar="S", help="random seed (default: 42)"
+    )
+    parser.add_argument('--mcoef', type=float, default=-0.1,
+                        help='coefficient for mixing: mcoef*SDR_Loss + MSE_Loss')
+
+    # Model Parameters
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+        help="skip dataset statistics calculation",
+    )
+    parser.add_argument(
+        "--seq-dur",
+        type=float,
+        default=1.0,
+        help="Sequence duration in seconds" "value of <=0.0 will use full/variable length",
+    )
+    parser.add_argument(
+        "--model-b",
+        action="store_true",
+        default=False,
+        help="use model b instead of a",
+    )
+
+    # sliCQT parameters
+    parser.add_argument(
+        f"--fscale",
+        choices=('bark','mel', 'cqlog', 'vqlog', 'oct'),
+        default='bark',
+        help="frequency scale for sliCQ-NSGT",
+    )
+    parser.add_argument(
+        f"--fbins",
+        type=int,
+        default=262,
+        help="number of frequency bins for NSGT scale",
+    )
+    parser.add_argument(
+        f"--fmin",
+        type=float,
+        default=32.9,
+        help="min frequency for NSGT scale",
+    )
+
+    parser.add_argument(
+        "--nb-channels",
+        type=int,
+        default=2,
+        help="set number of channels for model (1, 2)",
+    )
+    parser.add_argument(
+        "--nb-workers", type=int, default=0, help="Number of workers for dataloader."
+    )
+
+    # Misc Parameters
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        default=False,
+        help="less verbose during training",
+    )
+    parser.add_argument(
+        "--no-cuda", action="store_true", default=False, help="disables CUDA training"
+    )
+
+    args, _ = parser.parse_known_args()
+
+    torchaudio.set_audio_backend(args.audio_backend)
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    print("Using GPU:", use_cuda)
+
+    if use_cuda:
+        print("Configuring NSGT to use GPU")
+
+    dataloader_kwargs = {
+        "num_workers": args.nb_workers,
+        "pin_memory": True,
+        "persistent_workers": True,
+    } if use_cuda else {}
+
+    try:
+        repo_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        repo = Repo(repo_dir)
+        commit = repo.head.commit.hexsha[:7]
+    except:
+        commit = 'n/a'
+
+    # use jpg or npy
+    torch.manual_seed(args.seed)
+    random.seed(args.seed)
+
+    device = torch.device("cuda" if use_cuda else "cpu")
+
+    train_dataset, valid_dataset, args = data.load_datasets(parser, args)
+
+    # create output dir if not exist
+    target_path = Path(args.output)
+    target_path.mkdir(parents=True, exist_ok=True)
+
+    tboard_path = target_path / f"logdir"
+    tboard_writer = SummaryWriter(tboard_path)
+
+    train_sampler = torch.utils.data.DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=True, **dataloader_kwargs
+    )
+
+    valid_sampler = torch.utils.data.DataLoader(valid_dataset, batch_size=1, **dataloader_kwargs)
+
+    # need to globally configure an NSGT object to peek at its params to set up the neural network
+    # e.g. M depends on the sllen which depends on fscale+fmin+fmax
+    nsgt_base = transforms.NSGTBase(
+        scale=args.fscale,
+        fbins=args.fbins,
+        fmin=args.fmin,
+        fs=train_dataset.sample_rate,
+        device=device,
+    )
+
+    nsgt, insgt = transforms.make_filterbanks_slicqt(
+        nsgt_base, sample_rate=train_dataset.sample_rate
+    )
+    cnorm = transforms.ComplexNormSliCQT(mono=args.nb_channels == 1)
+
+    nsgt = nsgt.to(device)
+    insgt = insgt.to(device)
+    cnorm = cnorm.to(device)
+    
+    # pack the various encoder/decoders
+    encoder = (nsgt, insgt)
+
+    separator_conf = {
+        "sample_rate": train_dataset.sample_rate,
+        "nb_channels": args.nb_channels,
+        "seq_dur": args.seq_dur, # have to do inference in chunks of seq_dur in CNN architecture
+    }
+
+    with open(Path(target_path, "separator.json"), "w") as outfile:
+        outfile.write(json.dumps(separator_conf, indent=4, sort_keys=True))
+
+    jagged_slicq = nsgt_base.predict_input_size(args.batch_size, args.nb_channels, args.seq_dur)
+    jagged_slicq = cnorm(jagged_slicq)
+
+    ragged_shapes = [X_.shape for X_ in jagged_slicq]
+    nb_slices = jagged_slicq[0].shape[-2]
+
+    # data whitening
+    if args.model or args.debug:
+        scaler_mean, scaler_std = None, None
+    else:
+        scaler_mean, scaler_std = get_statistics(args, train_dataset, encoder, cnorm)
+
+    unmix = model.OpenUnmix(
+        nsgt,
+        jagged_slicq,
+        model_b=args.model_b,
+        input_mean=scaler_mean,
+        input_scale=scaler_std,
+    ).to(device)
+
+    if not args.quiet:
+        torchinfo.summary(
+            unmix,
+            input_data=(nsgt.overlap_add(nsgt.interpolate(jagged_slicq)), nb_slices, ragged_shapes),
+        )
+
+    optimizer = torch.optim.Adam(unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+    criterion = LossCriterion(args.mcoef)
+
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        factor=args.lr_decay_gamma,
+        patience=args.lr_decay_patience,
+        cooldown=10,
+    )
+
+    es = utils.EarlyStopping(patience=args.patience)
+
+    # if a model is specified: resume training
+    if args.model:
+        model_path = Path(args.model).expanduser()
+        with open(Path(model_path, "xumx_slicq.json"), "r") as stream:
+            results = json.load(stream)
+
+        target_model_path = Path(model_path, "xumx_slicq.chkpnt")
+        checkpoint = torch.load(target_model_path, map_location=device)
+        unmix.load_state_dict(checkpoint["state_dict"], strict=False)
+        optimizer.load_state_dict(checkpoint["optimizer"])
+        scheduler.load_state_dict(checkpoint["scheduler"])
+        # train for another epochs_trained
+        t = tqdm.trange(
+            results["epochs_trained"],
+            results["epochs_trained"] + args.epochs + 1,
+            disable=args.quiet,
+        )
+        train_losses = results["train_loss_history"]
+        valid_losses = results["valid_loss_history"]
+        train_times = results["train_time_history"]
+        best_epoch = results["best_epoch"]
+        es.best = results["best_loss"]
+        es.num_bad_epochs = results["num_bad_epochs"]
+    # else start from 0
+    else:
+        t = tqdm.trange(1, args.epochs + 1, disable=args.quiet)
+        train_losses = []
+        valid_losses = []
+        train_times = []
+        best_epoch = 0
+
+    print('Starting Tensorboard')
+    tboard_proc = subprocess.Popen(["tensorboard", "--logdir", tboard_path, "--host", "0.0.0.0"])
+    tboard_pid = tboard_proc.pid
+
+    def kill_tboard():
+        if tboard_pid is None:
+            pass
+        print('Killing backgrounded Tensorboard process...')
+        os.kill(tboard_pid, signal.SIGTERM)
+
+    atexit.register(kill_tboard)
+
+    for epoch in t:
+        t.set_description("Training Epoch")
+        end = time.time()
+        train_loss = loop(args, unmix, encoder, cnorm, device, train_sampler, criterion, optimizer, train=True)
+        valid_loss = loop(args, unmix, encoder, cnorm, device, valid_sampler, criterion, optimizer, train=False)
+
+        scheduler.step(valid_loss)
+        train_losses.append(train_loss)
+        valid_losses.append(valid_loss)
+
+        t.set_postfix(train_loss=train_loss, val_loss=valid_loss)
+
+        stop = es.step(valid_loss)
+
+        if valid_loss == es.best:
+            best_epoch = epoch
+
+        utils.save_checkpoint(
+            {
+                "epoch": epoch + 1,
+                "state_dict": unmix.state_dict(),
+                "best_loss": es.best,
+                "optimizer": optimizer.state_dict(),
+                "scheduler": scheduler.state_dict(),
+            },
+            is_best=valid_loss == es.best,
+            path=target_path,
+            model_name="xumx_slicq",
+        )
+
+        # save params
+        params = {
+            "epochs_trained": epoch,
+            "args": vars(args),
+            "best_loss": es.best,
+            "best_epoch": best_epoch,
+            "train_loss_history": train_losses,
+            "valid_loss_history": valid_losses,
+            "train_time_history": train_times,
+            "num_bad_epochs": es.num_bad_epochs,
+            "commit": commit,
+        }
+
+        with open(Path(target_path, "xumx_slicq.json"), "w") as outfile:
+            outfile.write(json.dumps(params, indent=4, sort_keys=True))
+
+        train_times.append(time.time() - end)
+
+        if tboard_writer is not None:
+            tboard_writer.add_scalar('Loss/train', train_loss, epoch)
+            tboard_writer.add_scalar('Loss/valid', valid_loss, epoch)
+
+        if stop:
+            print("Apply Early Stopping")
+            break
+
+        gc.collect()
+
+
+if __name__ == "__main__":
+    main()
