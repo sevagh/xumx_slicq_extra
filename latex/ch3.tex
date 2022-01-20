@@ -4,7 +4,7 @@
 \section{Methodology}
 \label{sec:methodology}
 
-The proposed adaptation of Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX) to use the sliCQ Transform (sliCQT) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/v2021}} and is the subject and main result of this thesis. xumx-sliCQ is pronounced like ``X-U-M-X-slice-Q.''
+The proposed adaptation of Open-Unmix (UMX) and CrossNet-Open-Unmix (X-UMX) to use the sliCQ Transform (sliCQT) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}} and is the subject and main result of this thesis. xumx-sliCQ is pronounced like ``X-U-M-X-slice-Q.''
 
 Decisions for the methodology were influenced by the limitations of the computer that xumx-sliCQ was developed on, e.g., the maximum GPU memory available. Refer to appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer.
 
@@ -55,7 +55,7 @@ Finally, in Section \ref{sec:slicqparamsrch}, we describe the parameter search t
 \subsubsection{Computing the sliCQT on the GPU with PyTorch}
 \label{sec:torchslicq}
 
-In this section, we will describe the procedure for porting the CPU-based code of the reference NSGT/sliCQT library to the GPU using PyTorch. This is needed to be able to use the sliCQT in the PyTorch GPU code of UMX. All the modifications to the library were made in my copy of the library,\footnote{\url{https://github.com/sevagh/nsgt}} and the same library was embedded inside the xumx-sliCQ code.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/v2021}}
+In this section, we will describe the procedure for porting the CPU-based code of the reference NSGT/sliCQT library to the GPU using PyTorch. This is needed to be able to use the sliCQT in the PyTorch GPU code of UMX. All the modifications to the library were made in my copy of the library,\footnote{\url{https://github.com/sevagh/nsgt}} and the same library was embedded inside the xumx-sliCQ code.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}}
 
 The reference NSGT/sliCQT library uses NumPy, a CPU-based Python numerical computation library. PyTorch, in addition to being a deep learning framework, is also a numerical computation library that implements a large amount of NumPy's functions.
 
@@ -67,7 +67,7 @@ After the port to PyTorch, the sliCQT can be referred to as ``ragged'' or ``jagg
 
 In Section \ref{sec:theoryslicqt}, the sliCQT was described to return slices of time-frequency coefficients that have a 50\% overlap between adjacent slices. The sliCQT is therefore a 3D datastructure with dimensions $\text{slice} \times \text{frequency} \times \text{time-in-slice}$. Overlap-adding the slices is necessary to generate a 2D spectrogram with dimensions $\text{frequency} \times \text{time}$ like the STFT.
 
-The next addition to the sliCQT utilities was to include an overlap-add utility function, called \Verb#overlap_add_slicq#,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/transforms.py\#L14}} where the overlap width is automatically inferred from the shape of the transform. Figure \ref{fig:slicqt3d} shows the ragged shape of the PyTorch sliCQT in its 3D and 2D overlap-added forms, and how these compare to the datastructure of the STFT.
+The next addition to the sliCQT utilities was to include an overlap-add utility function, called \Verb#overlap_add_slicq#,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/transforms.py\#L14}} where the overlap width is automatically inferred from the shape of the transform. Figure \ref{fig:slicqt3d} shows the ragged shape of the PyTorch sliCQT in its 3D and 2D overlap-added forms, and how these compare to the datastructure of the STFT.
 
 \begin{figure}[ht]
 	\centering
@@ -358,7 +358,7 @@ Recall from Section \ref{sec:xumx} that X-UMX includes the multi-domain loss (CL
 
 In this section, we will discuss how the final post-processing step of UMX, which refines the four target estimates of the neural network using Wiener-EM as described in Section \ref{sec:umx}, was adapted for the sliCQT in xumx-sliCQ.
 
-After the neural network outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step can be applied to improve the estimates. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the four target magnitude spectrograms.
+After the neural network outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step can be applied to improve the estimates. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the four target magnitude spectrograms.
 
 In the first strategy, we can use the sliCQT to get a first estimate of the waveform using the mix phase, and then swap into the STFT domain to do Wiener-EM with the STFT, like in the original UMX, called ``STFT-Wiener-EM.'' In the other strategy, we can perform the Wiener-EM step on the sliCQT directly, called ``sliCQT-Wiener-EM.'' It can be done on each sub-matrix of the ragged sliCQT separately, or the ragged sliCQT can be padded with zeros to fit into a single rectangular matrix to perform Wiener-EM on the single matrix.
 

@@ -33,7 +33,7 @@ In Section \ref{sec:wienerconfigs}, we showed several implementation choices and
 
 Firstly, the zero-padded matrix form of the sliCQT-Wiener-EM was \textasciitilde2x faster than the ragged sliCQT-Wiener-EM, with an almost neglibile improvement of 0.005 dB in the SDR score for the tested track for one iteration. For this reason, the zero-padded sliCQT-Wiener-EM was the chosen implementation of sliCQT-based Wiener-EM in the final model, and the ragged sliCQT-Wiener-EM was discarded for being too computationally slow.
 
-Next, the STFT-Wiener-EM step with one iteration scored 0.073 dB lower than the zero-padded matrix form of sliCQT-Wiener-EM, but was \textasciitilde1.25x faster. We chose to use the STFT-Wiener-EM strategy as the default for the best tradeoff between music demixing performance and computation time, and to add a parameter called \Verb#slicq_wiener#\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/v2021/xumx_slicq/model.py\#L380}} to use the zero-padded sliCQT-Wiener-EM for a computation time hit but SDR improvement.
+Next, the STFT-Wiener-EM step with one iteration scored 0.073 dB lower than the zero-padded matrix form of sliCQT-Wiener-EM, but was \textasciitilde1.25x faster. We chose to use the STFT-Wiener-EM strategy as the default for the best tradeoff between music demixing performance and computation time, and to add a parameter called \Verb#slicq_wiener#\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/model.py\#L380}} to use the zero-padded sliCQT-Wiener-EM for a computation time hit but SDR improvement.
 
 For both STFT and sliCQT-based Wiener-EM, two iterations were worse than one iteration, so the default was left at one in xumx-sliCQ.
 
