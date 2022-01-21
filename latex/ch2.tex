@@ -678,69 +678,17 @@ this is python
 \end{BVerbatim}
 \end{listing}
 
-The Python interpreter is widely distributed on most modern operating systems (OS) like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts \parencite{pythonscience}. Python constructs that appear repeatedly in this thesis will be described in this section.
+The Python interpreter is widely distributed on most modern operating systems (OS) like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts \parencite{pythonscience}.
 
-The first is the list,\footnote{\url{https://docs.python.org/3/tutorial/datastructures.html\#more-on-lists}} which is a core datastructure of the language. The list in Python corresponds to the array data structure in computer science \parencite{skiena}. It allows for the construction of an ordered list of objects. For example, a discrete-time speech signal may be described by a list of its amplitude values, where the position in the list is the time sample $n$:
+One of the core features of the Python language is the list.\footnote{\url{https://docs.python.org/3/tutorial/data structures.html\#more-on-lists}} The list in Python corresponds to the array data structure in computer science \parencite{skiena}. It allows for the construction of an ordered list of objects. For example, a discrete-time speech signal may be described by a list of its amplitude values:
 
 \hfill \Verb#speech_signal = [0.15, 0.28, 0.57, 0.98, -0.59]#
-
-The generator is a function in Python which generates the next value of a sequence whenever it is called with the \Verb#yield# statement.\footnote{\url{https://docs.python.org/3/reference/simple_stmts.html\#the-yield-statement}} The internal state of the sequence is managed by the generator function. Generators are used for efficiency where an expensive function is only executed when a single value is demanded at a time. This is also called lazy evaluation.\footnote{\url{https://cvw.cac.cornell.edu/python/lazy}} An example of a generator is shown in Code Listing \ref{lst:siggen}.
-
-\begin{listing}[ht]
-\centering
-\begin{BVerbatim}
->>> def speech_signal():
-...     samples = [0.15, 0.28, 0.57, 0.98, -0.59]
-...     for s in samples:
-...             yield expensive_function(s)
-...
->>> s = speech_signal()
->>> print(s)
-<generator object speech_signal at 0x7f642933fa50>
-# N.B. expensive function has not been executed yet
->>>
->>> for sample in s:
-...     print(sample) # expensive function is computed on demand
-\end{BVerbatim}
-	\caption{A generator in Python, where the expensive function is only called when a value is requested}
-	\label{lst:siggen}
-\end{listing}
-
-The decorator in Python is a single line with a leading \Verb#@# symbol, added on top of a function, to wrap the execution of the function with another.\footnote{\url{https://docs.python.org/3/glossary.html\#term-decorator}} A simple example of a decorator is shown in Code Listing \ref{lst:decorator}.
-
-\begin{listing}[ht]
-\centering
-\begin{BVerbatim}
->>> def custom_decorator(func):
-...     def wrapper():
-...             print('before')
-...             func()
-...             print('after')
-...     return wrapper
-...
->>> @custom_decorator
-... def print_hello():
-...     print('hello')
-...
->>>
->>> print_hello()
-before
-hello
-after
-\end{BVerbatim}
-	\caption{A decorator in Python}
-	\label{lst:decorator}
-\end{listing}
-
-Decorators are often used to simplify tasks like measuring a function's execution time, or CPU and memory footprint, which is intended to observe or measure but not modify the original function.\footnote{\url{https://pypi.org/project/line-profiler/, https://pypi.org/project/memory-profiler/}}
-
-The \Verb#random# module of Python contains a random number generator (RNG).\footnote{\url{https://docs.python.org/3/library/random.html}} The \Verb#seed# function initializes the random number generator,\footnote{\url{https://docs.python.org/3/library/random.html\#bookkeeping-functions}} which is in fact pseudorandom \parencite{pseudorng}. Pseudorandom means that given the same starting seed, the exact same sequence of numbers are generated deterministically. The seed is usually a parameter to a script or Python program, such that the user can recreate the same RNG sequences for testing purposes by using the same seed.
 
 \subsubsection{Numerical and machine learning libraries for Python}
 
 Python has a rich ecosystem of academic libraries. NumPy\footnote{\url{https://numpy.org/}} and SciPy\footnote{\url{https://scipy.org/}} are used for numerical computation and parallelized matrix operations that run on the CPU (central processing unit). Matplotlib\footnote{\url{https://matplotlib.org/}} is a plotting library. Tensorflow\footnote{\url{https://www.tensorflow.org/}} and PyTorch\footnote{\url{https://pytorch.org/}} are libraries for machine learning and deep learning, which also have numerical computation and parallelized matrix operations that are similar to NumPy and SciPy, except that they can run on the GPU (graphical processing unit). The use of the GPU allows for more efficient, faster, and larger parallelized matrix operations, which are essential for modern machine learning and deep learning techniques.
 
-In NumPy, the ndarray\footnote{\url{https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html}} is the core datastructure representing an n-dimensional array of objects, which can be numerical (such as int16 or float32) or general objects (such as strings). The same speech signal represented by the Python list above can be represented by a 1-dimensional ndarray of 64-bit floating-point values:
+In NumPy, the ndarray\footnote{\url{https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html}} is the core data structure representing an n-dimensional array of objects, which can be numerical (such as int16 or float32) or general objects (such as strings). The same speech signal represented by the Python list above can be represented by a 1-dimensional ndarray of 64-bit floating-point values:
 
 \begin{listing}[!ht]
 \centering
@@ -754,7 +702,7 @@ float64
 \end{BVerbatim}
 \end{listing}
 
-The underlying values are stored in formats that allow for efficient numerical computations, which is why using NumPy ndarrays for numerical computation is preferred to using regular Python datastructures such as lists that are not designed for speed \parencite{ndarrayfast}.
+The underlying values are stored in formats that allow for efficient numerical computations, which is why using NumPy ndarrays for numerical computation is preferred to using regular Python data structures such as lists that are not designed for speed \parencite{ndarrayfast}.
 
 In PyTorch and Tensorflow (and in general machine learning), a similar concept to the ndarray is the tensor. The tensor originates from the field of physics \parencite{whatistensor}. The tensor is also an n-dimensional numerical array, and NumPy ndarrays are interchangeable with both PyTorch and Tensorflow tensors.\footnote{\url{https://www.tensorflow.org/guide/tf_numpy}, \url{https://pytorch.org/tutorials/beginner/blitz/tensor_tutorial.html}}
 
