@@ -110,6 +110,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 	\label{fig:glockdft}
 \end{figure}
 
+For a real-valued input signal $x[n]$, the spectrum has the conjugate symmetry property, i.e., the DFT coefficients are mirrored symmetrically around the center frequency \parencite{dspfirst}. This center bin corresponds to the Nyquist frequency $\sfrac{F_{s}}{2}$ where $F_{s}$ is the sampling rate of the signal, which was described in Section \ref{sec:timedomain}. In practice, for a given DFT of $N$ points, the points of the output spectrum between 0--$\sfrac{N}{2}+1$ correspond to 0--$\sfrac{F_{s}}{2}$ Hz, and the points $\sfrac{N}{2}+1$--N correspond to the same frequency bins in reverse order, i.e., $\sfrac{F_{2}}{2}$--0 Hz. In practice, therefore, the useful output coefficients of an $N$-point DFT of a real signal $x[n]$ are the first $\sfrac{N}{2}+1$ points.
+
 \newpagefill
 
 \subsubsection{Joint time-frequency analysis with the Gabor Transform and Short-time Fourier Transform (STFT)}
@@ -203,7 +205,16 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2} shows the Gabor transform, which is the STFT with the Gaussian window. Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
+The number of output frequency bins of the STFT is the same as the DFT, since the output of the STFT is a matrix of columns which each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that the output coefficients of an N-point DFT for a real-valued input signal $x[n]$ were symmetrically mirrored around the center bin, such that the bins 0--$\sfrac{N}{2}+1$ corresponded to the frequencies 0--$\sfrac{F_{s}}{2}$ Hz, and bins $\sfrac{N}{2}+2$--0 are redundant. The STFT has the same behavior, such that an STFT with a window size of N, which is the same as the N points of the DFT for each window of the signal, outputs $\sfrac{N}{2}+1$ non-redundant frequency bins. For an $N$-point DFT, the frequency spacing between each bin $\mathit{df} = \sfrac{F_{s}}{N}$, which is that of the DFT shown in Section \ref{sec:freqanal}. The frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0--$\sfrac{N}{2}+1$ therefore correspond to 0--$\sfrac{F_{s}}{2}$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{./images-blockdiagrams/stft_diag.png}
+	\caption{Rectangular matrix output of the STFT}
+	\label{fig:stftdiag}
+\end{figure}
+
+A key characteristic of the STFT is its fixed time-frequency resolution across the entire frequency spectrum. To change the time-frequency resolution, the window size must be changed.  Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2} shows the Gabor transform, which is the STFT with the Gaussian window. Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
 
 \begin{figure}[ht]
 	\centering
@@ -507,14 +518,16 @@ Note the terminology of the sliCQT, which uses slice length instead of the windo
 	... a data structure that is more difficult to work with than the time-frequency matrix (spectrogram) obtained by using Short-Time Fourier transform in successive time frames. The last problem is due to the fact that in CQT, the time resolution varies for different frequency bins, in effect meaning that the ``sampling'' of different frequency bins is not synchronized \parencite[1]{klapuricqt}.
 \end{quote}
 
-This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in Figure \ref{fig:raggedslicqt}. In the reference library, frequency bins are grouped together by their time resolution, and a ragged or jagged list of time-frequency matrices is returned.
+This same statement also applies to the NSGT, where different frequency bins have a different time resolution. An illustration is shown in Figure \ref{fig:raggedslicqt}. The shape of the transform can be referred to as an irregular or ragged matrix.\footnote{\url{https://xlinux.nist.gov/dads/HTML/raggedmatrix.html}}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images-misc/slicq_shape.png}
-	\caption{Illustration of the ragged NSGT, where frequency bins grouped by their time resolutions in the NSGT and sliCQT}
+	\caption{Illustration of the ragged NSGT, where frequency bins are grouped by their time resolution}
 	\label{fig:raggedslicqt}
 \end{figure}
+
+Note that to produce a meaningful spectrogram like the NSGT in Figure \ref{fig:raggedslicqt}, the slices returned by the sliCQT must be overlap-added as described in Section \ref{sec:theoryslicqt} and shown in \ref{fig:slicqoverlaps}. The NSGT outputs the meaningful spectrogram directly, without any further modifications needed.
 
 \newpagefill
 
@@ -664,6 +677,7 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 \label{sec:softcode}
 
 \subsubsection{Python programming language}
+\label{sec:pythonbasics}
 
 Python\footnote{\url{https://www.python.org/}} is a general-purpose programming language. It is an interpreted language,\footnote{\url{https://www.python.org/doc/essays/blurb/}} which means that there is no compilation step required, and the Python code or script written by a user can be executed right away with the Python interpreter. The Python interpreter can also run statements directly for quick prototyping, without needing to write a script:
 
