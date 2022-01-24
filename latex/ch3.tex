@@ -46,42 +46,39 @@ Section \ref{sec:inputrepresentation} will describe how the sliCQT was ported to
 
 In this section, we will describe the steps taken to port the sliCQT to PyTorch, new frequency scales added to the sliCQT, and the parameter search to find the optimal sliCQT for a music demixing application.
 
-First, Section \ref{sec:stftslicqtcomp} will describe the differences between the output of the STFT and the sliCQT, and Section \ref{sec:torchslicqdatastructure} will describe how we chose an appropriate data structure to represent the sliCQT in PyTorch.
+First, Section \ref{sec:stftslicqtcomp}, \ref{sec:stftslicqtcomp1}, and \ref{sec:stftslicqtcomp2} will describe the differences between the output of the STFT and the sliCQT, and Section \ref{sec:torchslicqdatastructure} will describe how we chose an appropriate data structure to represent the sliCQT in PyTorch as a result of these differences.
 
-Next, Section \ref{sec:torchslicq} will show the modifications made to the library to compute the transform with PyTorch on the GPU, so that it can be used in the UMX neural network code. It will describe show how the PyTorch sliCQT data structure differs from the STFT.
+Next, Section \ref{sec:torchslicq} will show the modifications made to the library to compute the transform with PyTorch on the GPU, so that it can be used in the UMX neural network code. It will describe how the PyTorch sliCQT data structure differs from the STFT.
 
 After that, Section \ref{sec:improvelib} will show the addition of new frequency scales that are interesting for music applications that were described in Section \ref{sec:fscales}. Recall from Section \ref{sec:theorynsgt} that the NSGT/sliCQT can be thought of as filterbanks, and the chosen frequency scale is the most important parameter that defines the spectral representation of the musical signal, which influences the results of the downstream application.
 
 Finally, in Section \ref{sec:slicqparamsrch}, we describe the parameter search that was run to choose frequency scales for the sliCQT with parameters that may perform best in a music demixing application. Section \ref{sec:fasterbsscupy} describes modifications made to the BSS eval metrics library to make it run faster on the GPU, with the aim to speed up the parameter search process.
 
-\subsubsection{Comparing the STFT to the sliCQT}
+\subsubsection{Comparing the sliCQT to the STFT}
 \label{sec:stftslicqtcomp}
 
 In this section, we will compare and contrast the expected outputs of the STFT and sliCQT. This lays the groundwork for the chosen data structure to represent the sliCQT in PyTorch and its implementation which will be shown in upcoming sections.
 
 The STFT was described in Section \ref{sec:jointtfa} and its rectangular matrix output was shown in Figure \ref{fig:stftdiag}. We can also call the STFT a uniform frequency transform, because its frequency bins are uniformly or evenly spaced.
 
-The ragged shape of nonuniform frequency transforms like the NSGT was described in \ref{sec:raggedtf} and shown in Figure \ref{fig:raggedslicqt}. Figure \ref{fig:contraststftslicqt} shows the output of the STFT and an arbitrary ragged nonuniform frequency transform such as the NSGT side-by-side.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[STFT, a uniform time-frequency transform]{\includegraphics[width=0.5\textwidth]{./images-blockdiagrams/stftslicqtcmp1.png}}\\
-	\subfloat[A nonuniform time-frequency transform]{\includegraphics[width=0.65\textwidth]{./images-blockdiagrams/stftslicqtcmp2.png}}
-	\caption{The uniform STFT compared to a ragged nonuniform transform like the NSGT}
-	\label{fig:contraststftslicqt}
-\end{figure}
-
-The sliCQT was described in Section \ref{sec:theoryslicqt} as a realtime implementation of the NSGT, consisting of DFT coefficients computed for the input signal split into overlapping slices, shown in Figure \ref{fig:slicqtukeys}. The sliCQT needs each slice to be overlap-added with 50\% of its previous and next slice to produce a meaningful spectrogram, which was shown in Figure \ref{fig:slicqoverlaps}. This is a characteristic specific to the sliCQT, which outputs DFT coefficients grouped by slices. The NSGT, which is the ancestor of the sliCQT not designed for realtime processing, outputs the meaningful spectrogram directly without requiring any overlap-add. To oversimplify, we can say that the sliCQT outputs a ragged time-frequency transform similar to the NSGT for each slice of the input signal, and that to produce the final spectrogram for the entire signal, the transform of each slice need to be overlap-added with each other.
+The sliCQT was described in Section \ref{sec:theoryslicqt} as a realtime variant of the NSGT shown in section \ref{sec:theorynsgt}. The sliCQT and NSGT both output a ragged matrix characteristic to nonuniform frequency transforms described in \ref{sec:raggedtf} and shown in Figure \ref{fig:raggedslicqt}. The sliCQT splits the input signal into smaller overlapping slices and computes DFT coefficients per slice, while the NSGT computes DFT coefficients for the whole input signal. To make the output of the sliCQT comparable to the NSGT, the slices must be overlap-added as described in Section \ref{sec:theoryslicqt}.
 
 We therefore note that there are two important and distinct characteristics that make working with the sliCQT different from the STFT:
 \begin{enumerate}
 	\item
-		The sliCQT computes ragged time-frequency transforms for each slice of length sllen of the input signal of length $N$, where $N > \text{sllen}$. Each slice of the sliCQT is a ragged spectrogram of DFT coefficients corresponding to that slice of the input signal. These slices need to be overlap-added by 50\% with their adjacent slices to create the final meaningful spectrogram. Note that each slice is ragged, due to the nonuniform time-frequency resolution.
+		The sliCQT computes the DFT coefficients for smaller slices of the input signal. These slices need to be overlap-added with their adjacent slices to create the final meaningful spectrogram. Note that the shape of the DFT coefficients of each slice is ragged, due to the nonuniform time-frequency resolution.
 	\item
-		The overlap-added sliCQT spectrogram has the same ragged characteristic as each individual slice, due to its nonuniform frequency resolution.
+		The overlap-added sliCQT spectrogram has the same ragged characteristic as the individual slices.
 \end{enumerate}
 
 When designing a data structure for the sliCQT, each of these points has to be addressed separately. 
+
+\subsubsection{3D shape of the slice-wise sliCQT compared to the 2D STFT}
+\label{sec:stftslicqtcomp1}
+
+The sliCQT was described in Section \ref{sec:theoryslicqt} as a realtime implementation of the NSGT, consisting of DFT coefficients computed for the input signal split into overlapping slices, shown in Figure \ref{fig:slicqtukeys}. The sliCQT therefore returns multiple slices of DFT coefficients for an input signal of length $N > sllen$. These slices need to be overlap-added with 50\% of the previous and next slice to produce a meaningful spectrogram, which was shown in Figure \ref{fig:slicqoverlaps}.
+
+This is a characteristic specific to the sliCQT; the NSGT, which is the ancestor of the sliCQT not designed for realtime processing, outputs the meaningful spectrogram directly without requiring any overlap-add. To oversimplify, we can say that the sliCQT outputs a ragged time-frequency transform similar to the NSGT for each slice of the input signal, and that to produce the final spectrogram for the entire signal, the transform of each slice need to be overlap-added with its adjacent slices.
 
 Figure \ref{fig:raggedslicqtoverlapadd} shows the procedure of overlap-adding ragged adjacent slices of the sliCQT to produce the final overlap-added ragged transform.
 
@@ -94,16 +91,29 @@ Figure \ref{fig:raggedslicqtoverlapadd} shows the procedure of overlap-adding ra
 
 Note that the 50\% overlap is done independently for each of the time-frequency resolutions, since they have different temporal framerates and a different total number of frames per slice. For example, in the illustration above, we can see that the overlap for the lower green-colored block of frequency bins is two frames, or half of the total width of four frames, while the overlap for the upper pink-colored block of frequency bins or half the total width of six frames.
 
+\subsubsection{Raggedness of the sliCQT compared to the STFT}
+\label{sec:stftslicqtcomp2}
+
+After overlap-adding the sliCQT, the result is a ragged matrix representing a nonuniform time-frequency transform with a different time-frequency resolution for groups of frequency bins. Figure \ref{fig:contraststftslicqt} shows the output of the STFT and an arbitrary ragged nonuniform frequency transform such as the NSGT side-by-side.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[STFT, a uniform time-frequency transform]{\includegraphics[width=0.5\textwidth]{./images-blockdiagrams/stftslicqtcmp1.png}}\\
+	\subfloat[A nonuniform time-frequency transform]{\includegraphics[width=0.65\textwidth]{./images-blockdiagrams/stftslicqtcmp2.png}}
+	\caption{The uniform STFT compared to a ragged nonuniform transform like the NSGT}
+	\label{fig:contraststftslicqt}
+\end{figure}
+
 \subsubsection{Choosing the data structure for the PyTorch sliCQT}
 \label{sec:torchslicqdatastructure}
 
-When choosing a data structure to represent the sliCQT in PyTorch, we must address the two characteristics described in the previous section, which are the adjacent slices that need to be overlap-added, and the raggedness of the slices and final overlap-added transform from the nonuniform time-frequency resolution.
+When choosing a data structure to represent the sliCQT in PyTorch, we must address the two characteristics described in the previous sections, which are the adjacent slices that need to be overlap-added, and the raggedness of the slices and final overlap-added transform from the nonuniform time-frequency resolution.
 
-Due to limitations in the PyTorch library, jagged or ragged tensors (which are the equivalent of irregular or ragged matrices) are not yet supported.\footnote{\url{https://github.com/pytorch/pytorch/issues/25032}} That means that the ragged sliCQT cannot be represented by a single tensor, due to the irregular or ragged shape of the underlying matrix from the different frequency bin groupings by time-frequency resolution.
+Due to limitations in the PyTorch library, jagged or ragged tensors (which are the equivalent of irregular or ragged matrices) are not yet supported.\footnote{\url{https://github.com/pytorch/pytorch/issues/25032}} That means that the ragged sliCQT cannot be represented by a single tensor, due to the irregular or ragged shape of the underlying matrix from the time-frequency resolutions.
 
-Therefore, to represent the raggedness of the noniform time-frequency resolution, the data structure chosen was a list of tensors. The list data structure in Python was described in Section \ref{sec:pythonbasics}. Each element of the list will contain a tensor for the groups of frequency bins that have the same time-frequency resolution and can fit in the same tensor or matrix.
+Therefore, to represent the raggedness of the noniform time-frequency resolution, the data structure chosen was a list of tensors. The list data structure in Python was described in Section \ref{sec:pythonbasics}. Each element of the list contains a tensor for the groups of frequency bins that have the same time-frequency resolution and can fit in the same tensor or matrix.
 
-As described in the previous section, each matrix in the list which have the same time-frequency resolution have their own independent overlap-add, computed by the width of their matrix, which is distinct due to its temporal framerate. Therefore, each element of the list will contain a 3D tensor. The three dimensions are frequency, time, and slice. The 3D tensor, when overlap-added, is converted to a 2D tensor with dimensions of time and frequency, which is equivalent to the 2D time-frequency dimensions of the STFT. Figure \ref{fig:3dslicqola2d} shows how the list of 3D tensors is converted to a list of 2D tensors by the overlap-add procedure.
+As described in the previous section, the sliCQT returns 2D time-frequency matrices per slice of the input signal, and multiple slices are needed to represent input signals longer than the slice length. Therefore, a 3D tensor with the dimensios time, frequency, and slice are used to represent the transform of each slice. The 3D tensor, when overlap-added, is converted to a 2D tensor with dimensions of time and frequency, which is equivalent to the 2D time-frequency dimensions of the STFT. Figure \ref{fig:3dslicqola2d} shows how the list of 3D tensors is converted to a list of 2D tensors by the overlap-add procedure.
 
 \begin{figure}[ht]
 	\centering
@@ -112,12 +122,12 @@ As described in the previous section, each matrix in the list which have the sam
 	\label{fig:3dslicqola2d}
 \end{figure}
 
-The final data structure for the sliCQT in PyTorch is a list of 3D tensors. Each 3D tensor in the list represents a grouping of frequency bins by their common time-frequency resolution. The 3D tensors of the list are each independently overlap-added to produce 2D tensors which constitute the final time-frequency spectrogram representation of the audio signal. Figure \ref{fig:2dslicqolastft} shows the data structure of the overlap-added sliCQT compared to the data structure of the STFT.
+The final data structure for the sliCQT in PyTorch is a list of 3D tensors. Each 3D tensor in the list represents a grouping of frequency bins by their common time-frequency resolution. The 3D tensors of the list are each independently overlap-added to produce 2D tensors which constitute the final time-frequency spectrogram representation of the audio signal. Figure \ref{fig:2dslicqolastft} shows the data structure of the ragged overlap-added sliCQT compared to the data structure of the STFT.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{./images-blockdiagrams/2dslicqolastft.png}
-	\caption{The overlap-added list of 2D tensors representing the sliCQT spectrogram, compared to the single 2D tensor representing the STFT spectrogram}
+	\caption{Ragged list of 2D tensors representing the overlap-added sliCQT spectrogram, compared to the single 2D tensor representing the STFT spectrogram}
 	\label{fig:2dslicqolastft}
 \end{figure}
 
@@ -278,15 +288,13 @@ Finally, in Section \ref{sec:xumxinc} we will show how we incorporated the X-UMX
 \subsubsection{Replacing the STFT with the sliCQT in UMX}
 \label{sec:replacestft}
 
-In this section, we will describe the changes made to UMX to support the two distinct characteristics of the sliCQT shown in Section \ref{sec:torchslicq}: the ragged shape, and the 3D dimensions requiring an overlap-add to produce a 2D time-frequency matrix.
+In this section, we will describe the changes made to UMX to support the data-structure of the sliCQT shown in Section \ref{sec:torchslicqdatastructure}, which addressed the distinct traits of the sliCQT compared to the STFT: the 3D slice-wise output, and the ragged shape from the nonuniform time-frequency resolution.
 
 Firstly, UMX uses a sequence duration of six seconds, meaning the training inputs are six second waveforms of audio. In xumx-sliCQ, we chose a smaller value of one second of music, chosen because it is often used in demixing papers \parencite{plumbley1, plumbley2, demucs}. Since the dimensionality of the sliCQT is larger than the STFT, having a smaller one second sequence duration creates less total sliCQT coefficients than a six second sequence duration, which lowers the demands of the training process of the xumx-sliCQ neural network on GPU memory.
 
-In sections \ref{sec:raggedtf} and \ref{sec:torchslicq}, it was mentioned that the ragged sliCQT has a different data structure than the single rectangular matrix of the STFT, consisting of a list of rectangular matrices. This arises from the different temporal frame rates of different frequency bins, which is a desired characteristic of the NSGT/sliCQT (or CQT).
+In sections \ref{sec:raggedtf} and \ref{sec:torchslicqdatastructure}, it was mentioned that the ragged sliCQT has a different data structure than the single rectangular matrix of the STFT, consisting of a list of 3D matrices. The 3D shape arises from the slice-wise implementation of the sliCQT, which computes time-frequency coefficients per slice of the input signal and thus introduces a third slice dimension to the familiar time and frequency dimensions of the STFT. The slices are overlap-added with their adjacent slices to reduce the three dimensions back to the two dimensions of time and frequency like the STFT. Next, the list was introduced because each element of the list contains a tensor or matrix with a different shape. This raggedness arises from the different time-frequency resolution applied to groups of frequency bins, which is a desired characteristic of nonuniform time-frequency transforms like the NSGT, sliCQT, and even the CQT.
 
-Additionally, the sliCQT coefficients are returned with the time coefficients distributed into adjacent slices, and these slices have a 50\% overlap-add with their neighboring slices. The overlap-add was described in Section \ref{sec:theoryslicqt} on the theoretical background of the sliCQT, and an implementation of the overlap-add procedure and spectrogram plotting code was discussed in \ref{sec:torchslicq}.
-
-First, the sliCQT must always be overlap-added to go from the 3D sliced data structure to the familiar 2D time-frequency data structure. Next, all of the operations of UMX which expect a single rectangular matrix of the STFT need to be modified to work on a list of matrices instead, where each separate matrix in the list consists of a group of frequency bins that share the same temporal framerate, ordered from the lowest to highest frequency bins.
+First, the list of tensors of the sliCQT must always be overlap-added to go from the 3D slice-wise time-frequency matrix  to the familiar 2D time-frequency matrix. Next, all of the operations of UMX which expect a single rectangular matrix of the STFT need to be modified to work on a list of matrices instead, where each separate matrix in the list consists of a group of frequency bins that share the same temporal framerate, ordered from the lowest to highest frequency bins.
 
 A necessary consideration in the network design is the non-invertibility of the overlap-add procedure, since the original 3D sliced data structure is needed to synthesize an audio waveform. The neural network needs a strategy to compute a 3D de-overlap-added estimate from the 2D overlap-added spectrogram. This was achieved with a final transpose convolutional layer at the end of the neural network, whose effect is to double the time coefficients to reverse their 50\% reduction from the overlap-add. Then, the 2D shape is reshaped back to the original 3D shape. The deoverlap is shown in greater detail in Section \ref{sec:deoverlap}.
 
