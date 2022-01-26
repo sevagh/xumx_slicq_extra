@@ -1,6 +1,11 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
+\todo[inline]{
+General tips:\\
+  Switch passive voice and we to I\\
+  Re-spell acronyms at the beginning of Chapter
+}
 \section{Background}
 \label{sec:background}
 
@@ -494,6 +499,10 @@ The NSGT processes the entire input signal at once. In cases where the input sig
 	\label{fig:slicqtukeys}
 \end{figure}
 
+\todo[inline]{
+Look for better ways to explain this, here and throughout the report\\
+Essentia blog post doesn't count, but something in that vein...
+}
 Slices have a 50\% overlap with adjacent slices. The noninvertibility of the half-overlap-add makes it only useful as a forward operation. Figure \ref{fig:slicqoverlaps} demonstrates this issue. This trait of the sliCQT has also been mentioned by in its implementation in the Essentia project:\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
 
 \begin{quote}
