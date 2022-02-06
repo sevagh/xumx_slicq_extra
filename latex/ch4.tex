@@ -6,9 +6,7 @@ General tips:\\
   Switch passive voice and we to I\\
   Re-spell acronyms at the beginning of Chapter\\
  Chapter tips:\\
-   Split GPU port pytorch and cupy\\
-   Why is CuPy BSS acceleration good? param search and also evaluation\\
-   Add table of evaluated stuff (slicqt, stft window sizes) before boxplot)\\
+   Fix boxplot colors\\
    More redundancy (restate hypothesis, goals)
 }
 \section{Experiment}
@@ -16,12 +14,20 @@ General tips:\\
 
 This section contains the results of the experiments described in the previous Section \ref{sec:methodology}. Refer to appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer on which the experiments and results in this section were generated from.
 
+The goal of this thesis is to use the sliced Constant-Q Transform (sliCQT) instead of the Short-Time Fourier Transform (STFT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. The sliCQT has a varying time-frequency resolution more suitable for auditory and psychoacoustic applications, which may give it an advantage in musical applications over the STFT which is limited by a fixed time-frequency resolution.
+
+To use the sliCQT in a neural network using the PyTorch framework, the reference library was first ported to PyTorch. This port was described in Section \ref{sec:torchslicq}, and in Section \ref{sec:gpuexperimentpytorch}, I will show the benchmark results.
+
+In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT which used the mix-phase inversion (MPI) oracle to pick sliCQT parameters that might perform best in a music demixing system that uses the MPI strategy for estimating waveforms. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the random search script. The BSS metrics library was sped up with CuPy in Section \ref{sec:fasterbsscupy} to allow for faster sliCQT parameter searches, and in Section \ref{sec:cupyportbss}, I will show the benchmark results.
+
+After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step is to train and evaluate the xumx-sliCQ neural network. Section \ref{sec:nnresults} contains the results for the neural network design presented in Section \ref{sec:neuralnet}. First, Section \ref{sec:hyperparams} will list all of the network hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Finally, Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing Wiener-EM configurations described in Section \ref{sec:postprocessing}, and Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
+
 \subsection{PyTorch port of the sliCQT}
 \label{sec:gpuexperimentpytorch}
 
-In Section \ref{sec:torchslicq}, it was described how the CPU-based NumPy implementation of the reference sliCQT Python library was ported to PyTorch to enable its computation on the GPU for use in deep neural networks.
+The first step was to port the sliCQT to PyTorch, a popular GPU neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
 
-The benchmark script for the PyTorch implementation of the sliCQT\footnote{\url{https://github.com/sevagh/nsgt}, \url{https://github.com/sevagh/nsgt/blob/main/examples/benchmark.py}, \url{https://github.com/sevagh/nsgt/blob/main/examples/run_bench.sh}} performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU was not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results.
+The benchmark script for the PyTorch implementation of the sliCQT performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU was not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results.
 
 \begin{table}[ht]
 	\centering
@@ -45,21 +51,10 @@ The benchmark script for the PyTorch implementation of the sliCQT\footnote{\url{
 \end{tabular}
 \end{table}
 
-\subsection{CuPy port of BSS metrics}
-\label{sec:gpuexperimentpytorch}
-
-In Section \ref{sec:fasterbsscupy}, the slowest functions of the BSS metrics library that used CPU-based NumPy and SciPy operations were ported to the GPU-equivalent CuPy functions to speed up their computation.
-
-The benchmark script for the CuPy BSS metrics library\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}, \url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/benchmark_cupy_eval.py}} creates a random estimated waveform for the four targets of the 14 validation tracks of MUSDB18-HQ, and computes the BSS metrics. The computation time was repeated for 10 iterations and averaged. Three copies of the benchmark script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on the AMD Ryzen 5950X CPU, one with the argument \Verb#--cuda-device=0# to use the NVIDIA 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
-
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the NVIDIA 3080 Ti GPU and 738.39 seconds with the weaker NVIDIA 2070 Super GPU. The results show that the expected speedup for BSS metrics evaluations from a GPU is \textasciitilde 2-2.5x over the CPU.
-
 \subsection{Best sliCQT parameters with MPI oracle}
 \label{sec:slicqparamresults}
 
-In Section \ref{sec:slicqparamsrch}, a random grid search was described to choose the parameters of the sliCQT to use in xumx-sliCQ.
-
-The parameter search script\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/slicq_explore.py}, \url{https://github.com/sevagh/xumx-sliCQ/blob/main/docs/slicq_params.md}} computes the median SDR score of the MPI oracle across all four targets and the 14 validation tracks of MUSDB18-HQ. The script ran for 60 iterations using random combinations of sliCQT parameters chosen from the ranges in Table \ref{table:slicqparams} in Section \ref{sec:slicqparamsrch}.
+In Section \ref{sec:slicqparamsrch}, I described the random search to choose the parameters of the sliCQT to use in xumx-sliCQ. Since the goal of xumx-sliCQ is to try to surpass X-UMX, which uses the STFT, the first step is to try to the sliCQT that has the most potential to surpass the STFT. This was done by choosing the best Signal-to-Distortion (SDR) score on the mixed-phase inversion (MPI) oracle waveforms of validation tracks of MUSDB18-HQ. The script ran for 60 iterations using random combinations of sliCQT parameters chosen from the ranges in Table \ref{table:slicqparams} in Section \ref{sec:slicqparamsrch}.
 
 The best-performing sliCQT parameters chosen by the script used the following parameters: Bark scale, 262 bins, 32.9--22,050 Hz. These parameters were used in the final neural network, xumx-sliCQ. Figure \ref{fig:bipolarslicqs} shows a visual comparison of the magnitude spectrograms of the best-performing sliCQT parameters alongside the STFT with the UMX default window size of 4,096 samples.
 
@@ -71,7 +66,37 @@ The best-performing sliCQT parameters chosen by the script used the following pa
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-The full MPI oracle evaluation of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, alongside different STFT window sizes. The MPI oracle was described in Section \ref{sec:noisyphaseoracle} as the strategy used by UMX to use the phase of the mix and estimated magnitude of the source to compute the final estimated source waveform.
+The full MPI oracle evaluation of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}. The MPI oracle was described in Section \ref{sec:noisyphaseoracle} as the strategy used by UMX to use the phase of the mix and estimated magnitude of the source to compute the final estimated source waveform.
+
+The BSS metrics of the best sliCQT are compared to the STFT with different window sizes. Recall that the hypothesis of this thesis is that the varying time-frequency resolution of the sliCQT may provide an advantage in a musical application over the fixed time-frequency resolution of the STFT, and that the window size of the STFT must be changed to trade time and frequency resolution. In some music source separation papers, a short window STFT is used for a high time resolution, and a long window STFT is used for a high frequency resolution \parencite{fitzgerald2, driedger}. In particular, \textcite{driedger} use a window size of 256 for the short window STFT and 4096 for the long window STFT, and \textcite{fitzgerald2} use a window of 1024 for the short window STFT and 16384 for the long window STFT. Therefore, to demonstrate the effect of time-frequency resolution on music demixing, I compared the best sliCQT chosen from the parameter search with different STFT window sizes, selecting powers of two between 256 and 16384 in the boxplot. Table \ref{table:winsizes} shows the evaluated transforms and their parameters. Note that the range of window sizes between 256--16384 contain 4096, which is the STFT window size of X-UMX.
+
+\begin{table}[ht]
+	\centering
+	\caption{Time-frequency transforms compared in the MPI oracle boxplot}
+	\label{table:winsizes}
+	\begin{tabular}{ |l|l|l| }
+	 \hline
+		Transform name & Transform & Parameters \\
+	 \hline
+	 \hline
+		slicqt-bark-262-32 & sliCQT & Bark scale, 262 bins, 32.9--22050 Hz \\
+	 \hline
+		stft-256 & STFT & 256 sample window size \\
+	 \hline
+		stft-512 & STFT & 512 sample window size \\
+	 \hline
+		stft-1024 & STFT & 1024 sample window size \\
+	 \hline
+		stft-2048 & STFT & 2048 sample window size \\
+	 \hline
+		stft-4096 & STFT & 4096 sample window size \\
+	 \hline
+		stft-8192 & STFT & 8192 sample window size \\
+	 \hline
+		stft-16384 & STFT & 16384 sample window size \\
+	 \hline
+\end{tabular}
+\end{table}
 
 \begin{figure}[ht]
 	\centering
@@ -82,13 +107,24 @@ The full MPI oracle evaluation of these sliCQT parameters are shown in the boxpl
 
 The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in Section \ref{sec:improvelib}. The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, beating the 6.23 dB achieved by the STFT with the UMX default window and overlap of 4,096 and 1,024 samples respectively.
 
+\subsection{CuPy port of BSS metrics}
+\label{sec:cupyportbss}
+
+In Section \ref{sec:fasterbsscupy}, the slowest functions of the BSS metrics library that used CPU-based NumPy and SciPy operations were ported to the GPU-equivalent CuPy functions to speed up their computation. This was done to speed up the development cycle and execution time of the parameter search script. As a bonus side effect, running the full BSS evaluations in Section \ref{sec:demixresults} were also sped up as a result of the BSS metrics port to CuPy.
+
+The benchmark script for the CuPy BSS metrics library creates a random estimated waveform for the four targets of the 14 validation tracks of MUSDB18-HQ, and computes the BSS metrics. The computation time was repeated for 10 iterations and averaged. Three copies of the benchmark script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on the AMD Ryzen 5950X CPU, one with the argument \Verb#--cuda-device=0# to use the NVIDIA 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
+
+The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the NVIDIA 3080 Ti GPU and 738.39 seconds with the weaker NVIDIA 2070 Super GPU. The results show that the expected speedup for BSS metrics evaluations from a GPU is \textasciitilde 2-2.5x over the CPU.
+
 \newpagefill
 
 \subsection{xumx-sliCQ neural network}
+\label{sec:nnresults}
 
 This section will show the hyperparameters, training procedure, and final trained performance of the xumx-sliCQ neural network, whose design was described in Section \ref{sec:neuralnet}.
 
 \subsubsection{Hyperparameters in the training script}
+\label{sec:hyperparams}
 
 This section will cover the details of the hyperparameters of the xumx-sliCQ training script. Table \ref{table:xumxslicqparams} contains a full list of all the hyperparameters, their default values, and their origin. The origins of the parameters are either copied from UMX, X-UMX, or sections from this thesis which describe new hyperparameters, or values of existing hyerparameters that are different from the default value used in UMX or X-UMX.
 
@@ -157,41 +193,12 @@ For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable paramete
 	\label{fig:networkloss}
 \end{figure}
 
-\subsubsection{Wiener-EM post-processing details}
-\label{sec:wienerconfigs}
-
-We previously discussed in Section \ref{sec:postprocessing} that after getting the initial estimate with the xumx-sliCQ neural network, there is a post-processing Wiener-EM step that could be done with the sliCQT or the STFT. In this section, we will discuss the execution times and SDR scores of the different configurations of Wiener-EM post-processing.
-
-Note that the default number of iterations for the Wiener-EM step is one, in UMX, X-UMX, and xumx-sliCQ. Anything above one iteration had worse demixing results, and was computationally slower as well. This is shown in Table \ref{table:wienerem}, where five different configurations of xumx-sliCQ's post-processing Wiener-EM were tested on the first test track of MUSDB18-HQ, ``Al James - Schoolboy Facination.''
-
-\begin{table}[ht]
-	\centering
-	\caption{SDR of Wiener-EM post-processing with the STFT and sliCQT}
-	\label{table:wienerem}
-	\begin{tabular}{ |l|l|l|l| }
-	 \hline
-		Wiener-EM implementation & Iterations & Median SDR & Execution time (s) \\
-	 \hline
-	 \hline
-		sliCQT, ragged & 1 & 2.221 & 479.104 \\
-	 \hline
-		sliCQT, zero-padded matrix & 1 & 2.216 & 268.061  \\
-	 \hline
-		STFT & 1 & 2.143 & 221.839  \\
-	 \hline
-		sliCQT, ragged & 2 & 1.941 & 775.51  \\
-	 \hline
-		STFT & 2 & 1.827 & 245.906  \\
-	 \hline
-\end{tabular}
-\end{table}
-
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
 In this section, the music demixing results of the trained models UMX, X-UMX, and xumx-sliCQ will be compared.
 
-The BSSv4 scores for the demixing results generated from the evaluation script\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/oracle_eval/trained_models.py}} were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. The sliCQT-Wiener-EM implementation is the zero-padded matrix form described in sections \ref{sec:postprocessing} and \ref{sec:wienerconfigs}, preferred over the ragged sliCQT-Wiener-EM step due to its faster computation time. Wiener-EM will be abbreviated to WEM in the following tables.
+The BSSv4 scores for the demixing results generated from the evaluation script were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. The results of xumx-sliCQ are computed for both the sliCQT-Wiener-EM and STFT-Wiener-EM strategies. Wiener-EM will be abbreviated to WEM in the tables that follow.
 
 To maximize result reproducibility, all pretrained models and code were downloaded from their public hosted locations shown in Table \ref{table:bsseval} and stored in a separate repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 

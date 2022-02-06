@@ -380,25 +380,6 @@ In this section, I will discuss how the final post-processing step of X-UMX, whi
 
 Both the sliCQT and STFT output complex Fourier coefficients, \hl{which means that the Wiener-EM step can be run on both the sliCQT and the STFT representations of the estimated targets.} Therefore, I chose to implement two strategies of Wiener-EM: one that operates on the sliCQT outputs of xumx-sliCQ directly, and the other that first swaps the sliCQT outputs into the STFT domain before applying Wiener-EM.
 
-In the first strategy, the Wiener-EM step is performed on the sliCQT directly, called ``sliCQT-Wiener-EM.'' It can be done on each sub-matrix of the ragged sliCQT separately, or the ragged sliCQT can be padded with zeros to fit into a single rectangular matrix to perform Wiener-EM on the single matrix. Figure \ref{fig:wienerempostprocslicqt} shows the two sub-strategies for sliCQT-Wiener-EM post-processing for a simplified case of two sources, A and B.
-
-In the second strategy, the sliCQT is used to get a first estimate of the waveform using the mix phase, and the waveform is then swapped into the STFT domain to do Wiener-EM with the STFT, like in the original X-UMX, called ``STFT-Wiener-EM.'' Figure \ref{fig:wienerempostprocstft} shows STFT-Wiener-EM for a simplified case of two sources, A and B.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/wienerem_stft.png}
-	\caption{STFT-Wiener-EM; Wiener-EM is applied in the STFT domain after swapping from the sliCQT to the time-domain waveforms}
-	\label{fig:wienerempostprocstft}
-\end{figure}
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Ragged sliCQT-Wiener-EM: Wiener-EM is applied on each sub-matrix separately]{\includegraphics[width=\textwidth]{./images-blockdiagrams/wienerem_slicqt_ragged.png}}\\
-	\subfloat[Zero-padded sliCQT-Wiener-EM: Wiener-EM is applied on the whole zero-padded matrix]{\includegraphics[width=\textwidth]{./images-blockdiagrams/wienerem_slicqt_zeropad.png}}
-	\caption{Different strategies for sliCQT-Wiener-EM post-processing}
-	\label{fig:wienerempostprocslicqt}
-\end{figure}
-
-Note that both figures show a simplified case of two sources, A and B. Real Wiener-EM is done with four sources (vocals, drums, bass, other), but the process is the same. Each strategy resulted in a different music demixing quality and execution time, which will be discussed in Section \ref{sec:wienerconfigs}.
+The music demixing quality and running time of both strategies will be discussed further in Section \ref{sec:demixresults}.
 
 \end{document}
