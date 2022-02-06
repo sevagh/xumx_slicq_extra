@@ -16,8 +16,8 @@ bark_scale = BarkScale(Fmin, Fmax, K)
 mel_fs, mel_Qs = mel_scale()
 bark_fs, bark_Qs = bark_scale()
 
-mel_pitches = [librosa.hz_to_note(freq) for freq in mel_fs]
-bark_pitches = [librosa.hz_to_note(freq) for freq in bark_fs]
+#mel_pitches = [librosa.hz_to_note(freq) for freq in mel_fs]
+#bark_pitches = [librosa.hz_to_note(freq) for freq in bark_fs]
 fig, axes = plt.subplots(2, 1)
 
 plt.rcParams.update({'font.size': 14})
@@ -33,11 +33,11 @@ for item in ([axes[0].title, axes[0].xaxis.label, axes[0].yaxis.label] +
              axes[0].get_xticklabels() + axes[0].get_yticklabels() + axes[0].get_legend().get_texts()):
     item.set_fontsize(24)
 
-for i, pitch in enumerate(mel_pitches):
-    axes[0].annotate(pitch, (i, mel_fs[i]), xytext=(i, mel_fs[i]-750.0))
-
-for i, pitch in enumerate(bark_pitches):
-    axes[0].annotate(pitch, (i, bark_fs[i]), xytext=(i, bark_fs[i]+750.0))
+#for i, pitch in enumerate(mel_pitches):
+#    axes[0].annotate(pitch, (i, mel_fs[i]), xytext=(i, mel_fs[i]-750.0))
+#
+#for i, pitch in enumerate(bark_pitches):
+#    axes[0].annotate(pitch, (i, bark_fs[i]), xytext=(i, bark_fs[i]+750.0))
 
 axes[0].grid()
 axes[0].xaxis.set_major_locator(MaxNLocator(integer=True))

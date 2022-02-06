@@ -19,7 +19,7 @@ print(f'bpo: {B}, bins: {K}, len(oct): {len(oct_scale)}, len(log): {len(log_scal
 oct_fs, oct_Qs = oct_scale()
 log_fs, log_Qs = log_scale()
 
-pitches = [librosa.hz_to_note(freq) for freq in oct_fs]
+#pitches = [librosa.hz_to_note(freq) for freq in oct_fs]
 fig, axes = plt.subplots(1)
 
 plt.rcParams.update({'font.size': 14})
@@ -34,8 +34,8 @@ for item in ([axes.title, axes.xaxis.label, axes.yaxis.label] +
              axes.get_xticklabels() + axes.get_yticklabels() + axes.get_legend().get_texts()):
     item.set_fontsize(24)
 
-for i, pitch in enumerate(pitches):
-    axes.annotate(pitch, (i, oct_fs[i]))
+#for i, pitch in enumerate(pitches):
+#    axes.annotate(pitch, (i, oct_fs[i]))
 
 axes.grid()
 axes.xaxis.set_major_locator(MaxNLocator(integer=True))

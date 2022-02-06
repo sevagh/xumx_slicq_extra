@@ -17,7 +17,7 @@ vql_scales = [VQLogScale(Fmin, Fmax, K, gamma=gamma) for gamma in gammas] # tota
 # call the scale object to get Frequencies and Qs for each bin
 log_fs, log_Qs = log_scale()
 
-pitches = [librosa.hz_to_note(freq) for freq in log_fs]
+#pitches = [librosa.hz_to_note(freq) for freq in log_fs]
 fig, axes = plt.subplots(2, 1)
 
 plt.rcParams.update({'font.size': 14})
@@ -48,8 +48,8 @@ for item in ([axes[0].title, axes[0].xaxis.label, axes[0].yaxis.label] +
              axes[0].get_xticklabels() + axes[0].get_yticklabels() + axes[0].get_legend().get_texts()):
     item.set_fontsize(24)
 
-for i, pitch in enumerate(pitches):
-    axes[0].annotate(pitch, (i, numpy.log2(log_fs[i])))
+#for i, pitch in enumerate(pitches):
+#    axes[0].annotate(pitch, (i, numpy.log2(log_fs[i])))
 
 axes[0].grid()
 axes[0].xaxis.set_major_locator(MaxNLocator(integer=True))

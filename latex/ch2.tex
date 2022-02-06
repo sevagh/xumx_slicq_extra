@@ -417,7 +417,7 @@ Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2} show different configu
 
 \begin{table}[ht]
 	\centering
-	\caption{Different frequencies and Q factors for various NSGT scales}
+	\caption{Different frequencies and Q-factors for various NSGT scales}
 	\label{table:nsgtfreqsandqs}
 \begin{tabular}{ |l|l|p{10cm}| }
 	 \hline
@@ -1237,6 +1237,21 @@ A visualization of the multi-domain loss (MDL) and combination loss (CL) for fou
 	\caption{Loss functions of X-UMX \parencite[2]{xumx}}
 	\label{fig:xumxlosses}
 \end{figure}
+
+Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired four targets (vocals, drums, bass, other) are combined together in X-UMX, illustrating the key concepts of the multi-domain loss functions (MDL), which computes loss for both the magnitude spectrograms and time-domain waveforms, and the combination losses across the four targets (CL).
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[UMX system for a single target]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
+	\subfloat[UMX system for a single target with loss function]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_single_target.png}}\\
+	\subfloat[X-UMX network for all four targets with MDL and CL loss functions]{\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_multiple_targets.png}}
+	\caption{UMX and X-UMX compared}
+	\label{fig:umxandxumx}
+\end{figure}
+
+Figure \ref{fig:umxandxumx} \hl{shows how X-UMX encompasses UMX entirely, and adds parameter-free enhancements with the new MDL and CL loss functions}. For simplicity, having a single training loop and single trained model to perform the separation is easier than training four independent models. For this reason, and that the music demixing performance of X-UMX is higher than UMX, I chose to base this thesis on the X-UMX variant of UMX.
+
+The available implementation of X-UMX\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} uses NNabla,\footnote{\url{https://nnabla.org/}} which is a different Python deep learning framework from PyTorch. The X-UMX additions are easily copied from the NNabla implementation of X-UMX into the PyTorch implementation of UMX.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} In the methodology chapter, I will use X-UMX to refer to the PyTorch implementation of UMX with the changes of X-UMX included, since PyTorch is the deep learning framework chosen for this thesis.
 
 \newpagefill
 

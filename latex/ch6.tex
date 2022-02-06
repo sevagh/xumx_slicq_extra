@@ -74,6 +74,50 @@ All Python environments were designed to be reproducible with pip requirements.t
 
 I take code availability and reproducibility seriously. Feel free to e-mail me\footnote{\href{mailto:sevag.hanssian@mail.mcgill.ca}{sevag.hanssian@mail.mcgill.ca}, \href{mailto:sevagh+thesis@pm.me}{sevagh+thesis@pm.me}} if you encounter any errors, discrepancies, or difficulties with reproducing any of the results.
 
+\newpagefill
+
+\section{Octave scale for the NSGT}
+\label{appendix:octscale}
+
+\todo[inline]{fix up the wording}
+
+The octave scale of the NSGT library takes a bins-per-octave (bpo) argument from which it computes the total number of frequency bins, instead of the logarithmic scale which takes the total number of frequency bins as a direct argument. Equation \eqref{equation:bpo1} describes how to compute the total bins from the bins-per-octave setting of the octave scale:
+\begin{align}
+	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}} + 1]\tag{24}\label{equation:bpo1}
+\end{align}
+
+where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. This equation was shown previously in Section \ref{sec:cqt}. The difference between the logarithmic and octave scales is shown in Code Listing \ref{code:octvlog}. The resulting frequency scale is plotted in Figure \ref{fig:octvlog}.
+
+\begin{figure}[h]
+  \centering
+ \begin{minipage}{\textwidth}
+  \centering
+\setlength\partopsep{-\topsep}
+\begin{inputminted}[linenos,breaklines,frame=single,firstline=4,lastline=16,fontsize=\scriptsize]{text}{./scripts/fscale.py}
+\end{inputminted}
+ \subfloat{(a) Code snippet defining octave and log scales}
+ \vspace{1em}
+ \end{minipage}
+ \begin{minipage}{\textwidth}
+  \centering
+\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
+|\$ python scripts/fscale.py 3 # invoke script for bpo=3|
+|bpo: 3, bins: 21, len(oct): 21, len(log): 21|
+\end{minted}
+ \subfloat{(b) Output printed by above}
+ \end{minipage}
+  \captionof{listing}{Octave and log scales for the NSGT}
+  \label{code:octvlog}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{./images-freqscales/log_vs_oct.png}
+	\caption{Frequency bins for the octave and log scales}
+	\label{fig:octvlog}
+\end{figure}
+
+
 \end{appendices}
 
 \end{document}
