@@ -223,11 +223,15 @@ Recall from Section \ref{sec:evalbss} that the Signal-to-Distortion (SDR) is one
 \subsubsection{Speeding up the parameter search using the GPU and CuPy}
 \label{sec:fasterbsscupy}
 
-In this section, I will explore a speedup of the parameter search script using the GPU. Like in Section \ref{sec:torchslicq}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} package.
+In this section, I will explore a speedup of the parameter search script using the GPU.  The parameter search script described in the previous section computes the MPI oracle waveforms and measures their SDR score on the 14 validation tracks of MUSDB18-HQ. \hl{As multiple instances of the script were run for several iterations during the experimentation phase, reducing the total time of the parameter search script would allow for the script to run in a shorter time frame, leading to a faster development cycle, which is beneficial to the thesis.}
 
-The bottlenecks of the BSS metrics library use NumPy and SciPy operations, which are Python numerical computation libraries that use the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides replacement functions of NumPy and SciPy which run on NVIDIA GPUs using the CUDA compute framework.\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch was used to replace NumPy code in the earlier Section \ref{sec:torchslicq}, CuPy is intended to be a direct replacement of NumPy and SciPy and thus represents an easier porting effort. Also, the MPI oracle testbench is separate from the xumx-sliCQ PyTorch code, it doesn't need to use PyTorch.
+As in Section \ref{sec:torchslicq}, the Python line-profiler library was used to discover any performance bottlenecks or slow parts of the MPI oracle parameter search script. The slowest step was the calculation of the SDR score from the BSS metrics library.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}}
 
-The replacement of the NumPy or SciPy function is as simple as using the CuPy equivalent, taking special care about GPU out-of-memory errors. The library is unchanged for end users, and the GPU is simply used whenever possible, falling back to the CPU in case of any errors, or if there is no GPU available on the user's computer. Similar to the NSGT/sliCQT library, the modifications made to the museval library are stored in my copy of the repository for future reference.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval/commit/f3b7540faddc8d2b1bc91cecaf05fd20d96df7c6}}
+The bottlenecks of the BSS metrics library are caused by NumPy and SciPy operations, which are Python numerical computation libraries that use the CPU. The CuPy library\footnote{\url{https://cupy.dev/}} provides drop-in replacement functions of NumPy and SciPy, which run on NVIDIA GPUs using the CUDA compute framework.\footnote{\url{https://developer.nvidia.com/cuda-toolkit}} This allows for acceleration of numerical operations through GPU parallelization. Note that although PyTorch was used to replace NumPy code in the earlier Section \ref{sec:torchslicq}, CuPy is intended to be a direct replacement of NumPy and SciPy and thus represents an easier porting effort. Also, since the MPI oracle testbench is separate from the xumx-sliCQ PyTorch code, it does not need to use PyTorch.
+
+I copied the BSS metrics library \hl{to my own GitHub user account},\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} which is called \Verb#sigsep-mus-eval# in the SigSep GitHub organization, and replaced the slowest NumPy and SciPy functions with their CuPy equivalents,\footnote{\url{https://github.com/sevagh/sigsep-mus-eval/commit/f3b7540faddc8d2b1bc91cecaf05fd20d96df7c6}} taking special care about GPU out-of-memory errors. The library is unchanged for end users, and the GPU is simply used whenever possible, falling back to the CPU in case of any errors, or if there is no GPU available on the user's computer.
+
+\todo[inline,color=green!40]{The relevance here is to make clear that the upstream BSS metrics library does not include my speedups, and that its available only in my copy}
 
 \newpagefill
 
@@ -236,7 +240,7 @@ The replacement of the NumPy or SciPy function is as simple as using the CuPy eq
 
 First, in Section \ref{sec:replacestft}, I will look at how the X-UMX PyTorch code needs to be modified in xumx-sliCQ to replace the STFT with the ragged sliCQT described in Section \ref{sec:torchslicq}.
 
-Next, in Section \ref{sec:slicqarches}, I will show two neural network architectures that can be used in xumx-sliCQ. I will show how the original Bi-LSTM architecture from X-UMX and the convolutional denoising autoencoder (CDAE) architecture described in Section \ref{sec:cdae}, both originally intended for the STFT, can be adapted to operate on the ragged sliCQT. In Section \ref{sec:deoverlap}, I will discuss a de-overlap layer which is necessary for any neural architecture for the sliCQT.
+Next, in Section \ref{sec:slicqarches}, I will show two neural network architectures, Bi-LSTM and CDAE, that can be used in xumx-sliCQ. I will show how the original Bi-LSTM architecture from X-UMX and the convolutional denoising autoencoder (CDAE) architecture described in Section \ref{sec:cdae}, both originally intended for the STFT, can be adapted to operate on the ragged sliCQT. In Section \ref{sec:bandwidth}, I will describe the bandwidth parameter of X-UMX and how it was adapted for the sliCQT in xumx-sliCQ. In Section \ref{sec:deoverlap}, I will discuss a de-overlap layer, which is necessary for any neural architecture for the sliCQT.
 
 Finally, in Section \ref{sec:xumxinc} I will show how I incorporated the X-UMX idea of combining the four target models in a single model with the multi-domain loss (MDL) and combination loss (CL) functions.
 
@@ -245,22 +249,22 @@ Finally, in Section \ref{sec:xumxinc} I will show how I incorporated the X-UMX i
 
 In this section, I will describe the changes made to X-UMX to support the data-structure of the sliCQT shown in Section \ref{sec:torchslicqdatastructure}, which addressed the distinct traits of the sliCQT compared to the STFT: the 3D slice-wise output, and the ragged shape from the nonuniform time-frequency resolution.
 
-Firstly, X-UMX uses a sequence duration of six seconds, meaning the training inputs are six second waveforms of audio. In xumx-sliCQ, I chose a smaller value of one second of music, chosen because it is often used in demixing papers \parencite{plumbley1, plumbley2, demucs}. The dimensionality of the sliCQT is larger than the STFT, so a shorter sequence is necessary to not exceed the memory limits of the GPU.
+Firstly, X-UMX uses a sequence duration of six seconds, meaning the training inputs are six second waveforms of audio. The dimensionality of the sliCQT is larger than the STFT. The sliCQT of a six second sequence is larger than the equivalent STFT, which leadsd to more GPU memory being required in training. In xumx-sliCQ, I chose a smaller value of one second of music, chosen because it is often used in demixing papers \parencite{plumbley1, plumbley2, demucs}, and because the shorter sequence results in a smaller sliCQT, \hl{reducing the memory demands on the GPU}.
 
-In sections \ref{sec:raggedtf} and \ref{sec:torchslicqdatastructure}, it was mentioned that the ragged sliCQT has a different data structure than the single rectangular matrix of the STFT, consisting of a list of 3D matrices. The 3D shape arises from the slice-wise implementation of the sliCQT, which computes time-frequency coefficients per slice of the input signal and thus introduces a third slice dimension to the familiar time and frequency dimensions of the STFT. The slices are overlap-added with their adjacent slices to reduce the three dimensions back to the two dimensions of time and frequency like the STFT. Next, the list was introduced because each element of the list contains a tensor or matrix with a different shape. This raggedness arises from the different time-frequency resolution applied to groups of frequency bins, which is a desired characteristic of nonuniform time-frequency transforms like the NSGT, sliCQT, and even the CQT.
+In sections \ref{sec:raggedtf} and \ref{sec:torchslicqdatastructure}, I described the data structure of the ragged sliCQT and how it differed from the single rectangular matrix of the STFT. The ragged sliCQT outputs a list of 3D matrices, representing the sliced transform, that must be overlap-added to create a list of 2D time-frequency matrices. Recall that the list was introduced from the raggedness of the transform, because each group of time-frequency bins has a different temporal framerate, resulting in a different size tensor or matrix. This raggedness is a desired characteristic of nonuniform time-frequency transforms like the NSGT, sliCQT, and even the original CQT.
 
-First, the list of tensors of the sliCQT must always be overlap-added to go from the 3D slice-wise time-frequency matrix  to the familiar 2D time-frequency matrix. Next, all of the operations of X-UMX which expect a single rectangular matrix of the STFT need to be modified to work on a list of matrices instead, where each separate matrix in the list consists of a group of frequency bins that share the same temporal framerate, ordered from the lowest to highest frequency bins.
+First, the list of 3D tensors of the sliCQT must always be overlap-added to transform them to the 2D time-frequency matrix. Next, all of the operations of X-UMX that expect a single rectangular matrix of the STFT need to be modified to work on a list of matrices instead, where each separate matrix in the list consists of a group of frequency bins that share the same temporal framerate, ordered from the lowest to highest frequency bins. Lastly, the list of 2D tensors in the overlap-added sliCQT needs to be converted back to the list of 3D tensors in the original sliCQT to synthesize an audio waveform. This was achieved with a final transpose convolutional layer at the end of the neural network, whose effect is to double the time coefficients to reverse their 50\% reduction from the overlap-add. Then, the 2D shape is reshaped back to the original 3D shape. The process of the de-overlap is shown in greater detail in Section \ref{sec:deoverlap}.
 
-A necessary consideration in the network design is the non-invertibility of the overlap-add procedure, since the original 3D sliced data structure is needed to synthesize an audio waveform. The neural network needs a strategy to compute a 3D de-overlap-added estimate from the 2D overlap-added spectrogram. This was achieved with a final transpose convolutional layer at the end of the neural network, whose effect is to double the time coefficients to reverse their 50\% reduction from the overlap-add. Then, the 2D shape is reshaped back to the original 3D shape. The deoverlap is shown in greater detail in Section \ref{sec:deoverlap}.
-
-\subsubsection{sliCQT neural network architectures}
+\subsubsection{Neural network architectures}
 \label{sec:slicqarches}
 
 In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented.
 
+\todo[inline,color=green!40]{how these were implemented? copied from umx originally, and the torch code of the CDAE paper}
+
 Figure \ref{fig:cdaeslicqt} shows how both the Bi-LSTM and CDAE network architectures should be applied to the ragged sliCQT. Instead of having a single neural network operate on the single matrix of the STFT, which includes all of the frequency bins at the same temporal frame rate, there must be a neural network that operates on each of the sub-matrices of the ragged sliCQT.
 
-Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQT, and need a de-overlap layer which is discussed in Section \ref{sec:deoverlap}.
+Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQT, and need a de-overlap layer, which is discussed in Section \ref{sec:deoverlap}.
 
 \begin{figure}[ht]
 	\centering
@@ -271,7 +275,7 @@ Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQ
 
 In the original X-UMX, the neural network architecture is a dense (i.e., linear) encoder-decoder with a Bi-LSTM. The STFT in X-UMX uses a window size of 4096, which results in 2049 output frequency bins. The purpose of the dense encoder/decoder with the STFT is to reduce the 2049 frequency bins into a smaller dimension set of 512 values, which are then used as the input and output of the Bi-LSTM. In the case of the sliCQT, the output frequency bins are less numerous than the STFT. As described in Section \ref{sec:slicqparamsrch}, the maximum frequency bins of the sliCQT were capped at 300, which is a small enough value to use directly as the input to the Bi-LSTM without needing to be encoded to a lower dimension with dense layers.
 
-Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT with the X-UMX default 2049 frequency bins, and how it should be adapted to a sliCQT that has a smaller set of frequency bins $f \ll 2049$.
+Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT with the X-UMX default 2049 frequency bins, and how it was adapted to a sliCQT that has a smaller set of frequency bins $f \ll 2049$.
 
 \begin{figure}[ht]
 	\centering
@@ -281,11 +285,11 @@ Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT
 	\label{fig:umxnetworkdetails}
 \end{figure}
 
-As discussed in sections \ref{sec:cnn} and \ref{sec:cdae}, convolutional layers, and specifically convolutional denoising autoencoders (CDAE), are simple ways of defining 2D time-frequency filters that slide over a 2D time-frequency matrix of Fourier coefficients. The convolutional denoising autoencoder (CDAE) models of \textcite{plumbley1, plumbley2} were adapted for use in xumx-sliCQ.
+As discussed in sections \ref{sec:cnn} and \ref{sec:cdae}, convolutional layers, and specifically convolutional denoising autoencoders (CDAE), are simple ways of defining 2D time-frequency filters that slide over a 2D time-frequency matrix of Fourier coefficients. The CDAE models of \textcite{plumbley1, plumbley2} were adapted for use in xumx-sliCQ.
 
-Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively. This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$. The sub-matrices of the ragged sliCQT may have different dimensions for time and frequency, due to their varying frequency bins and temporal framerates, so the 2D convolution filter sizes are adapted to the input size. After each layer, a 2D batch normalization (BN) and nonlinear activation function, specifically the rectified linear unit (ReLU) activation, are applied \parencite{plumbley2}.
+Using the values from \textcite{plumbley2}, the two layers of convolution in the CDAE of xumx-sliCQ use 25 and 55 channels respectively.\todo{create a diagram} This means that the stereo or 2-channel sliCQT has 25 output feature maps (or channels) computed from the first encoder convolutional layer, and 55 output feature maps from the second encoder convolutional layer. These are reversed in the decoder layer i.e., $2 \rightarrow \text{encoder}(25 \rightarrow 55) \rightarrow \text{decoder}(25 \rightarrow 2)$. The sub-matrices of the ragged sliCQT may have different dimensions for time and frequency, due to their varying frequency bins and temporal framerates, so the 2D convolution filter sizes are adapted to the input size. After each layer, a 2D batch normalization (BN) and nonlinear activation function, specifically the rectified linear unit (ReLU) activation, are applied \parencite{plumbley2}.
 
-The exact parameters and configuration of the convolutional kernels and layers are described in Tables \ref{table:convtable1}, \ref{table:convtable2}, \ref{table:convtable3}, and \ref{table:convtable4}. The parameters were initially chosen from the kernel values and layers in \textcite{plumbley1, plumbley2}. The parameters were repeatedly modified in an informal hyperparameter tuning process.
+The exact parameters and configuration of the convolutional kernels and layers are described in Tables \ref{table:convtable1}, \ref{table:convtable2}, \ref{table:convtable3}, and \ref{table:convtable4}. The parameters were initially chosen from the kernel values and layers in \textcite{plumbley1, plumbley2}. The parameters and network architectures were repeatedly modified in a hyperparameter tuning process, and an overview of all the historical experiments of xumx-sliCQ is included in Appendix \ref{appendix:crazyexperiments}.
 
 \begin{table}[ht]
 	\centering
@@ -340,44 +344,45 @@ The exact parameters and configuration of the convolutional kernels and layers a
 \end{tabular}
 \end{table}
 
-Another detail of the original X-UMX neural network architecture is the bandwidth parameter, which is set to a default value of 16,000 Hz. This controls the maximum STFT frequency bin which is passed through the network; frequency bins above the one corresponding to 16,000 Hz are cropped before passing the spectrogram into the network.
+\subsubsection{Bandwidth parameter}
+\label{sec:bandwidth}
 
-I used the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ. In the ragged sliCQT, the sub-matrices of the ragged transform that contain frequency bins above 16,000 Hz are passed through the neural networkunchanged, to achieve the same effect.
+Another\todo{say why im talking about this} detail of the original X-UMX neural network architecture is the bandwidth parameter, which is set to a default value of 16,000 Hz. This controls the maximum STFT frequency bin which is passed through the network; frequency bins above the one corresponding to 16,000 Hz are cropped before passing the spectrogram into the network. I used the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ. In the ragged sliCQT, the sub-matrices of the ragged transform that contain frequency bins above 16,000 Hz are passed through the neural network unchanged, to achieve the same effect.
 
-\subsubsection{sliCQT de-overlap layer}
+\todo[inline,color=green!40]{just made this a subsection}
+
+\subsubsection{De-overlap layer}
 \label{sec:deoverlap}
 
-In this section, I will discuss the ``de-overlap layer'' which is necessary for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. This is the inverse of the 50\% slice overlap-add procedure with learnable parameters.
+In this section, I will discuss the ``de-overlap layer,'' which is necessary for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. This is the inverse of the 50\% slice overlap-add procedure with learnable parameters.
+
+\todo[inline,color=green!40]{original contribution? yes. how do i know it was correct? well, 3.6 dB isn't world-beating, but it's probably better than random garbage, indicating my network is doing something correctly}
 
 I use a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides and considers three time coefficients to produce six time coefficients. The effect is to double the number of time coefficients, which is a reversal of the 50\% reduction of time coefficients from the overlap-add procedure.
 
-Finally, the 2D sliCQT is reshaped to the original 3D shape, separating it back out into separate slices. The final activation is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask which can then be applied to the input mixed magnitude 3D sliCQT spectrogram.
+Finally, the 2D sliCQT is reshaped to the original 3D shape, separating it back out into separate slices. The final activation is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask that can then be applied to the input mixed magnitude 3D sliCQT spectrogram.
 
-\subsubsection{Combining the target networks like X-UMX}
+\subsubsection{Modifying the mixing coefficient for the MDL loss}
 \label{sec:xumxinc}
 
-This section will describe how the xumx-sliCQ code was modified to combined and train the four target models together. It will also describe how the X-UMX loss functions, shown in Section \ref{sec:xumx}, were implemented.
-
-The data loader of X-UMX returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. In xumx-sliCQ, the MUSDB18-HQ data loader was modified to return the mixed waveform and all four targets, $(x, y_{\text{vocals}}, y_{\text{bass}}, y_{\text{drums}}, y_{\text{other}})$. Four copies of the neural networks described in the previous Section \ref{sec:slicqarches} are created in the xumx-sliCQ training script, and each one is trained using a $(x, y_{\text{target}})$ pair for its source.
+\hl{Recall from Section} \ref{sec:xumx} that X-UMX includes the multi-domain loss (MDL), with a mixing coefficient to sum the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0. In xumx-sliCQ, it is set to 0.1 to reflect the observed order of magnitude difference in the coefficients of the STFT and the sliCQT.
 
 To implement the time-domain SDR loss, I use the auraloss Python package.\footnote{\url{https://github.com/csteinmetz1/auraloss}} I used the SI-SDR (scale-invariant SDR) \parencite{roux2018sdr} variant of SDR as the loss function. SI-SDR is a simpler and more robust variant of SDR which improves on some failure cases of SDR \parencite{roux2018sdr}.
 
-The inference in xumx-sliCQ is the same as X-UMX, with the combined four-target model outputting four estimated magnitude spectrograms, followed by the post-processing Wiener-EM step that will be described in the next Section \ref{sec:postprocessing}.
-
-Recall from Section \ref{sec:xumx} that X-UMX includes the multi-domain loss (MDL), with a mixing coefficient to sum the magnitude spectrogram loss and the time-domain SDR loss. The mixing coefficient in X-UMX is 10.0. In xumx-sliCQ, it is set to 0.1 to reflect the observed order of magnitude difference in the coefficients of the STFT and the sliCQT.
+\todo[inline,color=green!40]{this is different now that i shifted the burden of explaining UMX vs. X-UMX to chapter 2}
 
 \newpagefill
 
 \subsection{Post-processing}
 \label{sec:postprocessing}
 
-In this section, I will discuss how the final post-processing step of X-UMX, which refines the four target estimates of the neural network using Wiener-EM as described in Section \ref{sec:umx}, was adapted for the sliCQT in xumx-sliCQ.
+In this section, I will discuss how the final post-processing step of X-UMX, which refines the four target estimates of the neural network using Wiener-EM was adapted for the sliCQT in xumx-sliCQ. After the neural network outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step is applied to potentially improve the estimates (see Section \ref{sec:umx}).
 
-After the neural network outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step can be applied to improve the estimates. The code for the Wiener-EM step is essentially unchanged from the original, since both the sliCQT and STFT output complex Fourier coefficients.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/blob/main/xumx_slicq/filtering.py\#L290}} The inputs to the Wiener-EM function are the mixed complex spectrogram and a rectangular matrix containing the four target magnitude spectrograms.
+Both the sliCQT and STFT output complex Fourier coefficients, \hl{which means that the Wiener-EM step can be run on both the sliCQT and the STFT representations of the estimated targets.} Therefore, I chose to implement two strategies of Wiener-EM: one that operates on the sliCQT outputs of xumx-sliCQ directly, and the other that first swaps the sliCQT outputs into the STFT domain before applying Wiener-EM.
 
-In the first strategy, the sliCQT is used to get a first estimate of the waveform using the mix phase, and the waveform is then swapped into the STFT domain to do Wiener-EM with the STFT, like in the original X-UMX, called ``STFT-Wiener-EM.'' In the other strategy, the Wiener-EM step is performed on the sliCQT directly, called ``sliCQT-Wiener-EM.'' It can be done on each sub-matrix of the ragged sliCQT separately, or the ragged sliCQT can be padded with zeros to fit into a single rectangular matrix to perform Wiener-EM on the single matrix.
+In the first strategy, the Wiener-EM step is performed on the sliCQT directly, called ``sliCQT-Wiener-EM.'' It can be done on each sub-matrix of the ragged sliCQT separately, or the ragged sliCQT can be padded with zeros to fit into a single rectangular matrix to perform Wiener-EM on the single matrix. Figure \ref{fig:wienerempostprocslicqt} shows the two sub-strategies for sliCQT-Wiener-EM post-processing for a simplified case of two sources, A and B.
 
-Figure \ref{fig:wienerempostprocstft} shows STFT-Wiener-EM, and Figure \ref{fig:wienerempostprocslicqt} shows the two sub-strategies for sliCQT-Wiener-EM post-processing. Both figures show a simplified case of two sources, A and B. The real Wiener-EM is done with four sources (vocals, drums, bass, other), but the process is similar. Each strategy resulted in a different music demixing quality and execution time, which will be discussed in Section \ref{sec:wienerconfigs}.
+In the second strategy, the sliCQT is used to get a first estimate of the waveform using the mix phase, and the waveform is then swapped into the STFT domain to do Wiener-EM with the STFT, like in the original X-UMX, called ``STFT-Wiener-EM.'' Figure \ref{fig:wienerempostprocstft} shows STFT-Wiener-EM for a simplified case of two sources, A and B.
 
 \begin{figure}[ht]
 	\centering
@@ -393,5 +398,7 @@ Figure \ref{fig:wienerempostprocstft} shows STFT-Wiener-EM, and Figure \ref{fig:
 	\caption{Different strategies for sliCQT-Wiener-EM post-processing}
 	\label{fig:wienerempostprocslicqt}
 \end{figure}
+
+Note that both figures show a simplified case of two sources, A and B. Real Wiener-EM is done with four sources (vocals, drums, bass, other), but the process is the same. Each strategy resulted in a different music demixing quality and execution time, which will be discussed in Section \ref{sec:wienerconfigs}.
 
 \end{document}
