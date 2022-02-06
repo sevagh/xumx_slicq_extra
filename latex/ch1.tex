@@ -1,11 +1,6 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\todo[inline]{
-General tips:\\
-  Switch passive voice and we to I\\
-  Re-spell acronyms at the beginning of Chapter
-}
 \section{Introduction}
 \label{sec:intro}
 
@@ -46,7 +41,7 @@ The Constant-Q Transform was originally proposed by \textcite{jbrown} to analyze
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Linear-frequency DFT]{\includegraphics[width=0.7\textwidth]{./images-tftheory/violindft.png}}\\
+	\subfloat[Linear-frequency Fourier transform]{\includegraphics[width=0.7\textwidth]{./images-tftheory/violindft.png}}\\
 	\subfloat[Constant-Q transform]{\includegraphics[width=0.7\textwidth]{./images-tftheory/violincqt.png}}
 	\caption{Violin playing the diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$ \parencite[430]{jbrown}}
 	\label{fig:violin}
@@ -67,18 +62,18 @@ Several music demixing papers \parencite{fitzgerald1, driedger, tftradeoff1, tft
 
 Other music demixing systems have been proposed that use the CQT instead of the STFT \parencite{fitzgerald2, cqtseparation, bettermusicsep}. However, these papers used implementations of the CQT which lacked a stable inverse \parencite{lackinverse}, and for which different approximate inversion schemes have been proposed \parencite{klapuricqt, fitzgeraldcqt}. The NSGT is a generalization of the CQT, and can be used to construct a CQT with perfect inverse, or CQ-NSGT \parencite{invertiblecqt, variableq1}. The sliCQ Transform (sliCQT), whose name means \textit{sliced Constant-Q transform}, was introduced by \textcite{slicq} to compute the NSGT on slices of the audio signal instead of the entire signal, allowing realtime processing. The NSGT and sliCQT can in practice be constructed with any frequency scale that is monotonically increasing, and can use frequency scales that are appropriate for the task, e.g. musical or psychoacoustic scales.
 
-Additionally, frequency-warped transforms to use using nonlinear musical or auditory frequency scales for specific applications have been described \parencite{warped1, warped2, earlywarped1, earlywarped2, warpedcomparison, warpedpsycho}. The NSGT and sliCQT, with their support for arbitrary frequency scales with perfect invertibility, are interesting as the implementation choice for the various frequency warping schemes. The NSGT and sliCQT have open-source reference implementations in MATLAB\footnote{\url{http://ltfat.org/doc/filterbank/cqt_code.html}} and Python\footnote{\url{https://github.com/grrrr/nsgt}}, allowing for reproducibility and further research.
+Additionally, frequency-warped transforms to use using nonlinear musical or auditory frequency scales for specific applications have been described \parencite{warped1, warped2, earlywarped1, earlywarped2, warpedcomparison, warpedpsycho}. The NSGT and sliCQT, with their support for arbitrary frequency scales with perfect inverse, are interesting as the implementation choice for the various frequency warping schemes. The NSGT and sliCQT have open-source reference implementations in MATLAB\footnote{\url{http://ltfat.org/doc/filterbank/cqt_code.html}} and Python\footnote{\url{https://github.com/grrrr/nsgt}}, allowing for reproducibility and further research.
 
 Open-Unmix \parencite{umx} is a state-of-the-art deep neural network for music demixing based on the STFT. The reference implementation is published as fully open-source software\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} with the intention of encouraging further music demixing research. The objective of this thesis is to adapt Open-Unmix to use the sliCQT instead of the STFT. The goal is to present a viable music demixing application with the sliCQT.
 
 \subsection{Contribution and results}
 
-The first contribution of this thesis is the adaptation of the reference Python NSGT and sliCQ library\footnote{\url{https://github.com/grrrr/nsgt}} to use PyTorch,\footnote{\url{https://pytorch.org}} a modern deep learning framework with GPU support. This allows the NSGT and sliCQT to be computed on the graphical processing unit (GPU), which due to its capabilities for parallel computing is the preferred device on which to train deep neural networks \parencite{pytorch}. The resulting library, released as open-source software,\footnote{\url{https://github.com/sevagh/nsgt}} allows future researchers to use the NSGT and sliCQT in any GPU-based machine or deep learning model.
+\hl{The first contribution of this thesis is the adaptation of the reference} Python NSGT and sliCQT library\footnote{\url{https://github.com/grrrr/nsgt}} to use PyTorch,\footnote{\url{https://pytorch.org}} a modern deep learning framework with graphical processing unit (GPU) support. This allows the NSGT and sliCQT to be computed on the GPU, which due to its capabilities for parallel computing is the preferred device on which to train deep neural networks \parencite{pytorch}. The resulting library, released as open-source software,\footnote{\url{https://github.com/sevagh/nsgt}} allows future researchers to use the NSGT and sliCQT in any GPU-based machine or deep learning model.
 
-The second contribution of this thesis is the adaptation of the reference Open-Unmix\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} neural network for STFT-based music demixing \parencite{umx} to use the sliCQT. Ideas were also incorporated from CrossNet-OpenUnmix \parencite{xumx}, which is a further evolution of Open-Unmix. The final result, named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}} is a successful neural network which performs the task of music demixing using the sliCQT. It scored lower in its music demixing performance than Open-Unmix and CrossNet-Open-Unmix, but it can act as a starting point for future research.
+\hl{The second contribution of this thesis is the adaptation of the reference} Open-Unmix\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} neural network for STFT-based music demixing \parencite{umx} to use the sliCQT. Ideas were also incorporated from CrossNet-OpenUnmix \parencite{xumx}, which is a further evolution of Open-Unmix. The final result, named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}} is a successful neural network which performs the task of music demixing using the sliCQT. It scored lower in its music demixing performance than Open-Unmix and CrossNet-Open-Unmix, but it can act as a starting point for future research.
 
 \subsection{Outline}
 
-This thesis is organized as follows. Chapter two covers the background of acoustic signals, frequency analysis, and the important transforms in this thesis including the Fourier Transform, STFT, CQT, NSGT, and sliCQT. It also presents an overview of machine learning for audio and music signals, an introduction to a few recurring software and Python code concepts, and a survey on the history of music source separation and music demixing. Chapter three describes the methodology for the two objectives of the thesis, which are the PyTorch adaptation of the NSGT/sliCQT library, and the replacement of the STFT with the sliCQT inside Open-Unmix. Chapter four shows the experimental results, and chapter five discusses the results and concludes the thesis.
+\hl{This thesis is organized as follows. Chapter two covers the background of acoustic signals, frequency analysis, and the important transforms in this thesis including the Fourier Transform, STFT, CQT, NSGT, and sliCQT. It also presents an overview of machine learning for audio and music signals, an introduction to a few recurring software and Python code concepts, and a survey on the history of music source separation and music demixing. Chapter three describes the methodology for the two objectives of the thesis, which are the PyTorch adaptation of the NSGT/sliCQT library, and the replacement of the STFT with the sliCQT inside Open-Unmix. Chapter four shows the experimental results, and chapter five discusses the results and concludes the thesis.}
 
 \end{document}
