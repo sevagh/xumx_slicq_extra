@@ -63,7 +63,7 @@ From the above, there are two important and distinct characteristics that make w
 
 When designing a data structure for the sliCQT, each of these points has to be addressed separately. 
 
-\subsubsection{3D shape of the slice-wise sliCQT compared to the 2D STFT}
+\subsubsection{3D shape of the sliCQT compared to the 2D STFT}
 \label{sec:stftslicqtcomp1}
 
 The sliCQT was described in Section \ref{sec:theoryslicqt} as a realtime implementation of the NSGT, consisting of DFT coefficients computed for the input signal split into overlapping slices, shown in Figure \ref{fig:slicqtukeys}. The sliCQT therefore returns multiple slices of DFT coefficients for an input signal of length $N > sllen$. These slices need to be overlap-added with 50\% of the previous and next slice to produce a spectrogram, because each slice is symmetrically zero-padded to twice its length to reduce time-aliasing, which was described in Section \ref{sec:theoryslicqt} and shown in Figure \ref{fig:slicqoverlaps}. This is a characteristic specific to the sliCQT. The NSGT, which is the ancestor of the sliCQT not designed for realtime processing, outputs the spectrogram directly without requiring any overlap-add.
@@ -383,10 +383,10 @@ To implement the time-domain SDR loss, I use the auraloss Python package.\footno
 \subsection{Post-processing}
 \label{sec:postprocessing}
 
-In this section, I will discuss how the final post-processing step of X-UMX, which refines the four target estimates of the neural network using Wiener-EM was adapted for the sliCQT in xumx-sliCQ. After the neural network outputs the estimates of the magnitude sliCQT for all four targets, the post-processing Wiener expectation-maximization (EM) step is applied to potentially improve the estimates (see Section \ref{sec:umx}).
+In this section, I will discuss how the final post-processing step of X-UMX, which refines the four target estimates of the neural network using Wiener-EM was adapted for the sliCQT in xumx-sliCQ. In X-UMX, after the neural network outputs the estimates of the magnitude STFT for all four targets, the post-processing Wiener expectation-maximization (EM) step is applied to potentially improve the estimates (see Section \ref{sec:umx}).
 
-Both the sliCQT and STFT output complex Fourier coefficients, \hl{which means that the Wiener-EM step can be run on both the sliCQT and the STFT representations of the estimated targets.} Therefore, I chose to implement two strategies of Wiener-EM: one that operates on the sliCQT outputs of xumx-sliCQ directly, and the other that first swaps the sliCQT outputs into the STFT domain before applying Wiener-EM.
+Both the sliCQT and STFT output complex Fourier coefficients, \hl{which means that the Wiener-EM step can be run on both the sliCQT and the STFT representations of the estimated targets.} Therefore, I chose to implement two strategies of Wiener-EM: one that operates on the sliCQT outputs of xumx-sliCQ directly, and the other that swaps the sliCQT outputs into the STFT domain before applying Wiener-EM.
 
-The music demixing quality and running time of both strategies will be discussed further in Section \ref{sec:demixresults}.
+The music demixing quality and running time of both strategies will be shown in Section \ref{sec:demixresults}.
 
 \end{document}
