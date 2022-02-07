@@ -6,7 +6,6 @@ General tips:\\
   Switch passive voice and we to I\\
   Re-spell acronyms at the beginning of Chapter\\
  Chapter tips:\\
-   Fix boxplot colors\\
    More redundancy (restate hypothesis, goals)
 }
 \section{Experiment}
@@ -14,18 +13,18 @@ General tips:\\
 
 This section contains the results of the experiments described in the previous Section \ref{sec:methodology}. Refer to appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer on which the experiments and results in this section were generated from.
 
-The goal of this thesis is to use the sliced Constant-Q Transform (sliCQT) instead of the Short-Time Fourier Transform (STFT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. The sliCQT has a varying time-frequency resolution more suitable for auditory and psychoacoustic applications, which may give it an advantage in musical applications over the STFT which is limited by a fixed time-frequency resolution.
+The goal of this thesis is to use the sliced Constant-Q Transform (sliCQT) to represent musical signals in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. The sliCQT has a varying time-frequency resolution more suitable for auditory and psychoacoustic applications, which may give it an advantage in musical applications over the STFT which is limited by a fixed time-frequency resolution.
 
-To use the sliCQT in a neural network using the PyTorch framework, the reference library was first ported to PyTorch. This port was described in Section \ref{sec:torchslicq}, and in Section \ref{sec:gpuexperimentpytorch}, I will show the benchmark results.
+To use the sliCQT in a neural network using the PyTorch framework, the reference sliCQT library was first ported to PyTorch. This port was described in Section \ref{sec:torchslicq}, and in Section \ref{sec:gpuexperimentpytorch}, I will show the benchmark results.
 
 In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT which used the mix-phase inversion (MPI) oracle to pick sliCQT parameters that might perform best in a music demixing system that uses the MPI strategy for estimating waveforms. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the random search script. The BSS metrics library was sped up with CuPy in Section \ref{sec:fasterbsscupy} to allow for faster sliCQT parameter searches, and in Section \ref{sec:cupyportbss}, I will show the benchmark results.
 
-After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step is to train and evaluate the xumx-sliCQ neural network. Section \ref{sec:nnresults} contains the results for the neural network design presented in Section \ref{sec:neuralnet}. First, Section \ref{sec:hyperparams} will list all of the network hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Finally, Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing Wiener-EM configurations described in Section \ref{sec:postprocessing}, and Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
+After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step was to train and evaluate the xumx-sliCQ neural network. Section \ref{sec:nnresults} contains the results for the neural network design presented in Section \ref{sec:neuralnet}. First, Section \ref{sec:hyperparams} will list all of the network hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Finally, Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing Wiener-EM configurations described in Section \ref{sec:postprocessing}, and Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
 
 \subsection{PyTorch port of the sliCQT}
 \label{sec:gpuexperimentpytorch}
 
-The first step was to port the sliCQT to PyTorch, a popular GPU neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
+The first step was to port the sliCQT to PyTorch, a GPU neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
 
 The benchmark script for the PyTorch implementation of the sliCQT performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU was not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results.
 

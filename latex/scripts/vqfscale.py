@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import librosa
 from nsgt.fscale import OctScale, LogScale, VQLogScale
+from warnings import warn
+
+warn('dont forget the patc to return a reciprocal of the Q factor')
+
+import pathlib, nsgt; print(pathlib.Path(nsgt.__file__).resolve().parent)
+
 import numpy, sys
 
 Fmin = 82.41 # hz of E2
@@ -54,7 +60,7 @@ for item in ([axes[0].title, axes[0].xaxis.label, axes[0].yaxis.label] +
 axes[0].grid()
 axes[0].xaxis.set_major_locator(MaxNLocator(integer=True))
 
-axes[1].plot(log_Qs, 'r--', alpha=0.5, marker='+', markersize=12)
+axes[1].plot(1.0/log_Qs, 'r--', alpha=0.5, marker='+', markersize=12)
 
 for i, gamma in enumerate(gammas):
     if i == 1:
@@ -67,7 +73,7 @@ for i, gamma in enumerate(gammas):
         linestr = 'g'
 
     gamma_fs, gamma_Qs = vql_scales[i]()
-    axes[1].plot(gamma_Qs, linestr, alpha=0.5, marker='x', markersize=12)
+    axes[1].plot(1.0/gamma_Qs, linestr, alpha=0.5, marker='x', markersize=12)
 
 axes[1].legend([f'cq/log, gamma=0'] + [f'vq, gamma={gamma}' for gamma in gammas])
 axes[1].set_title(f'Q-factors for total bins: {K}, {Fmin}-{Fmax} Hz')

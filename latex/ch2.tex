@@ -494,15 +494,15 @@ The NSGT processes the entire input signal at once. In cases where the input sig
 	\label{fig:slicqtukeys}
 \end{figure}
 
-Additionally, the ``slicing windows are symmetrically zero-padded to length 2N , reducing time-aliasing significantly'' \parencite[10]{slicq}, with the effect that adjacent slices need to be 50\% overlap-added with each other to create the final spectrogram. There is no inverse operation for the 50\% overlap-add provided in the paper. Figure \ref{fig:slicqoverlaps} demonstrates this issue.\todo{fix flatten spectrogram}
+Additionally, the ``slicing windows are symmetrically zero-padded to length 2N , reducing time-aliasing significantly'' \parencite[10]{slicq}, with the effect that adjacent slices need to be 50\% overlap-added with each other to create the final spectrogram. There is no inverse operation for the 50\% overlap-add provided in the paper. Figure \ref{fig:slicqoverlaps} demonstrates this characteristic of the sliCQT.
 
 Note the terminology of the sliCQT, which uses slice length instead of the window length of the STFT, and transition length or transition area instead of the overlap or hop length of the STFT. Slice and transition are used to distinguish the larger slice-wise operation of the sliCQT from the local windowing and overlapping done \textit{within} each slice to achieve the desired time-frequency resolution. The real overlap between slices can vary up to a maximum of the transition area.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Adjacent slices placed side-by-side]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
+	\subfloat[Adjacent slices placed side-by-side without overlap-adding]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
 	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_proper.png}}
-	\caption{sliCQT spectrograms demonstrating the slice half-overlap}
+	\caption{sliCQT spectrograms demonstrating the necessary slice 50\% overlap-add due to the symmetric zero-padding of each slice}
 	\label{fig:slicqoverlaps}
 \end{figure}
 
@@ -717,6 +717,11 @@ The underlying values are stored in formats that allow for efficient numerical c
 In PyTorch and Tensorflow (and in general machine learning), a similar concept to the ndarray is the tensor. The tensor originates from the field of physics \parencite{whatistensor}. The tensor is also an n-dimensional numerical array, and NumPy ndarrays are interchangeable with both PyTorch and Tensorflow tensors.\footnote{\url{https://www.tensorflow.org/guide/tf_numpy}, \url{https://pytorch.org/tutorials/beginner/blitz/tensor_tutorial.html}}
 
 Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example, \Verb#torch.cos()# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning constructs supported by these libraries are represented as tensors.
+
+\subsubsection{Random number generation}
+\label{sec:pyrng}
+
+The \Verb#random# module of Python contains a random number generator (RNG).\footnote{\url{https://docs.python.org/3/library/random.html}} The \Verb#seed# function initializes the random number generator,\footnote{\url{https://docs.python.org/3/library/random.html\#bookkeeping-functions}} which is in fact pseudorandom \parencite{pseudorng}. Pseudorandom means that given the same starting seed, the exact same sequence of numbers are generated deterministically. The seed is usually a parameter to a script or Python program, such that the user can recreate the same RNG sequences for testing purposes by using the same seed.
 
 \subsubsection{Package managers for Python}
 
