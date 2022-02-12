@@ -112,6 +112,12 @@ if __name__ == '__main__':
         help='model to evaluate ("" == all)'
     )
     parser.add_argument(
+        '--track-name',
+        default="",
+        type=str,
+        help='track to evaluate ("" == all)'
+    )
+    parser.add_argument(
         '--track-offset',
         default=0,
         type=int,
@@ -166,6 +172,9 @@ if __name__ == '__main__':
     tot_tracks = len(pbar)
 
     for track in pbar:
+        if args.track_name != "" and args.track_name != track.name:
+            continue
+
         print(f'evaluating track {track.name} with model {args.model}')
         est_path = os.path.join(args.eval_dir, f'{args.model}') if args.eval_dir else None
         aud_path = os.path.join(args.audio_dir, f'{args.model}') if args.audio_dir else None

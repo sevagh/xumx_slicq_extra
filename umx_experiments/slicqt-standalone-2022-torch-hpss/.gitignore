@@ -1,0 +1,14 @@
+build/
+dist/
+nsgt.egg-info/
+nsgt/*.c
+*.pyc
+*.pyo
+*.so
+._*
+.DS_Store
+.settings/
+*.wav
+*.png
+src/
+*.json

@@ -1254,9 +1254,9 @@ Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired f
 	\label{fig:umxandxumx}
 \end{figure}
 
-Figure \ref{fig:umxandxumx} \hl{shows how X-UMX encompasses UMX entirely, and adds parameter-free enhancements with the new MDL and CL loss functions}. For simplicity, having a single training loop and single trained model to perform the separation is easier than training four independent models. For this reason, and that the music demixing performance of X-UMX is higher than UMX, I chose to base this thesis on the X-UMX variant of UMX.
+Figure \ref{fig:umxandxumx} shows how X-UMX encompasses UMX entirely, and adds parameter-free enhancements with the new MDL and CL loss functions. For simplicity, having a single training loop and single trained model to perform the separation is easier than training four independent models. For this reason, and that the music demixing performance of X-UMX is higher than UMX, I chose to base this thesis on the X-UMX variant of UMX.
 
-The available implementation of X-UMX\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} uses NNabla,\footnote{\url{https://nnabla.org/}} which is a different Python deep learning framework from PyTorch. The X-UMX additions are easily copied from the NNabla implementation of X-UMX into the PyTorch implementation of UMX.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} In the methodology chapter, I will use X-UMX to refer to the PyTorch implementation of UMX with the changes of X-UMX included, since PyTorch is the deep learning framework chosen for this thesis.
+The available implementation of X-UMX\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} uses NNabla,\footnote{\url{https://nnabla.org/}} which is a different Python deep learning framework from PyTorch. The X-UMX additions are easily copied from the NNabla implementation of X-UMX into the PyTorch implementation of UMX.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} In the upcoming sections, I will use X-UMX to refer to the PyTorch implementation of UMX with the changes of X-UMX included, since PyTorch is the deep learning framework chosen for this thesis.
 
 \newpagefill
 
