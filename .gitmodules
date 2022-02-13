@@ -26,7 +26,3 @@
 	path = mss_evaluation/vendor/sigsep-mus-eval-cupy-fork
 	url = https://github.com/sevagh/sigsep-mus-eval
 	branch = feat/cupy-accel
-[submodule "nsgt_newest_dafx_2022"]
-	path = nsgt_newest_dafx_2022
-	url = https://github.com/sevagh/nsgt
-	branch = feat/dafx-2022-improvements
