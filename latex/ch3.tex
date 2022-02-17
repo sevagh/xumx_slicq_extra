@@ -261,7 +261,7 @@ First, the list of 3D tensors of the sliCQT must always be overlap-added to tran
 \subsubsection{Neural network architectures}
 \label{sec:slicqarches}
 
-In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented. I copied the Bi-LSTM code from the original model,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/model.py\#L43}} making adaptations as necessary to support the sliCQT instead of the STFT. I implemented the CDAE code from the ground up, by implementing the CDAE architectures described in \textcite{plumbley1} and \textcite{plumbley2} using the convolutional layers provided by PyTorch.
+In this section, a choice of Bi-LSTM and CDAE architectures for the ragged sliCQT in xumx-sliCQ will be presented. I copied the Bi-LSTM code from the original model,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch/blob/master/openunmix/model.py\#L43}} making adaptations as necessary to support the sliCQT instead of the STFT. I implemented the CDAE code from the ground up, recreating the CDAE architectures described in \textcite{plumbley1} and \textcite{plumbley2} with the convolutional layers provided by PyTorch.
 
 Figure \ref{fig:cdaeslicqt} shows how both the Bi-LSTM and CDAE network architectures should be applied to the ragged sliCQT. Instead of having a single neural network operate on the single matrix of the STFT, which includes all of the frequency bins at the same temporal frame rate, there must be a neural network that operates on each of the sub-matrices of the ragged sliCQT.
 
