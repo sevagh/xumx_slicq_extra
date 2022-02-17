@@ -1,0 +1,395 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Boadilla}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{fancyvrb}
+\usepackage{soul}
+\usepackage{multicol}
+\usepackage{optparams}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning}
+\newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
+\usepackage{subfig}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+\addbibresource{citations_presentation.bib}
+\usepackage{pgfpages}
+\usepackage{xcolor}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+\setbeameroption{hide notes}
+\input{variables.tex}
+
+\title{Music demixing with the sliCQ transform}
+\author{Sevag Hanssian}
+\date{February 18, 2022}
+%\date{}
+\setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{school}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearlist{journal}%
+  \clearfield{journal}%
+  \clearfield{booktitle}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{school}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+  \clearfield{isbn}%
+  \clearfield{title}%
+  \clearfield{url}%
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{inproceedings}{
+    \clearfield{booktitle}%
+}{}
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{phdthesis}{
+    \clearfield{school}%
+}{}
+}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+	\frametitle{Intro to myself}
+	\begin{enumerate}
+		\item
+			Electrical engineering background, McGill 2014
+		\item
+			Linux infrastructure engineer at NVIDIA (formerly Pandora, the U.S. music streaming service)
+		\item
+			Open-source enthusiast: \url{https://github.com/sevagh}, \url{https://gitlab.com/sevagh}
+		\item
+			Student in the Master of Arts, Music Tech (thesis) program at McGill
+		\item
+			Member of the Distributed Digital Music Archives \& Libraries lab led by Prof. Ichiro Fujinaga
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{quote}
+	Music source separation is the task of extracting an estimate of one or more isolated sources or instruments (for example, drums or vocals) from musical audio. The task of music demixing or unmixing considers the case where the musical audio is separated into an estimate of all of its constituent sources that can be summed back to the original mixture. The Music Demixing Challenge was created to inspire new demixing research. Open-Unmix (UMX), and the improved variant CrossNet-Open-Unmix (X-UMX), were included in the challenge as the baselines. Both models use the Short-Time Fourier Transform (STFT) as the representation of music signals. The time-frequency uncertainty principle states that the STFT of a signal cannot have maximal resolution in both time and frequency. The tradeoff in time-frequency resolution can significantly affect music demixing results. Our proposed adaptation of UMX replaced the STFT with the sliCQT, a time-frequency transform with varying time-frequency resolution. Unfortunately, our model xumx-sliCQ achieved lower demixing scores than UMX.
+	\end{quote}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Audio source separation}
+       \begin{enumerate}
+               \item
+                       Audio source separation is the task of extracting an estimate of an isolated source from audio, e.g., cocktail party in speech
+		       \begin{figure}
+		       \includegraphics[width=8cm]{./images-mila-presentation/bss.png}\footnote{\url{https://gowrishankar.info/blog/cocktail-party-problem-eigentheory-and-blind-source-separation-using-ica/}}
+		       \vspace{-0.5em}
+		       \end{figure}
+	       \item
+		       Computational source separation has a history of at least 50 years.\footcite{musicmask, musicsepintro1} In computational auditory scene analysis (CASA) and blind source separation (BSS), separate unknown sources
+	              \end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Why speech techniques don't work for music}
+       Speech separation algorithm: Independent Component Analysis (ICA)\footcite{musicsepintro1}
+       \begin{figure}
+	       \vspace{-1.25em}
+	       \subfloat{\includegraphics[width=4.5cm]{./images-mila-presentation/ica.png}}\footnote{\url{https://medium.com/appengine-ai/independent-component-analysis-machine-learning-b62ff260c022}}
+	       \subfloat{\includegraphics[width=4cm]{./images-mss/positional.png}}
+	       \vspace{-0.5em}
+       \end{figure}
+	ICA in speech applications uses spatial information, requires as many channels as the number of sources, assumes independent sources, and assumes the background is stationary\\
+	\vspace{0.15em}
+	In music, there are typically more instruments than channels, musical sources are highly dependent, and music is nonstationary and synchronous
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music source separation}
+	\framesubtitle{... is the task of extracting an estimate of one or more isolated sources or instruments from musical audio}
+	\begin{itemize}
+	       \item
+		       Music source separation: extract an estimate of an isolated \textit{known} source from the mix (e.g., harmonic/percussive, vocals, drums), or a source with \textit{known characteristics}, that are dependent \footcite[1]{musicsepintro1}
+	       \item
+			Popular approach: musical source models, which are ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with time-frequency masks
+	\end{itemize}
+	\begin{figure}
+		\centering
+		\vspace{-1.25em}
+		\subfloat{\includegraphics[width=5.5cm]{./images-mss/mss1.png}}
+		\subfloat{\includegraphics[width=6cm]{./images-mss/mss2.png}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Time-frequency masks}
+	Multiply the time-frequency (TF) transform (typically, a Short-Time Fourier Transform) with a mask, or a matrix of the same size as the TF transform with values $\in [0, 1]$
+	\begin{figure}
+		\centering
+		\includegraphics[width=12cm]{./images-mss/mask_simple.png}\footnote{\url{https://source-separation.github.io/tutorial/basics/tf_and_masking.html}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Estimating time-frequency masks}
+	\begin{figure}
+		\setcounter{subfigure}{0}
+		\vspace{-1em}
+		\centering
+		\subfloat[Kernel Additive Modeling (KAM) and Nonnegative Matrix Factorization (NMF)]{\includegraphics[width=7.5cm]{./images-mss/kamvnmf.png}}\\
+		\vspace{-0.5em}
+		\subfloat[Deep neural networks]{\includegraphics[width=7.5cm]{./images-mss/mssdnn.png}}
+		\vspace{-0.5em}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Magnitude and phase spectrogram}
+	Common approaches to MSS discard the phase; it's difficult to learn relationships from phase
+	\begin{enumerate}
+		\item
+			Simplifying assumption: estimate magnitude spectrograms, use the phase of the original mixed audio. Called ``noisy phase'' \footcite{noisyphase1}. Done by Open-Unmix (UMX), CrossNet-Open-Unmix (X-UMX) \footcite{umx, xumx}, and many other popular \& near-SOTA models
+		\item
+			Why? Phase is hard to model!\footnote{\url{https://source-separation.github.io/tutorial/basics/phase.html\#why-we-don-t-model-phase}}
+	\end{enumerate}
+	\begin{figure}
+		\vspace{-0.5em}
+	\centering
+	\includegraphics[height=3.25cm]{./images-mss/whynophase.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Music demixing (MDX) or unmixing}
+	\framesubtitle{... considers the case where the musical audio is separated into an estimate of all of its constituent sources that can be summed back to the original mixture}
+	Music demixing (or unmixing): estimate multiple sources (vocals, drums, bass, other\footcite{musdb18hq}) that can be summed back to the original mix. Multiple MSS subproblems, reversing the linear mixing of stems in the recording studio (stem datasets can be used for mixing and demixing)
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=12cm]{./images-mss/mixdemix.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{MDX, UMX, and X-UMX}
+	\framesubtitle{The Music Demixing Challenge was created to inspire new demixing research. Open-Unmix (UMX), and the improved variant CrossNet-Open-Unmix (X-UMX), were included in the challenge as the baselines.}
+	MDX: ISMIR 2021 Music Demixing Challenge on AICrowd\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}\\\ \\
+	UMX: Open-Unmix, a near-SOTA music demixing system based on the STFT with a Bi-LSTM neural network\footcite{umx}. There are four provided pre-trained models for vocals, drums, bass, other\\\ \\
+	X-UMX: CrossNet-Open-Unmix, combining four UMX networks for vocals, bass, drums, other with mixed loss functions\footcite{xumx}
+\end{frame}
+
+\begin{frame}
+	\frametitle{UMX and X-UMX}
+	\begin{figure}[ht]
+		\centering
+		\subfloat{\includegraphics[width=10cm]{./images-blockdiagrams/generic_mdx.png}}\\
+		\subfloat{\includegraphics[width=10cm]{./images-blockdiagrams/umx_clean.png}}\\
+		\subfloat{\includegraphics[width=10cm]{./images-blockdiagrams/xumx_multiple_targets.png}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Joint time-frequency analysis, the STFT, and the spectrogram}
+	The Fourier transform decomposes a signal into a sum of \textbf{infinite} sinusoids: no temporal information. Joint time-frequency analysis is important for signals whose frequencies change with time.\footcite{gabor1946} Take the Fourier transform of local windows of the signal, i.e., the STFT
+	\begin{figure}
+		\includegraphics[height=3.9cm]{./images-mila-presentation/stft_diagram1.png}
+		\hspace{-0.75em}
+		\includegraphics[height=3.1cm]{./images-mila-presentation/stft_diagram2.png}\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{The time-frequency uncertainty principle}
+	Time and frequency are orthogonal domains, opposite sides of a Fourier transform: just like the position and momentum of an electron in the Heisenberg uncertainty principle
+	\begin{figure}
+		\vspace{-0.5em}
+		\includegraphics[height=3.5cm]{./images-tftheory/gabor13.png}
+		\vspace{-0.25em}
+	\end{figure}
+	    Time-frequency uncertainty\footfullcite{gabor1946}: $\Delta t\Delta f \ge 1 $
+	    \begin{quote}
+		    although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit
+	    \end{quote}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Time-frequency tradeoff in the STFT and MDX}
+	Change window size to trade off time and frequency:
+	\begin{figure}[ht]
+		\centering
+		\vspace{-1.5em}
+		\subfloat{\includegraphics[height=2cm]{./images-tftheory/gabor3.png} \includegraphics[height=1.75cm]{./images-tftheory/gabor4.png}}\\
+		\vspace{-1em}
+		\subfloat{\includegraphics[height=2.7cm]{./images-mila-presentation/glock_stft_1024.png}}
+		\subfloat{\includegraphics[height=2.7cm]{./images-mila-presentation/glock_stft_4096.png}}
+		\subfloat{\includegraphics[height=2.7cm]{./images-mila-presentation/glock_stft_256.png}}
+		\vspace{-1.25em}
+	\end{figure}
+	In music source separation, window size matters per-target.\footcite{tftradeoff1} Short-window for percussion, long-window for harmonic
+\end{frame}
+
+\begin{frame}
+	\frametitle{Time-frequency tradeoff: HPSS case study}
+	Harmonic/percussive source separation with median filters\footcite{fitzgerald1}
+	\begin{figure}
+		\centering
+		\includegraphics[height=3.5cm]{./images-mila-presentation/mix_stft_medianfilters.png}\\
+		\includegraphics[height=3.5cm]{./images-mila-presentation/harm_stft.png}
+		\includegraphics[height=3.5cm]{./images-mila-presentation/perc_stft.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Improving harmonic/percussive source separation (HPSS)}
+	\begin{enumerate}
+	\item
+		Short-time Fourier Transform (STFT) window size matters per-target\footfullcite{tftradeoff1, tftradeoff2}
+	\item
+		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footfullcite{cqtransient}
+	\item
+		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footfullcite{doerflerphd}
+	\item
+		window=4096 for harmonic, window=256 for percussive in HPSS\footfullcite{driedger}
+	\item
+		Constant-Q Transform (CQT) and multiple STFTs in HPSS\footfullcite{fitzgerald2}
+	\item
+		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Short-time Fourier Transform vs. Constant-Q Transform}
+	\begin{figure}[ht]
+		\setcounter{subfigure}{0}
+		\centering
+		\vspace{-1em}
+		\subfloat[STFT, window = 256]{\includegraphics[height=2.4cm]{./images-gspi/glock_stft_256.png}}
+		\subfloat[STFT, window = 1024]{\includegraphics[height=2.4cm]{./images-gspi/glock_stft_1024.png}}
+		\subfloat[STFT, window = 4096]{\includegraphics[height=2.4cm]{./images-gspi/glock_stft_4096.png}}
+		\vspace{-0.5em}
+		\subfloat[CQT, 12 bins/octave]{\includegraphics[height=2.4cm]{./images-gspi/glock_cqt12.png}}
+		\subfloat[CQT, 24 bins/octave]{\includegraphics[height=2.4cm]{./images-gspi/glock_cqt24.png}}
+		\subfloat[CQT, 48 bins/octave]{\includegraphics[height=2.4cm]{./images-gspi/glock_cqt48.png}}
+	\end{figure}
+\end{frame}
+
+
+
+\begin{frame}
+	\frametitle{CQT, NSGT, sliCQT}
+	\begin{enumerate}
+	\item
+		For musical and auditory reasons, we want high frequency resolution at low frequencies and high time resolution at high frequencies \footcite{doerflerphd}
+	\item
+		CQT\footcite{jbrown} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+	\item
+		Nonstationary Gabor Transform (NSGT) and sliCQT\footcite{balazs, slicq} are TF transforms with Fourier coefficients, perfect inverse, and varying windows to create a varying time-frequency resolution
+	\item
+		sliCQT params chosen for max quality of the noisy-phase waveform
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.5em}
+		\includegraphics[height=2.7cm]{./images-mila-presentation/spectrograms_comparison.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{xumx-sliCQ}
+	\begin{enumerate}
+		\item
+			My goal: improve Open-Unmix by replacing STFT with sliCQT
+		\item
+			My model submitted to the MDX21 challenge and workshop: \url{https://github.com/sevagh/xumx-sliCQ}
+		\item
+			Use Convolutional Denoising Autoencoder\footcite{plumbley1, plumbley2} neural architecture
+		\item
+			Scored 3.6 dB vs. 4.6 dB (UMX) and 5.54 dB (X-UMX); there is still room for improvement
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-1.15em}
+		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/generic_mdx.png}}\\
+		\vspace{-0.5em}
+		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/umx_clean.png}}\\
+		\vspace{-0.5em}
+		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/xumx_slicq_clean.png}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{MDX 21 winners, current trends in demixing}
+	\begin{enumerate}
+		\item
+			Previously, music demixing systems were submitted to and evaluated at SiSEC (Signal Separation Evaluation Campaign). This year: MDX (Music Demixing Challenge) ISMIR 2021 @ AICrowd, follow-up MDX21 workshop, satellite @ ISMIR 2021
+		\item
+			\textbf{ISMIR 2021}: Model that uses the complex spectrogram (i.e. includes phase) and uses complex masks\footcite{kong2021decoupling}
+		\item
+			\textbf{MDX21}: 1: Demucs++\footcite{demucsplus} (waveforms + complex spectrogram), 2: KUIELAB-MDX-Net \footcite{choi2021} (waveforms + magnitude spectrogram), 3: Danna-Sep\footcite{dannasep} (waveform + magnitude spectrogram, use complex spectrogram in loss function)
+	\end{enumerate}
+	Properties in common: blending networks, waveforms (implicitly includes phase), complex spectrograms/masks, mixing spectrogram and waveform models
+\end{frame}
+
+\begin{frame}
+	\frametitle{Magnitude mask above 1}
+	Common approaches to music source separation (MSS):
+	\begin{enumerate}
+		\item
+			Get spectrogram of mix
+		\item
+			Take magnitude
+		\item
+			Multiply by a mask $\in [0, 1]$ to get source estimate
+		\item
+			Why $[0, 1]$? DFT/STFT is a linear operation: $x_{a} = x_{b} + x_{c}, |X_{a}| = |X_{b}| + |X_{c}|$\\
+			$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
+			if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
+	\end{enumerate}
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-mss/mask_simple.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Phase!}
+	Common approaches to MSS discard the phase; it's difficult to learn relationships from phase
+	\begin{figure}
+	\centering
+	\includegraphics[height=3cm]{./images-mss/whynophase.png}
+	\end{figure}
+	This paper considers the phase, and uses a complex mask to estimate the magnitude and phase of the spectrogram\\
+	$|X_{b}| = M_{b}(\in [0, 1]) \times |X_{a}|$\\
+	if $M_{b}$ (i.e., Mask of source b) $> 1$, then $|X_{b}| > |X_{a}|$?
+	\textbf{Yes!} 
+	\begin{quote}
+		|M(t,f)| can be larger than 1... this may happen when S(t,f) and N(t,f) are out of phase, since that makes the magnitude of mixture to be smaller than that of (individual) signal
+	\end{quote}
+\end{frame}
+
+\end{document}
