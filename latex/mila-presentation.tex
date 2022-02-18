@@ -377,14 +377,14 @@
 
 \begin{frame}
 	\frametitle{3D shape of the sliCQT}
-	sliCQT returns coefficients sliced-up input signal: ``slicing windows are symmetrically zero-padded to length 2N , reducing time-aliasing significantly'' \footcite[10]{slicq}. Overlap-add each slice by 50\%:
+	sliCQT returns coefficients for sliced input signal: ``slicing windows are symmetrically zero-padded to length 2N , reducing time-aliasing significantly'' \footcite[10]{slicq}. Overlap-add each slice by 50\%:
 	\begin{quote}
-		Displaying the framewise transform is slightly more tricky as we have to overlap-add the spectrograms obtained for each frame... Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it. The synthesis has to be performed from the original list of frames\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+		Displaying the framewise transform is slightly more tricky as we have to overlap-add the spectrograms obtained for each frame... Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it.\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
 	\end{quote}
 	\begin{figure}
 		\centering
 		\includegraphics[height=2cm]{./images-blockdiagrams/slicq3ddatastructure.png}\\
-		\includegraphics[height=1.7cm]{./images-blockdiagrams/slicq2ddatastructure.png}
+		\includegraphics[height=1.5cm]{./images-blockdiagrams/slicq2ddatastructure.png}
 	\end{figure}
 \end{frame}
 
