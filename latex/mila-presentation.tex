@@ -15,10 +15,11 @@
 \usepackage[
     backend=biber,
     natbib=true,
-    style=numeric,
     sorting=none,
     style=verbose-ibid,
-    maxcitenames=1, %remove this outside of toy presentations
+    mincitenames=2,
+    maxcitenames=2,
+    citestyle=authoryear,
 ]{biblatex}
 \addbibresource{citations_presentation.bib}
 \usepackage{pgfpages}
@@ -33,46 +34,7 @@
 \title{Music demixing with the sliCQ transform}
 \author{Sevag Hanssian}
 \date{February 18, 2022}
-%\date{}
 \setbeamertemplate{navigation symbols}{}
-
-\AtEveryBibitem{%
-  \clearfield{pages}%
-  \clearfield{school}%
-  \clearfield{volume}%
-  \clearfield{number}%
-  \clearlist{journal}%
-  \clearfield{journal}%
-  \clearfield{booktitle}%
-}
-
-\renewbibmacro{in:}{}
-
-\AtEveryCitekey{%
-  \clearfield{pages}%
-  \clearfield{volume}%
-  \clearfield{school}%
-  \clearfield{number}%
-  \clearfield{doi}%
-  \clearfield{journal}%
-  \clearlist{journal}%
-  \clearfield{booktitle}%
-  \clearfield{isbn}%
-  \clearfield{title}%
-  \clearfield{url}%
-\ifentrytype{article}{
-    \clearfield{journal}%
-}{}
-\ifentrytype{inproceedings}{
-    \clearfield{booktitle}%
-}{}
-\ifentrytype{article}{
-    \clearfield{journal}%
-}{}
-\ifentrytype{phdthesis}{
-    \clearfield{school}%
-}{}
-}
 
 \begin{document}
 
@@ -135,7 +97,7 @@
 	\framesubtitle{... is the task of extracting an estimate of one or more isolated sources or instruments from musical audio}
 	\begin{itemize}
 	       \item
-		       Music source separation: extract an estimate of an isolated \textit{known} source from the mix (e.g., harmonic/percussive, vocals, drums), or a source with \textit{known characteristics}, that are dependent \footcite[1]{musicsepintro1}
+		       Music source separation: extract an estimate of an isolated \textit{known} source from the mix (e.g., harmonic/percussive, vocals, drums), or a source with \textit{known characteristics}, that are dependent \footcite{musicsepintro1}
 	       \item
 			Popular approach: musical source models, which are ``model-based approaches that attempt to capture the spectral characteristics of the target source'' \footcite[36]{musicsepgood} with time-frequency masks
 	\end{itemize}
@@ -196,9 +158,27 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{MDX ecosystem}
+	Evaluation measure: BSS (Blind Source Separation) metrics \footcite{bss, bss2}
+	\begin{itemize}
+	\item
+		\textbf{SDR:} Signal to Distortion Ratio
+	\item
+		\textbf{SIR:} Signal to Interference Ratio
+	\item
+		\textbf{SAR:} Signal to Artifacts Ratio
+	\item
+		\textbf{ISR:} source Image to Spatial distortion Ratio
+	\end{itemize}
+	Are these good metrics? \footcite{roux2018sdr}, \footnote{MDX @ ISMIR 2021 keynote: Rachel Bittner, ``Source Separation Metrics: What are they measuring?''}\\
+	Datasets: MUSDB18-HQ \footcite{musdb18, musdb18hq}; stems: vocals, drums, bass, other\\
+	Campaigns: Signal Source Separation Evaluation Campaign (SiSEC) 2016, 2018 \footcite{sisec2016, sisec2018}\\
+\end{frame}
+
+\begin{frame}
 	\frametitle{MDX, UMX, and X-UMX}
 	\framesubtitle{The Music Demixing Challenge was created to inspire new demixing research. Open-Unmix (UMX), and the improved variant CrossNet-Open-Unmix (X-UMX), were included in the challenge as the baselines.}
-	MDX: ISMIR 2021 Music Demixing Challenge on AICrowd\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}\\\ \\
+	MDX: Sony MDX (Music Demixing Challenge) on AICrowd for ISMIR 2021\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}, used SDR to rank systems, introduced a new hidden dataset MXDB21\\\ \\
 	UMX: Open-Unmix, a near-SOTA music demixing system based on the STFT with a Bi-LSTM neural network\footcite{umx}. There are four provided pre-trained models for vocals, drums, bass, other\\\ \\
 	X-UMX: CrossNet-Open-Unmix, combining four UMX networks for vocals, bass, drums, other with mixed loss functions\footcite{xumx}
 \end{frame}
@@ -214,32 +194,44 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Joint time-frequency analysis, the STFT, and the spectrogram}
-	The Fourier transform decomposes a signal into a sum of \textbf{infinite} sinusoids: no temporal information. Joint time-frequency analysis is important for signals whose frequencies change with time.\footcite{gabor1946} Take the Fourier transform of local windows of the signal, i.e., the STFT
+	\frametitle{Time-frequency uncertainty principle}
+	The Fourier transform decomposes a signal into a sum of \textbf{infinite} sinusoids: no temporal information\\
+	Time and frequency are orthogonal domains (opposites of the Fourier transform), like the position and momentum of an electron
 	\begin{figure}
-		\includegraphics[height=3.9cm]{./images-mila-presentation/stft_diagram1.png}
+		\includegraphics[height=4cm]{./images-tftheory/gabor13.png}
+		\includegraphics[height=2.5cm]{./images-mila-presentation/gabor5.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Joint time-frequency analysis, the STFT, and the spectrogram}
+	Joint time-frequency analysis is important for signals whose frequencies change with time\footcite{gabor1946} Take Fourier transform of local windows of the signal
+	\begin{figure}
+		\includegraphics[height=2cm]{./images-tftheory/gabor3.png}\\
+		\includegraphics[height=3.5cm]{./images-mila-presentation/stft_diagram1.png}
 		\hspace{-0.75em}
-		\includegraphics[height=3.1cm]{./images-mila-presentation/stft_diagram2.png}\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
+		\includegraphics[height=3cm]{./images-mila-presentation/stft_diagram2.png}\footnote{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}
 	\end{figure}
 \end{frame}
 
 \begin{frame}
 	\frametitle{The time-frequency uncertainty principle}
-	Time and frequency are orthogonal domains, opposite sides of a Fourier transform: just like the position and momentum of an electron in the Heisenberg uncertainty principle
-	\begin{figure}
-		\vspace{-0.5em}
-		\includegraphics[height=3.5cm]{./images-tftheory/gabor13.png}
-		\vspace{-0.25em}
-	\end{figure}
-	    Time-frequency uncertainty\footfullcite{gabor1946}: $\Delta t\Delta f \ge 1 $
+	\framesubtitle{... states that the STFT of a signal cannot have maximal resolution in both time and frequency}
+	    Time-frequency uncertainty\footcite{gabor1946}:
 	    \begin{quote}
-		    although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit
+		    although we can carry out the analysis with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit
 	    \end{quote}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-1.5em}
+		\subfloat{\includegraphics[height=5cm]{./images-tftheory/gabor2.png}}
+	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Time-frequency tradeoff in the STFT and MDX}
-	Change window size to trade off time and frequency:
+	\frametitle{Time-frequency tradeoff}
+	\framesubtitle{... can significantly affect music demixing results}
+	Time-frequency tiles are constrained to a minimum area: $\Delta t\Delta f \ge 1 $\\Change window size to trade off time and frequency:
 	\begin{figure}[ht]
 		\centering
 		\vspace{-1.5em}
@@ -250,7 +242,7 @@
 		\subfloat{\includegraphics[height=2.7cm]{./images-mila-presentation/glock_stft_256.png}}
 		\vspace{-1.25em}
 	\end{figure}
-	In music source separation, window size matters per-target.\footcite{tftradeoff1} Short-window for percussion, long-window for harmonic
+	In music source separation, window size matters per-target.\footcite{tftradeoff1, tftradeoff2} Short-window for percussion, long-window for harmonic
 \end{frame}
 
 \begin{frame}
@@ -268,22 +260,84 @@
 	\frametitle{Improving harmonic/percussive source separation (HPSS)}
 	\begin{enumerate}
 	\item
-		Short-time Fourier Transform (STFT) window size matters per-target\footfullcite{tftradeoff1, tftradeoff2}
+		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footcite{cqtransient}
 	\item
-		From musical and auditory aspects, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footfullcite{cqtransient}
+		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footcite{doerflerphd}
 	\item
-		Use long windows/$\uparrow \Delta f$ in low frequencies, and short windows/$\uparrow \Delta t$ in high frequencies to analyze music (harmonic basis and transients)\footfullcite{doerflerphd}
+		window=4096 for harmonic, window=256 for percussive in HPSS\footcite{driedger}
 	\item
-		window=4096 for harmonic, window=256 for percussive in HPSS\footfullcite{driedger}
-	\item
-		Constant-Q Transform (CQT) and multiple STFTs in HPSS\footfullcite{fitzgerald2}
+		Constant-Q Transform (CQT) and multiple STFTs (16384 for harmonic, 1024 for percussive) in HPSS\footcite{fitzgerald2}
 	\item
 		CQT\footcite{jbrown, klapuricqt} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
 	\end{enumerate}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Short-time Fourier Transform vs. Constant-Q Transform}
+	\frametitle{Constant-Q Transform}
+	Constant-Q transform for music analysis\footcite{jbrown, msp}:
+		\begin{enumerate}
+			\item
+				Harmonics of the fundamental have consistent spacing in the log scale -- the constant pattern\\
+				\includegraphics[height=3cm]{./images-mila-presentation/logharmonic.png}
+			\item
+				Log-frequency spectra, demonstrating the constant pattern for harmonics, would be more useful in musical tasks
+		\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Constant-Q Transform}
+	``Constant ratio of frequency to frequency resolution'': $\frac{f}{\delta f} = Q$
+	\begin{figure}
+		\setcounter{subfigure}{0}
+		\vspace{-1em}
+		\centering
+		\subfloat[Properties of DFT, CQT]{\includegraphics[height=3.5cm]{./images-tftheory/dftvcqt.png}}
+		\subfloat[Window sizes for CQT]{\includegraphics[height=5cm]{./images-tftheory/qwindowchanges.png}}
+	\end{figure}
+	Non-invertible; approximate inverse introduced\footcite{klapuricqt}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Constant-Q Transform}
+	\begin{figure}
+		\setcounter{subfigure}{0}
+		\centering
+		\subfloat[Discrete Fourier Transform]{\includegraphics[height=3.75cm]{./images-tftheory/violindft.png}}
+		\subfloat[Constant Q transform]{\includegraphics[height=3.75cm]{./images-tftheory/violincqt.png}}
+		\caption{Violin playing diatonic scale, $G_{3} \text{(196Hz)} - G_{5} \text{(784Hz)}$\footcite{jbrown}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NSGT and sliCQT}
+	STFT = ``stationary'' Gabor transform: use the same window, suffering from a fixed time-frequency resolution\\
+	Nonstationary Gabor Transform (NSGT)\footcite{balazs}, realtime sliCQ Transform\footcite{invertiblecqt, slicq, variableq1} = ``nonstationary'' Gabor transform: use different window sizes to vary the time-frequency resolution\\
+	\begin{enumerate}
+	\item
+		STFT-like transforms with windows that vary with time
+	\item
+		CQT motivates the NSGT/sliCQ, but can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.)
+	\item
+		Outputs the familiar Fourier coefficients with \textbf{perfect inverse}
+	\item
+		CQT implemented with NSGT/sliCQT = CQ-NSGT
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NSGT demo}
+	\begin{figure}[ht]
+		\vspace{-0.5em}
+		\setcounter{subfigure}{0}
+		\subfloat[6ms STFT]{\includegraphics[height=3.15cm]{./images-tftheory/tf_tradeoff_balasz1.png}}
+		\subfloat[93ms STFT]{\includegraphics[height=3.15cm]{./images-tftheory/tf_tradeoff_balasz2.png}}\\
+		\vspace{-0.5em}
+		\subfloat[6--93ms NSGT]{\includegraphics[height=3.15cm]{./images-tftheory/tf_tradeoff_balasz3.png}}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{STFT vs. CQ-NSGT}
 	\begin{figure}[ht]
 		\setcounter{subfigure}{0}
 		\centering
@@ -298,47 +352,76 @@
 	\end{figure}
 \end{frame}
 
-
-
 \begin{frame}
-	\frametitle{CQT, NSGT, sliCQT}
-	\begin{enumerate}
-	\item
-		For musical and auditory reasons, we want high frequency resolution at low frequencies and high time resolution at high frequencies \footcite{doerflerphd}
-	\item
-		CQT\footcite{jbrown} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
-	\item
-		Nonstationary Gabor Transform (NSGT) and sliCQT\footcite{balazs, slicq} are TF transforms with Fourier coefficients, perfect inverse, and varying windows to create a varying time-frequency resolution
-	\item
-		sliCQT params chosen for max quality of the noisy-phase waveform
-	\end{enumerate}
+	\frametitle{xumx-sliCQ: spectral transform}
+	\framesubtitle{Our proposed adaptation of UMX replaced the STFT with the sliCQT, a time-frequency transform with varying time-frequency resolution}
+	Hypothesis: improve Open-Unmix by using sliCQT with varying time-frequency resolution. sliCQT demonstrates good tonal/transient representation, and displays more musical information than the STFT\\\ \\
+	Choose sliCQT params by maximizing SDR of ``noisy phase'' oracle: $\hat{X}_{\text{target}} = |X_{\text{target}}| \cdot \measuredangle{X_{\text{mix}}}$; \textbf{7.42 dB} vs. 6.23 dB of STFT-4096 on MUSDB18-HQ validation set
 	\begin{figure}[ht]
 		\centering
 		\vspace{-0.5em}
-		\includegraphics[height=2.7cm]{./images-mila-presentation/spectrograms_comparison.png}
+		\includegraphics[height=3.5cm]{./images-mila-presentation/spectrograms_comparison.png}
 	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{xumx-sliCQ}
+	\frametitle{Ragged shape of the sliCQT}
+	sliCQT output: list of complex 2D $\text{Time} \times \text{Frequency}$ tensors of Fourier coefficients, bucketed by time resolution. Different temporal frame rate per bucket
+	\begin{figure}
+		\centering
+		\includegraphics[height=3.7cm]{./images-blockdiagrams/stftslicqtcmp1.png}
+		\hspace{-0.25em}
+		\includegraphics[height=4.5cm]{./images-blockdiagrams/stftslicqtcmp2.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{3D shape of the sliCQT}
+	sliCQT returns coefficients sliced-up input signal: ``slicing windows are symmetrically zero-padded to length 2N , reducing time-aliasing significantly'' \footcite[10]{slicq}. Overlap-add each slice by 50\%:
+	\begin{quote}
+		Displaying the framewise transform is slightly more tricky as we have to overlap-add the spectrograms obtained for each frame... Note that it is not possible to synthesize the audio from this overlapped version as we cannot retrieve the analysis frames from it. The synthesis has to be performed from the original list of frames\footnote{\url{https://mtg.github.io/essentia-labs/news/2019/02/07/invertible-constant-q/}}
+	\end{quote}
+	\begin{figure}
+		\centering
+		\includegraphics[height=2cm]{./images-blockdiagrams/slicq3ddatastructure.png}\\
+		\includegraphics[height=1.7cm]{./images-blockdiagrams/slicq2ddatastructure.png}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{xumx-sliCQ: CDAE network architecture}
+	Use Convolutional Denoising Autoencoder (CDAE) \footcite{plumbley1, plumbley2} neural architecture, applied to each matrix of the ragged overlap-added sliCQT separately
+	\begin{figure}
+		\vspace{-0.25em}
+		\centering
+		\includegraphics[height=3cm]{./images-blockdiagrams/xumx_slicq_cdae.png}
+		\vspace{-0.25em}
+	\end{figure}
+	Introduce an extra layer for ``de-overlap''
+	\begin{figure}
+		\vspace{-0.25em}
+		\centering
+		\includegraphics[height=3cm]{./images-blockdiagrams/xumx_slicq_pertarget_largefont.png}
+		\vspace{-0.25em}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{xumx-sliCQ: block diagrams, results}
 	\begin{enumerate}
 		\item
 			My goal: improve Open-Unmix by replacing STFT with sliCQT
-		\item
-			My model submitted to the MDX21 challenge and workshop: \url{https://github.com/sevagh/xumx-sliCQ}
-		\item
-			Use Convolutional Denoising Autoencoder\footcite{plumbley1, plumbley2} neural architecture
 		\item
 			Scored 3.6 dB vs. 4.6 dB (UMX) and 5.54 dB (X-UMX); there is still room for improvement
 	\end{enumerate}
 	\begin{figure}[ht]
 		\centering
 		\vspace{-1.15em}
-		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/generic_mdx.png}}\\
+		\subfloat{\includegraphics[width=9cm]{./images-blockdiagrams/generic_mdx.png}}\\
 		\vspace{-0.5em}
-		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/umx_clean.png}}\\
+		\subfloat{\includegraphics[width=9cm]{./images-blockdiagrams/umx_clean.png}}\\
 		\vspace{-0.5em}
-		\subfloat{\includegraphics[width=8cm]{./images-blockdiagrams/xumx_slicq_clean.png}}
+		\subfloat{\includegraphics[width=9cm]{./images-blockdiagrams/xumx_slicq_clean.png}}
 	\end{figure}
 \end{frame}
 
