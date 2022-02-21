@@ -6,8 +6,8 @@ General tips:\\
   Switch passive voice and we to I\\
   Re-spell acronyms at the beginning of Chapter\\
  Chapter tips:\\
-   Split GPU port pytorch and cupy\\
    Why is CuPy BSS acceleration good? param search and also evaluation\\
+   Discard/simplify post-processing stuff wiener ragged etc.\\
    More redundancy (restate hypothesis, goals)
 }
 \section{Discussion and conclusion}
@@ -17,23 +17,28 @@ In this section, we will discuss the results shown in Section \ref{sec:experimen
 \subsection{Discussion of results}
 \label{sec:discussion}
 
-\subsubsection{GPU acceleration benchmarks}
+\subsubsection{sliCQT PyTorch port}
+\label{sec:gpuexperimentpytorchdiscuss}
 
-In Section \ref{sec:gpuexperiments}, the results of the benchmarks were shown for the two GPU porting efforts, which were the PyTorch port of the NSGT/sliCQT library from Section \ref{sec:torchslicq} and the CuPY port of the BSS metrics evaluation library from Section \ref{sec:fasterbsscupy} respectively.
+In Section \ref{sec:gpuexperimentpytorch}, the results of the benchmarks were shown for the two GPU porting efforts, which were the PyTorch port of the NSGT/sliCQT library from Section \ref{sec:torchslicq} and the CuPY port of the BSS metrics evaluation library from Section \ref{sec:fasterbsscupy} respectively.
 
-Table \ref{table:nsgttorchresultsragged} from Section \ref{sec:gpuexperiments} contained the benchmark results for the PyTorch implementation of the ragged sliCQT compared to the original library. The execution time of the transform improved with PyTorch in every case. The transform computed with PyTorch on the CPU was \textasciitilde4.7x faster than the single-threaded CPU implementation of the original library. The transforms computed with PyTorch on the two GPUs were \textasciitilde3.5x and \textasciitilde3.7x faster than the single-threaded CPU implementation of the original library respectively.
+Table \ref{table:nsgttorchresultsragged} from Section \ref{sec:gpuexperimentpytorch} contained the benchmark results for the PyTorch implementation of the ragged sliCQT compared to the original library. The execution time of the transform improved with PyTorch in every case. The transform computed with PyTorch on the CPU was \textasciitilde4.7x faster than the single-threaded CPU implementation of the original library. The transforms computed with PyTorch on the GPUs were \textasciitilde3.5x and \textasciitilde3.7x faster than the single-threaded CPU implementation of the original library respectively.
 
 Even though the sliCQT computed with PyTorch on the GPU was not faster than the CPU for the tested parameters, having the transform on the GPU allows us to use the sliCQT inside a PyTorch neural network. We note that the original library has a multithreaded option which performs worse than the default single-threaded behavior, which was an unexpected result. It might be explained by the overhead of multithreading.
 
-Section \ref{sec:gpuexperiments} also described the benchmarking of the GPU-accelerated BSS metrics library using CuPy.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} The results showed a \textasciitilde2-2.5x speedup with GPU over the CPU, which represent a significant reduction in the time taken to evaluate music demixing systems. This speedup can be useful for various evaluation campaigns like SiSEC \parencite{sisec2018} or MDX \parencite{mdx21}.
-
 \subsubsection{Best sliCQT parameters}
+\label{sec:slicqparamresultsdiscuss}
 
 In Section \ref{sec:slicqparamresults}, the results of the random grid search for the best-performing sliCQT parameters for the MPI oracle in Section \ref{sec:slicqparamsrch} were shown. The best-performing sliCQT chosen by the script had the parameters of 262 bins between 32.9--22050 Hz on the Bark scale.
 
 The sliCQT MPI oracle results for the above sliCQT achieved a median SDR of 7.42 dB. This surpassed the MPI oracle score of 6.23 dB achieved by the STFT with the UMX settings of a window size of 4096 and overlap of 1024. This indicates that a music demixing system that uses the sliCQT with these parameters has the potential to surpass the STFT-based performance.
 
 Keep in mind that to translate this theoretical boost to a real advantage in the final model, a neural network architecture must be chosen that can produce a good estimate of the target magnitude sliCQT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b). We hope that this added information gives the neural network an advantage when learning how to demix music from the sliCQT representation compared to the STFT.
+
+\subsubsection{CuPy PyTorch port}
+\label{sec:cupyportbssdiscuss}
+
+Section \ref{sec:cupyportbss} described the benchmarking of the GPU-accelerated BSS metrics library using CuPy.\footnote{\url{https://github.com/sevagh/sigsep-mus-eval}} The results showed a \textasciitilde2-2.5x speedup with GPU over the CPU, which represent a significant reduction in the time taken to evaluate music demixing systems. This speedup can be useful for various evaluation campaigns like SiSEC \parencite{sisec2018} or MDX \parencite{mdx21}.
 
 \subsubsection{xumx-sliCQ neural network}
 \label{sec:netdiscuss}

@@ -1,40 +1,33 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\todo[inline]{
-General tips:\\
-  Switch passive voice and we to I\\
-  Re-spell acronyms at the beginning of Chapter\\
- Chapter tips:\\
-   More redundancy (restate hypothesis, goals)
-}
 \section{Experiment}
 \label{sec:experiment}
 
-This section contains the results of the experiments described in the previous Section \ref{sec:methodology}. Refer to appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer on which the experiments and results in this section were generated from.
+This section contains the results of the experiments described in Section \ref{sec:methodology}. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer which produced the results in this section.
 
-The goal of this thesis is to use the sliced Constant-Q Transform (sliCQT) to represent musical signals in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. The sliCQT has a varying time-frequency resolution more suitable for auditory and psychoacoustic applications, which may give it an advantage in musical applications over the STFT which is limited by a fixed time-frequency resolution.
+The goal of this thesis is to use the sliced Constant-Q Transform (sliCQT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. X-UMX represents musical signals with the Short-Time Fourier Transform (STFT), which is limited by a fixed time-frequency resolution. The sliCQT by contrast has a varying time-frequency resolution which may be more suitable for musical applications such as music demixing.
 
-To use the sliCQT in a neural network using the PyTorch framework, the reference sliCQT library was first ported to PyTorch. This port was described in Section \ref{sec:torchslicq}, and in Section \ref{sec:gpuexperimentpytorch}, I will show the benchmark results.
+To use the sliCQT in a neural network, I first ported the sliCQT library to use PyTorch, a Python framework for GPU-based deep neural networks. The porting effort was described in Section \ref{sec:torchslicq}, and in Section \ref{sec:gpuexperimentpytorch}, I will show benchmark results of the port compared to the original library.
 
-In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT which used the mix-phase inversion (MPI) oracle to pick sliCQT parameters that might perform best in a music demixing system that uses the MPI strategy for estimating waveforms. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the random search script. The BSS metrics library was sped up with CuPy in Section \ref{sec:fasterbsscupy} to allow for faster sliCQT parameter searches, and in Section \ref{sec:cupyportbss}, I will show the benchmark results.
+In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT which used the mix-phase inversion (MPI) oracle to pick sliCQT parameters. The MPI strategy, used by X-UMX and also by my proposed model xumx-sliCQ, combines the magnitude spectrogram of the estimate with the phase of the mix. Choosing sliCQT parameters that give the best MPI oracle score might result in a higher overall music demixing performance from the neural network, since the MPI oracle represents the upper limit of performance for any model that uses the MPI strategy. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the parameter search script. In Section \ref{sec:fasterbsscupy}, I used the GPU-accelerated CuPy library in the BSS (Blind Source Separation) metrics library to speed up the parameter search, and I will show the benchmark results of the CuPy speedup in Section \ref{sec:cupyportbss}.
 
-After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step was to train and evaluate the xumx-sliCQ neural network. Section \ref{sec:nnresults} contains the results for the neural network design presented in Section \ref{sec:neuralnet}. First, Section \ref{sec:hyperparams} will list all of the network hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Finally, Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing Wiener-EM configurations described in Section \ref{sec:postprocessing}, and Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
+After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step was to train and evaluate the xumx-sliCQ neural network. Section \ref{sec:nnresults} contains the results for the neural network designs presented in Section \ref{sec:neuralnet}. First, Section \ref{sec:hyperparams} will list all of the training hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing configurations described in Section \ref{sec:postprocessing}. Finally, Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
 
 \subsection{PyTorch port of the sliCQT}
 \label{sec:gpuexperimentpytorch}
 
-The first step was to port the sliCQT to PyTorch, a GPU neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
+The first step was to port the sliCQT to PyTorch, a GPU-based neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
 
-The benchmark script for the PyTorch implementation of the sliCQT performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU was not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results.
+The benchmark script for the PyTorch implementation of the sliCQT performs the forward and backward sliCQT using the Bark scale with 50 bins between 20--22,050 Hz. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU was not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results, which will be discussed further in Section \ref{sec:gpuexperimentpytorchdiscuss}.
 
 \begin{table}[ht]
 	\centering
 	\caption{Execution times for the forward + backward ragged sliCQT}
 	\label{table:nsgttorchresultsragged}
-	\begin{tabular}{ |l|l|l|l| }
+	\begin{tabular}{ |l|l|l| }
 	 \hline
-		NSGT library & Device & Time (s) \\
+		Library & Device & Time (s) \\
 	 \hline
 	 \hline
 		Original & CPU, multithreaded & 51.95  \\
@@ -55,17 +48,17 @@ The benchmark script for the PyTorch implementation of the sliCQT performs the f
 
 In Section \ref{sec:slicqparamsrch}, I described the random search to choose the parameters of the sliCQT to use in xumx-sliCQ. Since the goal of xumx-sliCQ is to try to surpass X-UMX, which uses the STFT, the first step is to try to the sliCQT that has the most potential to surpass the STFT. This was done by choosing the best Signal-to-Distortion (SDR) score on the mixed-phase inversion (MPI) oracle waveforms of validation tracks of MUSDB18-HQ. The script ran for 60 iterations using random combinations of sliCQT parameters chosen from the ranges in Table \ref{table:slicqparams} in Section \ref{sec:slicqparamsrch}.
 
-The best-performing sliCQT parameters chosen by the script used the following parameters: Bark scale, 262 bins, 32.9--22,050 Hz. These parameters were used in the final neural network, xumx-sliCQ. Figure \ref{fig:bipolarslicqs} shows a visual comparison of the magnitude spectrograms of the best-performing sliCQT parameters alongside the STFT with the UMX default window size of 4,096 samples.
+The best-performing sliCQT parameters chosen by the script used the following parameters: Bark scale, 262 bins, 32.9--22,050 Hz. These parameters were used in the final neural network, xumx-sliCQ. The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in Section \ref{sec:improvelib}. Figure \ref{fig:bipolarslicqs} shows a visual comparison of the magnitude spectrograms of the best-performing sliCQT parameters alongside the STFT with the X-UMX default window size of 4,096 samples.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Best sliCQT from MPI oracle parameter search]{\includegraphics[width=0.675\textwidth]{./images-gspi/slicqt_good.png}}\\
-	\subfloat[STFT with UMX defaults]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_4096.png}}
+	\subfloat[STFT, X-UMX default]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_4096.png}}
 	\caption{Magnitude spectrogram comparison; sliCQT vs. STFT}
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-The full MPI oracle evaluation of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}. The MPI oracle was described in Section \ref{sec:noisyphaseoracle} as the strategy used by UMX to use the phase of the mix and estimated magnitude of the source to compute the final estimated source waveform.
+The full MPI oracle evaluation of these sliCQT parameters are shown in the boxplot in Figure \ref{fig:oraclebssboxplot}. The MPI oracle was described in Section \ref{sec:noisyphaseoracle} as the strategy used by X-UMX to use the phase of the mix and estimated magnitude of the source to compute the final estimated source waveform.
 
 The BSS metrics of the best sliCQT are compared to the STFT with different window sizes. Recall that the hypothesis of this thesis is that the varying time-frequency resolution of the sliCQT may provide an advantage in a musical application over the fixed time-frequency resolution of the STFT, and that the window size of the STFT must be changed to trade time and frequency resolution. In some music source separation papers, a short window STFT is used for a high time resolution, and a long window STFT is used for a high frequency resolution \parencite{fitzgerald2, driedger}. In particular, \textcite{driedger} use a window size of 256 for the short window STFT and 4096 for the long window STFT, and \textcite{fitzgerald2} use a window of 1024 for the short window STFT and 16384 for the long window STFT. Therefore, to demonstrate the effect of time-frequency resolution on music demixing, I compared the best sliCQT chosen from the parameter search with different STFT window sizes, selecting powers of two between 256 and 16384 in the boxplot. Table \ref{table:winsizes} shows the evaluated transforms and their parameters. Note that the range of window sizes between 256--16384 contain 4096, which is the STFT window size of X-UMX.
 
@@ -104,16 +97,32 @@ The BSS metrics of the best sliCQT are compared to the STFT with different windo
 	\label{fig:oraclebssboxplot}
 \end{figure}
 
-The slice length and transition length for the 262-bin Bark scale sliCQT with frequency limits of 32.9--22,050 Hz are automatically chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in Section \ref{sec:improvelib}. The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, beating the 6.23 dB achieved by the STFT with the UMX default window and overlap of 4,096 and 1,024 samples respectively.
+The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, compared to the 6.23 dB achieved by the STFT with the X-UMX default window and overlap of 4,096 and 1,024 samples respectively. This result will be discussed further in Section \ref{sec:slicqparamresultsdiscuss}.
 
-\subsection{CuPy port of BSS metrics}
+\subsection{CuPy acceleration of BSS metrics}
 \label{sec:cupyportbss}
 
-In Section \ref{sec:fasterbsscupy}, the slowest functions of the BSS metrics library that used CPU-based NumPy and SciPy operations were ported to the GPU-equivalent CuPy functions to speed up their computation. This was done to speed up the development cycle and execution time of the parameter search script. As a bonus side effect, running the full BSS evaluations in Section \ref{sec:demixresults} were also sped up as a result of the BSS metrics port to CuPy.
+In Section \ref{sec:fasterbsscupy}, the slowest functions of the BSS metrics library that used CPU-based NumPy and SciPy operations were swapped with their equivalent functions in CuPy, taking advantage of GPU acceleration. This was done to speed up the development cycle and execution time of the parameter search script. As a bonus side effect, running the full BSS evaluations in Section \ref{sec:demixresults} were also sped up as a result of the CuPy-accelerated BSS metrics.
 
-The benchmark script for the CuPy BSS metrics library creates a random estimated waveform for the four targets of the 14 validation tracks of MUSDB18-HQ, and computes the BSS metrics. The computation time was repeated for 10 iterations and averaged. Three copies of the benchmark script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on the AMD Ryzen 5950X CPU, one with the argument \Verb#--cuda-device=0# to use the NVIDIA 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU.
+The benchmark script for the CuPy BSS metrics library creates a random estimated waveform for the four targets of the 14 validation tracks of MUSDB18-HQ, and computes the BSS metrics. The computation time was repeated for 10 iterations and averaged. Three copies of the benchmark script were run; one with the argument \Verb#--disable-cupy# to use the CPU code with SciPy and NumPy functions on the CPU, one with the argument \Verb#--cuda-device=0# to use the NVIDIA 3080 Ti GPU, and one with the argument \Verb#--cuda-device=1# to use the NVIDIA RTX 2070 Super GPU. The results are shown in Table \ref{table:cupybssresults}, and they will be discussed further in Section \ref{sec:cupyportbssdiscuss}.
 
-The results were that the regular BSS metrics evaluation on the CPU took 1,485.77 seconds, compared to the CuPy GPU-accelerated code which took 585.33 seconds with the NVIDIA 3080 Ti GPU and 738.39 seconds with the weaker NVIDIA 2070 Super GPU. The results show that the expected speedup for BSS metrics evaluations from a GPU is \textasciitilde 2-2.5x over the CPU.
+\begin{table}[ht]
+	\centering
+	\caption{Execution times for the BSS metrics evaluation}
+	\label{table:cupybssresults}
+	\begin{tabular}{ |l|l|l| }
+	 \hline
+		BSS library & Device & Time (s) \\
+	 \hline
+	 \hline
+		Original & CPU & 1,485.77  \\
+	 \hline
+		CuPy & GPU (NVIDIA 2070 Super) & 738.39 \\
+	 \hline
+		CuPy & GPU (NVIDIA 3080 Ti) &  585.33 \\
+	 \hline
+\end{tabular}
+\end{table}
 
 \newpagefill
 
@@ -125,34 +134,34 @@ This section will show the hyperparameters, training procedure, and final traine
 \subsubsection{Hyperparameters in the training script}
 \label{sec:hyperparams}
 
-This section will cover the details of the hyperparameters of the xumx-sliCQ training script. Table \ref{table:xumxslicqparams} contains a full list of all the hyperparameters, their default values, and their origin. The origins of the parameters are either copied from UMX, X-UMX, or sections from this thesis which describe new hyperparameters, or values of existing hyerparameters that are different from the default value used in UMX or X-UMX.
+This section will cover the details of the hyperparameters of the xumx-sliCQ training script. Table \ref{table:xumxslicqparams} contains a full list of all the hyperparameters, their default values, and the justification for the choice of default value if it was not copied from X-UMX. Parameters that were introduced or modified as necessary to support the use of the sliCQT in xumx-sliCQ will point to the section of the thesis that explains the parameter and its chosen default value. Note that the choice of the Bidirectional Long Short-Term Memory (Bi-LSTM) and Convolutional Denoising Autoencoder (CDAE) network architectures of xumx-sliCQ, shown in Section \ref{sec:neuralnet}, has been made a parameter in the training script.
 
 \begin{table}[ht]
 	\centering
-	\caption{Arguments for the xumx-sliCQ training script to define hyperparameters}
+	\caption{Hyperparameters in the xumx-sliCQ training script}
 	\label{table:xumxslicqparams}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
 		Parameter & Default & Origin \\
 	 \hline
 	 \hline
-		Dataset & MUSDB18-HQ & Copied from UMX \\
+		Dataset & MUSDB18-HQ & Copied from X-UMX \\
 	 \hline
-		Learning rate & 1e-3 & Copied from UMX \\
+		Learning rate & 1e-3 & Copied from X-UMX \\
 	 \hline
-		Learning rate decay patience & 80 & Copied from UMX \\
+		Learning rate decay patience & 80 & Copied from X-UMX \\
 	 \hline
-		Learning rate decay gamma & 0.3 & Copied from UMX \\
+		Learning rate decay gamma & 0.3 & Copied from X-UMX \\
 	 \hline
-		Weight decay & 1e-5 & Copied from UMX \\
+		Weight decay & 1e-5 & Copied from X-UMX \\
 	 \hline
-	 	Seed & 42 & Copied from UMX \\
+	 	Seed & 42 & Copied from X-UMX \\
 	 \hline
-	 	Bandwidth & 16000 Hz & Copied from UMX \\
+	 	Bandwidth & 16000 Hz & Copied from X-UMX \\
 	 \hline
-	 	Number of channels & 2 & Copied from UMX \\
+	 	Number of channels & 2 & Copied from X-UMX \\
 	 \hline
-	 	Number of workers for dataloader & 4 & Copied from UMX \\
+	 	Number of workers for dataloader & 4 & Copied from X-UMX \\
 	 \hline
 		Epochs & 1,000 & Copied from X-UMX \\
 	 \hline
@@ -173,14 +182,14 @@ This section will cover the details of the hyperparameters of the xumx-sliCQ tra
 \end{tabular}
 \end{table}
 
-The optimizer used is the Adam optimizer, with an adaptive learning rate scheduler, unchanged from UMX.
+The optimizer used is the Adam optimizer with an adaptive learning rate scheduler, copied directly and unchanged from X-UMX.
 
 \subsubsection{Network architecture and training results}
 \label{sec:networktraining}
 
-In this section, we will describe the neural network architectures and training results for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. We will use the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package to get a count of the total trainable parameters of the neural network. We will show the loss curves of the training process with Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a neural network training visualization tool.
+In this section, I will describe the neural network architectures and training results for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. I will use the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package to get a count of the total trainable parameters of the neural network, and show the loss curves of the training process with Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a neural network training visualization tool.
 
-For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. We did not complete the training and could not evaluate this configuration, due to the very high duration per epoch; this decision will be discussed further in Section \ref{sec:netdiscuss}.
+For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. I did not fully train this configuration, since a training time of 36 days is not feasible for this thesis. This decision will be discussed further in Section \ref{sec:netdiscuss}.
 
 For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable parameters in total. The training time per epoch took 350 seconds, or almost 6 minutes, representing a total of 100 hours or 4 days of training. The total training curves for the full 1000 epochs can be seen in Figure \ref{fig:networkloss}. The lowest validation loss achieved was -0.449 at epoch 583.
 
@@ -197,7 +206,7 @@ For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable paramete
 
 In this section, the music demixing results of the trained models UMX, X-UMX, and xumx-sliCQ will be compared.
 
-The BSSv4 scores for the demixing results generated from the evaluation script were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. The results of xumx-sliCQ are computed for both the sliCQT-Wiener-EM and STFT-Wiener-EM strategies. Wiener-EM will be abbreviated to WEM in the tables that follow.
+The BSSv4 scores for the demixing results generated from the evaluation script were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. The results of xumx-sliCQ are computed for both of the Wiener Expectation Maximization (Wiener-EM) post-processing strategies, using the sliCQT or STFT. Wiener-EM will be abbreviated to WEM in the tables that follow.
 
 To maximize result reproducibility, all pretrained models and code were downloaded from their public hosted locations shown in Table \ref{table:bsseval} and stored in a separate repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
 
@@ -233,9 +242,9 @@ To maximize result reproducibility, all pretrained models and code were download
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
 
-In this section, we will measure the size on disk and inference running times of the models.
+In this section, I will show measurements of inference time and the size on disk of the compared models. In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that as a shorthand in the last two chapters, I would only use X-UMX to refer to the reference system encompassing all of UMX and X-UMX that I based my new model on. In this section, I need to report on UMX and X-UMX separately, since their size on disk and inference performance is implementation-specific due to the different deep learning frameworks to implement them.
 
-The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined.
+The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined. The ``-HQ'' suffix denotes that this the pretrained model of UMX that was trained on MUSDB18-HQ, as opposed to the original MUSDB18. MUSDB18-HQ is the dataset used for X-UMX and xumx-sliCQ.
 
 The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} for the NNabla deep learning framework has a size on disk of 136 MB for the four combined targets, which is almost the same as the size of the UMX PyTorch weights.
 
