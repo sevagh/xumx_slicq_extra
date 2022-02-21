@@ -129,7 +129,7 @@ The benchmark script for the CuPy BSS metrics library creates a random estimated
 \subsection{xumx-sliCQ neural network}
 \label{sec:nnresults}
 
-This section will show the hyperparameters, training procedure, and final trained performance of the xumx-sliCQ neural network, whose design was described in Section \ref{sec:neuralnet}.
+In this section, I will show the hyperparameters, training procedure, and final trained performance of the xumx-sliCQ neural network, whose design was described in Section \ref{sec:neuralnet}.
 
 \subsubsection{Hyperparameters in the training script}
 \label{sec:hyperparams}
@@ -189,32 +189,38 @@ The optimizer used is the Adam optimizer with an adaptive learning rate schedule
 
 In this section, I will describe the neural network architectures and training results for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. I will use the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package to get a count of the total trainable parameters of the neural network, and show the loss curves of the training process with Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a neural network training visualization tool.
 
-For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. I did not fully train this configuration, since a training time of 36 days is not feasible for this thesis. This decision will be discussed further in Section \ref{sec:netdiscuss}.
+For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. I did not fully train this configuration, since a training time of 36 days is not feasible for this thesis.
 
 For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable parameters in total. The training time per epoch took 350 seconds, or almost 6 minutes, representing a total of 100 hours or 4 days of training. The total training curves for the full 1000 epochs can be seen in Figure \ref{fig:networkloss}. The lowest validation loss achieved was -0.449 at epoch 583.
+
+The music demixing performance of the trained model of xumx-sliCQ with the CDAE architecture will be shown in Section \ref{sec:demixresults}, and the execution time of inference and the size of the model on disk will be shown in Section \ref{sec:inferenceperf}. The results of these evaluations will be discussed further in Section \ref{sec:netdiscuss}.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Train loss]{\includegraphics[width=\textwidth]{./images-neural/train_loss.png}}\\
 	\subfloat[Validation loss]{\includegraphics[width=\textwidth]{./images-neural/valid_loss.png}}
-	\caption{Tensorboard loss curves for xumx-sliCQ, 1,000 epochs}
+	\caption{Tensorboard loss curves for xumx-sliCQ using the CDAE architecture}
 	\label{fig:networkloss}
 \end{figure}
 
 \subsubsection{Music demixing results}
 \label{sec:demixresults}
 
-In this section, the music demixing results of the trained models UMX, X-UMX, and xumx-sliCQ will be compared.
+In this section, I will compare the music demixing results of the trained models of UMX, X-UMX, and xumx-sliCQ.
 
-The BSSv4 scores for the demixing results generated from the evaluation script were computed on the test set of the MUSDB18-HQ dataset, and are shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of every model evaluated in the boxplot with their label, and the median SDR across the four targets and 50 test tracks. The results of xumx-sliCQ are computed for both of the Wiener Expectation Maximization (Wiener-EM) post-processing strategies, using the sliCQT or STFT. Wiener-EM will be abbreviated to WEM in the tables that follow.
+In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that for convenience throughout Section \ref{sec:methodology} and \ref{sec:experiment}, I would use X-UMX to refer to the concepts of both UMX and X-UMX. In the results shown in this and the next section, I will treat UMX and X-UMX separately. They have a different music demixing performance and inference performance, due to the differences in their network architectures, shown in Figure \ref{fig:umxandxumx}, and the different deep learning frameworks used in their reference implementations.
 
-To maximize result reproducibility, all pretrained models and code were downloaded from their public hosted locations shown in Table \ref{table:bsseval} and stored in a separate repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}}
+The evaluated trained model of xumx-sliCQ uses the CDAE architecture. The Bi-LSTM architecture of xumx-sliCQ was not evaluated, due to requiring 36 days to train the full 1,000 epochs. The CDAE architecture was trained fully in four days, which is a more feasible training time for this thesis.
+
+The BSS metrics for the demixing results of UMX, X-UMX, and xumx-sliCQ were computed on the test set of the MUSDB18-HQ dataset, and the boxplot is shown in Figure \ref{fig:bssboxplot}. Table \ref{table:bsseval} contains the details of the evaluated models, including the median SDR across all tracks and targets. The results of xumx-sliCQ are computed for both of the Wiener Expectation Maximization (Wiener-EM) post-processing strategies, using the sliCQT or STFT. Wiener-EM will be abbreviated to WEM in the tables that follow.
+
+To maximize result reproducibility, all pretrained models and code were downloaded from their public hosted locations shown in Table \ref{table:bsseval} and stored in a separate repository to generate the results.\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/tree/main/mss_evaluation}} The results will be discussed further in Section \ref{sec:netdiscuss}.
 
 \begin{table}[ht]
 	\centering
 	\caption{Evaluated pretrained models in the BSS boxplot}
 	\label{table:bsseval}
-	\begin{tabular}{ |p{2.5cm}|l|l|p{3.5cm}|p{3.5cm}| }
+	\begin{tabular}{ |p{2.5cm}|l|l|p{4cm}|p{4cm}| }
 	 \hline
 		Project & Legend & SDR & Code repository & Pretrained model \\
 	 \hline
@@ -242,9 +248,9 @@ To maximize result reproducibility, all pretrained models and code were download
 \subsubsection{Model size and inference performance comparison}
 \label{sec:inferenceperf}
 
-In this section, I will show measurements of inference time and the size on disk of the compared models. In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that as a shorthand in the last two chapters, I would only use X-UMX to refer to the reference system encompassing all of UMX and X-UMX that I based my new model on. In this section, I need to report on UMX and X-UMX separately, since their size on disk and inference performance is implementation-specific due to the different deep learning frameworks to implement them.
+In this section, I will show measurements of inference time and the size on disk of the compared models.
 
-The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined. The ``-HQ'' suffix denotes that this the pretrained model of UMX that was trained on MUSDB18-HQ, as opposed to the original MUSDB18. MUSDB18-HQ is the dataset used for X-UMX and xumx-sliCQ.
+The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined. The ``-HQ'' suffix denotes that this the pretrained model of UMX that was trained on MUSDB18-HQ, as opposed to the original MUSDB18. MUSDB18-HQ is same the dataset used for X-UMX and xumx-sliCQ.
 
 The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} for the NNabla deep learning framework has a size on disk of 136 MB for the four combined targets, which is almost the same as the size of the UMX PyTorch weights.
 
@@ -252,7 +258,7 @@ The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sli
 
 To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs \parencite{deepcpuinf, deepcpuinf2}.
 
-The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the STFT and sliCQT configurations of the post-processing Wiener-EM step were measured, denoted as STFT-WEM and sliCQT-WEM respectively.
+The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the STFT and sliCQT configurations of the post-processing Wiener-EM step were measured, denoted as STFT-WEM and sliCQT-WEM respectively. The results will be discussed further in Section \ref{sec:netdiscuss}.
 
 \begin{table}[ht]
 	\centering

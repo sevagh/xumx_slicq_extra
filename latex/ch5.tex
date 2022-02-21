@@ -8,6 +8,7 @@ General tips:\\
  Chapter tips:\\
    Why is CuPy BSS acceleration good? param search and also evaluation\\
    Discard/simplify post-processing stuff wiener ragged etc.\\
+   Redo neural section in the correct order of ch4\\
    More redundancy (restate hypothesis, goals)
 }
 \section{Discussion and conclusion}
@@ -43,7 +44,7 @@ Section \ref{sec:cupyportbss} described the benchmarking of the GPU-accelerated 
 \subsubsection{xumx-sliCQ neural network}
 \label{sec:netdiscuss}
 
-In Section \ref{sec:wienerconfigs}, we showed several implementation choices and configurations for the Wiener-EM post-processing step in the xumx-sliCQ model.
+In Section \ref{sec:postprocessing}, I showed two implementation choices for the Wiener-EM post-processing step in xumx-sliCQ; one which could be computed on the sliCQT directly, and one which swapped from the sliCQT domain to the STFT domain to perform Wiener-EM.
 
 Firstly, the zero-padded matrix form of the sliCQT-Wiener-EM was \textasciitilde2x faster than the ragged sliCQT-Wiener-EM, with an almost neglibile improvement of 0.005 dB in the SDR score for the tested track for one iteration. For this reason, the zero-padded sliCQT-Wiener-EM was the chosen implementation of sliCQT-based Wiener-EM in the final model, and the ragged sliCQT-Wiener-EM was discarded for being too computationally slow.
 
