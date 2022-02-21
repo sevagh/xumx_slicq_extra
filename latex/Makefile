@@ -8,11 +8,6 @@ report-dev: report
 report: tex_fname="report.tex"
 report: texpdf
 
-mila-presentation-dev: export LATEXMK_FLAGS="-pvc"
-mila-presentation-dev: mila-presentation
-mila-presentation: tex_fname="mila-presentation.tex"
-mila-presentation: texpdf
-
 all: report
 
 clean:
