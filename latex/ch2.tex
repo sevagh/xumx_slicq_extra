@@ -1,10 +1,6 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\todo[inline]{
-General tips:\\
-  Switch passive voice and we to I, be careful about us also
-}
 \section{Background}
 \label{sec:background}
 
@@ -133,7 +129,7 @@ According to \citeauthor{korpel}, ``Gabor came to the conclusion that the diffic
 
 Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \citeauthor{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \parencite[432]{gabor1946}. This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' \parencite[432]{gabor1946}.
 
-Let us start with a description of the time-domain unit impulse signal or sequence \parencite[20]{melbook} in equation \eqref{equation:delta}:
+The time-domain unit impulse signal or sequence \parencite[20]{melbook} is described by equation \eqref{equation:delta}:
 \begin{flalign}\label{equation:delta}
 \delta[n] = \begin{cases}
 	1 \text{\hspace{1em}} n = 0\\
@@ -165,7 +161,9 @@ More recently, according to \citeauthor{psycho1}:
 	[w]e have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10 \parencite[4]{psycho1}.
 \end{quote}
 
-\citeauthor{psycho1} goes on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue'' \parencite[4]{psycho1}. Nevertheless, if we choose to proceed with time-frequency analysis despite this limitation, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \citeauthor{gabor1946} asks:
+\citeauthor{psycho1} goes on to state that ``most sound analysis and processing tools today continue to use models based on spectral theories... [w]e believe it is time to revisit this issue'' \parencite[4]{psycho1}.
+
+When performing joint time-frequency analysis, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \citeauthor{gabor1946} asks:
 
 \begin{quote}
 	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function \parencite[435]{gabor1946}
@@ -311,7 +309,7 @@ Several examples of magnitude spectrograms of the glockenspiel signal are genera
 \subsubsection{Nonstationary Gabor Transform (NSGT)}
 \label{sec:theorynsgt}
 
-\textcite{doerflerphd} in their dissertation analyzed music with multiple Gabor dictionaries (i.e. STFTs). Figure \ref{fig:dorflertradeoff} shows the time-frequency tradeoff of the short and long window STFT analyses of the glockenspiel signal for its transient and tonal characteristics, and how two Gabor dictionaries combined gives us the ability to analyze either the transient or tonal aspects with a more appropriate resolution.
+\textcite{doerflerphd} in their dissertation analyzed music with multiple Gabor dictionaries (i.e. STFTs). Figure \ref{fig:dorflertradeoff} shows the time-frequency tradeoff of the short and long window STFT analyses of the glockenspiel signal for its transient and tonal characteristics.
 
 \begin{figure}[ht]
 	\centering
@@ -344,7 +342,7 @@ These requirements lead to invertibility of the frame operator and therefore to 
 	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case \parencite[1,482]{balazs}
 \end{quote}
 
-To derive the NSGT, let us recall the previously-seen definition of the Gabor transform from Section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal \parencite{adaptivecqt}, described by equation \eqref{equation:stationarygab}:
+The derivation of the NSGT starts from the previously-seen definition of the Gabor transform from Section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal \parencite{adaptivecqt}, described by equation \eqref{equation:stationarygab}:
 \begin{align} \tag{11}\label{equation:stationarygab}
 g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
 \end{align}
@@ -534,7 +532,7 @@ Note that to produce a meaningful spectrogram like the NSGT in Figure \ref{fig:r
 \subsubsection{Interesting frequency scales for musical applications}
 \label{sec:fscales}
 
-Let us consider frequency scales that may be interesting for music or audio analysis, in addition to the Constant-Q/logarithmic and mel scales already defined in the reference NSGT library and shown in the previous section.
+The reference NSGT library contains the Constant-Q/logarithmic scale and mel scale, shown in the previous section. I will describe additional frequency scales that may be interesting for music or audio analysis.
 
 The Variable-Q scale \parencite{variableq1, variableq2} is the same as the log or octave scales, except with a small fixed frequency offset, denoted by gamma or $\gamma \text{ (Hz)}$, added to each frequency bin. \citeauthor{variableq1} provide the motivation for the Variable-Q scale:
 \begin{quote}
@@ -1012,7 +1010,7 @@ An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2},
 
 The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms \parencite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}. Discarding the phase of the complex STFT is a choice made for simplicity, although the phase may be important for source separation applications \parencite{ditchphase}.
 
-To illustrate the calculation of the oracle mask, let us describe a simple case of a mixed song consisting of a vocal and drum track. To compute oracles, note that it is necessary to have access to the ground truth isolated source recordings of vocals and drums, in addition to the mix.
+To illustrate the calculation of the oracle mask, I will describe a simple case of a mixed song consisting of a vocal and drum track. To compute oracles, note that it is necessary to have access to the ground truth isolated source recordings of vocals and drums, in addition to the mix.
 
 The waveforms $x_{v}[n]$ and $x_{d}[n]$ denote the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, I want my algorithm or model to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
 
@@ -1061,7 +1059,7 @@ Equations \eqref{equation:mpineural} show how the phase of the mixture and magni
 
 In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. 
 
-Let us write out the equations for an MPI oracle, derived from equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
+I will begin with the equations for an MPI oracle, derived from equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
 \begin{align}\tag{30}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & X_{\text{source}} = \mathit{STFT}(x_{\text{source}}[n])\\
@@ -1069,7 +1067,7 @@ Let us write out the equations for an MPI oracle, derived from equations \eqref{
 	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
-This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It gives us the idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
+This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It provides an idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
 
 \subsubsection{Open-source ecosystem}
 
