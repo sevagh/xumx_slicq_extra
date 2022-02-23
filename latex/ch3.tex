@@ -376,9 +376,9 @@ To implement the time-domain SDR loss, I use the auraloss Python package.\footno
 \subsection{Post-processing}
 \label{sec:postprocessing}
 
-In this section, I will discuss how the final post-processing step of X-UMX, which refines the four target estimates of the neural network using Wiener-EM was adapted for the sliCQT in xumx-sliCQ. In X-UMX, after the neural network outputs the estimates of the magnitude STFT for all four targets, the post-processing Wiener expectation-maximization (EM) step is applied to potentially improve the estimates (see Section \ref{sec:umx}).
+In this section, I will discuss how the final post-processing step of X-UMX was modified for in xumx-sliCQ. In X-UMX, after the neural network outputs the estimates of the magnitude STFT for all four targets, the post-processing step of iterative Wiener expectation-maximization (EM) is applied to potentially improve the estimates (see Section \ref{sec:umx}).
 
-Both the sliCQT and STFT output complex Fourier coefficients, which means that the Wiener-EM step can be run on both the sliCQT and the STFT representations of the estimated targets. Therefore, I chose to implement two strategies of Wiener-EM: one that operates on the sliCQT outputs of xumx-sliCQ directly, and the other that swaps the sliCQT outputs into the STFT domain before applying Wiener-EM.
+Both the sliCQT and STFT output complex Fourier coefficients, which means that the Wiener-EM step can be run on both the sliCQT and the STFT representations of the estimated targets. Therefore, in xumx-sliCQ, I chose to implement two strategies of Wiener-EM: one that operates on the sliCQT outputs of xumx-sliCQ directly, and the other that swaps the sliCQT outputs into the STFT domain before applying Wiener-EM.
 
 The music demixing quality and running time of both strategies will be shown in Section \ref{sec:demixresults}.
 
