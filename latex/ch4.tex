@@ -8,7 +8,7 @@ This section contains the results of the experiments described in Section \ref{s
 
 The goal of this thesis was to use the sliced Constant-Q Transform (sliCQT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. X-UMX represents musical signals with the Short-Time Fourier Transform (STFT), which is limited by a fixed time-frequency resolution. In contrast, the sliCQT has a varying time-frequency resolution, which may be more suitable for musical applications such as music demixing.
 
-To use the sliCQT in a neural network, I first ported the sliCQT library to use PyTorch, a Python framework for GPU-based deep neural networks. The porting effort was described in Section \ref{sec:torchslicq}, and in Section \ref{sec:gpuexperimentpytorch}, I will show benchmark results of the port compared to the original library.
+To use the sliCQT in a neural network, I first ported the sliCQT library to use PyTorch, a Python framework for GPU-based deep neural networks. The porting effort was described in Section \ref{sec:torchslicq}. In Section \ref{sec:gpuexperimentpytorch}, I will show benchmark results of the port compared to the original library.
 
 In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT which used the mix-phase inversion (MPI) oracle to pick sliCQT parameters. The MPI strategy, used by X-UMX and also by my proposed model xumx-sliCQ, combines the magnitude spectrogram of the estimate with the phase of the mix. Choosing sliCQT parameters that give the best MPI oracle score might result in a higher overall music demixing performance from the neural network, since the MPI oracle represents the upper limit of performance for any model that uses the MPI strategy. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the parameter search script. In Section \ref{sec:fasterbsscupy}, I used the GPU-accelerated CuPy library in the BSS (Blind Source Separation) metrics library to speed up the parameter search, and I will show the benchmark results of the CuPy BSS metrics in Section \ref{sec:cupyportbss}.
 
@@ -284,10 +284,6 @@ To report the inference performance, only the CPU was used. The CPU is a more un
 \end{tabular}
 \end{table}
 
-To discuss these results, I will first note that X-UMX shows an anomalously high execution time, almost \textasciitilde20x slower than UMX. This is because it uses a different deep learning framework, NNabla, which cannot be directly compared to the two models, UMX and xumx-sliCQ, that use PyTorch.
-
-The STFT Wiener-EM configuration of xumx-sliCQ runs \textasciitilde2x slower than UMX, and the sliCQT Wiener-EM configuration runs \textasciitilde4x slower than UMX. Wiener-EM with the sliCQT only adds \textasciitilde0.1 dB to the median SDR score compared to the Wiener-EM with the STFT, while doubling the running time. This is a poor tradeoff, and Wiener-EM with the STFT is chosen as the default configuration of xumx-sliCQ.
-
-From the results, the only advantage of xumx-sliCQ over UMX and X-UMX is in the size on disk of the trained model. It is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and X-UMX respectively.
+To discuss these results, I will first note that X-UMX shows an anomalously high execution time which is \textasciitilde20x slower than UMX. This is because it uses a different deep learning framework, NNabla, compared to the PyTorch-based UMX and xumx-sliCQ. The STFT Wiener-EM configuration of xumx-sliCQ is \textasciitilde2x slower than UMX, and the sliCQT Wiener-EM configuration is \textasciitilde4x slower than UMX. Wiener-EM with the sliCQT only adds \textasciitilde0.1 dB to the median SDR score compared to the Wiener-EM with the STFT, while doubling the running time. The pretrained model of xumx-sliCQ is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and X-UMX respectively.
 
 \end{document}
