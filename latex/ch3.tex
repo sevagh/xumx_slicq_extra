@@ -215,13 +215,13 @@ The random search parameters are shown in Table \ref{table:slicqparams}. Note th
 \end{tabular}
 \end{table}
 
-The space of possible parameters is infinite, even with the ranges constrained as in Table \ref{table:slicqparams}. Therefore, an exhaustive grid search over all the possible parameters is impossible. I chose instead to do a random search over the parameter space. \textcite{randomgrid} found that to search for hyperparameters in a neural network:
+The space of possible parameters is infinite, even with the ranges constrained as in Table \ref{table:slicqparams}. Therefore, an exhaustive grid search over all the possible parameters is impossible. To search for hyperparameters in a neural network, \textcite{randomgrid} found that:
 
 \begin{quote}
 	[o]ften the extent of a search is determined by a computational budget, and with random search 64 trials are enough to find better models in a larger less promising space \parencite[293]{randomgrid}
 \end{quote}
 
-Since the sliCQT parameters are hyperparameters of the xumx-sliCQ neural network, I decided from the above that using at least 64 iterations of a random search would yield a good enough result. I ran two instances of the script with 60 iterations each, resulting in 120 total iterations of the random parameter search for each of the four frequency scales. Each instance of the script used a different random seed (42 and 1337). The purpose of fixing the seed of Python's random number generator (RNG) is discussed in Section \ref{sec:pyrng}.
+I decided to use a random search with at least 64 iterations for the sliCQT parameters, since the sliCQT parameters are hyperparameters of the xumx-sliCQ neural network. I ran two instances of the random parameter search script with 60 iterations each, resulting in 120 total iterations of the random parameter search for each of the four frequency scales. Each instance of the script used a different random seed (42 and 1337). The purpose of fixing the seed of Python's random number generator (RNG) is discussed in Section \ref{sec:pythonbasics}.
 
 Recall from Section \ref{sec:evalbss} that the Signal-to-Distortion (SDR) is one of the scores of the BSS metrics, with a units of decibels (dB), which is commonly used as a single metric that summarizes the global performance of a music demixing system. The selected sliCQT frequency scale parameters were evaluated by computing the mix-phase waveforms, which were described in Section \ref{sec:noisyphaseoracle}. The phase of the complex sliCQT of the mixed song and the magnitude of the complex sliCQT of the ground-truth source signal for all four sources (drums, bass, vocals, other) were combined to create the MPI (mix-phase inversion) waveforms. The median SDR was computed across the four sources and 14 validation tracks of MUSDB18-HQ, and the sliCQT parameters that resulted in the MPI waveforms with the highest SDR were selected as the final sliCQT parameters to use in the neural network.
 

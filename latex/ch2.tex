@@ -1,18 +1,27 @@
 \documentclass[report.tex]{subfiles}
 \begin{document}
 
-\todo{
+\todo[inline]{
 	chapter notes:\\
-	remove all traces of MDX\\
-	remove all traces of tonal/transient\\
-	remove all traces of wavelets\\
 	continue reading ich feedback
 }
 
 \section{Background}
 \label{sec:background}
 
-\todo[inline]{Chapter roadmap here}
+In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural network for music demixing written in the Python programming language. Open-Unmix uses the Short-Time Fourier Transform (STFT) as its representation of musical signals, which is subject to the limitations of the time-frequency uncertainty principle, or time-frequency tradeoff. I will be exploring the sliced Constant-Q Transform (sliCQT) as a replacement of the STFT, and my hypothesis is that using the sliCQT instead of the STFT will improve the music demixing performance of Open-Unmix due to the varying time-frequency resolution of the sliCQT that is more suitable for musical or auditory analysis.
+
+In this chapter, I will introduce the theoretical background necessary to understand my goal and hypothesis.
+
+In Section \ref{sec:timedomain}, I will give an overview of acoustic signals, including the time-domain waveform and discrete-time signals in digital systems.
+
+In Section \ref{sec:freqdomain}, I will introduce the frequency domain, which is alternative representation of acoustic signals. In Section \ref{sec:freqanal}, I will discuss frequency analysis and the Fourier transform. In Section \ref{sec:jointtfa}, I will describe joint time-frequency analysis, time-frequency transforms, and the Short-Time Fourier Transform (STFT). In Section \ref{sec:cqt}, I will introduce the Constant-Q Transform (CQT), which is a time-frequency transform designed to display more musical information than the STFT. In Section \ref{sec:theorynsgt}, I will introduce the Nonstationary Gabor Transform (NSGT), which is a time-frequency transform that can be used to implement the CQT with a perfect inverse. In Section \ref{sec:theoryslicqt}, I will introduce the sliced Constant-Q Transform (sliCQT), which is a realtime variant of the NSGT. In Section \ref{sec:raggedtf}, I will describe how nonuniform time-frequency transforms (e.g., CQT, NSGT, sliCQT) differ from a uniform time-frequency transform like the STFT. Finally, in Section \ref{sec:fscales}, I will describe different frequency scales that can be used in the NSGT and sliCQT.
+
+In Section \ref{sec:ml}, I will give an overview of machine learning and deep learning, and how these methods are typically applied to audio or musical applications, commonly in the form of convolutional neural networks (CNN) or recurrent neural networks (RNN). In Section \ref{sec:cnn}, I will describe convolutional neural networks (CNN), and their uses in audio applications. In Section \ref{sec:rnn}, I will describe recurrent neural networks (RNN), and their uses in audio applications.
+
+In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis. In Section \ref{sec:pythonbasics}, I will describe core concepts of the Python programming language that I will be using in subsequent sections to describe the code I wrote to implement and test my hypothesis. In Section \ref{sec:gitvcs}, I will describe version control for software projects and introduce Git, a tool for storing and tracking changes in code projects. In Section \ref{sec:ossgithub}, I will describe open-source software and GitHub, which is a social website for sharing open-source code that use Git. I will be releasing the code that I wrote for this thesis in public on GitHub.
+
+In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks in Section \ref{sec:musicsepdefs}, and their motivations and uses in \ref{sec:musicsepmotivations}. In Section \ref{sec:musicsepbackground}, I will give an overview of historical computational approaches to audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for STFT-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a strategy used by Open-Unmix to only estimate the magnitude STFT spectrogram and use the phase of the original mixed audio, or ``noisy phase.'' In Section \ref{sec:musicseposs}, I will describe the open-source ecosystem of music source separation projects, whose public availability helped me work on this thesis. In Section \ref{sec:musicsepdatasets}, I will describe the public datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe the evaluation measures commonly used for music source separation methods. In Section \ref{sec:umx}, I will describe Open-Unmix, the model that will be the starting point for this thesis, and in Section \ref{sec:xumx}, I will describe its closely-related variant, CrossNet-Open-Unmix. Finally, in Section \ref{sec:cdae}, I will describe Convolutional Denoising Autoencoders (CDAE), which are another type of music source separation models that will also be incorporated in the final model of this thesis.
 
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
@@ -66,7 +75,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{di
 
 Throughout this section, the description of the Fourier Transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
 
-The\todo{introduce this paragraph} Large Time-Frequency Analysis toolbox (LTFAT) is ``a Matlab/Octave toolbox for working with time-frequency analysis and synthesis.''\footnote{\url{http://ltfat.org/}} It contains a test signal from the glockenspiel instrument, loaded by the \Verb#gspi# function.\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} This signal can be seen in audio signal processing papers on the topic of time-frequency \parencite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}. This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform}\todo{add score, pitch, 15 strikes?} shows the discrete-time waveform of the glockenspiel signal. Throughout this section, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44,100 Hz.
+Also, throughout this section and the rest of this chapter, an example waveform will be used for illustrative purposes. This is the glockenspiel waveform,\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} which is used in various audio signal processing papers on the topic of time-frequency \parencite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}. This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform}\todo{add score, pitch, 15 strikes?} shows the discrete-time waveform of the glockenspiel signal. Throughout this section, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44,100 Hz.
 
 \begin{figure}[ht]
 	\centering
@@ -665,6 +674,7 @@ The kernel parameters define the size and movement of the 2D convolution kernel 
 \end{figure}
 
 \subsubsection{Recurrent neural networks (RNN)}
+\label{sec:rnn}
 
 For time series data, for which the audio waveform is an exemplar given the temporal evolution of its amplitude, recurrent neural networks (RNNs) are useful since the input sequence of data is introduced back into the network with a cyclic or recurrent connection, and outputs are predicted based on past (or future, if the network is bi-directional) values of the sequence \parencite{rnns}. RNNs are also used commonly in sequence-to-sequence, or seq2seq, models \parencite{seq2seqs}.
 
@@ -714,8 +724,6 @@ One of the core features of the Python language is the \textit{list}.\footnote{\
 
 \hfill \Verb#speech_signal = [0.15, 0.28, 0.57, 0.98, -0.59]#
 
-\subsubsection{Numerical and machine learning libraries for Python}
-
 Python has a rich ecosystem of academic software libraries. NumPy\footnote{\url{https://numpy.org/}} and SciPy\footnote{\url{https://scipy.org/}} are used for numerical computation and parallelized matrix operations that run on the CPU (central processing unit). Matplotlib\footnote{\url{https://matplotlib.org/}} is a plotting library. Tensorflow\footnote{\url{https://www.tensorflow.org/}} and PyTorch\footnote{\url{https://pytorch.org/}} are libraries for machine learning and deep learning, which also have numerical computation and parallelized matrix operations that are similar to NumPy and SciPy, except that they can run on the GPU (graphical processing unit). The use of the GPU allows for more efficient, faster, and larger parallelized matrix operations, which are essential for modern machine learning and deep learning techniques.
 
 In NumPy, the \textit{ndarray}\footnote{\url{https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html}} is the core data structure representing an n-dimensional array of objects, which can be numerical (such as int16 or float32) or general objects (such as strings). The same speech signal represented by the Python list above can be represented by a 1-dimensional ndarray of 64-bit floating-point values:
@@ -738,12 +746,7 @@ In PyTorch and Tensorflow (and in general machine learning), a similar concept t
 
 Tensors can be used for numerical computations using the GPU in both PyTorch and TensorFlow, much like the ndarray with NumPy and SciPy on the CPU. For example, \Verb#torch.cos()# computes the cosine of a tensor. Additionally and most importantly, the inputs and outputs to the machine learning and deep learning constructs supported by these libraries are represented as tensors.
 
-\subsubsection{Random number generation}
-\label{sec:pyrng}
-
 The \Verb#random# module of Python contains a random number generator (RNG).\footnote{\url{https://docs.python.org/3/library/random.html}} The \Verb#seed# function initializes the random number generator,\footnote{\url{https://docs.python.org/3/library/random.html\#bookkeeping-functions}} which is, in fact, pseudorandom \parencite{pseudorng}. Pseudorandom means that given the same starting seed, the exact same sequence of numbers are generated deterministically. The seed is usually a parameter to a script or Python program, such that the user can recreate the same RNG sequences for testing purposes by using the same seed.
-
-\subsubsection{Package managers for Python}
 
 To manage third-party libraries and packages for Python, a package manager is suggested. The built-in way of managing a sandboxed Python environment is the virtual environment.\footnote{\url{https://docs.python.org/3/tutorial/venv.html}} This creates an isolated copy of Python where the user can install packages without risking the stability of the operating system (OS). The Python dependency manager tool, \Verb#pip#,\footnote{\url{https://pip.pypa.io/en/stable/cli/pip_install/\#requirements-file-format}} can be used to install a list of third-party packages. Packages are published to the public Python Package Index (PyPi) by the authors.\footnote{\url{https://pypi.org/}} An example of a \Verb#pip# file, conventionally called \Verb#requirements.txt#, is shown in Code Listing \ref{lst:reqtxt}.
 
@@ -782,6 +785,7 @@ dependencies:
 Pip is installed by default with Python, but Conda needs to be installed separately. For the code in this thesis, both pip and Conda files are used and provided to help the readers replicate the necessary Python environments.
 
 \subsubsection{Version control systems and git}
+\label{sec:gitvcs}
 
 Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database \parencite{gitbook}. \citeauthor{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you \hl{screw things up} or lose files, you can easily recover'' \parencite[1]{gitbook}.
 
@@ -800,6 +804,7 @@ Git is a popular tool for DVCS written by Linus Torvalds, who is also known for 
 All of the code for this thesis were stored in Git repositories to keep track of historical changes. It conveniently allows the author to reference the Git history to describe the evolution of the project and the incremental progress.
 
 \subsubsection{Open-source software and GitHub}
+\label{sec:ossgithub}
 
 \citeauthor{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form'' \parencite[1]{floss}. Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
 
@@ -816,16 +821,18 @@ All of the code for this thesis were stored in Git repositories to keep track of
 
 \newpagefill
 
-\subsection{Music source separation}
+\subsection{Music source separation and demixing}
 \label{sec:musicsep}
 
 \todo[inline]{explain the topics covered in this section. include bits of HPSS about how manipulating time-frequency resolution led to my hypothesis}
 
 \subsubsection{Task definition}
+\label{sec:musicsepdefs}
 
 \todo[inline]{repeat/distinguish the differences between music source separation and music demixing}
 
 \subsubsection{Task motivation}
+\label{sec:musicsepmotivations}
 
 Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track \parencite{musicsepintro1}. To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
 
@@ -852,6 +859,7 @@ A common thread in survey papers is that the domains of speech enhancement and m
 \end{figure}
 
 \subsubsection{Computational approaches}
+\label{sec:musicsepbackground}
 
 Computational source separation has a history of at least 50 years \parencite{musicmask, musicsepintro1}, originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, four sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset \parencite{musdb18}.
 
@@ -1005,10 +1013,12 @@ I will begin with the equations for an MPI oracle, derived from equations \eqref
 This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It provides an idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
 
 \subsubsection{Open-source ecosystem}
+\label{sec:musicseposs}
 
 There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub to provide tools, tutorials, and implementations for source separation. In particular, the SigSep organization\footnote{\url{https://github.com/sigsep}} contains many tools useful for music demixing research, including the reference implementation of Open-Unmix \parencite{umx}, MUSDB18 dataset loaders \parencite{musdb18, musdb18hq}, and BSS evaluation metrics \parencite{bss, bss2, sisec2018}.
 
 \subsubsection{Public datasets}
+\label{sec:musicsepdatasets}
 
 The most popular music stem dataset used by the Signal Separation Evaluation Campaign (SiSEC) and SigSep is the MUSDB18 dataset \parencite{musdb18}, and more recently the HQ (high-quality) version \parencite{musdb18hq}. MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets \parencite{sisec2016, otherdataset2}.
 
