@@ -80,7 +80,7 @@ Also, throughout this section and the rest of this chapter, an example waveform 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.725\textwidth]{./images-gspi/glock_waveform.png}
-	\caption{Glockenspiel waveform playing a C minor pentatonic melody with 15 strikes. The struck notes are C7, Eb7, G7, Bb7, C7, Eb7, G7, Bb7}
+	\caption{Glockenspiel waveform playing a C minor pentatonic melody with 15 strikes. The struck notes are $C, Eb, G, Bb, C, Eb, G, Bb$.}
 	\label{fig:glockwaveform}
 \end{figure}
 
@@ -113,13 +113,13 @@ Signals needs to be transformed from the continuous to the discrete domain via s
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{6}\label{equation:idtft}
 \end{align}
 
-The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}\todo{figure caption different lengths}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
+The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[2,048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_2048.png}}\\
 	\subfloat[262,144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_262144.png}}
-	\caption{DFT of the Glockenspiel waveform. Note the richer frequency information in the higher frequency resolution transform in (b)}
+	\caption{DFT of the Glockenspiel waveform, using a low frequency resolution with 2,048 points in (a), and a high frequency resolution with 262,144 points in (b). Note the more detailed frequency components shown in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
 
@@ -233,9 +233,9 @@ The number of output frequency bins of the STFT is the same as the DFT, since th
 	\label{fig:stftdiag}
 \end{figure}
 
-A key characteristic of the STFT is its fixed time-frequency resolution across the entire frequency spectrum. To change the time-frequency resolution, the window size must be changed.  Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2}\todo{describe why each spectrogram is different} shows the Gabor transform, which is the STFT with the Gaussian window. Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
+A key characteristic of the STFT is its fixed time-frequency resolution across the entire frequency spectrum. To change the time-frequency resolution, the window size must be changed.  Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2} shows the Gabor transform, which is the STFT with the Gaussian window, intending to show that the STFT and Gabor transform are practically identical to each other. Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The different window sizes show a visual demonstration of the time-frequency tradeoff. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
 
-\todo[inline]{segue to constant-q and gabor}
+The time-frequency tradeoff limitation of the STFT and Gabor transform is a result of taking the Fourier transform of fixed-size windows applied to the input signal. In upcoming sections, I will show time-frequency transforms that use variable-size windows, which result in a time-frequency resolution that varies across the frequency spectrum. These transforms are also called nonuniform, to distinguish from the uniform or fixed time-frequency resolution of the STFT. Section \ref{sec:cqt} introduces the Constant-Q Transform (CQT), a variable-window time-frequency transform designed for music analysis. Section \ref{sec:theorynsgt} and Section \ref{sec:theoryslicqt} show the Nonstationary Gabor Transform (NSGT) and sliced Constant-Q Transform (sliCQT), which are time-frequency transforms with varying time-frequency resolution motivated by the CQT. Section \ref{sec:raggedtf} will show how nonuniform time-frequency transforms differ from the uniform STFT, and Section \ref{sec:fscales} will show different nonuniform frequency scales that can be used to analyze audio in the NSGT and sliCQT.
 
 \begin{figure}[ht]
 	\centering
@@ -251,7 +251,7 @@ A key characteristic of the STFT is its fixed time-frequency resolution across t
 	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_128.png}}\\
 	\subfloat[STFT, 2,048-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_2048.png}}\\
 	\subfloat[STFT, 16,384-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_16384.png}}
-	\caption{Magnitude spectrograms with the Hamming window STFT}
+	\caption{Magnitude spectrograms with the Hamming window STFT. The spectrograms are shown in order of the smallest to largest window size. The horizontal lines (i.e., frequency components) are becoming sharper from the increasing frequency resolution, while the vertical lines (i.e., temporal events or note onsets) are becoming blurrier from the decreasing time resolution.}
 	\label{fig:stfts1}
 \end{figure}
 
@@ -260,7 +260,7 @@ A key characteristic of the STFT is its fixed time-frequency resolution across t
 	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_128.png}}\\
 	\subfloat[Gabor transform, 2,048-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
 	\subfloat[Gabor transform, 16,384-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_16384.png}}
-	\caption{Magnitude spectrograms with the Gabor transform, i.e., the Gaussian window STFT}
+	\caption{Magnitude spectrograms with the Gabor transform, i.e., the STFT with a Gaussian window. Note that they look identical to the STFT with a Hamming window in Figure \ref{fig:stfts1}. The different window functions are compared in Figure \ref{fig:gaussvshamm}.}
 	\label{fig:stfts2}
 \end{figure}
 
@@ -303,14 +303,16 @@ where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\t
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT \parencite{invertiblecqt, slicq, variableq1}. However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction \parencite{klapuricqt}. Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
-Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}\todo{comment in the caption}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}\todo{comment in caption comp to previous fig}. The spectrograms generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox. Note how the CQT spectrograms contain more musical information than the STFT spectrograms at all frequency resolutions.\todo{make a connection to the next section}
+Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox. Note how the CQT spectrograms contain more musical information than the STFT spectrograms at all frequency resolutions.
+
+As mentioned throughout this section, the best implementation choice for the CQT is the NSGT, which allows for a perfect inverse transform. Section \ref{sec:theorynsgt} will introduce and describe the general NSGT, and Section \ref{sec:theoryslicqt} will introduce and describe the sliCQT, which is a realtime variant of the NSGT. The NSGT and sliCQT allow the analysis of audio with an arbitrary nonuniform frequency scale not limited to the Constant-Q scale, which will give me more freedom in this thesis to find a frequency scale that performs best for music source separation applications.
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_256.png}}\\
 	\subfloat[STFT spectrogram, window size 1,024]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_1024.png}}\\
 	\subfloat[STFT spectrogram, window size 4,096]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_4096.png}}
-	\caption{STFT magnitude spectrograms of the glockenspiel signal}
+	\caption{STFT magnitude spectrograms of the glockenspiel signal. Three different window sizes are shown in increasing order, demonstrating an increasing frequency resolution (sharper horizontal lines) and decreasing time resolution (blurrier vertical lines).}
 	\label{fig:cqtvsstft1}
 \end{figure}
 
@@ -319,7 +321,7 @@ Several examples of magnitude spectrograms of the glockenspiel signal are genera
 	\subfloat[CQT spectrogram, 12 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt12.png}}\\
 	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt24.png}}\\
 	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt48.png}}
-	\caption{CQT magnitude spectrograms of the glockenspiel signal}
+	\caption{CQT magnitude spectrograms of the glockenspiel signal. Three different bins-per-octave are shown in increasing order. For a given bins-per-octave, the time and frequency resolution varies by frequency region. Using more bins-per-octave increases the highest frequency resolution and decreases the lowest time resolution.}
 	\label{fig:cqtvsstft2}
 \end{figure}
 
@@ -808,9 +810,7 @@ All of the code for this thesis were stored in Git repositories to keep track of
 
 \citeauthor{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form'' \parencite[1]{floss}. Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
 
-\todo[inline]{somewhere describe how GitHub is different from Git}
-
-\citeauthor{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects'' \parencite[131]{gitbook}. GitHub contains tools for working with Git repositories, including social elements for personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate. An example of the GitHub code browser showing a file from the PyTorch project's Git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in Figure \ref{fig:githubpytorch}.
+GitHub\footnote{\url{https://github.com}} is a social website, designed for sharing and browsing software projects that use Git for version control, intended for users to share and collaborate on open-source code. \citeauthor{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects'' \parencite[131]{gitbook}. GitHub contains tools for working with Git repositories, including social elements for personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate. An example of the GitHub code browser showing a file from the PyTorch project's Git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in Figure \ref{fig:githubpytorch}.
 
 \begin{figure}[ht]
 	\centering
