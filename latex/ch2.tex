@@ -79,8 +79,9 @@ Also, throughout this section and the rest of this chapter, an example waveform 
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.725\textwidth]{./images-gspi/glock_waveform.png}
-	\caption{Glockenspiel waveform playing a C minor pentatonic melody with 15 strikes. The struck notes are $C, Eb, G, Bb, C, Eb, G, Bb$.}
+	\subfloat[Glockenspiel waveform]{\includegraphics[width=0.725\textwidth]{./images-gspi/glock_waveform.png}}\\
+	\subfloat[Glockenspiel notes]{\includegraphics[width=\textwidth]{./images-gspi/sheetmusic.png}}
+	\caption{Glockenspiel waveform in (a) playing a C minor pentatonic melody with 15 strikes. The struck notes are $C, Eb, G, Bb, C, Eb, G, Bb$, shown in (b)}
 	\label{fig:glockwaveform}
 \end{figure}
 
@@ -107,7 +108,7 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra, respectively \parencite{discretebook}.
 
-Signals needs to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
+Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{6}\label{equation:idtft}
@@ -146,17 +147,9 @@ According to \citeauthor{korpel}, ``Gabor came to the conclusion that the diffic
 
 Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \citeauthor{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \parencite[432]{gabor1946}. This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' \parencite[432]{gabor1946}.
 
-The\todo{where am i going with this} time-domain unit impulse signal or sequence \parencite[20]{melbook} is described by equation \eqref{equation:delta}:
-\begin{flalign}\label{equation:delta}
-\delta[n] = \begin{cases}
-	1 \text{\hspace{1em}} n = 0\\
-	0 \text{\hspace{1em}} \text{otherwise}
-\end{cases}
-\end{flalign}
+Figure \ref{fig:gaborfirst}(a) demonstrates the mutually exclusive formulations of time and frequency by showing the unit impulse contrasted with the DC-component DFT. The DFT spectrum of a ``sinusoid of zero frequency'' \parencite[13]{dspfirst} has only one nonzero value in the frequency domain at the 0 Hz frequency component (direct current, or DC), but has an infinite extent in the time domain. The unit impulse is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0'' \parencite[107]{dspfirst}, but has an infinite extent in the frequency domain.
 
-The impulse is a useful signal, as it is the ``simplest [time-domain] sequence because it has only one nonzero value, which occurs at n = 0. The mathematical notation is that of the Kronecker delta function'' \parencite[107]{dspfirst}. Note the Kronecker delta function is the discrete equivalent of the Dirac delta function \parencite[937]{melbook}. Contrast this with the DFT spectrum of a signal that is only nonzero at the 0 Hz (direct current, or DC) frequency component, which is a ``sinusoid of zero frequency'' \parencite[13]{dspfirst}.
-
-Figure \ref{fig:gaborfirst}(a) shows the unit impulse contrasted with the DC-component DFT, and these two, in fact, demonstrate the mutually exclusive formulations of time and frequency. The unit impulse, which has a single nonzero value in the time domain, has an infinite extent in the frequency domain. Conversely, the DC-component DFT has a single nonzero value in the frequency domain, but has an infinite extent in the time domain. Figure \ref{fig:gaborfirst}(b) shows the intuition of the time-frequency tradeoff as a choice of signal length. The periodicity of the sine wave is more apparent over longer periods of time $\Delta t$, but the detail of the individual sample values become lost.
+Figure \ref{fig:gaborfirst}(b) shows the intuition of the time-frequency tradeoff as a choice of signal length. The periodicity of the sine wave is more apparent over longer periods of time $\Delta t$, but the detail of the individual sample values become lost.
 
 \begin{figure}[ht]
 	\centering
@@ -294,7 +287,6 @@ This first CQT implementation was not designed to be invertible, until \textcite
 \textcite{invertiblecqt} implemented the Constant-Q Transform with the Nonstationary Gabor Transform (NSGT) \parencite{balazs}, which allowed for perfect reconstruction for the first time. This is also called the CQ-NSGT, or Constant-Q Nonstationary Gabor Transform.
 
 \textcite{slicq} followed up with a realtime algorithm, the \textit{sliCQ} or ``sliced Constant-Q'' transform (sliCQT), which can process the input signal in fixed-size slices, as opposed to operating on the entire input signal like the NSGT. Finally, \textcite{variableq1} introduced the Variable-Q scale and improved the phase of the transform. From \textcite{invertiblecqt}, the total frequency bins of the CQ-NSGT or sliCQT can be derived from the bins-per-octave, and the minimum and maximum frequencies of the desired frequency scale, shown in equation \eqref{equation:bpo}:
-
 \begin{align}
 	K = [B \log_{2}\big(\frac{\xi_{\text{max}}}{\xi_{\text{min}}}\big) + 1]\tag{10}\label{equation:bpo}
 \end{align}
@@ -702,7 +694,11 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 \subsection{Software and code concepts}
 \label{sec:softcode}
 
-\todo[inline]{explain why i am covering this topic and provide an introduction to this section}
+In this section, I will give an overview of important concepts in Python and general software and coding. The overview will cover the topics that are relevant to the methodology and experiments of this thesis in Section \ref{sec:methodology} and Section \ref{sec:experiment} respectively.
+
+In Section \ref{sec:pythonbasics}, I will describe concepts of the Python programming language that are most relevant to this thesis, including data structures, numerical and scientific libraries, library managers for installing academic software, and random number generation.
+
+For all of the software written for this thesis, I used Git to track changes, and made the code open-source and available on GitHub for transparency into my methodology and results. In Section \ref{sec:gitvcs}, I will describe version control and Git, and in Section \ref{sec:ossgithub}, I will describe open-source software and GitHub, a social website for sharing code that use Git.
 
 \subsubsection{Python programming language}
 \label{sec:pythonbasics}
@@ -789,7 +785,7 @@ Pip is installed by default with Python, but Conda needs to be installed separat
 \subsubsection{Version control systems and git}
 \label{sec:gitvcs}
 
-Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database \parencite{gitbook}. \citeauthor{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you \hl{screw things up} or lose files, you can easily recover'' \parencite[1]{gitbook}.
+Version control systems (VCS) are systems used for tracking and managing changes to code files, and storing the history of changes in a database \parencite{gitbook}. \citeauthor{gitbook} state that the benefits of using a VCS is that it ``allows you to revert selected files back to a previous state, revert the entire project back to a previous state, compare changes over time, see who last modified something that might be causing a problem, who introduced an issue and when, and more. Using a VCS also generally means that if you [make mistakes] or lose files, you can easily recover'' \parencite[1]{gitbook}.
 
 According to \textcite{gitbook}, version control systems are either centralized or distributed. In a distributed version control systems (DVCS), each person's copy of the code contains the full history of changes. This means that people can work on their own private copy of the code, and then sync changes with a central server, rather than depending on the central server for viewing the history like in a centralized version control system (CVCS). This allows people to work independently of the central server, until they are ready to sync changes back with the other collaborators.
 
@@ -838,10 +834,9 @@ Typical music recordings are mono or stereo mixtures, with multiple sound object
 
 There are many motivations for performing this separation. \citeauthor{musicsepgood} describe that ``we can remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix'' \parencite[31]{musicsepgood}.
 
-\textcite{mdx21}\todo{do this part better from paper not website\url{https://arxiv.org/pdf/2108.13559.pdf}} describe audio source separation as consisting of different subtasks, including ``music source separation systems [that] take a song as input and output one track for each of the instruments,'' and ``speech enhancement systems [that] take noisy speech as input and separate the speech content from the noise.'' Important uses for music demixing systems range from entertainment to hearing aids:
-
+According to \citeauthor{mdx21}, audio source separation and music source separation have important uses in the world today:
 \begin{quote}
-	For example, the original master of old movies contains all the material (dialogue, music and sound effects) mixed in mono or stereo: thanks to source separation we can retrieve the individual components and allow for up-mixing to surround systems. [...] Karaoke systems can benefit from the audio source separation technology as users can sing over any original song, where the vocals have been suppressed, instead of picking from a set of ``cover'' songs specifically produced for karaoke.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}
+	Audio source separation has been studied extensively for decades as it brings benefits in our daily life, driven by many practical applications, e.g., hearing aids, speech diarization, etc. In particular, music source separation (MSS) attracts professional creators because it allows the remixing or reviving of songs to a level never achieved with conventional approaches such as equalizers. Suppressing vocals in songs can also improve the experience of a karaoke application, where people can enjoy singing together on top of the original song (where the vocals were suppressed), instead of relying on content developed specifically for karaoke applications \parencite[1]{mdx21}.
 \end{quote}
 
 A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of \parencite{musicsepintro1, musicmask}. Music demixing is the focus of this thesis, shown in Figure \ref{fig:mixingdiagrams}.
@@ -926,7 +921,7 @@ The entire process of median-filtering HPSS with binary masks applied to the spe
 
 Surveys on speech \parencite{speechmask} and music separation \parencite{musicmask} indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
-A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values, i.e., only zero and one. To compute a binary mask, there must be an additional real-valued parameter, $\theta \in [0.0, 1.0]$, which is the separation factor -- values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
+A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
 
 \begin{figure}[ht]
 	\centering
@@ -940,12 +935,12 @@ An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2},
 	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}}\tag{16}\label{equation:softmask}
 \end{align}
 
-, where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is given by equation \eqref{equation:hardmask}:
+where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is given by equation \eqref{equation:hardmask}:
 \begin{align}
 	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{17}\label{equation:hardmask}
 \end{align}
 
-, where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equations \eqref{equation:residual}:
+where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equations \eqref{equation:residual}:
 \begin{align}\tag{18}\label{equation:residual}
 	\nonumber & M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta\\
 	\nonumber & M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}})
@@ -980,7 +975,7 @@ The oracles for the vocal source (and the same equations apply to the drum track
 	\end{cases}
 \end{align}
 
-To estimate the time domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using equation \eqref{equation:cplxinvert}:
+To estimate the time-domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using equation \eqref{equation:cplxinvert}:
 \begin{align}\tag{21}\label{equation:cplxinvert}
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \mathit{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
@@ -1107,7 +1102,7 @@ Finally, the four estimated magnitude STFTs are considered together, along with 
 
 The loss function of X-UMX is first modified to include a multi-domain loss (MDL), which includes the existing frequency-domain loss (spectrogram MSE) in addition to a new time-domain loss. The time-domain loss is the same SDR score from the BSS metrics which was shown in Section \ref{sec:evalbss}.
 
-I showed in equation \ref{equation:mpirepeat} how to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In X-UMX, these equations are used to compute the time-domain waveforms and apply the SDR loss function.
+I showed in equation \eqref{equation:mpirepeat} how to convert from the estimated magnitude spectrogram of the neural network to the waveform estimate. In X-UMX, these equations are used to compute the time-domain waveforms and apply the SDR loss function.
 
 The next addition to the loss function of X-UMX is the combination loss (CL), which considers 14 possible combinations of the four target sources (vocals, drums, bass, other) in both the spectral MSE loss and time-domain SDR loss. The 14 combinations are shown in Table \ref{table:14targets}.
 
@@ -1162,7 +1157,7 @@ Equations \eqref{equation:cl} show the computation of the total frequency-domain
 	\nonumber & \text{mse\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{mse\_loss}_{n}}
 \end{align}
 
-For the time-domain loss, the same 14 combinations are considered in the time-domain, using the ground-truth time-domain waveforms $y$ and the estimated time-domain waveform $\hat{y}$ from the mix-phase inversion, shown in the equations \eqref{equation:mdl}:
+For the time-domain loss, the same 14 combinations are considered in the time domain, using the ground-truth time-domain waveforms $y$ and the estimated time-domain waveform $\hat{y}$ from the mix-phase inversion, shown in the equations \eqref{equation:mdl}:
 \begin{align}\tag{35}\label{equation:mdl}
 	\nonumber & \text{sdr\_loss}_{1} = \mathit{SDR}(\hat{y}_{1}, y_{1})\\
 	\nonumber & \text{(... repeat for size-1 combinations)}\\
