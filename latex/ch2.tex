@@ -21,7 +21,7 @@ In Section \ref{sec:ml}, I will give an overview of machine learning and deep le
 
 In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis. In Section \ref{sec:pythonbasics}, I will describe core concepts of the Python programming language that I will be using in subsequent sections to describe the code I wrote to implement and test my hypothesis. In Section \ref{sec:gitvcs}, I will describe version control for software projects and introduce Git, a tool for storing and tracking changes in code projects. In Section \ref{sec:ossgithub}, I will describe open-source software and GitHub, which is a social website for sharing open-source code that use Git. I will be releasing the code that I wrote for this thesis on GitHub for public availability.
 
-In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks in Section \ref{sec:musicsepdefs}, and their motivations and uses in Section \ref{sec:musicsepmotivations}. In Section \ref{sec:musicsepbackground}, I will give an overview of computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a strategy used by Open-Unmix to only estimate the magnitude STFT spectrogram and use the phase of the original mixed audio, or the ``noisy phase.'' In Section \ref{sec:musicseposs}, I will describe the open-source ecosystem of music source separation projects, whose public availability helped me work on this thesis. In Section \ref{sec:musicsepdatasets}, I will describe the public datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe metrics that are commonly used for evaluating music source separation methods. In Section \ref{sec:umx}, I will describe Open-Unmix, the model that will be the starting point for this thesis, and in Section \ref{sec:xumx}, I will describe its closely-related variant, CrossNet-Open-Unmix. Finally, in Section \ref{sec:cdae}, I will describe Convolutional Denoising Autoencoders (CDAE), which are another type of music source separation model that I will incorporate in the final model of this thesis.
+In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, and their motivations and uses, in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepdatasets}, I will describe the public datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe metrics that are commonly used for evaluating music source separation methods. In Section \ref{sec:musicsepbackground}, I will give an overview of computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a common strategy for only estimating the magnitude STFT spectrogram and using the phase of the original mixed audio, or the ``noisy phase.'' In Section \ref{sec:umx}, I will describe Open-Unmix, the model that will be the starting point for this thesis, and in Section \ref{sec:xumx}, I will describe its closely-related variant, CrossNet-Open-Unmix. Finally, in Section \ref{sec:cdae}, I will describe Convolutional Denoising Autoencoders (CDAE), which are another type of music source separation model that I will incorporate in the final model of this thesis.
 
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
@@ -820,19 +820,18 @@ GitHub\footnote{\url{https://github.com}} is a social website, designed for shar
 \subsection{Music source separation and demixing}
 \label{sec:musicsep}
 
-\todo[inline]{explain the topics covered in this section}
+In this section, I will provide an overview of music source separation and music demixing. I will start by providing definitions, motivations, and uses of the tasks in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepdatasets}, I will describe the MUSDB18 and MUSDB18-HQ datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe the BSS evaluation metrics used for evaluating music source separation methods.
 
-A new music source separation model, which is the result of this thesis, will be presented in Section \ref{sec:methodology}. It will have two variants, one based on a recurrent neural network (RNN) architecture, and one based on a convolutional neural network (CNN) architecture. To provide the necessary background, I will give an overview of convolutional neural networks (CNN) for audio and music applications in Section \ref{sec:cnn}, I will give an overview of recurrent neural networks (RNN) for audio and music applications in Section \ref{sec:rnn}.
+In Section \ref{sec:musicsepbackground}, I will give an overview of historical computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a strategy used by spectrogram-based music source separation models, where only the model only estimates the magnitude STFT of the target and uses the phase of the original mixed audio, or the ``noisy phase.''
 
-The music Open-Unmix, which will be shown in Section \ref{sec:umx}, and the Convolutional Denoising Autoencoder (CDAE), which will be shown in Section \ref{sec:cdae}. Open-Unmix uses a recurrent neural network (RNN) architecture, and the CDAE uses a convolutional neural network (CNN) architecture.  
+A new music source separation model, which is the result of this thesis, will be presented in Section \ref{sec:methodology}. In Section \ref{sec:ml}, I described that the model will have two variants, one based on a convolutional neural network (CNN) architecture, and one based on a recurrent neural network (RNN) architecture. The RNN model architecture is based on Open-Unmix and CrossNet-Open-Unmix, two related models for music source separation, which will be shown in Section \ref{sec:umx} and Section \ref{sec:xumx}. The CNN model architecture is based on the Convolutional Denoising Autoencoder (CDAE), which will be shown in Section \ref{sec:cdae}.
 
-\subsubsection{Task definition}
-\label{sec:musicsepdefs}
+I would like to express gratitude to the SigSep organization\footnote{\url{https://github.com/sigsep}} on GitHub, which has published many open-source code projects for music source separation research. The projects were essential to the creation of this thesis, and they include the reference implementation of Open-Unmix,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}}, libraries for loading the MUSDB18-HQ dataset,\footnote{\url{https://github.com/sigsep/sigsep-mus-db}} and a library for computing the BSS evaluation metrics for evaluating music source separation systems.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}}
+
+\subsubsection{Task definition and motivations}
+\label{sec:musicsepdefsmotivations}
 
 \todo[inline]{repeat/distinguish the differences between music source separation and music demixing}
-
-\subsubsection{Task motivation}
-\label{sec:musicsepmotivations}
 
 Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track \parencite{musicsepintro1}. To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
 
@@ -856,6 +855,42 @@ A common thread in survey papers is that the domains of speech enhancement and m
 		\label{fig:mixingdiagrams}
 	\end{minipage}
 \end{figure}
+
+\subsubsection{Public datasets}
+\label{sec:musicsepdatasets}
+
+The most popular music stem dataset used by the Signal Separation Evaluation Campaign (SiSEC) and SigSep is the MUSDB18 dataset \parencite{musdb18}, and more recently the HQ (high-quality) version \parencite{musdb18hq}. MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets \parencite{sisec2016, otherdataset2}.
+
+The MUSDB18-HQ dataset has fixed train, validation, and test splits. The dataset is organized into \Verb#train# and \Verb#test# folders, and a list of 14 tracks from the training folder are defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
+
+\subsubsection{Evaluation measures}
+\label{sec:evalbss}
+
+The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
+
+\begin{tight_itemize}
+\item
+	\textbf{SDR:} Signal to Distortion Ratio
+\item
+	\textbf{SIR:} Signal to Interference Ratio
+\item
+	\textbf{SAR:} Signal to Artifacts Ratio
+\item
+	\textbf{ISR:} source Image to Spatial distortion Ratio
+\end{tight_itemize}
+
+Out of these four scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
+\begin{align}
+	\nonumber & \mathit{SDR}_{\text{instr}} = \\
+	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{22}\label{equation:sdrinstr}
+\end{align}
+
+The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
+\begin{align}
+	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{23}\label{equation:sdrsong}
+\end{align}
+
+In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used to calculate the results in this thesis.
 
 \subsubsection{Computational approaches}
 \label{sec:musicsepbackground}
@@ -1010,47 +1045,6 @@ I will begin with the equations for an MPI oracle, derived from equations \eqref
 \end{align}
 
 This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It provides an idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
-
-\subsubsection{Open-source ecosystem}
-\label{sec:musicseposs}
-
-There are several groups of researchers who created open-source ecosystems on the code sharing platform GitHub to provide tools, tutorials, and implementations for source separation. In particular, the SigSep organization\footnote{\url{https://github.com/sigsep}} contains many tools useful for music demixing research, including the reference implementation of Open-Unmix \parencite{umx}, MUSDB18 dataset loaders \parencite{musdb18, musdb18hq}, and BSS evaluation metrics \parencite{bss, bss2, sisec2018}.
-
-\subsubsection{Public datasets}
-\label{sec:musicsepdatasets}
-
-The most popular music stem dataset used by the Signal Separation Evaluation Campaign (SiSEC) and SigSep is the MUSDB18 dataset \parencite{musdb18}, and more recently the HQ (high-quality) version \parencite{musdb18hq}. MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets \parencite{sisec2016, otherdataset2}.
-
-The MUSDB18-HQ dataset has fixed train, validation, and test splits. The dataset is organized into \Verb#train# and \Verb#test# folders, and a list of 14 tracks from the training folder are defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
-
-\subsubsection{Evaluation measures}
-\label{sec:evalbss}
-
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
-
-\begin{tight_itemize}
-\item
-	\textbf{SDR:} Signal to Distortion Ratio
-\item
-	\textbf{SIR:} Signal to Interference Ratio
-\item
-	\textbf{SAR:} Signal to Artifacts Ratio
-\item
-	\textbf{ISR:} source Image to Spatial distortion Ratio
-\end{tight_itemize}
-
-Out of these four scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
-\begin{align}
-	\nonumber & \mathit{SDR}_{\text{instr}} = \\
-	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{22}\label{equation:sdrinstr}
-\end{align}
-
-The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
-\begin{align}
-	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{23}\label{equation:sdrsong}
-\end{align}
-
-In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used to calculate the results in this thesis.
 
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
