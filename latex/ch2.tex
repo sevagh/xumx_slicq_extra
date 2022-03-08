@@ -603,7 +603,7 @@ In machine learning, the input data is typically split into a training set and a
 
 Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing \parencite{musicsp}. It follows that ML and DL techniques can be extended to music \hl{signal processing} applications. \textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that models from the field of computer vision, originally designed for 2D images where pixels are related spatially, may not exactly fit audio waveforms, where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains \parencite{audiodeeplearning}.
 
-\todo[inline]{say what you will cover in the rest of this section and why}
+A new music source separation model, which is the result of this thesis, will be presented in Section \ref{sec:methodology}. It will have two variants, one based on a recurrent neural network (RNN) architecture, and one based on a convolutional neural network (CNN) architecture. To provide the necessary background, I will give an overview of convolutional neural networks (CNN) for audio and music applications in Section \ref{sec:cnn}, I will give an overview of recurrent neural networks (RNN) for audio and music applications in Section \ref{sec:rnn}.
 
 \subsubsection{Convolutional neural networks (CNN)}
 \label{sec:cnn}
@@ -759,7 +759,7 @@ numpy==1.19.4
 	\label{lst:reqtxt}
 \end{listing}
 
-There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish and distribute their packages to users, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in Code Listing \ref{lst:condayml}. Conda files can also support the pip syntax, since pip is a native Python tool. The user can combine the best of both worlds by using Conda and pip syntax simultaneously in their Conda environment file.
+There is another popular Python dependency manager called Conda.\footnote{\url{https://docs.conda.io/en/latest/}} Conda environments are also popular for creating reproducible Python environments for academic software. Conda supports channels for third-party package authors to publish and distribute their packages to users, similar to PyPi.\footnote{\url{https://conda.io/projects/conda/en/latest/user-guide/concepts/channels.html}} An example Conda environment file is shown in Code Listing \ref{lst:condayml}. Conda files can also support the \Verb#pip# syntax, since \Verb#pip# is a native Python tool. The user can combine the best of both worlds by using Conda and \Verb#pip# syntax simultaneously in their Conda environment file.
 
 \begin{listing}[ht]
 \centering
@@ -780,7 +780,7 @@ dependencies:
 	\label{lst:condayml}
 \end{listing}
 
-Pip is installed by default with Python, but Conda needs to be installed separately. For the code in this thesis, both pip and Conda files are used and provided to help the readers replicate the necessary Python environments.
+Pip is installed by default with Python, but Conda needs to be installed separately. For the code in this thesis, both \Verb#pip# and Conda files are used and provided to help the readers replicate the necessary Python environments.
 
 \subsubsection{Version control systems and git}
 \label{sec:gitvcs}
@@ -820,7 +820,11 @@ GitHub\footnote{\url{https://github.com}} is a social website, designed for shar
 \subsection{Music source separation and demixing}
 \label{sec:musicsep}
 
-\todo[inline]{explain the topics covered in this section. include bits of HPSS about how manipulating time-frequency resolution led to my hypothesis}
+\todo[inline]{explain the topics covered in this section}
+
+A new music source separation model, which is the result of this thesis, will be presented in Section \ref{sec:methodology}. It will have two variants, one based on a recurrent neural network (RNN) architecture, and one based on a convolutional neural network (CNN) architecture. To provide the necessary background, I will give an overview of convolutional neural networks (CNN) for audio and music applications in Section \ref{sec:cnn}, I will give an overview of recurrent neural networks (RNN) for audio and music applications in Section \ref{sec:rnn}.
+
+The music Open-Unmix, which will be shown in Section \ref{sec:umx}, and the Convolutional Denoising Autoencoder (CDAE), which will be shown in Section \ref{sec:cdae}. Open-Unmix uses a recurrent neural network (RNN) architecture, and the CDAE uses a convolutional neural network (CNN) architecture.  
 
 \subsubsection{Task definition}
 \label{sec:musicsepdefs}
@@ -898,7 +902,7 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 \subsubsection{Harmonic/Percussive source separation}
 \label{sec:hpss}
 
-A simple case of music source separation is Harmonic/Percussive Source Separation (HPSS) \parencite{musicsepgood}. Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. This is a form of KAM (kernel additive modelling) algorithm.
+A simple case of music source separation is Harmonic/Percussive Source Separation (HPSS) \parencite{musicsepgood}. Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. HPSS is in the category of KAM (kernel additive modeling) \parencite{musicsepgood}.
 
 Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals. \textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in Section \ref{sec:masksandoracles}.
 
@@ -914,7 +918,7 @@ The entire process of median-filtering HPSS with binary masks applied to the spe
 	\label{fig:fitz12}
 \end{figure}
 
-\textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice.
+\textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks, a larger window size for the harmonic separation, and a smaller window size for the percussive separation. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice. These modifications of HPSS related to the time-frequency tradeoff of the STFT and CQT directly inspired the hypothesis of this thesis, which is that using the sliCQT instead of the STFT in a neural network for music source separation might improve the results due to the better time-frequency resolution characteristics of the sliCQT.
 
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
