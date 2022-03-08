@@ -863,8 +863,12 @@ The most popular music stem dataset used by the Signal Separation Evaluation Cam
 
 The MUSDB18-HQ dataset has fixed train, validation, and test splits. The dataset is organized into \Verb#train# and \Verb#test# folders, and a list of 14 tracks from the training folder are defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
 
+\explanation{why is 14 tracks significant? because you told me to do that}
+
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
+
+\todo[inline]{this section needs an intro, why do we need to evaluate?}
 
 The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
 
@@ -879,25 +883,29 @@ The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from t
 	\textbf{ISR:} source Image to Spatial distortion Ratio
 \end{tight_itemize}
 
-Out of these four scores, SDR is the single global score which is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
+Out of these four scores, SDR is the single global score that is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
 \begin{align}
 	\nonumber & \mathit{SDR}_{\text{instr}} = \\
 	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{22}\label{equation:sdrinstr}
 \end{align}
 
-The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems of MUSDB18-HQ -- vocals, drums, bass, other -- the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
+The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, durms, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
 	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{23}\label{equation:sdrsong}
 \end{align}
 
-In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used to calculate the results in this thesis.
+In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used in this thesis.
 
 \subsubsection{Computational approaches}
 \label{sec:musicsepbackground}
 
-Computational source separation has a history of at least 50 years \parencite{musicmask, musicsepintro1}, originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA and BSS, the mixed audio contains unknown sources that must be separated. In music demixing, the sources are typically known; most commonly, four sources (vocals, drums, bass, other) are used as defined by the MUSDB18 dataset \parencite{musdb18}.
+Computational source separation has a history of at least 50 years \parencite{musicmask, musicsepintro1}, originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS).
 
-Among the earliest computational approaches for blind source separation is Independent Component Analysis (ICA)  \parencite{musicmask, musicsepgood, musicsepintro1}, which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. \textcite{ica1, ica2} describe ICA algorithms, and \textcite{blind1, blind2} provide an in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
+\todo[inline]{blurb on casa and bss}
+
+In CASA and BSS, the mixed audio contains unknown sources that must be separated; the criteria for separation is that the sources must be distinct from each other. In music demixing, the sources are typically known. That is to say, in music source separation, the task is not to separate all of the distinct sources in the mixture, but to extract a known set of sources. Some forms of music source separation try to extract harmonic and percussive sources \parencite{fitzgerald1, fitzgerald2, driedger}, which will be described in greater detail in Section \ref{sec:hpss}. Another common set of separation sources are the four sources defined by the MUSDB18 \parencite{musdb18} dataset: vocals, drums, bass, and other.
+
+A popular algorithm in blind source separation is Independent Component Analysis (ICA)  \parencite{musicmask, musicsepgood, musicsepintro1}, which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. \textcite{ica1, ica2} describe ICA algorithms, and \textcite{blind1, blind2} provide an in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
 \begin{figure}[ht]
 	\centering
@@ -922,7 +930,7 @@ Techniques more specific to music were developed as a necessity to deal with the
 \label{fig:sepgood}
 \end{figure}
 
-Kernel Additive Modeling (KAM) is the simplest form of music source modeling \parencite{musicsepgood}. To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source, e.g., percussive, harmonic or vocals, are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' \parencite[36]{musicsepgood}. A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm \parencite{fitzgerald1}.
+Kernel Additive Modeling (KAM) is the simplest form of music source modeling \parencite{musicsepgood}. To estimate a music source at a given time-frequency point, KAM ``select[s] a set of time-frequency bins, which, given the nature of the target source (e.g., percussive, harmonic or vocals) are likely to be similar in value. This set of time-frequency bins is termed a proximity kernel'' \parencite[36]{musicsepgood}. A well-known example of a KAM-based music separation algorithm is the median-filtering Harmonic/Percussive Source Separation (HPSS) algorithm \parencite{fitzgerald1}.
 
 Spectrogram factorization models are more sophisticated than KAM, and the most popular spectrogram factorization model is Nonnegative Matrix Factorization (NMF) \parencite{musicmask, musicsepgood}. According to \citeauthor{musicsepgood}, NMF ``attempts to factorize a given nonnegative matrix into two nonnegative matrices,'' and it can be applied to the magnitude spectrogram of the mix, $M$, to separate it into frequency weight matrices $W$ and time activation matrices $H$ \parencite[37]{musicsepgood}. A survey on NMF techniques by \textcite{nmfpaper} covers the algorithm in more detail. Most recently, data-driven approaches based on machine learning and deep learning have significantly surpassed past approaches \parencite{musicsepgood, sisec2018}. Figure \ref{fig:spectraldemix} shows different techniques for spectral demixing.
 
@@ -937,9 +945,9 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 \subsubsection{Harmonic/Percussive source separation}
 \label{sec:hpss}
 
-A simple case of music source separation is Harmonic/Percussive Source Separation (HPSS) \parencite{musicsepgood}. Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines respectively in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. HPSS is in the category of KAM (kernel additive modeling) \parencite{musicsepgood}.
+A simple case of music source separation is Harmonic/Percussive Source Separation (HPSS) \parencite{musicsepgood}. Harmonic (or steady-state, or tonal) sounds are narrowband and steady in time, while percussive (or transient) sounds are broadband and have a fast decay. \textcite{fitzgerald1} noted that they appear as horizontal and vertical lines, respectively, in the STFT, and applied a median filter in the vertical and horizontal directions to estimate the harmonic and percussive components. HPSS is in the category of KAM (kernel additive modeling) \parencite{musicsepgood}.
 
-Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals. \textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, described in further detail in Section \ref{sec:masksandoracles}.
+Median filtering is a technique for image processing where a pixel is replaced by the median value of its neighbors in a window, or filter, which slides across all pixels. Applying a median filter shaped like a horizontal rectangle (i.e., stretching in time) to the STFT causes vertical (or percussive) features to be diminished since their neighboring pixels are empty, which preserves horizontal (or harmonic) features. Similarly, applying a median filter shaped like a vertical rectangle (i.e., stretching in frequency) causes horizontal (or harmonic) features to be diminished, which preserves vertical (or percussive) features. From these estimates, soft masks are computed, which are applied to the original STFT and inverted to create the estimated harmonic and percussive signals. \textcite{driedger} replaced the soft mask with a binary/hard mask, which allows for estimation of a third component, the residual, which is neither harmonic nor percussive, and is described in further detail in Section \ref{sec:masksandoracles}.
 
 The entire process of median-filtering HPSS with binary masks applied to the spectrogram of the glockenspiel signal is shown in Figure \ref{fig:fitz12}.
 
@@ -953,14 +961,16 @@ The entire process of median-filtering HPSS with binary masks applied to the spe
 	\label{fig:fitz12}
 \end{figure}
 
-\textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks, a larger window size for the harmonic separation, and a smaller window size for the percussive separation. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice. These modifications of HPSS related to the time-frequency tradeoff of the STFT and CQT directly inspired the hypothesis of this thesis, which is that using the sliCQT instead of the STFT in a neural network for music source separation might improve the results due to the better time-frequency resolution characteristics of the sliCQT.
+\textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass, which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks, a larger window size for the harmonic separation, and a smaller window size for the percussive separation. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice. These modifications of HPSS related to the time-frequency tradeoff of the STFT and CQT directly inspired the hypothesis of this thesis, which is that using the sliCQT instead of the STFT in a neural network for music source separation might improve the results due to the better time-frequency resolution characteristics of the sliCQT.
 
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
 
+\todo[inline]{this section needs an intro}
+
 Surveys on speech \parencite{speechmask} and music separation \parencite{musicmask} indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
-A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
+A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.\todo{describe in caption}
 
 \begin{figure}[ht]
 	\centering
@@ -1022,6 +1032,8 @@ To estimate the time-domain waveform from an oracle mask, the complex STFT of th
 \subsubsection{Noisy phase or mix-phase inversion (MPI)}
 \label{sec:noisyphaseoracle}
 
+\todo[inline]{better intro, why are we talking about this}
+
 As mentioned in Section \ref{sec:masksandoracles}, many music demixing systems prefer to only estimate magnitude spectrograms, and discard the phase. These systems use the phase of the mixed audio combined with the magnitude of the estimated source to create an audio waveform.
 
 In demixing or source separation literature, this strategy is referred to as the ``noisy phase'' \parencite{noisyphase1, noisyphase2}. The name originates from speech separation, where a common task is to separate speech from noise. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, and I will use the term ``mix-phase inversion'' (MPI) to refer to the same idea.
@@ -1044,12 +1056,16 @@ I will begin with the equations for an MPI oracle, derived from equations \eqref
 	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
-This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It provides an idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture.
+This is the first estimate of the mix-phase inversion strategy, and does not assume further post-processing of the estimates. It provides an idea of the performance of a time-frequency transform of an isolated source when the phase is discarded and the magnitude is combined with the phase of the mixture\todo{this makes no sense}.
 
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
 
-Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. UMX is based on STFT masking, and is intended to foster reproducible research by only using the open MUSDB18 dataset for training data \parencite{musdb18, musdb18hq}.
+\todo[inline]{why am i talking about this?}
+
+Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. UMX is based on STFT masking, and is intended to foster reproducible research by using the open MUSDB18 dataset for training data \parencite{musdb18, musdb18hq}.
+
+\explanation{only musdb18 is significant because many popular neural networks use unavailable datasets that the public can't replicate, but i dropped the word only for now}
 
 UMX has a reference implementation released as an open-source Python project,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch \parencite{pytorch} for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader \parencite{musdb18hq} and BSS metrics evaluator \parencite{bss}.
 
@@ -1078,7 +1094,7 @@ The loss function is the mean-squared error (MSE) function. In the loss function
 
 , where $n$ is the number of elements in the magnitude STFT matrix.
 
-There are four independent Bi-LSTM neural networks for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
+There are four independent Bi-LSTM neural networks\todo{cite fig 44 or better figure?} for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
 
 First, the four independently-trained Bi-LSTM models are used to obtain the estimated magnitude STFTs of the four target sources. The mix phase inversion is used to create a first estimate the waveforms for the four targets. Equations \eqref{equation:mpirepeat} show how the estimated magnitude STFT of UMX Bi-LSTM is converted to the time-domain waveform estimate:
 
@@ -1095,6 +1111,8 @@ Finally, the four estimated magnitude STFTs are considered together, along with 
 
 \subsubsection{CrossNet-Open-Unmix (X-UMX)}
 \label{sec:xumx}
+
+\todo[inline]{why am i talking about this? better sdr than umx, no extra parameters}
 
 \textcite{xumx} improved on UMX without introducing any additional parameters. They combined the four separate target networks into a single model to apply the loss functions and optimizations jointly across all four targets, rather than optimizing each one separately. The model is named CrossNet-Open-Unmix (X-UMX). It also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients.
 
@@ -1171,7 +1189,7 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}
 
-A visualization of the multi-domain loss (MDL) and combination loss (CL) for four targets is shown in Figure \ref{fig:xumxlosses}.
+A visualization of the multi-domain loss (MDL) and combination loss (CL) for four targets is shown in Figure \ref{fig:xumxlosses}\todo{more details about this in captions}.
 
 \begin{figure}[ht]
 	\centering
@@ -1181,7 +1199,7 @@ A visualization of the multi-domain loss (MDL) and combination loss (CL) for fou
 	\label{fig:xumxlosses}
 \end{figure}
 
-Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired four targets (vocals, drums, bass, other) are combined together in X-UMX, illustrating the key concepts of the multi-domain loss functions (MDL), which computes loss for both the magnitude spectrograms and time-domain waveforms, and the combination losses across the four targets (CL).
+Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired four targets (vocals, drums, bass, other) are combined together in X-UMX, illustrating the key concepts of the multi-domain loss functions (MDL), which computes loss for both the magnitude spectrograms and time-domain waveforms, and the combination losses across the four targets (CL)\todo{caption explain umx x-umx differences}.
 
 \begin{figure}[ht]
 	\centering
@@ -1201,7 +1219,9 @@ The available implementation of X-UMX\footnote{\url{https://github.com/sony/ai-r
 \subsubsection{Convolutional denoising autoencoder (CDAE)}
 \label{sec:cdae}
 
-While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing \parencite{plumbley1, plumbley2}. The architectures are shown in Figure \ref{fig:cdaes}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT. Section \ref{sec:cnn} provides more details on convolutional and deconvolutional layers and their various parameters.
+\todo[inline]{why am i talking about this}
+
+While the discussed Open-Unmix model is based on sequence2sequence ideas with a bidirectional LSTM architecture, a different class of neural network called convolutional autoencoders, or convolutional denoising autoencoders (CDAE), have been seeing increasing use in music demixing \parencite{plumbley1, plumbley2}. The architectures are shown in Figure \ref{fig:cdaes}\todo{caption needs more details}, where 2D convolutions (in the time and frequency dimensions) are applied on the magnitude STFT. Section \ref{sec:cnn} provides more details on convolutional and deconvolutional layers and their various parameters.
 
 \begin{figure}[ht]
 	\centering
