@@ -826,8 +826,6 @@ I would like to express gratitude to the SigSep organization\footnote{\url{https
 \subsubsection{Task definition and motivations}
 \label{sec:musicsepdefsmotivations}
 
-\todo[inline]{repeat/distinguish the differences between music source separation and music demixing}
-
 Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track \parencite{musicsepintro1}. To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
 
 There are many motivations for performing this separation. \citeauthor{musicsepgood} describe that ``we can remix the balance within the music [...] to make the vocals louder or to suppress an unwanted sound, or we might want to upmix a 2-channel stereo recording to a 5.1-channel surround sound system... We might also want to change the spatial location of a musical instrument within the mix'' \parencite[31]{musicsepgood}.
@@ -837,7 +835,15 @@ According to \citeauthor{mdx21}, audio source separation and music source separa
 	Audio source separation has been studied extensively for decades as it brings benefits in our daily life, driven by many practical applications, e.g., hearing aids, speech diarization, etc. In particular, music source separation (MSS) attracts professional creators because it allows the remixing or reviving of songs to a level never achieved with conventional approaches such as equalizers. Suppressing vocals in songs can also improve the experience of a karaoke application, where people can enjoy singing together on top of the original song (where the vocals were suppressed), instead of relying on content developed specifically for karaoke applications \parencite[1]{mdx21}.
 \end{quote}
 
-A common thread in survey papers is that the domains of speech enhancement and music demixing are both mentioned as important subproblems of audio source separation of \parencite{musicsepintro1, musicmask}. Music demixing is the focus of this thesis, shown in Figure \ref{fig:mixingdiagrams}.
+A common thread in survey papers is that the domains of speech enhancement and music source separation are both mentioned as important subproblems of audio source separation of \parencite{musicsepintro1, musicmask}.
+
+I provided definitions for music source separation and music demixing in Section \ref{sec:intro}, to distinguish them from the more general problem of audio source separation:
+
+\begin{quote}
+Music source separation is the task of extracting an estimate of one or more isolated sources or instruments (for example, drums or vocals) from musical audio. The task of music demixing or unmixing considers the case where the musical audio is separated into an estimate of all of its constituent sources that can be summed back to the original mixture.
+\end{quote}
+
+Music demixing can be considered as the reverse of the mixing process of \textit{stems} in a recording studio, shown in Figure \ref{fig:mixingdiagrams}. First, I will provide a definition of what a stem is from online materials published by music production companies: a stem is a grouping of individually recorded tracks that have been combined together in a common category.\footnote{\url{https://www.izotope.com/en/learn/stems-and-multitracks-whats-the-difference.html}, \url{https://blog.landr.com/stems-in-music/}} For example, a drum stem could include of all of the tracks of a drum kit (e.g., snare, tom, hihat), and a vocal stem could include all of the vocal tracks from the different singers in the song.
 
 \begin{figure}[ht]
 	\centering
@@ -851,14 +857,14 @@ A common thread in survey papers is that the domains of speech enhancement and m
 	\end{minipage}
 \end{figure}
 
+Music demixing can also be viewed as a combination of multiple music source separation subproblems for all of the desired target stems. To illustrate the concrete example from Figure \ref{fig:mixingdiagrams}: extracting \textit{one} of the guitar, drum, keyboard, or vocal sources (or stems) from the mixed song is music source separation, but extracting \textit{all four} from the mixed audio at the same time is music demixing.
+
 \subsubsection{Public datasets}
 \label{sec:musicsepdatasets}
 
 The most popular music stem dataset used by the Signal Separation Evaluation Campaign (SiSEC) and SigSep is the MUSDB18 dataset \parencite{musdb18}, and more recently the HQ (high-quality) version \parencite{musdb18hq}. MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets \parencite{sisec2016, otherdataset2}.
 
-The MUSDB18-HQ dataset has fixed train, validation, and test splits. The dataset is organized into \Verb#train# and \Verb#test# folders, and a list of 14 tracks from the training folder are defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
-
-\explanation{why is 14 tracks significant? because you told me to do that}
+The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. The dataset is organized into \Verb#train# and \Verb#test# folders, and a subset from the training folder are defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
 
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
@@ -1149,7 +1155,7 @@ Figure \ref{fig:umxes2}(a) shows the training of a single UMX Bi-LSTM network, a
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[UMX, single target training]{\includegraphics[width=0.75\textwidth]{./images-blockdiagrams/umx_new_single.png}}\\
+	\subfloat[UMX, single target training]{\includegraphics[width=0.8\textwidth]{./images-blockdiagrams/umx_new_single.png}}\\
 	\subfloat[UMX, four targets inference]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_new_multiple.png}}
 	\caption{UMX training for a single target and inference for four targets}
 	\label{fig:umxes2}
