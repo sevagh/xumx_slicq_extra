@@ -865,7 +865,7 @@ The MUSDB18-HQ dataset has fixed train, validation, and test splits. The dataset
 
 \todo[inline]{this section needs an intro, why do we need to evaluate?}
 
-The SigSep\footnote{\url{https://sigsep.github.io/}} community, borrowing from the methodology of Signal Separation Evaluation Campaign (SISEC), uses the BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure for separation quality. There are four distinct metrics that comprise BSS:
+The BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure is used for objective measurements of separation quality. There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
@@ -1010,12 +1010,12 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
 
 Surveys on speech \parencite{speechmask} and music separation \parencite{musicmask} indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
 
-A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary or hard mask has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.\todo{describe in caption}
+A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary mask, or hard mask, has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{./images-mss/maskdemo.png}
-	\caption{Results of a soft and hard oracle mask applied for speech denoising \parencite[71]{masking}}
+	\caption{Results of a soft and binary oracle mask applied for speech denoising \parencite[71]{masking}. When the binary mask is applied, there is a more dramatic separation, and there is starker contrast between the non-zero and zero parts of the resulting spectrogram. When the soft mask is applied, the separation is more gentle, and a range of zero to non-zero values can be seen in the resulting spectrogram.}
 	\label{fig:masks}
 \end{figure}
 
@@ -1099,19 +1099,16 @@ The equations for the MPI oracle can be derived from equations \eqref{equation:m
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
 
-\todo[inline]{why am i talking about this?}
+In this thesis, my goal is to address the fixed time-frequency resolution limitation of the STFT in music source separation applications. Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a deep neural network for music source separation based on the STFT. Due to the code being open-source and freely available, I chose to begin with UMX as the initial STFT-based model in this thesis. My goal is to replace the STFT with the sliCQT shown in Section \ref{sec:theoryslicqt}.
 
-Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a state-of-the-art deep neural network for music source separation. UMX is based on time-frequency masking of the STFT, which was described previously in Section \ref{sec:masksandoracles}. UMX also only estimates the magnitude STFT spectrogram of the target, and uses the phase of the mixed audio, which is a common strategy for spectrogram-based music demixing described previously in Section \ref{sec:noisyphase}.
+UMX is based on time-frequency masking of the STFT, which was described previously in Section \ref{sec:masksandoracles}. UMX also only estimates the magnitude STFT spectrogram of the target, and uses the phase of the mixed audio, which is a common strategy for spectrogram-based music demixing described previously in Section \ref{sec:noisyphaseoracle}.
 
-UMX uses the openly available MUSDB18 and MUSB18-HQ datasets for its training data \parencite{musdb18, musdb18hq} to encourage reproducible research \parencite{umx}.
-
-UMX has a reference implementation released as an open-source Python project,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch \parencite{pytorch} for GPU-accelerated numerical computation and deep learning, and includes a MUSDB18-HQ data loader \parencite{musdb18hq} and BSS metrics evaluator \parencite{bss}.
+UMX uses the openly available MUSDB18 and MUSB18-HQ datasets for its training data \parencite{musdb18, musdb18hq} to encourage reproducible research \parencite{umx}. The Python source code of the reference implementation of UMX is openly available,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch \parencite{pytorch} for GPU-accelerated numerical computation and deep learning.
 
 In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture of the DNN is a variant of a sequence2sequence model. UMX uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[UMX system for a single target]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
 	\subfloat[UMX Bi-LSTM architecture\protect\footnotemark]{\includegraphics[width=\textwidth]{./images-neural/umx.png}}\\
 	\subfloat[Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}]{\includegraphics[width=\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
 	\caption{Architecture of UMX and one of its simpler predecessors}
@@ -1133,7 +1130,7 @@ The loss function is the mean-squared error (MSE) function. In the loss function
 
 where $n$ is the number of elements in the magnitude STFT matrix.
 
-There are four independent Bi-LSTM neural networks\todo{cite fig 44 or better figure?} for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
+There are four independent Bi-LSTM neural networks, shown in Figure \ref{fig:umxes2}, for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
 
 First, the four independently-trained Bi-LSTM models are used to obtain the estimated magnitude STFTs of the four target sources. The mix phase inversion is used to create a first estimate the waveforms for the four targets. Equations \eqref{equation:mpirepeat} show how the estimated magnitude STFT of UMX Bi-LSTM is converted to the time-domain waveform estimate:
 
@@ -1147,6 +1144,17 @@ First, the four independently-trained Bi-LSTM models are used to obtain the esti
 Similar equations were previously described for the mix-phase inversion (MPI) oracle in Section \ref{sec:noisyphaseoracle}.
 
 Finally, the four estimated magnitude STFTs are considered together, along with the phase of the STFT of the original mixed audio, to perform a post-processing step called iterative Wiener filtering and expectation-maximization (EM), jointly referred to as ``Wiener-EM'' \parencite{umxorig1, wiener2, wiener3, wiener4}. The output of the Wiener-EM step is a refined estimate of the waveforms of the four target sources, which is the final output of UMX.
+
+Figure \ref{fig:umxes2}(a) shows the training of a single UMX Bi-LSTM network, and Figure \ref{fig:umxes2}(b) shows the four independent networks performing inference for the four targets (vocals, drums, bass, other) of MUSDB18-HQ with the Wiener-EM post-processing step.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[UMX, single target training]{\includegraphics[width=0.75\textwidth]{./images-blockdiagrams/umx_new_single.png}}\\
+	\subfloat[UMX, four targets inference]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_new_multiple.png}}
+	\caption{UMX training for a single target and inference for four targets}
+	\label{fig:umxes2}
+\end{figure}
+
 
 \subsubsection{CrossNet-Open-Unmix (X-UMX)}
 \label{sec:xumx}
