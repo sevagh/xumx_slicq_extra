@@ -76,10 +76,6 @@
 	\todo[inline,color=green!40]
 }
 
-\newcommand{\explanationtwo}{
-	\todo[color=green!40]
-}
-
 \DeclareCiteCommand{\secondaryciteauthor}{}{\printtext[bibhyperref]{\printnames{labelname}}}{}{}
 \DeclareCiteCommand{\secondaryciteyear}{}{\bibhyperref{\printdate}}{\multicitedelim}{}
 \newcommand{\secondarycitedirect}[2]{\secondaryciteauthor{#1} (\secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
@@ -96,7 +92,7 @@
 \renewcommand\listingscaption{Code Listing}
 \renewcommand\listoflistingscaption{List of Code Listings}
 
-\colorlet{shadecolor}{blue!0}
+\colorlet{shadecolor}{blue!15}
 %\colorlet{hlcolor}{blue!10}
 
 \DeclareRobustCommand{\hlblu}[1]{{\sethlcolor{shadecolor}\hl{#1}}}

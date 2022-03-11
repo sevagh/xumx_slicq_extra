@@ -4,8 +4,6 @@
 \section{Background}
 \label{sec:background}
 
-\explanation{Added chapter roadmap}
-
 \begin{shaded}
 
 In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural network for music demixing written in the Python programming language. Open-Unmix uses the Short-Time Fourier Transform (STFT) as its representation of musical signals, which is subject to the limitations of the time-frequency uncertainty principle, or time-frequency tradeoff. I will be exploring the sliced Constant-Q Transform (sliCQT) as a replacement of the STFT, and my hypothesis is that using the sliCQT instead of the STFT will improve the music demixing performance of Open-Unmix due to the varying time-frequency resolution of the sliCQT that is more suitable for musical or auditory analysis.
@@ -76,8 +74,6 @@ Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{di
 
 Throughout this section, the description of the Fourier Transform of acoustic signals and the evolution of further transforms that build on it will be covered in detail.
 
-\explanation{changed glockenspiel paragraph, added sheet music and notes}
-
 \begin{shaded}
 
 Also, throughout this section and the rest of this chapter, an example waveform will be used for illustrative purposes. This is the glockenspiel waveform,\footnote{\url{https://ltfat.github.io/doc/signals/gspi.html}} which is used in various audio signal processing papers on the topic of time-frequency \parencite{doerflerphd, balazs, jaillet, tfjigsaw, invertiblecqt, wmdct}. This is because the glockenspiel contains both tonal and transient properties, which have conflicting needs for time and frequency resolution in their analysis. Figure \ref{fig:glockwaveform} shows the discrete-time waveform of the glockenspiel signal. Throughout this section, demonstrations of each transform will use this same glockenspiel signal as the input $x[n]$. The signal has a total duration of 5.94 seconds, and is sampled with a rate of 44,100 Hz.
@@ -113,8 +109,6 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 	X(e^{j\omega}) = |X(e^{j\omega})|e^{j\angle X(e^{j\omega})} \tag{4}\label{equation:polar}
 \end{align}
 
-\explanation{rearranged these paragraphs to go FT/CTFT $\rightarrow$ DFT $\rightarrow$ FFT}
-
 \begin{shaded}
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase \hlblu{spectra,} respectively \parencite{discretebook}.
@@ -128,8 +122,6 @@ Signals need to be transformed from the continuous to the discrete domain via sa
 The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
 \end{shaded}
-
-\explanation{added more detail in captions of Figure \ref{fig:glockdft}}
 
 \begin{figure}[ht]
 	\centering
@@ -165,8 +157,6 @@ Dennis Gabor's seminal signal processing paper, \textit{The Theory of Communicat
 According to \citeauthor{korpel}, ``Gabor came to the conclusion that the difficulty lay in our mutually exclusive formulations of time analysis and frequency analysis ... he suggested a new method of analyzing signals in which time and frequency play symmetrical parts'' \parencite[3624]{korpel}.
 
 Gabor derived the principal of time-frequency uncertainty from the Heisenberg uncertainty principle in quantum physics, which states that the more precisely the position of an electron is determined, the less precisely the momentum is known, and conversely \secondaryciteindirect{heisenberg1927}{hallm}. \citeauthor{gabor1946} states that ``although we can carry out the analysis [of the acoustic signal] with any degree of accuracy in the time direction or frequency direction, we cannot carry it out simultaneously in both beyond a certain limit'' \parencite[432]{gabor1946}. This is referred to as the time-frequency uncertainty principle or the Gabor limit. Gabor defines the unit of time-frequency information $\Delta t \Delta f$ as the \textit{logon}, where $\Delta t$ and $\Delta f$ are defined as ``the uncertainties inherent in the definition of the epoch t and frequency f of an oscillation'' \parencite[432]{gabor1946}.
-
-\explanation{describe why i'm showing these diagrams, relate to above paragraphs}
 
 \begin{shaded}
 
@@ -242,7 +232,7 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-The number of output frequency bins of the STFT is the same as the DFT, since the output of the STFT is a matrix of columns \hlblu{where} each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that the output coefficients of an N-point DFT for a real-valued input signal $x[n]$ were symmetrically mirrored around the center bin, such that bins 0 to $(\sfrac{N}{2}+1)$ corresponded to the frequency range of 0 \hlblu{to}\explanationtwo{replaced 0--$\sfrac{N}{2}$ with 0 to $\sfrac{N}{2}$ for clarity} $(\sfrac{F_{s}}{2})$ Hz, and bins $(\sfrac{N}{2}+2)$ to 0 were redundant. The STFT has the same behavior, such that an STFT with a window size of N, which is the same as the N points of the DFT for each window of the signal, outputs $(\sfrac{N}{2}+1)$ non-redundant frequency bins. For an $N$-point DFT, the frequency spacing between each bin $\mathit{df} = \sfrac{F_{s}}{N}$, which is that of the DFT shown in Section \ref{sec:freqanal}. The frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0 to $(\sfrac{N}{2}+1)$ therefore correspond to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
+The number of output frequency bins of the STFT is the same as the DFT, since the output of the STFT is a matrix of columns \hlblu{where} each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that the output coefficients of an N-point DFT for a real-valued input signal $x[n]$ were symmetrically mirrored around the center bin, such that bins 0 to $(\sfrac{N}{2}+1)$ corresponded to the frequency range of 0 \hlblu{to} $(\sfrac{F_{s}}{2})$ Hz, and bins $(\sfrac{N}{2}+2)$ to 0 were redundant. The STFT has the same behavior, such that an STFT with a window size of N, which is the same as the N points of the DFT for each window of the signal, outputs $(\sfrac{N}{2}+1)$ non-redundant frequency bins. For an $N$-point DFT, the frequency spacing between each bin $\mathit{df} = \sfrac{F_{s}}{N}$, which is that of the DFT shown in Section \ref{sec:freqanal}. The frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0 to $(\sfrac{N}{2}+1)$ therefore correspond to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
 
 \begin{figure}[ht]
 	\centering
@@ -251,16 +241,13 @@ The number of output frequency bins of the STFT is the same as the DFT, since th
 	\label{fig:stftdiag}
 \end{figure}
 
-A key characteristic of the STFT is its fixed time-frequency resolution across the entire frequency spectrum. To change the time-frequency resolution, the window size must be changed. Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2} shows the Gabor transform, which is the STFT with the Gaussian window, \hlblu{intending to show that the STFT and Gabor transform are practically identical to each other.}\explanationtwo{describe that Gabor and STFT are identical} Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The different window sizes show a visual demonstration of the time-frequency tradeoff. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
+A key characteristic of the STFT is its fixed time-frequency resolution across the entire frequency spectrum. To change the time-frequency resolution, the window size must be changed. Figure \ref{fig:stfts1} shows the STFT with the Hamming window and Figure \ref{fig:stfts2} shows the Gabor transform, which is the STFT with the Gaussian window, \hlblu{intending to show that the STFT and Gabor transform are practically identical to each other.} Three different window sizes are shown for each: 128 samples, 2,048 samples, and 16,384 samples, which at the sample rate of the glockenspiel signal (44,100 Hz) represent $\sfrac{128}{44,100} =$ 2.9 ms, 46.44 ms, and 371.52 ms respectively. The different window sizes show a visual demonstration of the time-frequency tradeoff. The Hamming window was chosen because it is the default window in the MATLAB \Verb#spectrogram# function.\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} The Gaussian and Hamming windows are shown together in Figure \ref{fig:gaussvshamm}.
 
-\explanation{segue to next section, STFT/Gabor transform to Constant-Q, NSGT, etc.}
 \begin{shaded}
 
 The time-frequency tradeoff limitation of the STFT and Gabor transform is a result of taking the Fourier transform of fixed-size windows applied to the input signal. In upcoming sections, I will show time-frequency transforms that use variable-size windows, which result in a time-frequency resolution that varies across the frequency spectrum. These transforms are also called nonuniform, to distinguish from the uniform or fixed time-frequency resolution of the STFT. Section \ref{sec:cqt} introduces the Constant-Q Transform (CQT), a variable-window time-frequency transform designed for music analysis. Section \ref{sec:theorynsgt} and Section \ref{sec:theoryslicqt} show the Nonstationary Gabor Transform (NSGT) and sliced Constant-Q Transform (sliCQT), which are time-frequency transforms with varying time-frequency resolution motivated by the CQT. Section \ref{sec:raggedtf} will show how nonuniform time-frequency transforms differ from the uniform STFT.
 
 \end{shaded}
-
-\explanation{improved captions of STFT and Gabor transform diagrams}
 
 \begin{figure}[ht]
 	\centering
@@ -329,15 +316,11 @@ In the landscape of music analysis libraries, Essentia,\footnote{\url{https://es
 
 Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox. Note how the CQT spectrograms contain more musical information than the STFT spectrograms at all frequency resolutions.
 
-\explanation{connection to next section}
-
 \begin{shaded}
 
 As mentioned throughout this section, the best implementation choice for the CQT is the NSGT, which allows for a perfect inverse transform. Section \ref{sec:theorynsgt} will introduce and describe the general NSGT, and Section \ref{sec:theoryslicqt} will introduce and describe the sliCQT, which is a realtime variant of the NSGT. The NSGT and sliCQT allow the analysis of audio with an arbitrary nonuniform frequency scale not limited to the Constant-Q scale, which will give me more freedom in this thesis to find a frequency scale that performs best for music source separation applications.
 
 \end{shaded}
-
-\explanation{improved captions of STFT and CQT spectrogram figures}
 
 \begin{figure}[ht]
 	\centering
@@ -454,11 +437,6 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows.
 
 I believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales \parencite{melbook}, or the Variable-Q \hlblu{scale,} which combines the Constant-Q scale with the psychoacoustic concept of the equivalent rectangular bandwidth (ERB) \parencite{variableq1, variableq2}. In essence the NSGT can be thought of as a filterbank \parencite{variableq1}.
-
-\explanation{
-describe that i will be using the reference Python NSGT library in this thesis, which is relevant when showing the two included frequency scales, Constant-Q and log\\
-moved the Variable-Q and Bark scale section into this section too, to mention as the same time as Constant-Q and mel
-}
 
 \begin{shaded}
 
@@ -611,8 +589,6 @@ This same statement also applies to the NSGT, where different frequency bins hav
 
 Note that to produce a meaningful spectrogram like the NSGT in Figure \ref{fig:raggedslicqt}, the slices returned by the sliCQT must be overlap-added as described in Section \ref{sec:theoryslicqt} and shown in \ref{fig:slicqoverlaps}. The NSGT outputs the meaningful spectrogram directly, without any further modifications needed.
 
-\explanation{in caption of ragged transform in Figure \ref{fig:raggedslicqt}, i described the color legend for the temporal frame rates}
-
 \newpagefill
 
 \subsection{Machine learning and deep learning for music signals}
@@ -637,7 +613,6 @@ According to \citeauthor{introtodl}, deep learning (DL) ``is the subfield of mac
 
 Optimization techniques have been used in statistical, approximate, or stochastic signal processing \parencite{stochasticsp, statisticalsp} for decades \parencite{optsp}. Some of the classic examples include basis pursuit and matching pursuit \parencite{dictionary1, dictionary2}. Signal processing techniques and machine and deep learning are compatible with one another and can be used together \parencite{mlsp1, mlsp2}. According to \citeauthor{mldspmix}, signal processing and machine learning should both be considered in the study of acoustic signals, shown in Figure \ref{fig:dspmlmix}:
 
-\explanation{moved quote out of caption of Figure \ref{fig:dspmlmix}}
 \begin{shaded}
 
 \begin{quote}
@@ -656,8 +631,6 @@ Optimization techniques have been used in statistical, approximate, or stochasti
 In machine learning, the input data is typically split into a training set and a test set \parencite{introtoml}. The model makes predictions with its initial parameters using the training input. It measures how correct its prediction was by using a loss function to compare its predicted output to the training (or ground truth) output. Contemporary machine learning is dependent on the field of optimization \parencite{boyd2004convex, mlopt1, mlopt2} for the loss function and parameter updates \parencite{sgd}. The performance of the network is measured by its ability to generalize on the test set, which was data not seen during training. There is sometimes a third set called the validation set, which is also unseen during training and typically used to perform hyperparameter tuning \parencite{splitvaliddata}. Hyperparameters are the parameters of a machine learning model that are defined by the user \parencite{introtodl}. The user tries to maximize the performance of the model on the validation set by modifying the hyperparameters.
 
 Music signals are a form of acoustic signal, and the domain of music signal processing is inseparable from the larger field of signal processing \parencite{musicsp}. It follows that ML and DL techniques can be extended to music signal processing applications. \textcite{audiodeeplearning} describe contemporary deep learning architectures that are used for audio applications. They state that models from the field of computer vision, originally designed for 2D images where pixels are related spatially, may not exactly fit audio waveforms, where amplitude values are related temporally. However, convolutional neural networks, recurrent neural networks, and sequence-to-sequence models are three popular types of network architecture that have been adapted with varying levels of success to the audio and music domains \parencite{audiodeeplearning}.
-
-\explanation{say that i will talk about CNN and RNNs in the upcoming sections}
 
 \begin{shaded}
 
@@ -727,8 +700,6 @@ The kernel parameters define the size and movement of the 2D convolution kernel 
 	\label{fig:convdiags}
 \end{figure}
 
-\explanation{added section on pooling and up-sampling, will be important later in CDAE section \ref{sec:cdae}}
-
 \begin{shaded}
 
 In addition to the convolution operator, another operator commonly used in CNN architectures is the pooling layer. Like the strided convolution shown in Figure \ref{fig:convdiags}(c), the role of the pooling operator is to reduce the dimensionality of the input ``by using some function to summarize subregions, such as taking the average or the maximum value'' \parencite[10]{convguide}. The inverse of a pooling or strided convolution layer, which reduce the dimensionality of the input, is the up-sampling layer, which ``is the principal way to recover the resolution of the downsampled feature map'' \parencite[2]{hao2020indexnet}. According to \textcite{hao2020indexnet}, up-sampling can be implemented with a transpose convolution (or deconvolution) layer shown in Figure \ref{fig:convtranspose}, na\"ive interpolation, or unpooling layers.
@@ -761,8 +732,6 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 
 \subsection{Software and code concepts}
 \label{sec:softcode}
-
-\explanation{i add an intro for why i'm talking about software, code, git, etc.}
 
 \begin{shaded}
 
@@ -880,8 +849,6 @@ All of the code for this thesis were stored in Git repositories to keep track of
 
 \citeauthor{floss} state that ``free and open source software (FOSS) is any computer program released under a licence that grants users rights to run the program for any purpose, to study it, to modify it, and to redistribute it in original or modified form'' \parencite[1]{floss}. Free and open-source software is a merging of two distinct ideas: free software\footnote{\url{https://www.fsf.org/}} and open-source software.\footnote{\url{https://opensource.org/}} While these have nuanced differences when it comes to commercial licensing, code visibility, and availability, in simplistic terms FOSS implies code that is free and open for users to read and modify. Releasing code as open-source is becoming more popular in academia, with initiatives like Papers With Code\footnote{\url{https://paperswithcode.com/}} and the Journal of Open Source Software.\footnote{\url{https://joss.theoj.org/}} According to \textcite{floss}, FOSS software is a natural complement to academic publications, given concerns with reproducibility of results.
 
-\explanation{added sentence to paragraph making more clear the difference between GitHub and Git}
-
 \begin{shaded}
 
 GitHub\footnote{\url{https://github.com}} is a social website, designed for sharing and browsing software projects that use Git for version control, intended for users to share and collaborate on open-source code. \citeauthor{gitbook} describe GitHub\footnote{\url{https://github.com/}} as ``the single largest host for Git repositories, and [... a] central point of collaboration for millions of developers and projects'' \parencite[131]{gitbook}. GitHub contains tools for working with Git repositories, including social elements for personal profiles or organizations. Open-source projects can be made public on GitHub such that anybody can read and download the source code. For a project hosted on GitHub, there is a file browser built into the website which allows one to view the code and change history of a project. In this thesis, the GitHub code browser will be linked wherever appropriate. An example of the GitHub code browser showing a file from the PyTorch project's Git repository\footnote{\url{https://github.com/pytorch/pytorch}} is shown in Figure \ref{fig:githubpytorch}.
@@ -900,8 +867,6 @@ GitHub\footnote{\url{https://github.com}} is a social website, designed for shar
 \subsection{Music source separation and demixing}
 \label{sec:musicsep}
 
-\explanation{added explanation/roadmap of topics i will cover in this section}
-
 \begin{shaded}
 
 In this section, I will provide an overview of music source separation and music demixing. I will start by providing definitions, motivations, and uses of the tasks in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepbackground}, I will give an overview of historical computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:musicsepdatasets}, I will describe the MUSDB18 and MUSDB18-HQ datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe the BSS evaluation metrics used for evaluating music source separation methods.
@@ -912,8 +877,6 @@ A new music source separation model, which is the result of this thesis, will be
 
 \end{shaded}
 
-\explanation{removed section on open-source ecosystem, just mentioned it here}
-
 \begin{shaded}
 
 I would like to express gratitude to the SigSep organization\footnote{\url{https://github.com/sigsep}} on GitHub, which houses open-source code projects for music source separation research \parencite{umx}. The projects were essential to the creation of this thesis, and they include the reference implementation of Open-Unmix,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}}, libraries for loading the MUSDB18-HQ dataset,\footnote{\url{https://github.com/sigsep/sigsep-mus-db}} and a library for computing the BSS evaluation metrics for evaluating music source separation systems.\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}}
@@ -922,12 +885,6 @@ I would like to express gratitude to the SigSep organization\footnote{\url{https
 
 \subsubsection{Task definition and motivations}
 \label{sec:musicsepdefsmotivations}
-
-\explanation{
-re-stated my definition of music source separation vs. demixing from ch1\\
-defined what stems are\\
-removed mentions of the MDX21 demixing challenge, saving that for the appendix
-}
 
 Typical music recordings are mono or stereo mixtures, with multiple sound objects (drums, vocals, etc.) sharing the same track \parencite{musicsepintro1}. To manipulate the individual sound objects, the stereo audio mixture needs to be separated into a track for each different sound source, in a process called audio source separation.
 
@@ -973,20 +930,18 @@ There are many motivations for performing this separation. \citeauthor{musicsepg
 \subsubsection{Computational approaches}
 \label{sec:musicsepbackground}
 
-\explanation{added definitions of CASA and BSS}
-
 \begin{shaded}
 
 Computational source separation has a history of at least 50 years \parencite{musicmask, musicsepintro1}, originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA, the goal is to ``computationally extract individual streams from one or two recordings of an acoustic scene'' \parencite[12]{casabook}, based on the definition of ASA (auditory scene analysis) given by \textcite{bregman}. BSS, first defined by \textcite{jutten}, solves a subproblem of CASA which aims to recover the sources of a ``mixture of multiple, statistically independent sources that are received with separate sensors'' \parencite[190]{casabook}. The term ``blind'' refers to there being no prior knowledge of what the sources are, and how they were mixed together. In CASA and BSS, therefore, the mixed audio contains unknown sources combined in unknown ways that must be separated.
 
-By contrast, in music source separation and music demixing, the sources are typically known, or have known characteristics. That is to say, in music source separation, the task is not to separate all of the distinct sources in the mixture, but to extract a predefined set of sources. Some forms of music source separation try to extract harmonic and percussive sources \parencite{fitzgerald1, fitzgerald2, driedger}, which will be described in greater detail in Section \ref{sec:hpss}. Another common set of separation sources are the four sources defined by the MUSDB18 \parencite{musdb18} dataset: vocals, drums, bass, and other. Additionally, in music source separation, the mixing process is generally assumed to be a simple linear mixture \parencite{musicsepgood}, shown in equation \eqref{equation:linearmixunitygain}:
+By contrast, in music source separation and music demixing, the sources are typically known, or have known characteristics. That is to say, in music source separation, the task is not to separate all of the distinct sources in the mixture, but to extract a predefined set of sources. Some forms of music source separation try to extract harmonic and percussive sources \parencite{fitzgerald1, fitzgerald2, driedger}, which will be described in greater detail in Section \ref{sec:hpss}. Another common set of separation sources are the four sources defined by the MUSDB18 \parencite{musdb18} dataset: vocals, drums, bass, and other. The MUSDB18 dataset will be described in more detail in Section \ref{sec:musicsepdatasets}. Additionally, in music source separation, the mixing process is generally assumed to be a simple linear mixture \parencite{musicsepgood}, shown in equation \eqref{equation:linearmixunitygain}:
 \begin{align}
 	x_{\text{mix}} = x_{\text{source1}} + x_{\text{source2}} + ... \tag{20}\label{equation:linearmixunitygain}
 \end{align}
 
 \end{shaded}
 
-A popular algorithm\explanationtwo{changed ``earliest'' to simply ``popular''} in BSS is Independent Component Analysis (ICA) \parencite{musicmask, musicsepgood, musicsepintro1}, which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. \textcite{ica1, ica2} describe ICA algorithms, and \textcite{blind1, blind2} provide an in-depth review on the history of BSS. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
+A \hlblu{popular algorithm} in BSS is Independent Component Analysis (ICA) \parencite{musicmask, musicsepgood, musicsepintro1}, which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. \textcite{ica1, ica2} describe ICA algorithms, and \textcite{blind1, blind2} provide an in-depth review on the history of BSS. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
 \begin{figure}[ht]
 	\centering
@@ -1028,12 +983,14 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 
 The most popular music stem dataset used by the Signal Separation Evaluation Campaign (SiSEC) and SigSep is the MUSDB18 dataset \parencite{musdb18}, and more recently the HQ (high-quality) version \parencite{musdb18hq}. MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets \parencite{sisec2016, otherdataset2}.
 
-The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. The dataset is organized into \Verb#train# and \Verb#test# folders, and a subset from the training folder is defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}\explanationtwo{don't mention 14 tracks}
+\begin{shaded}
+
+The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. The dataset is organized into \Verb#train# and \Verb#test# folders, and a subset from the training folder is defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
+
+\end{shaded}
 
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
-
-\explanation{add an intro paragraph for why we want an objective measure and why i picked BSS from its popularity}
 
 \begin{shaded}
 
@@ -1070,8 +1027,6 @@ In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sise
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
 
-\explanation{added intro to why i'm talking about this}
-
 \begin{shaded}
 
 Diverse music source separation algorithms based on spectrograms use the technique of time-frequency masking \parencite{musicsepgood, musicmask}. In this section, I will describe the concept of time-frequency masking, and oracle estimators, which can be used to compute the maximum possible quality of a given time-frequency mask from ground truth signals. Two different music source separation systems based on time-frequency masking will be described in upcoming sections: Harmonic/Percussive Source Separation \parencite{fitzgerald1}, a KAM (kernel additive modeling) algorithm for music source separation that will be presented in Section \ref{sec:hpss}, and Open-Unmix \parencite{umx}, a DNN (deep neural network) for music source separation that will be presented in Section \ref{sec:umx}.
@@ -1079,8 +1034,6 @@ Diverse music source separation algorithms based on spectrograms use the techniq
 \end{shaded}
 
 \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary mask, or hard mask, has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:simplemasks}, and an example of soft and hard masking is shown in Figure \ref{fig:masks}.
-
-\explanation{added a new figure to show masking}
 
 \begin{figure}[ht]
        \centering
@@ -1092,8 +1045,6 @@ Diverse music source separation algorithms based on spectrograms use the techniq
                \label{fig:simplemasks}
        \end{minipage}
 \end{figure}
-
-\explanation{described what to look for in soft vs. binary mask in Figure \ref{fig:masks} caption}
 
 \begin{figure}[ht]
 	\centering
@@ -1152,15 +1103,11 @@ To estimate the time-domain waveform from an oracle mask, the complex STFT of th
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \mathit{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
 
-\explanation{added segue to noisy phase/mixed-phase/MPI section since i talk about magnitude vs. phase spectrogram here}
-
 \begin{shaded}
 
 In this section, I mentioned that discarding the phase of the complex STFT and applying masks only on the magnitude spectrogram is a common choice in music source separation \parencite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}. This is done to avoid working with the phase of the STFT \parencite{ditchphase}. Figure \ref{fig:noisyphase} shows how the phase spectrograms of an audio signal and random noise look similar to one another.
 
 \end{shaded}
-
-\explanation{add diagram showing why phase is not typically modelled in Figure \ref{fig:noisyphase}}
 
 \begin{figure}[ht]
        \centering
@@ -1181,8 +1128,6 @@ Systems that only estimate the magnitude STFT of a source need a phase STFT to c
 
 \subsubsection{Noisy phase or mix-phase inversion (MPI)}
 \label{sec:noisyphaseoracle}
-
-\explanation{continuing from segue in previous section, added an intro section here for why i'm talking about the noisy phase}
 
 \begin{shaded}
 
@@ -1210,8 +1155,6 @@ The equations for the MPI oracle can be derived from equations \eqref{equation:m
 	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
-\explanation{conclude section with a simpler sentence}
-
 \begin{shaded}
 
 The MPI oracle waveform should provide an idea of the upper limit of performance of a music source separation system that uses the MPI strategy.
@@ -1237,8 +1180,6 @@ The entire process of median-filtering HPSS with binary masks applied to the spe
 	\label{fig:fitz12}
 \end{figure}
 
-\explanation{explicitly state how the different time-frequency manipulations of HPSS inspired the hypothesis of this thesis}
-
 \begin{shaded}
 
 \textcite{driedger} also introduced a two-pass variant. The first pass separates the harmonic component using an STFT with a large window size for high frequency resolution, followed by the second pass, which separates the percussive component using an STFT with a small window size for high time resolution. \textcite{fitzgerald2} created a similar iterative variant using soft masks, a larger window size for the harmonic separation, and a smaller window size for the percussive separation. Additionally, they noted that when they replaced the small-window STFT with the CQT in the second pass, they obtained a separation of the human singing voice. These modifications of HPSS related to the time-frequency tradeoff of the STFT and CQT directly inspired the hypothesis of this thesis, which is that using the sliCQT instead of the STFT in a neural network for music source separation might improve the results due to the better time-frequency resolution characteristics of the sliCQT.
@@ -1247,11 +1188,6 @@ The entire process of median-filtering HPSS with binary masks applied to the spe
 
 \subsubsection{Source separation with wavelets}
 \label{sec:wavelets}
-
-\explanation{
-Rename section from ``Wavelets'' which is more about time-frequency transforms, to ``Source separation with wavelets''\\
-Add intro and re-use Bark-scale wavelet paper from a previous section here to reinforce some of the key concepts throughout the thesis
-}
 
 \begin{shaded}
 
@@ -1302,17 +1238,9 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
 
-\explanation{add intro, why i'm studying UMX}
-
 \begin{shaded}
 
 In this thesis, my goal is to address the fixed time-frequency resolution limitation of the STFT in music source separation applications. Open-Unmix (UMX) was created by \textcite{umx} as an open-source, reference implementation of a deep neural network for music source separation based on the STFT. Due to the code being open-source and freely available, I chose to begin with UMX as the initial STFT-based model in this thesis. My goal is to replace the STFT with the sliCQT shown in Section \ref{sec:theoryslicqt}.
-
-\end{shaded}
-
-\explanation{split masking and mag/phase from dataset paragraph}
-
-\begin{shaded}
 
 UMX is based on time-frequency masking of the STFT, which was described previously in Section \ref{sec:masksandoracles}. UMX also only estimates the magnitude STFT spectrogram of the target, and uses the phase of the mixed audio, which is a common strategy for spectrogram-based music demixing described previously in Section \ref{sec:noisyphaseoracle}.
 
@@ -1345,7 +1273,7 @@ The loss function is the mean-squared error (MSE) function. In the loss function
 
 where $n$ is the number of elements in the magnitude STFT matrix.
 
-There are four independent Bi-LSTM neural networks, shown in Figure \ref{fig:umxes2},\explanationtwo{add new figures} for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
+There are four independent Bi-LSTM neural networks, \hlblu{shown in Figure} \ref{fig:umxes2}, for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
 
 First, the four independently-trained Bi-LSTM models are used to obtain the estimated magnitude STFTs of the four target sources. The mix phase inversion is used to create a first estimate the waveforms for the four targets. Equations \eqref{equation:mpirepeat} show how the estimated magnitude STFT of UMX Bi-LSTM is converted to the time-domain waveform estimate:
 
@@ -1359,8 +1287,6 @@ First, the four independently-trained Bi-LSTM models are used to obtain the esti
 Similar equations were previously described for the mix-phase inversion (MPI) oracle in Section \ref{sec:noisyphaseoracle}.
 
 Finally, the four estimated magnitude STFTs are considered together, along with the phase of the STFT of the original mixed audio, to perform a post-processing step called iterative Wiener filtering and expectation-maximization (EM), jointly referred to as ``Wiener-EM'' \parencite{umxorig1, wiener2, wiener3, wiener4}. The output of the Wiener-EM step is a refined estimate of the waveforms of the four target sources, which is the final output of UMX.
-
-\explanation{added two figures on individual UMX training and four independent UMX for inference}
 
 \begin{shaded}
 
@@ -1379,15 +1305,13 @@ Figure \ref{fig:umxes2}(a) shows the training of a single UMX Bi-LSTM network, a
 \subsubsection{CrossNet-Open-Unmix (X-UMX)}
 \label{sec:xumx}
 
-\explanation{add intro to xumx, why i'm talking about it}
-
 \begin{shaded}
 
 I will now introduce a closely-related variant of Open-Unmix (UMX), called CrossNet-Open-Unmix (X-UMX) \parencite{xumx}. X-UMX improves on the music demixing performance of UMX without introducing any additional parameters in the neural network. Since X-UMX is mostly identical to UMX with better performance, I will be using it as the starting point for the new model that will be proposed by this thesis in Section \ref{sec:methodology}.
 
 \end{shaded}
 
-\textcite{xumx} combined the four separate target networks of UMX into a single model to apply the loss functions and optimizations jointly across all four targets, rather than optimizing each one separately, shown in Figure \ref{fig:umxandxumx}(b).\explanationtwo{added reference to fig} X-UMX also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients from the original UMX.
+\textcite{xumx} combined the four separate target networks of UMX into a single model to apply the loss functions and optimizations jointly across all four targets, rather than optimizing each one separately, \hlblu{shown in} Figure \ref{fig:umxandxumx}(b). X-UMX also includes loss computed from the time-domain waveforms, in addition to the loss measured from the magnitude spectral coefficients from the original UMX.
 
 The loss function of X-UMX is first modified to include a multi-domain loss (MDL), which includes the existing frequency-domain loss (spectrogram MSE) in addition to a new time-domain loss. The time-domain loss is the same SDR score from the BSS metrics which was shown in Section \ref{sec:evalbss}.
 
@@ -1486,18 +1410,8 @@ Figure \ref{fig:umxandxumx} shows how X-UMX encompasses UMX entirely, and adds p
 
 The available implementation of X-UMX\footnote{\url{https://github.com/sony/ai-research-code/tree/master/x-umx}} uses NNabla,\footnote{\url{https://nnabla.org/}} which is a different Python deep learning framework from PyTorch. The X-UMX additions are easily copied from the NNabla implementation of X-UMX into the PyTorch implementation of UMX.\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} In the upcoming sections, I will use X-UMX to refer to the PyTorch implementation of UMX with the changes of X-UMX included, since PyTorch is the deep learning framework chosen for this thesis.
 
-\explanation{
-improved loss diagram captions referring to equations and tables above in Figure \ref{fig:xumxlosses}\\
-verbally describe UMX vs. XUMX in Figure \ref{fig:umxandxumx} caption
-}
-
 \subsubsection{Convolutional denoising autoencoder (CDAE)}
 \label{sec:cdae}
-
-\explanation{
-added intro to why i'm talking about CDAEs\\
-removed confusing wording, only include one diagram in Figure \ref{fig:cdaes}, simplify whole section
-}
 
 \begin{shaded}
 
