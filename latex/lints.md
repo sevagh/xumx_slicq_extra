@@ -26,3 +26,9 @@ ch2.tex
 1009:\todo[inline]{this section needs an intro}
 1075:\todo[inline]{better intro, why are we talking about this}
 ```
+
+# too many consecutive spaces
+
+```
+$ rg '[^\s]([ ]{2,})[^\s]' -g 'ch*.tex'
+```

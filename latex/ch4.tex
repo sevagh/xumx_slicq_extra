@@ -30,20 +30,20 @@ The benchmark script for the PyTorch implementation of the sliCQT performs the f
 		Library & Device & Time (s) \\
 	 \hline
 	 \hline
-		Original & CPU, multithreaded & 51.95  \\
+		Original & CPU, multithreaded & 51.95 \\
 	 \hline
-		Original & CPU, single-threaded & 8.72  \\
+		Original & CPU, single-threaded & 8.72 \\
 	 \hline
 		PyTorch & GPU (NVIDIA 2070 Super) & 2.52 \\
 	 \hline
-		PyTorch & GPU (NVIDIA 3080 Ti) &  2.38 \\
+		PyTorch & GPU (NVIDIA 3080 Ti) & 2.38 \\
 	 \hline
-		PyTorch & CPU & 1.85  \\
+		PyTorch & CPU & 1.85 \\
 	 \hline
 \end{tabular}
 \end{table}
 
-To discuss these results, I will first note that the execution time of the transform improved with PyTorch in every case. The transform computed with PyTorch on the CPU was \textasciitilde4.7x faster than the single-threaded CPU implementation of the original library. The transforms computed with PyTorch on the GPUs were \textasciitilde3.5x and \textasciitilde3.7x faster than the single-threaded CPU implementation of the original library respectively.  The original library has a multithreaded option which performs worse than the default single-threaded behavior, which was an unexpected result.
+To discuss these results, I will first note that the execution time of the transform improved with PyTorch in every case. The transform computed with PyTorch on the CPU was \textasciitilde4.7x faster than the single-threaded CPU implementation of the original library. The transforms computed with PyTorch on the GPUs were \textasciitilde3.5x and \textasciitilde3.7x faster than the single-threaded CPU implementation of the original library respectively. The original library has a multithreaded option which performs worse than the default single-threaded behavior, which was an unexpected result.
 
 Even though the sliCQT computed with PyTorch on the GPU was not faster than the CPU for the tested parameters, having the transform on the GPU allows the use of the sliCQT inside any PyTorch-based neural network, which was the original goal of the port.
 
@@ -121,11 +121,11 @@ The benchmark script for the CuPy BSS metrics library creates a random estimated
 		BSS library & Device & Time (s) \\
 	 \hline
 	 \hline
-		Original & CPU & 1,485.77  \\
+		Original & CPU & 1,485.77 \\
 	 \hline
 		CuPy & GPU (NVIDIA 2070 Super) & 738.39 \\
 	 \hline
-		CuPy & GPU (NVIDIA 3080 Ti) &  585.33 \\
+		CuPy & GPU (NVIDIA 3080 Ti) & 585.33 \\
 	 \hline
 \end{tabular}
 \end{table}
@@ -183,7 +183,7 @@ This section will cover the details of the hyperparameters of the xumx-sliCQ tra
 	 \hline
 		Sequence duration & 1 s & Section \ref{sec:replacestft} \\
 	 \hline
-		Use Bi-LSTM instead of CDAE & False & Section \ref{sec:slicqarches}  \\
+		Use Bi-LSTM instead of CDAE & False & Section \ref{sec:slicqarches} \\
 	 \hline
 		Mixing coefficient & 0.1 & Section \ref{sec:xumxinc} \\
 	 \hline
@@ -273,13 +273,13 @@ To report the inference performance, only the CPU was used. The CPU is a more un
 		Model & Size on disk & Time (s) \\
 	 \hline
 	 \hline
-		UMX & 137 MB & 27.26  \\
+		UMX & 137 MB & 27.26 \\
 	 \hline
-		xumx-sliCQ, STFT-WEM & 28 MB & 55.59  \\
+		xumx-sliCQ, STFT-WEM & 28 MB & 55.59 \\
 	 \hline
-		xumx-sliCQ, sliCQT-WEM & 28 MB & 104.54  \\
+		xumx-sliCQ, sliCQT-WEM & 28 MB & 104.54 \\
 	 \hline
-		X-UMX & 136 MB & 528.19  \\
+		X-UMX & 136 MB & 528.19 \\
 	 \hline
 \end{tabular}
 \end{table}
