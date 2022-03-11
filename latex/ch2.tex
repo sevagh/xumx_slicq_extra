@@ -420,14 +420,14 @@ The Variable-Q scale \parencite{variableq1, variableq2} is the same as the Const
 \end{quote}
 
 Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform \parencite{erblet} as a psychoacoustic transform, which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provide the following equations \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
-\begin{align}\tag{25}\label{equation:variablebw}
+\begin{align}\tag{16}\label{equation:variablebw}
 	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
 
 The effect is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. 
 
 Finally, the Bark psychoacoustic scale is introduced to complement the included mel scale, because the Bark scale has been used with success in music source separation \parencite{barkjust1} and in percussion instrument classification \parencite{barkjust2}. In this thesis, I use the formula shown in equation \eqref{equation:barktan} to convert between Bark and Hz frequencies \parencite{barktan}:
-\begin{align}\tag{26}\label{equation:barktan}
+\begin{align}\tag{17}\label{equation:barktan}
 	\nonumber & f_{\text{Bark}} = 6 \cdot arcsinh \Big(\frac{f_{\text{Hz}}}{600}\Big), f_{\text{Hz}} = 600 \cdot sinh \Big(\frac{f_{\text{Bark}}}{6}\Big)
 \end{align}
 
@@ -869,9 +869,9 @@ The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. Th
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
 
-\todo[inline]{this section needs an intro, why do we need to evaluate?}
+To fairly rank and evaluate different systems for music source separation, an objective measurement of the source separation quality is necessary. \textcite{bss, bss2} introduced the BSS (Blind Source Separation) Eval metrics, a ``new numerical performance criteria that can help evaluate and compare algorithms when applied on [blind audio source separation] problems'' \parencite[1463]{bss}. BSS metrics have been widely used in papers introducing new music source separation models  \parencite{umx, xumx, dannasep, choi2021, kong2021decoupling, demucs} and in large-scale evaluation campaigns of diverse music source separation systems \parencite{sisec2016, sisec2018, mdx21}. Due to their prominence in source separation literature, I decided to use the BSS metrics in this thesis to measure the performance of my proposed model.
 
-The BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure is used for objective measurements of separation quality. There are four distinct metrics that comprise BSS:
+There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
@@ -887,12 +887,12 @@ The BSS (Blind Source Separation) Eval \parencite{bss, bss2} objective measure i
 Out of these four scores, SDR is the single global score that is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
 \begin{align}
 	\nonumber & \mathit{SDR}_{\text{instr}} = \\
-	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{22}\label{equation:sdrinstr}
+	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{18}\label{equation:sdrinstr}
 \end{align}
 
 The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, durms, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
-	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{23}\label{equation:sdrsong}
+	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{19}\label{equation:sdrsong}
 \end{align}
 
 In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used in this thesis.
@@ -900,13 +900,14 @@ In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sise
 \subsubsection{Computational approaches}
 \label{sec:musicsepbackground}
 
-Computational source separation has a history of at least 50 years \parencite{musicmask, musicsepintro1}, originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS).
+Computational source separation has a history of at least 50 years \parencite{musicmask, musicsepintro1}, originating from the tasks of computational auditory scene analysis (CASA) and blind source separation (BSS). In CASA, the goal is to ``computationally extract individual streams from one or two recordings of an acoustic scene'' \parencite[12]{casabook}, based on the definition of ASA (auditory scene analysis) given by \textcite{bregman}. BSS, first defined by \textcite{jutten}, solves a subproblem of CASA which aims to recover the sources of a ``mixture of multiple, statistically independent sources that are received with separate sensors'' \parencite[190]{casabook}. The term ``blind'' refers to there being no prior knowledge of what the sources are, and how they were mixed together. In CASA and BSS, therefore, the mixed audio contains unknown sources combined in unknown ways that must be separated.
 
-\todo[inline]{blurb on casa and bss}
+By contrast, in music source separation and music demixing, the sources are typically known, or have known characteristics. That is to say, in music source separation, the task is not to separate all of the distinct sources in the mixture, but to extract a predefined set of sources. Some forms of music source separation try to extract harmonic and percussive sources \parencite{fitzgerald1, fitzgerald2, driedger}, which will be described in greater detail in Section \ref{sec:hpss}. Another common set of separation sources are the four sources defined by the MUSDB18 \parencite{musdb18} dataset: vocals, drums, bass, and other. Additionally, in music source separation, the mixing process is generally assumed to be a simple linear mixture \parencite{musicsepgood}, shown in equation \eqref{equation:linearmixunitygain}:
+\begin{align}
+	x_{\text{mix}} = x_{\text{source1}} + x_{\text{source2}} + ... \tag{20}\label{equation:linearmixunitygain}
+\end{align}
 
-In CASA and BSS, the mixed audio contains unknown sources that must be separated; the criteria for separation is that the sources must be distinct from each other. In music demixing, the sources are typically known. That is to say, in music source separation, the task is not to separate all of the distinct sources in the mixture, but to extract a known set of sources. Some forms of music source separation try to extract harmonic and percussive sources \parencite{fitzgerald1, fitzgerald2, driedger}, which will be described in greater detail in Section \ref{sec:hpss}. Another common set of separation sources are the four sources defined by the MUSDB18 \parencite{musdb18} dataset: vocals, drums, bass, and other.
-
-A popular algorithm in blind source separation is Independent Component Analysis (ICA)  \parencite{musicmask, musicsepgood, musicsepintro1}, which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. \textcite{ica1, ica2} describe ICA algorithms, and \textcite{blind1, blind2} provide an in-depth review on the history of blind source separation. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
+A popular algorithm in BSS is Independent Component Analysis (ICA) \parencite{musicmask, musicsepgood, musicsepintro1}, which exploits spatial information of the sources, and assumes the sources to be independent. This technique can be used when there are as many channels in the mixture (corresponding to differently placed microphones) as the number of sources. \textcite{ica1, ica2} describe ICA algorithms, and \textcite{blind1, blind2} provide an in-depth review on the history of BSS. Figure \ref{fig:icaposition} shows an example of the positional considerations in a typical ICA system.
 
 \begin{figure}[ht]
 	\centering
@@ -1027,16 +1028,16 @@ A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary mask,
 
 An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2}, is given by equation \eqref{equation:softmask}:
 \begin{align}
-	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}}\tag{16}\label{equation:softmask}
+	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}}\tag{21}\label{equation:softmask}
 \end{align}
 
 where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is given by equation \eqref{equation:hardmask}:
 \begin{align}
-	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{17}\label{equation:hardmask}
+	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{22}\label{equation:hardmask}
 \end{align}
 
 where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equations \eqref{equation:residual}:
-\begin{align}\tag{18}\label{equation:residual}
+\begin{align}\tag{23}\label{equation:residual}
 	\nonumber & M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta\\
 	\nonumber & M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}})
 \end{align}
@@ -1048,7 +1049,7 @@ To illustrate the calculation of the oracle mask, I will describe a simple case 
 The waveforms $x_{v}[n]$ and $x_{d}[n]$ denote the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, I want my algorithm or model to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
 
 Several interesting oracle masks can be calculated from the STFTs of the mix and ground truths of two sources shown in equations \eqref{equation:targetstfts}:
-\begin{align}\tag{19}\label{equation:targetstfts}
+\begin{align}\tag{24}\label{equation:targetstfts}
 	\nonumber X_{m} &= \mathit{STFT}(x_{m}[n])\\
 	\nonumber X_{v} &= \mathit{STFT}(x_{v}[n])\\
 	\nonumber X_{d} &= \mathit{STFT}(x_{d}[n])
@@ -1057,7 +1058,7 @@ Several interesting oracle masks can be calculated from the STFTs of the mix and
 \textcite{sisec2018} report the performance of several oracles called IRM1, IRM2, IBM1, and IBM2. These acronyms can be understood as follows; the ``I'' stands for Ideal, ``R|B'' denotes a Ratio (soft) vs. Binary (hard) mask, ``M'' stands for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the IRM1 is a soft mask between the magnitude spectrograms (since the magnitude spectrogram raised to the power of one is simply itself), and IBM2 is a hard mask between the power spectrograms (i.e., the magnitude spectrogram raised to the power of two).
 
 The oracles for the vocal source (and the same equations apply to the drum track) are computed from equations \eqref{equation:vocaloracles}, noting that a typical default value for $\theta$ is 0.5:
-\begin{align}\tag{20}\label{equation:vocaloracles}
+\begin{align}\tag{25}\label{equation:vocaloracles}
 	\nonumber \mathit{IRM1}_{v} &= \frac{|X_{v}|^{1}}{|X_{m}|^{1}}\text{,\qquad}
 	\nonumber \mathit{IRM2}_{v} = \frac{|X_{v}|^{2}}{|X_{m}|^{2}}\\
 	\nonumber \mathit{IBM1}_{v} &= \begin{cases}
@@ -1071,7 +1072,7 @@ The oracles for the vocal source (and the same equations apply to the drum track
 \end{align}
 
 To estimate the time-domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using equation \eqref{equation:cplxinvert}:
-\begin{align}\tag{21}\label{equation:cplxinvert}
+\begin{align}\tag{26}\label{equation:cplxinvert}
 	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \mathit{iSTFT}(\hat{X}_{v\text{, IRM1}})
 \end{align}
 
@@ -1085,7 +1086,7 @@ As mentioned in Section \ref{sec:masksandoracles}, many music demixing systems p
 In demixing or source separation literature, this strategy is referred to as the ``noisy phase'' \parencite{noisyphase1, noisyphase2}. The name originates from speech separation, where a common task is to separate speech from noise. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, and I will use the term ``mix-phase inversion'' (MPI) to refer to the same idea.
 
 Equations \eqref{equation:mpineural} show how the phase of the mixture and magnitude of the estimated source are used to create a waveform by some arbitrary music demixing system:
-\begin{align}\tag{29}\label{equation:mpineural}
+\begin{align}\tag{27}\label{equation:mpineural}
 	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \mathit{MusicDemixingSystem}(x_{\text{mix}})\\
 	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
@@ -1095,7 +1096,7 @@ Equations \eqref{equation:mpineural} show how the phase of the mixture and magni
 In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. 
 
 The equations for the MPI oracle can be derived from equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
-\begin{align}\tag{30}\label{equation:mpioracle}
+\begin{align}\tag{28}\label{equation:mpioracle}
 	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & X_{\text{source}} = \mathit{STFT}(x_{\text{source}}[n])\\
 	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \angle{X_{\text{mix}}}\\
@@ -1130,7 +1131,7 @@ Before the training of the neural network, the mixed waveforms of the training s
 In the training loop, the $(x, y)$ pairs of mixed audio and the ground-truth of the target source waveform are converted to the magnitude STFT domain $(|X|, |Y|)$. The data whitening from the previous step is applied to the input mixed magnitude spectrogram $|X|$, to use $(|X|+\mathit{mean}(\{|X|\}_{\text{train}}))\times\mathit{std}(\{|X|\}_{\text{train}})$ as the input to the Bi-LSTM neural network. The Bi-LSTM neural network outputs $|\hat{Y}|$, the estimated magnitude STFT of the target sources.
 
 The loss function is the mean-squared error (MSE) function. In the loss function, the estimated magnitude STFT of the target source is compared to the ground-truth, shown in equation \eqref{equation:mselossstft}.
-\begin{align}\tag{31}\label{equation:mselossstft}
+\begin{align}\tag{29}\label{equation:mselossstft}
 	\nonumber & \mathit{MSE}(Y, \hat{Y}) = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i})^{2}}
 \end{align}
 
@@ -1140,7 +1141,7 @@ There are four independent Bi-LSTM neural networks, shown in Figure \ref{fig:umx
 
 First, the four independently-trained Bi-LSTM models are used to obtain the estimated magnitude STFTs of the four target sources. The mix phase inversion is used to create a first estimate the waveforms for the four targets. Equations \eqref{equation:mpirepeat} show how the estimated magnitude STFT of UMX Bi-LSTM is converted to the time-domain waveform estimate:
 
-\begin{align}\tag{32}\label{equation:mpirepeat}
+\begin{align}\tag{30}\label{equation:mpirepeat}
 	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \mathit{UMX}(x_{\text{mix}})\\
 	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
@@ -1216,7 +1217,7 @@ The next addition to the loss function of X-UMX is the combination loss (CL), wh
 \end{table}
 
 Equations \eqref{equation:cl} show the computation of the total frequency-domain loss from the 14 combinations, where $|Y|$ represents the magnitude spectrogram of the ground-truth target waveform, and $\hat{|Y|}$ represents the estimated magnitude spectrogram of the neural network. The subscript of $|Y|$ and $|\hat{Y}|$ represents the target (1--4 for vocals, drums, bass, and other):
-\begin{align}\tag{34}\label{equation:cl}
+\begin{align}\tag{31}\label{equation:cl}
 	\nonumber & \text{mse\_loss}_{1} = \mathit{MSE}(\hat{|Y|}_{1}, |Y|_{1})\\
 	\nonumber & \text{(... repeat for size-1 combinations)}\\
 	\nonumber & \text{mse\_loss}_{5} = \mathit{MSE}(\hat{|Y|}_{1} + \hat{|Y|}_{2}, |Y|_{1} + |Y|_{2})\\
@@ -1227,7 +1228,7 @@ Equations \eqref{equation:cl} show the computation of the total frequency-domain
 \end{align}
 
 For the time-domain loss, the same 14 combinations are considered in the time domain, using the ground-truth time-domain waveforms $y$ and the estimated time-domain waveform $\hat{y}$ from the mix-phase inversion, shown in the equations \eqref{equation:mdl}:
-\begin{align}\tag{35}\label{equation:mdl}
+\begin{align}\tag{32}\label{equation:mdl}
 	\nonumber & \text{sdr\_loss}_{1} = \mathit{SDR}(\hat{y}_{1}, y_{1})\\
 	\nonumber & \text{(... repeat for size-1 combinations)}\\
 	\nonumber & \text{sdr\_loss}_{5} = \mathit{SDR}(\hat{y}_{1} + \hat{y}_{2}, y_{1} + y_{2})\\
@@ -1238,7 +1239,7 @@ For the time-domain loss, the same 14 combinations are considered in the time do
 \end{align}
 
 As a last step, the time-domain loss is multiplied by a mixing coefficient, $\alpha$, before adding it to the frequency-domain loss to create the total loss function in equation \eqref{equation:totalloss}:
-\begin{align}\tag{36}\label{equation:totalloss}
+\begin{align}\tag{33}\label{equation:totalloss}
 	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}
 
