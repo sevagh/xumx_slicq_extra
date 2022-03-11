@@ -1,5 +1,6 @@
 \documentclass[letter,12pt,notitlepage]{article}
 \usepackage[svgnames]{xcolor}
+\usepackage{framed}
 \usepackage{soul}
 \usepackage{subfiles}
 \usepackage[left=4cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
@@ -75,6 +76,10 @@
 	\todo[inline,color=green!40]
 }
 
+\newcommand{\explanationtwo}{
+	\todo[color=green!40]
+}
+
 \DeclareCiteCommand{\secondaryciteauthor}{}{\printtext[bibhyperref]{\printnames{labelname}}}{}{}
 \DeclareCiteCommand{\secondaryciteyear}{}{\bibhyperref{\printdate}}{\multicitedelim}{}
 \newcommand{\secondarycitedirect}[2]{\secondaryciteauthor{#1} (\secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
@@ -91,7 +96,10 @@
 \renewcommand\listingscaption{Code Listing}
 \renewcommand\listoflistingscaption{List of Code Listings}
 
-% manual fixes for weird hyphenations
+\colorlet{shadecolor}{blue!15}
+%\colorlet{hlcolor}{blue!10}
+
+\DeclareRobustCommand{\hlblu}[1]{{\sethlcolor{shadecolor}\hl{#1}}}
 
 \title{\ThesisTitle}
 
