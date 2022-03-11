@@ -16,7 +16,7 @@ In Section \ref{sec:ml}, I will give an overview of machine learning and deep le
 
 In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis. In Section \ref{sec:pythonbasics}, I will describe core concepts of the Python programming language that I will be using in subsequent sections to describe the code I wrote to implement and test my hypothesis. In Section \ref{sec:gitvcs}, I will describe version control for software projects and introduce Git, a tool for storing and tracking changes in code projects. In Section \ref{sec:ossgithub}, I will describe open-source software and GitHub, which is a social website for sharing open-source code that use Git. I will be releasing the code that I wrote for this thesis on GitHub for public availability.
 
-In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, and their motivations and uses, in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepdatasets}, I will describe the public datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe metrics that are commonly used for evaluating music source separation methods. In Section \ref{sec:musicsepbackground}, I will give an overview of computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a common strategy for only estimating the magnitude STFT spectrogram and using the phase of the original mixed audio, or the ``noisy phase.'' In Section \ref{sec:umx}, I will describe Open-Unmix, the model that will be the starting point for this thesis, and in Section \ref{sec:xumx}, I will describe its closely-related variant, CrossNet-Open-Unmix. Finally, in Section \ref{sec:cdae}, I will describe Convolutional Denoising Autoencoders (CDAE), which are another type of music source separation model that I will incorporate in the final model of this thesis.
+In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, and their motivations and uses, in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepdatasets}, I will describe the public datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe metrics that are commonly used for evaluating music source separation methods. In Section \ref{sec:musicsepbackground}, I will give an overview of computational approaches to general audio source separation, leading to current trends in music source separation and demixing.  In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a common strategy for only estimating the magnitude STFT spectrogram and using the phase of the original mixed audio, or the ``noisy phase.'' In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram masking that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:umx}, I will describe Open-Unmix, the model that will be the starting point for this thesis, and in Section \ref{sec:xumx}, I will describe its closely-related variant, CrossNet-Open-Unmix. Finally, in Section \ref{sec:cdae}, I will describe Convolutional Denoising Autoencoders (CDAE), which are another type of music source separation model that I will incorporate in the final model of this thesis.
 
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
@@ -817,7 +817,7 @@ GitHub\footnote{\url{https://github.com}} is a social website, designed for shar
 
 In this section, I will provide an overview of music source separation and music demixing. I will start by providing definitions, motivations, and uses of the tasks in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepdatasets}, I will describe the MUSDB18 and MUSDB18-HQ datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe the BSS evaluation metrics used for evaluating music source separation methods.
 
-In Section \ref{sec:musicsepbackground}, I will give an overview of historical computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a strategy used by spectrogram-based music source separation models, where only the model only estimates the magnitude STFT of the target and uses the phase of the original mixed audio, or the ``noisy phase.''
+In Section \ref{sec:musicsepbackground}, I will give an overview of historical computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a strategy used by spectrogram-based music source separation models, where only the model only estimates the magnitude STFT of the target and uses the phase of the original mixed audio, or the ``noisy phase.'' In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram that exemplifies the time-frequency tradeoff of the STFT. 
 
 A new music source separation model, which is the result of this thesis, will be presented in Section \ref{sec:methodology}. In Section \ref{sec:ml}, I described that the model will have two variants, one based on a convolutional neural network (CNN) architecture, and one based on a recurrent neural network (RNN) architecture. The RNN model architecture is based on Open-Unmix and CrossNet-Open-Unmix, two related models for music source separation, which will be shown in Section \ref{sec:umx} and Section \ref{sec:xumx}. The CNN model architecture is based on the Convolutional Denoising Autoencoder (CDAE), which will be shown in Section \ref{sec:cdae}.
 
@@ -857,14 +857,14 @@ Music demixing can be considered as the reverse of the mixing process of \textit
 	\end{minipage}
 \end{figure}
 
-Music demixing can also be viewed as a combination of multiple music source separation subproblems for all of the desired target stems. To illustrate the concrete example from Figure \ref{fig:mixingdiagrams}: extracting \textit{one} of the guitar, drum, keyboard, or vocal sources (or stems) from the mixed song is music source separation, but extracting \textit{all four} from the mixed audio at the same time is music demixing.
+Music demixing can also be viewed as a combination of multiple music source separation subproblems for all of the desired target stems. To illustrate the example from Figure \ref{fig:mixingdiagrams}: extracting \textit{one} of the guitar, drum, keyboard, or vocal sources (or stems) from the mixed song is music source separation, but extracting \textit{all four} from the mixed audio at the same time is music demixing.
 
 \subsubsection{Public datasets}
 \label{sec:musicsepdatasets}
 
 The most popular music stem dataset used by the Signal Separation Evaluation Campaign (SiSEC) and SigSep is the MUSDB18 dataset \parencite{musdb18}, and more recently the HQ (high-quality) version \parencite{musdb18hq}. MUSDB18-HQ contains stereo wav files sampled at 44,100 Hz representing stems (drum, vocal, bass, and other) from a collection of permissively licensed music, specifically intended for recording, mastering, mixing (and in this case, ``de-mixing'', or source separation) research. It combines earlier mixing/demixing datasets \parencite{sisec2016, otherdataset2}.
 
-The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. The dataset is organized into \Verb#train# and \Verb#test# folders, and a subset from the training folder are defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
+The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. The dataset is organized into \Verb#train# and \Verb#test# folders, and a subset from the training folder is defined to be the validation set by the Python MUSDB18-HQ loader library.\footnote{https://github.com/sigsep/sigsep-mus-db}
 
 \subsubsection{Evaluation measures}
 \label{sec:evalbss}
@@ -944,6 +944,123 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 	\label{fig:spectraldemix}
 \end{figure}
 
+\subsubsection{Time-frequency masking and oracle estimators}
+\label{sec:masksandoracles}
+
+Diverse music source separation algorithms based on spectrograms use the technique of time-frequency masking \parencite{musicsepgood, musicmask}. In this section, I will describe the concept of time-frequency masking, and oracle estimators, which can be used to compute the maximum possible quality of a given time-frequency mask from ground truth signals. Two different music source separation systems based on time-frequency masking will be described in upcoming sections: Harmonic/Percussive Source Separation \parencite{fitzgerald1}, a KAM (kernel additive modeling) algorithm for music source separation that will be presented in Section \ref{sec:hpss}, and Open-Unmix \parencite{umx}, a DNN (deep neural network) for music source separation that will be presented in Section \ref{sec:umx}.
+
+\textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins. A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary mask, or hard mask, has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:simplemasks}, and an example of soft and hard masking is shown in Figure \ref{fig:masks}.
+
+\begin{figure}[ht]
+       \centering
+        \begin{minipage}{1.\textwidth}
+               \renewcommand\footnoterule{} % optional removing footnote bar
+               \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+               \includegraphics[width=\textwidth]{./images-mss/mask_simple.png}
+               \caption[Simple example of applying a time-frequency mask to a spectrogram]{Simple example of applying a time-frequency mask to a spectrogram\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/tf_and_masking.html}}}
+               \label{fig:simplemasks}
+       \end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{./images-mss/maskdemo.png}
+	\caption{Results of a soft and binary oracle mask applied for speech denoising \parencite[71]{masking}. When the binary mask is applied, there is a more dramatic separation, and there is starker contrast between the non-zero and zero parts of the resulting spectrogram. When the soft mask is applied, the separation is more gentle, and a range of zero to non-zero values can be seen in the resulting spectrogram.}
+	\label{fig:masks}
+\end{figure}
+
+An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2}, is given by equation \eqref{equation:softmask}:
+\begin{align}
+	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}}\tag{21}\label{equation:softmask}
+\end{align}
+
+where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is given by equation \eqref{equation:hardmask}:
+\begin{align}
+	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{22}\label{equation:hardmask}
+\end{align}
+
+where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equations \eqref{equation:residual}:
+\begin{align}\tag{23}\label{equation:residual}
+	\nonumber & M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta\\
+	\nonumber & M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}})
+\end{align}
+
+The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms \parencite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}. Discarding the phase of the complex STFT is a choice made for simplicity, although the phase may be important for source separation applications \parencite{ditchphase}.
+
+To illustrate the calculation of the oracle mask, I will describe a simple case of a mixed song consisting of a vocal and drum track. To compute oracles, note that it is necessary to have access to the ground truth isolated source recordings of vocals and drums, in addition to the mix.
+
+The waveforms $x_{v}[n]$ and $x_{d}[n]$ denote the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, I want my algorithm or model to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
+
+Several interesting oracle masks can be calculated from the STFTs of the mix and ground truths of two sources shown in equations \eqref{equation:targetstfts}:
+\begin{align}\tag{24}\label{equation:targetstfts}
+	\nonumber X_{m} &= \mathit{STFT}(x_{m}[n])\\
+	\nonumber X_{v} &= \mathit{STFT}(x_{v}[n])\\
+	\nonumber X_{d} &= \mathit{STFT}(x_{d}[n])
+\end{align}
+ 
+\textcite{sisec2018} report the performance of several oracles called IRM1, IRM2, IBM1, and IBM2. These acronyms can be understood as follows; the ``I'' stands for Ideal, ``R|B'' denotes a Ratio (soft) vs. Binary (hard) mask, ``M'' stands for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the IRM1 is a soft mask between the magnitude spectrograms (since the magnitude spectrogram raised to the power of one is simply itself), and IBM2 is a hard mask between the power spectrograms (i.e., the magnitude spectrogram raised to the power of two).
+
+The oracles for the vocal source (and the same equations apply to the drum track) are computed from equations \eqref{equation:vocaloracles}, noting that a typical default value for $\theta$ is 0.5:
+\begin{align}\tag{25}\label{equation:vocaloracles}
+	\nonumber \mathit{IRM1}_{v} &= \frac{|X_{v}|^{1}}{|X_{m}|^{1}}\text{,\qquad}
+	\nonumber \mathit{IRM2}_{v} = \frac{|X_{v}|^{2}}{|X_{m}|^{2}}\\
+	\nonumber \mathit{IBM1}_{v} &= \begin{cases}
+		0 \text{ where } \frac{|X_{v}|^{1}}{|X_{m}|^{1}} < \theta\\
+		1 \text{ where } \frac{|X_{v}|^{1}}{|X_{m}|^{1}} \ge \theta
+	\end{cases},
+	\nonumber \mathit{IBM2}_{v} = \begin{cases}
+		0 \text{ where } \frac{|X_{v}|^{2}}{|X_{m}|^{2}} < \theta\\
+		1 \text{ where } \frac{|X_{v}|^{2}}{|X_{m}|^{2}} \ge \theta
+	\end{cases}
+\end{align}
+
+To estimate the time-domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using equation \eqref{equation:cplxinvert}:
+\begin{align}\tag{26}\label{equation:cplxinvert}
+	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \mathit{iSTFT}(\hat{X}_{v\text{, IRM1}})
+\end{align}
+
+In this section, I mentioned that discarding the phase of the complex STFT and applying masks only on the magnitude spectrogram is a common choice in music source separation \parencite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}. This is done to avoid working with the phase of the STFT \parencite{ditchphase}. Figure \ref{fig:noisyphase} shows how the phase spectrograms of an audio signal and random noise look similar to one another.
+
+\begin{figure}[ht]
+       \centering
+        \begin{minipage}{1.\textwidth}
+               \renewcommand\footnoterule{} % optional removing footnote bar
+               \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+               \includegraphics[width=\textwidth]{./images-mss/whynophase.png}
+               \caption[Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model]{Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/phase.html}}}
+               \label{fig:noisyphase}
+       \end{minipage}
+\end{figure}
+
+Systems that only estimate the magnitude STFT of a source need a phase STFT to create a complex STFT which can be inverted back to a time-domain waveform. In demixing and source separation literature, there is a strategy called ``noisy phase'' \parencite{noisyphase1, noisyphase2}, where the estimated magnitude STFT of the source is combined with the phase STFT of the original mixed (or noisy) audio. The ``noisy phase'' strategy will be described in further detail in Section \ref{sec:noisyphaseoracle}.
+
+\subsubsection{Noisy phase or mix-phase inversion (MPI)}
+\label{sec:noisyphaseoracle}
+
+In this section, I will describe the ``noisy phase'' strategy in music source separation, which is the strategy of estimating only the magnitude STFT of the source, and using the phase of the original mixed (or noisy) audio. I will also show the design of an oracle estimator for the ``noisy phase'' strategy to estimate its upper limit of quality. This is important for understanding the upper limit of performance of Open-Unmix \parencite{umx}, a model for music source separation that will be described in Section \ref{sec:umx}, and that forms the base of the new model proposed by this thesis in Section \ref{sec:methodology}.
+
+The name ``noisy phase'' originates from speech separation, where a common task is to separate speech from noise. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, and throughout this section and the rest of this thesis, I will use the term ``mix-phase inversion'' (MPI) to refer to the same idea.
+
+Equations \eqref{equation:mpineural} show how the phase of the mixture and magnitude of the estimated source are used to create a waveform by some arbitrary music demixing system:
+\begin{align}\tag{27}\label{equation:mpineural}
+	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
+	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \mathit{MusicDemixingSystem}(x_{\text{mix}})\\
+	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
+	\nonumber & \hat{x}_{\text{source, est}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, est}})
+\end{align}
+
+In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. 
+
+The equations for the MPI oracle can be derived from equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
+\begin{align}\tag{28}\label{equation:mpioracle}
+	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
+	\nonumber & X_{\text{source}} = \mathit{STFT}(x_{\text{source}}[n])\\
+	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \angle{X_{\text{mix}}}\\
+	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
+\end{align}
+
+The MPI oracle waveform should provide an idea of the upper limit of performance of a music source separation system that uses the MPI strategy.
+
 \subsubsection{Harmonic/Percussive Source Separation}
 \label{sec:hpss}
 
@@ -1009,99 +1126,6 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
        \caption{Source separation using wavelets. Cyan shows the first harmonic source, yellow shows the second harmonic source, and red shows the overlap \parencite[5]{wavelets}}
        \label{fig:waveletsep}
 \end{figure}
-
-\subsubsection{Time-frequency masking and oracle estimators}
-\label{sec:masksandoracles}
-
-\todo[inline]{this section needs an intro}
-
-Surveys on speech \parencite{speechmask} and music separation \parencite{musicmask} indicate that the majority of source separation algorithms use the technique of time-frequency masking to separate the sources.  \textcite{masking} describe different time-frequency masking strategies in audio source separation. A time-frequency mask (or spectral mask, or masking filter) is a matrix of the same size as the complex STFT, or its real-valued magnitude, by which the STFT is multiplied to mask, filter, or suppress specific time-frequency bins.
-
-A soft mask, or ratio mask, has real values $\in [0.0, 1.0]$, and a binary mask, or hard mask, has logical values (i.e., only zero and one). To compute a binary mask, there must be an additional real-valued parameter, $\theta$, which is the separation factor; values below $\theta$ are set to 0, and values above $\theta$ are set to 1. According to \textcite{masking}, soft masks are generally produce a higher quality of sound. An illustration of spectral masking is shown in Figure \ref{fig:masks}.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.8\textwidth]{./images-mss/maskdemo.png}
-	\caption{Results of a soft and binary oracle mask applied for speech denoising \parencite[71]{masking}. When the binary mask is applied, there is a more dramatic separation, and there is starker contrast between the non-zero and zero parts of the resulting spectrogram. When the soft mask is applied, the separation is more gentle, and a range of zero to non-zero values can be seen in the resulting spectrogram.}
-	\label{fig:masks}
-\end{figure}
-
-An example of a soft or ratio mask, used by \textcite{fitzgerald1, fitzgerald2}, is given by equation \eqref{equation:softmask}:
-\begin{align}
-	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|^{p}}{|\hat{S}_{\text{interference}}|^{p} + |\hat{S}_{\text{target}}|^{p}}\tag{21}\label{equation:softmask}
-\end{align}
-
-where $\hat{S}$ represents the complex-valued spectrogram and $p$ represents the raised power ($p = 1$ is the magnitude spectrogram, and $p = 2$ is the power spectrogram). The binary or hard mask used by \textcite{driedger} is given by equation \eqref{equation:hardmask}:
-\begin{align}
-	M_{\text{target}} = \frac{|\hat{S}_{\text{target}}|}{|\hat{S}_{\text{interference}}| + \epsilon} \le \beta\tag{22}\label{equation:hardmask}
-\end{align}
-
-where $\beta$ is the separation factor. Note the inclusion of machine epsilon in the denominator, to avoid division by zero. One advantage of the hard mask's separation factor is that a third residual component can be extracted. This is shown for two arbitrary sources a and b in equations \eqref{equation:residual}:
-\begin{align}\tag{23}\label{equation:residual}
-	\nonumber & M_{\text{a}} = \frac{|\hat{S}_{\text{a}}|}{|\hat{S}_{\text{b}}| + \epsilon} > \beta, M_{\text{b}} = \frac{|\hat{S}_{\text{b}}|}{|\hat{S}_{\text{a}}| + \epsilon} \ge \beta\\
-	\nonumber & M_{\text{residual}} = 1 - (M_{\text{a}} + M_{\text{b}})
-\end{align}
-
-The oracle mask, or oracle estimator, is a perfect time-frequency mask which is computed from ground-truth data. The use of the oracle estimator is to give an idea of the upper limit of audio quality from an algorithm or machine learning model for source separation or demixing. Typically, the mask is computed from and applied to the magnitude spectrograms \parencite{fitzgerald1, fitzgerald2, driedger, umx, plumbley1, plumbley2}. Discarding the phase of the complex STFT is a choice made for simplicity, although the phase may be important for source separation applications \parencite{ditchphase}.
-
-To illustrate the calculation of the oracle mask, I will describe a simple case of a mixed song consisting of a vocal and drum track. To compute oracles, note that it is necessary to have access to the ground truth isolated source recordings of vocals and drums, in addition to the mix.
-
-The waveforms $x_{v}[n]$ and $x_{d}[n]$ denote the isolated vocal and drum tracks respectively. The mixed song is defined by the waveform $x_{m}[n] = x_{v}[n] + x_{d}[n]$. To apply the music demixing task to this waveform, I want my algorithm or model to take the mixed waveform $x_{m}[n]$ as an input, and estimate the two source waveforms of vocals $\hat{x}_{v}[n]$ and drums $\hat{x}_{d}[n]$.
-
-Several interesting oracle masks can be calculated from the STFTs of the mix and ground truths of two sources shown in equations \eqref{equation:targetstfts}:
-\begin{align}\tag{24}\label{equation:targetstfts}
-	\nonumber X_{m} &= \mathit{STFT}(x_{m}[n])\\
-	\nonumber X_{v} &= \mathit{STFT}(x_{v}[n])\\
-	\nonumber X_{d} &= \mathit{STFT}(x_{d}[n])
-\end{align}
- 
-\textcite{sisec2018} report the performance of several oracles called IRM1, IRM2, IBM1, and IBM2. These acronyms can be understood as follows; the ``I'' stands for Ideal, ``R|B'' denotes a Ratio (soft) vs. Binary (hard) mask, ``M'' stands for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the IRM1 is a soft mask between the magnitude spectrograms (since the magnitude spectrogram raised to the power of one is simply itself), and IBM2 is a hard mask between the power spectrograms (i.e., the magnitude spectrogram raised to the power of two).
-
-The oracles for the vocal source (and the same equations apply to the drum track) are computed from equations \eqref{equation:vocaloracles}, noting that a typical default value for $\theta$ is 0.5:
-\begin{align}\tag{25}\label{equation:vocaloracles}
-	\nonumber \mathit{IRM1}_{v} &= \frac{|X_{v}|^{1}}{|X_{m}|^{1}}\text{,\qquad}
-	\nonumber \mathit{IRM2}_{v} = \frac{|X_{v}|^{2}}{|X_{m}|^{2}}\\
-	\nonumber \mathit{IBM1}_{v} &= \begin{cases}
-		0 \text{ where } \frac{|X_{v}|^{1}}{|X_{m}|^{1}} < \theta\\
-		1 \text{ where } \frac{|X_{v}|^{1}}{|X_{m}|^{1}} \ge \theta
-	\end{cases},
-	\nonumber \mathit{IBM2}_{v} = \begin{cases}
-		0 \text{ where } \frac{|X_{v}|^{2}}{|X_{m}|^{2}} < \theta\\
-		1 \text{ where } \frac{|X_{v}|^{2}}{|X_{m}|^{2}} \ge \theta
-	\end{cases}
-\end{align}
-
-To estimate the time-domain waveform from an oracle mask, the complex STFT of the mixed waveform, $X_{m}$, is multiplied by the mask, and the resultant complex STFT is inverted back to the time-domain waveform using equation \eqref{equation:cplxinvert}:
-\begin{align}\tag{26}\label{equation:cplxinvert}
-	\nonumber \hat{X}_{v\text{, IRM1}} &= X_{m} \cdot \text{IRM1}_{v}, \hat{x}_{v\text{, IRM1}} = \mathit{iSTFT}(\hat{X}_{v\text{, IRM1}})
-\end{align}
-
-\subsubsection{Noisy phase or mix-phase inversion (MPI)}
-\label{sec:noisyphaseoracle}
-
-\todo[inline]{better intro, why are we talking about this}
-
-As mentioned in Section \ref{sec:masksandoracles}, many music demixing systems prefer to only estimate magnitude spectrograms, and discard the phase. These systems use the phase of the mixed audio combined with the magnitude of the estimated source to create an audio waveform.
-
-In demixing or source separation literature, this strategy is referred to as the ``noisy phase'' \parencite{noisyphase1, noisyphase2}. The name originates from speech separation, where a common task is to separate speech from noise. In music demixing, referring to interfering musical instruments as ``noise'' is inappropriate, and I will use the term ``mix-phase inversion'' (MPI) to refer to the same idea.
-
-Equations \eqref{equation:mpineural} show how the phase of the mixture and magnitude of the estimated source are used to create a waveform by some arbitrary music demixing system:
-\begin{align}\tag{27}\label{equation:mpineural}
-	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
-	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \mathit{MusicDemixingSystem}(x_{\text{mix}})\\
-	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, est}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, est}})
-\end{align}
-
-In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. 
-
-The equations for the MPI oracle can be derived from equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
-\begin{align}\tag{28}\label{equation:mpioracle}
-	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
-	\nonumber & X_{\text{source}} = \mathit{STFT}(x_{\text{source}}[n])\\
-	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \angle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
-\end{align}
 
 \subsubsection{Open-Unmix (UMX)}
 \label{sec:umx}
