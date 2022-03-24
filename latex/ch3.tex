@@ -15,7 +15,7 @@ Figure \ref{fig:generalmdx} shows a block diagram for a general deep neural netw
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-blockdiagrams/generic_mdx.png}
-	\caption{General DNN music demixing system with magnitude spectrograms. This diagram is shown for a single estimated waveform, but music demixing systems estimate four waveforms for vocals, bass, drums, and other, following the example of the MUSDB18-HQ dataset}
+	\caption{General DNN music demixing system with magnitude spectrograms. This diagram is shown for a single estimated waveform, but music demixing systems \hlblu{often estimate} four waveforms for vocals, bass, drums, and other, following the example of the MUSDB18-HQ dataset}
 	\label{fig:generalmdx}
 \end{figure}
 
@@ -29,7 +29,7 @@ Figure \ref{fig:umxandxumxslicq} shows how X-UMX and xumx-sliCQ are variants of 
 	\label{fig:umxandxumxslicq}
 \end{figure}
 
-In Section \ref{sec:inputrepresentation}, I will describe how I ported the sliCQT to use PyTorch, a Python framework to run deep neural networks (DNN) on the GPU. I will also describe new frequency scales I added to the sliCQT for music applications, and how I chose frequency scale parameters for the sliCQT that might perform well in the task music demixing. In Section \ref{sec:neuralnet}, I will discuss the changes made to X-UMX to use the sliCQT instead of the STFT in xumx-sliCQ, the choice of Bi-LSTM and CDAE neural architectures, and the combining of the four independent target networks into a single model with the X-UMX loss functions. Finally, in Section \ref{sec:postprocessing}, I will show how the post-processing iterative Wiener filtering and Expectation-Maximization (Wiener-EM) step was adapted for the sliCQT.
+In Section \ref{sec:inputrepresentation}, I will describe how I ported the sliCQT to use PyTorch, a Python framework to run deep neural networks (DNN) on the GPU. I will also describe new frequency scales I added to the sliCQT for music applications, and how I chose frequency scale parameters for the sliCQT that might perform well \hlblu{in music demixing}. In Section \ref{sec:neuralnet}, I will discuss the changes made to X-UMX to use the sliCQT instead of the STFT in xumx-sliCQ, the choice of Bi-LSTM and CDAE neural architectures, and the combining of the four independent target networks into a single model with the X-UMX loss functions. Finally, in Section \ref{sec:postprocessing}, I will show how the post-processing iterative Wiener filtering and Expectation-Maximization (Wiener-EM) step was adapted for the sliCQT.
 
 \subsection{Input representation}
 \label{sec:inputrepresentation}
@@ -38,18 +38,18 @@ First, in Section \ref{sec:stftslicqtcomp}, \ref{sec:stftslicqtcomp1}, and \ref{
 
 Next, in Section \ref{sec:torchslicq}, I will show the modifications made to the library to compute the transform with PyTorch on the GPU, so that it can be used in the X-UMX neural network code. I will also describe how the PyTorch sliCQT data structure differs from the STFT.
 
-In Section \ref{sec:improvelib}, I will show the addition of new frequency scales that are interesting for music applications that were described in Section \ref{sec:theorynsgt}. Recall from Section \ref{sec:theorynsgt} that the sliCQT can be thought of as a filterbank, and the chosen frequency scale is the most important parameter that defines the spectral representation of the musical signal, which influences the results of the downstream application. In Section \ref{sec:sllenpicker}, I will talk about how I added code to automatically choose the slice and transition length of the sliCQT based on the time-frequency resolution requirements of the desired frequency scale.
+In Section \ref{sec:improvelib}, I will show the addition of new frequency scales that are interesting for music applications that were described in Section \ref{sec:theorynsgt}. Recall from Section \ref{sec:theorynsgt} that the sliCQT can be thought of as a filterbank, and the chosen frequency scale is the most important parameter that defines the spectral representation of the musical signal, which influences the results of the downstream application. In Section \ref{sec:sllenpicker}, I will \hlblu{explain} how I added code to automatically choose the slice and transition length of the sliCQT based on the time-frequency resolution requirements of the desired frequency scale.
 
-Finally, in Section \ref{sec:slicqparamsrch}, I will describe the parameter search that was run to choose frequency scales for the sliCQT with parameters that may perform best in a music demixing application. Section \ref{sec:fasterbsscupy} describes modifications made to the BSS (blind source separation) metrics library to make it run faster on the GPU, with the aim to speed up the parameter search process.
+Finally, in Section \ref{sec:slicqparamsrch}, I will describe the parameter search that was run to choose frequency scales for the sliCQT with parameters that may perform best in a music demixing application. Section \ref{sec:fasterbsscupy} describes modifications made to the BSS (blind source separation) metrics library to make it run faster on the GPU, with the aim to \hlblu{expedite} the parameter search process.
 
 \subsubsection{Comparing the sliCQT to the STFT}
 \label{sec:stftslicqtcomp}
 
-In this section, I will compare and contrast the expected outputs of the STFT and sliCQT. This lays the groundwork for the chosen data structure to represent the sliCQT in PyTorch and its implementation which will be shown in upcoming sections.
+In this section, I will compare and contrast the expected outputs of the STFT and sliCQT. This lays the groundwork for the chosen data structure to represent the sliCQT in PyTorch and its \hlblu{implementation,} which will be shown in upcoming sections.
 
 The STFT was described in Section \ref{sec:jointtfa} and its rectangular matrix output was shown in Figure \ref{fig:stftdiag}.
 
-The sliCQT was described in Section \ref{sec:theoryslicqt} as a realtime variant of the Nonstationary Gabor Transform (NSGT) shown in section \ref{sec:theorynsgt}. The sliCQT and NSGT both output a ragged matrix characteristic to nonuniform frequency transforms described in \ref{sec:raggedtf} and shown in Figure \ref{fig:raggedslicqt}. By contrast, the STFT can be thought of as a uniform frequency transform, because its frequency bins are uniformly or evenly spaced.
+The sliCQT was described in Section \ref{sec:theoryslicqt} as a realtime variant of the Nonstationary Gabor Transform (NSGT) shown in section \ref{sec:theorynsgt}. The sliCQT and NSGT both output a ragged \hlblu{matrix,} characteristic to nonuniform frequency transforms described in \ref{sec:raggedtf} and shown in Figure \ref{fig:raggedslicqt}. By contrast, the STFT can be thought of as a uniform frequency transform, because its frequency bins are uniformly or evenly spaced.
 
 The sliCQT splits the input signal into fixed-size overlapping slices and computes discrete Fourier Transform (DFT) coefficients per slice, while the NSGT computes DFT coefficients for the whole input signal. To make the output of the sliCQT comparable to the NSGT, the slices must be overlap-added as described in Section \ref{sec:theoryslicqt}.
 
@@ -101,7 +101,7 @@ Due to limitations in the PyTorch library, jagged or ragged tensors (which are t
 
 Therefore, to represent the raggedness of the noniform time-frequency resolution, the data structure chosen was a list of tensors. The list data structure in Python was described in Section \ref{sec:pythonbasics}. Each element of the list contains a tensor for the groups of frequency bins that have the same time-frequency resolution and can therefore fit in the same tensor or matrix.
 
-As described in the previous section, the sliCQT returns 2D time-frequency matrices per slice of the input signal, and multiple slices are needed to represent input signals longer than the slice length. Therefore, a 3D tensor with the dimensions time, frequency, and slice are used to represent the transform of each slice. The 3D tensor, when overlap-added, is converted to a 2D tensor with dimensions of time and frequency, which is equivalent to the 2D time-frequency dimensions of the STFT. Figure \ref{fig:3dslicqola2d} shows how the list of 3D tensors is converted to a list of 2D tensors by the overlap-add procedure.
+As described in the previous section, the sliCQT returns 2D time-frequency matrices per slice of the input signal, and multiple slices are needed to represent input signals longer than the slice length. Therefore, a 3D tensor with \hlblu{the dimensions:} time, frequency, and slice are used to represent the transform of each slice. The 3D tensor, when overlap-added, is converted to a 2D tensor with dimensions of time and frequency, which is equivalent to the 2D time-frequency dimensions of the STFT. Figure \ref{fig:3dslicqola2d} shows how the list of 3D tensors is converted to a list of 2D tensors by the overlap-add procedure.
 
 \begin{figure}[ht]
 	\centering
@@ -110,7 +110,7 @@ As described in the previous section, the sliCQT returns 2D time-frequency matri
 	\label{fig:3dslicqola2d}
 \end{figure}
 
-The final data structure for the sliCQT in PyTorch is a list of 3D tensors. Each 3D tensor in the list represents a grouping of frequency bins by their common time-frequency resolution. The 3D tensors of the list are each independently overlap-added to produce 2D tensors which constitute the final time-frequency spectrogram representation of the audio signal. Figure \ref{fig:2dslicqolastft} shows the data structure of the ragged overlap-added sliCQT compared to the data structure of the STFT.
+The final data structure for the sliCQT in PyTorch is a list of 3D tensors. Each 3D tensor in the list represents a grouping of frequency bins by their common time-frequency resolution. The 3D tensors of the list are each independently overlap-added to produce \hlblu{2D tensors,} which constitute the final time-frequency spectrogram representation of the audio signal. Figure \ref{fig:2dslicqolastft} shows the data structure of the ragged overlap-added sliCQT compared to the data structure of the STFT.
 
 \begin{figure}[ht]
 	\centering
@@ -122,7 +122,7 @@ The final data structure for the sliCQT in PyTorch is a list of 3D tensors. Each
 \subsubsection{Computing the sliCQT on the GPU with PyTorch}
 \label{sec:torchslicq}
 
-In this section, I will describe the procedure for porting the CPU-based code of the reference NSGT/sliCQT library to the GPU using PyTorch. This is needed to be able to use the sliCQT in the PyTorch GPU code of X-UMX. All the modifications to the library were made in my copy of the library,\footnote{\url{https://github.com/sevagh/nsgt}} and the same library was embedded inside the xumx-sliCQ code.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}}
+In this section, I will describe the procedure for porting the CPU-based code of the reference NSGT/sliCQT library to the GPU using PyTorch. This is needed to be able to use the sliCQT in the PyTorch GPU code of X-UMX. All the modifications to the library were made in my copy of \hlblu{the software library},\footnote{\url{https://github.com/sevagh/nsgt}} and the same library was embedded inside the xumx-sliCQ code.\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}}
 
 The reference NSGT/sliCQT library uses NumPy, a CPU-based Python numerical computation library. PyTorch, in addition to being a deep learning framework, is also a numerical computation library that implements a large amount of NumPy's functions.
 
@@ -147,15 +147,15 @@ Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram
 
 In this section, I will discuss why I added new frequency scales to the reference NSGT/sliCQT library.\footnote{\url{https://github.com/grrrr/nsgt/blob/master/nsgt/fscale.py}}
 
-The frequency scale is the most important parameter of the NSGT and sliCQT. It defines the nonuniform frequency bands for audio analysis desired by the user. The choice of frequency scale affects the spectral representation of the music signal. The hypothesis of this thesis is that a spectrogram generated from a musical or auditory frequency scale may improve the results of the downstream music demixing system compared to the STFT, which suffers from the time-frequency tradeoff described in Section \ref{sec:jointtfa}.
+The frequency scale is \hlblu{perhaps} the most important parameter of the NSGT and sliCQT. It defines the nonuniform frequency bands for audio analysis desired by the user. The choice of frequency scale affects the spectral representation of the music signal. The hypothesis of this thesis is that a spectrogram generated from a musical or auditory frequency scale may improve the results of the downstream music demixing system compared to the STFT, which suffers from the time-frequency tradeoff described in Section \ref{sec:jointtfa}.
 
-The parameters to a frequency scale in the NSGT/sliCQT library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed.
+The parameters to a frequency scale in the NSGT/sliCQT library are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz \hlblu{respectively,} and the total frequency bins. The type of scale determines how the frequency bins are distributed between $f_{min}$--$f_{\text{max}}$. A custom frequency scale may use additional parameters as needed.
 
 The octave scale is the default scale used to demonstrate the NSGT and sliCQT \parencite{balazs, slicq} in various open-source libraries and implementations.\footnote{\url{https://github.com/grrrr/nsgt}, \url{https://www.mathworks.com/help/wavelet/ref/cqt.html}, \url{http://ltfat.org/doc/filterbank/cqt_code.html}} The octave scale and log scale are almost identical, except that the bins parameter is interpreted as bins-per-octave for the octave scale, and the total number of output bins are computed using equation \eqref{equation:bpo} from Section \ref{sec:cqt}. In the log scale, the bins parameter is directly used as the number of output bins. In this thesis, I used the log scale to avoid the hidden bins-per-octave calculation. Appendix \ref{appendix:octscale} contains a more in-depth comparison of the octave and log scales.
 
-Section \ref{sec:theorynsgt} showed examples of NSGT spectrograms with the log (Constant-Q) and mel scales, in Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2}. These are the scales provided in the reference NSGT/sliCQT library. I also discussed that the Variable-Q scale for music and Bark psychoacoustic scale are both of interest in music or auditory applications. For this reason, I chose to implement the Variable-Q and Bark scales to supplement the Constant-Q and mel scales.
+Section \ref{sec:theorynsgt} showed examples of NSGT spectrograms with the log (Constant-Q) and mel scales, in Figures \ref{fig:bunchansgts1} and \ref{fig:bunchansgts2}. These are the scales provided in the reference NSGT/sliCQT library. I also discussed that the Variable-Q scale for music and Bark psychoacoustic scale are both of interest in music \hlblu{and} auditory applications. For this reason, I chose to implement the Variable-Q and Bark scales to supplement the Constant-Q and mel scales.
 
-The first frequency scale I added was the Variable-Q scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}} which introduces an additional parameter, $\gamma \text{ (Hz)}$ for the offset. $\gamma$ is a frequency offset added to each frequency band to reduce the Q-factor and improve the time resolution in the lower frequency bins, as described in Section \ref{sec:theorynsgt} Figure \ref{fig:vq} compares the Constant-Q and Variable-Q frequency scales and Q-factors for different values of $\gamma$. The Q-factor of Constant-Q scale was defined as the relative frequency resolution in Section \ref{sec:cqt}, so a low Q-factor
+The first frequency scale I added was the Variable-Q scale,\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/fscale.py\#L105}} which introduces an additional parameter, $\gamma \text{ (Hz)}$ for the offset. $\gamma$ is a frequency offset added to each frequency band to reduce the Q-factor and improve the time resolution in the lower frequency bins, as described in \hlblu{Section} \ref{sec:theorynsgt}. Figure \ref{fig:vq} compares the Constant-Q and Variable-Q frequency scales and Q-factors for different values of $\gamma$. The Q-factor of Constant-Q scale was defined as the relative frequency resolution \hlblu{in Section} \ref{sec:cqt}.
 
 \begin{figure}[ht]
 	\centering
@@ -185,7 +185,7 @@ In this section, I will design a sliCQT parameter search to discover optimal sli
 
 As discussed in Section \ref{sec:ml}, the validation split of a dataset is often used to tune hyperparameters, which are the parameters of a machine learning or deep learning network defined by the user. In xumx-sliCQ, the sliCQT parameters are a hyperparameter, similar to how the STFT settings of the window and hop size are hyperparameters in X-UMX.
 
-As described in Section \ref{sec:improvelib}, the time and frequency resolution of the sliCQT are defined from the frequency scale, and the parameters of the frequency scale are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz, and the total frequency bins.
+As described in Section \ref{sec:improvelib}, the time and frequency resolution of the sliCQT are defined from the frequency scale, and the parameters of the frequency scale are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz \hlblu{respectively}, and the total frequency bins.
 
 The maximum frequency $f_{\text{max}}$ was fixed to 22,050 Hz, which is the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. I made this decision after early experiments showed that fixing the maximum frequency to 22,050 Hz led to a smaller size of the sliCQT, resulting in lower memory demands on the system. The minimum frequency $f_{\text{min}}$ was chosen from the range of 10.0--130.0 Hz, loosely based on the frequencies of the C0 (16.35 Hz) and C3 (130.81 Hz) notes of the standard piano.
 
@@ -223,7 +223,7 @@ The space of possible parameters is infinite, even with the ranges constrained a
 
 I decided to use a random search with at least 64 iterations for the sliCQT parameters, since the sliCQT parameters are hyperparameters of the xumx-sliCQ neural network. I ran two instances of the random parameter search script with 60 iterations each, resulting in 120 total iterations of the random parameter search for each of the four frequency scales. Each instance of the script used a different random seed (42 and 1337). The purpose of fixing the seed of Python's random number generator (RNG) is discussed in Section \ref{sec:pythonbasics}.
 
-Recall from Section \ref{sec:evalbss} that the Signal-to-Distortion (SDR) is one of the scores of the BSS metrics, with a units of decibels (dB), which is commonly used as a single metric that summarizes the global performance of a music demixing system. The selected sliCQT frequency scale parameters were evaluated by computing the mix-phase waveforms, which were described in Section \ref{sec:noisyphaseoracle}. The phase of the complex sliCQT of the mixed song and the magnitude of the complex sliCQT of the ground-truth source signal for all four sources (drums, bass, vocals, other) were combined to create the MPI (mix-phase inversion) waveforms. The median SDR was computed across the four sources and 14 validation tracks of MUSDB18-HQ, and the sliCQT parameters that resulted in the MPI waveforms with the highest SDR were selected as the final sliCQT parameters to use in the neural network.
+Recall from Section \ref{sec:evalbss} that the Signal-to-Distortion (SDR) is one of the scores of the BSS metrics, with a units of decibels (dB), which is commonly used as a single metric that summarizes the global performance of a music demixing system. The selected sliCQT frequency scale parameters were evaluated by computing the mix-phase waveforms, which were described in Section \ref{sec:noisyphaseoracle}. The phase of the complex sliCQT of the mixed song and the magnitude of the complex sliCQT of the ground-truth source signal for all four sources (drums, bass, vocals, other) were combined to create the MPI (mix-phase inversion) waveforms. The median SDR was computed across the four sources and 14 validation tracks of the MUSDB18-HQ \hlblu{dataset}, and the sliCQT parameters that resulted in the MPI waveforms with the highest SDR were selected as the final sliCQT parameters to use in the neural network.
 
 \subsubsection{Speeding up the parameter search using the GPU and CuPy}
 \label{sec:fasterbsscupy}
@@ -238,21 +238,21 @@ I copied the BSS metrics library to my own GitHub user account,\footnote{\url{ht
 
 \newpagefill
 
-\subsection{Neural network}
+\subsection{Neural networks}
 \label{sec:neuralnet}
 
 First, in Section \ref{sec:replacestft}, I will look at how the X-UMX PyTorch code needs to be modified in xumx-sliCQ to replace the STFT with the ragged sliCQT described in Section \ref{sec:torchslicq}.
 
 Next, in Section \ref{sec:slicqarches}, I will show two neural network architectures, Bi-LSTM and CDAE, that can be used in xumx-sliCQ. I will show how the original Bi-LSTM architecture from X-UMX and the convolutional denoising autoencoder (CDAE) architecture described in Section \ref{sec:cdae}, both originally intended for the STFT, can be adapted to operate on the ragged sliCQT. In Section \ref{sec:bandwidth}, I will describe the bandwidth parameter of X-UMX and how it was adapted for the sliCQT in xumx-sliCQ. In Section \ref{sec:deoverlap}, I will discuss a de-overlap layer, which is necessary for any neural architecture for the sliCQT.
 
-Finally, in Section \ref{sec:xumxinc} I will show how I incorporated the X-UMX idea of combining the four target models in a single model with the multi-domain loss (MDL) and combination loss (CL) functions.
+Finally, in Section \ref{sec:xumxinc}, I will show how I incorporated the X-UMX idea of combining the four target models in a single model with the multi-domain loss (MDL) and combination loss (CL) functions.
 
 \subsubsection{Replacing the STFT with the sliCQT in X-UMX}
 \label{sec:replacestft}
 
 In this section, I will describe the changes made to X-UMX to support the data-structure of the sliCQT shown in Section \ref{sec:torchslicqdatastructure}, which addressed the distinct traits of the sliCQT compared to the STFT: the 3D slice-wise output, and the ragged shape from the nonuniform time-frequency resolution.
 
-Firstly, X-UMX uses a sequence duration of six seconds, meaning the training input is the STFT of six seconds of music. The dimensionality of the sliCQT for a waveform is larger than the STFT, and in my experiments, the sliCQT of a six second sequence used too much GPU memory during training. In xumx-sliCQ, I chose a smaller sequence duration of one second, which reduced the memory demands on the GPU by resulting in a smaller sliCQT. Also, a one second sequence duration is common in several demixing papers \parencite{plumbley1, plumbley2, demucs}.
+Firstly, X-UMX uses a sequence duration of six seconds, meaning the training input is the STFT of six seconds of music. The dimensionality of the sliCQT for a waveform is larger than the STFT, and in my experiments, the sliCQT of a six second sequence used too much GPU memory during training. In xumx-sliCQ, I chose a smaller sequence duration of one second, \hlblu{resulting in a sliCQT with fewer coefficients that uses less GPU memory.} Also, a one-second sequence duration is common in several demixing papers \parencite{plumbley1, plumbley2, demucs}.
 
 In sections \ref{sec:raggedtf} and \ref{sec:torchslicqdatastructure}, I described the data structure of the ragged sliCQT and how it differed from the single rectangular matrix of the STFT. The ragged sliCQT outputs a list of 3D matrices, representing the sliced transform, that must be overlap-added to create a list of 2D time-frequency matrices. Recall that the list was introduced from the raggedness of the transform, because each group of time-frequency bins has a different temporal framerate, resulting in a different size tensor or matrix. This raggedness is a desired characteristic of nonuniform time-frequency transforms like the NSGT, sliCQT, and even the original CQT.
 
@@ -270,19 +270,19 @@ Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQ
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget_cdae_bilstm.png}
-	\caption{Block diagram of the individual CNNs of xumx-sliCQ, using a simplified ragged sliCQT for demonstration purposes. The green-colored matrix represents the first time-frequency (TF) resolution and the pink-colored matrix represents the second time-frequency resolution in the ragged transform.}
+	\caption{Block diagram of the individual CNNs of xumx-sliCQ, using a simplified ragged sliCQT for demonstration purposes. The green-colored matrix represents the first time-frequency (TF) resolution and the pink-colored matrix represents the second time-frequency resolution in the ragged transform. The \hlblu{de-overlap layer is described in Section} \ref{sec:deoverlap}.}
 	\label{fig:cdaeslicqt}
 \end{figure}
 
 In the original X-UMX, the neural network architecture is a dense (i.e., linear) encoder-decoder with a Bi-LSTM. The STFT in X-UMX uses a window size of 4096, which results in 2049 output frequency bins. The purpose of the dense encoder/decoder with the STFT is to reduce the 2049 frequency bins into a smaller dimension set of 512 values, which are then used as the input and output of the Bi-LSTM. In the case of the sliCQT, the output frequency bins are less numerous than the STFT. As described in Section \ref{sec:slicqparamsrch}, the maximum frequency bins of the sliCQT were capped at 300, which is a small enough value to use directly as the input to the Bi-LSTM without needing to be encoded to a lower dimension with dense layers.
 
-Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT with the X-UMX default 2049 frequency bins, and how it was adapted to a sliCQT that has a smaller set of frequency bins $f \ll 2049$.
+Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT with the X-UMX default 2049 frequency bins, and how it was adapted to a sliCQT that has a smaller set of frequency bins $f \ll 2049$ ($f$ \hlblu{was constrained to} $[10, 300]$ in Section \ref{sec:slicqparamsrch}).
 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
 	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins]{\includegraphics[width=0.6\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
-	\caption{The original X-UMX Bi-LSTM for the STFT, and the variant adapted for the sliCQT}
+	\caption{The original X-UMX Bi-LSTM for the STFT, and the variant adapted for the \hlblu{sliCQT.}}
 	\label{fig:umxnetworkdetails}
 \end{figure}
 
@@ -355,16 +355,16 @@ The exact parameters and configuration of the convolutional kernels and layers a
 \subsubsection{Bandwidth parameter}
 \label{sec:bandwidth}
 
-X-UMX has a bandwidth parameter which controls how much of the 2049 output frequencies of the STFT with a window size of 4096 are used as an input to the neural network. The default value of the bandwidth parameter is 16,000 Hz, which means that the frequency bins of the STFT $> 16,000 \text{ Hz}$ are cropped before the STFT is input into the neural network. I implemented the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ, by not using frequency bins of the sliCQT $> 16,000 \text{ Hz}$ as inputs to the neural network.
+X-UMX has a bandwidth parameter \hlblu{that} controls how much of the 2049 output frequencies of the STFT with a window size of 4096 are used as an input to the neural network. The default value of the bandwidth parameter is 16,000 Hz, which means that the frequency bins of the STFT $> 16,000 \text{ Hz}$ are cropped before the STFT is input into the neural network. I implemented the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ, by not using frequency bins of the sliCQT $> 16,000 \text{ Hz}$ as inputs to the neural network.
 
 \subsubsection{De-overlap layer}
 \label{sec:deoverlap}
 
 In this section, I will discuss the ``de-overlap layer'' that I created, which is necessary for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. I described in Section \ref{sec:theoryslicqt} and \ref{sec:stftslicqtcomp1} that the 3D sliCQT needs its adjacent slices to be overlap-added by 50\% to create a cohesive spectrogram, due to the symmetric zero-padding of each slice introduced by \textcite{slicq} in the sliCQT to reduce time-domain aliasing. This 50\% overlap-add procedure does not have an exact inverse operation.
 
-In the neural network of xumx-sliCQ, before applying either the Bi-LSTM or CDAE architectures, the first step is to overlap-add the 3D sliCQT to create a 2D time-frequency sliCQT. This means that in the final step of the neural network, the 2D overlap-added sliCQT needs to be transformed back to its original, non-overlap-added 3D shape. For this, I needed to create a custom layer in the neural network which could learn how to do the inverse overlap-add.
+In the neural network of xumx-sliCQ, before applying either the Bi-LSTM or CDAE architectures, the first step is to overlap-add the 3D sliCQT to create a 2D time-frequency sliCQT. This means that in the final step of the neural network, the 2D overlap-added sliCQT needs to be transformed back to its original, non-overlap-added 3D shape. For this, I needed to create a custom layer in the neural network that could learn how to do the inverse overlap-add.
 
-In Figure \ref{fig:convtranspose}, I showed how the transpose convolution or deconvolution operation, which can grow its input to a larger size. For the de-overlap layer of xumx-sliCQ, I chose to use a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides over three time coefficients to produce six time coefficients. The effect is to double the number of time coefficients, which is a reversal of the 50\% reduction of time coefficients from the overlap-add procedure. Finally, the 2D sliCQT is reshaped to the original 3D shape to separate it back out into adjacent slices. The final activation after the transpose convolution layer is a Sigmoid, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask that can then be multiplied with the input spectrogram.
+In Figure \ref{fig:convtranspose}, I showed how the transpose convolution or deconvolution operation, which can grow its input to a larger size. For the de-overlap layer of xumx-sliCQ, I chose to use a transpose convolution layer with a kernel size of $(1, 3)$ and a stride of $(1, 2)$ where the first dimension is frequency and the second is time. This means that for each frequency bin, the kernel slides over three time coefficients to produce six time coefficients. The effect is to double the number of time coefficients, which is a reversal of the 50\% reduction of time coefficients from the overlap-add procedure. Finally, the 2D sliCQT is reshaped to the original 3D shape to separate it back out into adjacent slices. The final activation after the transpose convolution layer is a Sigmoid \hlblu{function}, which is real-valued $\in [0.0, 1.0]$. This makes the network estimate a soft or ratio mask that can then be multiplied with the input spectrogram.
 
 \subsubsection{Modifying the mixing coefficient for the MDL loss}
 \label{sec:xumxinc}
