@@ -7,7 +7,7 @@
 \label{appendix:computerspec}
 
 The hardware and software specifications of the computer which produced the results shown throughout this thesis are as follows:
-\begin{tight_enumerate}
+\begin{tight_itemize}
 	\item
 		Motherboard: Gigabyte Aorus X570 Elite Wifi
 	\item
@@ -30,7 +30,7 @@ The hardware and software specifications of the computer which produced the resu
 		NVIDIA driver version: 470.63.01
 	\item
 		NVIDIA CUDA toolkit version: 11.4
-\end{tight_enumerate}
+\end{tight_itemize}
 
 \newpagefill
 
@@ -40,9 +40,9 @@ The hardware and software specifications of the computer which produced the resu
 The code projects associated with this thesis are published as open-source software to encourage reproducibility of results.
 
 They are split across the following projects:
-\begin{tight_enumerate}
+\begin{tight_itemize}
 	\item
-		NSGT/sliCQT PyTorch copy from sections \ref{sec:torchslicq} and \ref{sec:improvelib}\\
+		NSGT/sliCQT PyTorch copy from sections \ref{sec:torchslicq} and \ref{sec:improvelib}:\\
 		\url{https://github.com/sevagh/nsgt}
 	\item
 		museval (BSS metrics evaluation) CuPy copy from Section \ref{sec:fasterbsscupy}:\\
@@ -54,13 +54,13 @@ They are split across the following projects:
 		LaTeX files and scripts for generating this thesis, including all plots and results:\\
 		\url{https://gitlab.com/sevagh/xumx_slicq_extra}
 	\item
-		Submissions made to the ISMIR 2021 Music Demixing Challenge:\\
+		Submissions made to the ISMIR 2021 Music Demixing Challenge (see Appendix \ref{appendix:crazyexperiments}):\\
 		\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}
-\end{tight_enumerate}
+\end{tight_itemize}
 
 All Python environments were designed to be reproducible with pip requirements.txt files or Conda environment files bundled with the source code:
 
-\begin{tight_enumerate}
+\begin{tight_itemize}
 	\item
 		Pip file for oracles, trained model evaluations, boxplot creation, and performance benchmarks:\\
 		\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/mss_evaluation/mss-oracle-experiments/requirements-cupy.txt}
@@ -70,7 +70,7 @@ All Python environments were designed to be reproducible with pip requirements.t
 	\item
 		Conda environment file for the xumx-sliCQ neural network:\\
 		\href{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}
-\end{tight_enumerate}
+\end{tight_itemize}
 
 I take code availability and reproducibility seriously. Feel free to e-mail me\footnote{\href{mailto:sevag.hanssian@mail.mcgill.ca}{sevag.hanssian@mail.mcgill.ca}, \href{mailto:sevagh+thesis@pm.me}{sevagh+thesis@pm.me}} if you encounter any errors, discrepancies, or difficulties with reproducing any of the results.
 
@@ -79,41 +79,19 @@ I take code availability and reproducibility seriously. Feel free to e-mail me\f
 \section{Octave scale for the NSGT}
 \label{appendix:octscale}
 
-\todo[inline]{fix up the wording}
-
-The octave scale of the NSGT library takes a bins-per-octave (bpo) argument from which it computes the total number of frequency bins, instead of the logarithmic scale which takes the total number of frequency bins as a direct argument. Equation \eqref{equation:bpo1} describes how to compute the total bins from the bins-per-octave setting of the octave scale:
+The octave scale for the NSGT takes a bins-per-octave (bpo) argument from which the total number of frequency bins is computed. Equation \eqref{equation:bpo1} describes how to compute the total bins from the bins-per-octave setting of the octave scale:
 \begin{align}
-	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}} + 1]\tag{24}\label{equation:bpo1}
+	K = [B \log_{2}(\sfrac{\xi_{\text{max}}}{\xi_{\text{min}}}) + 1]\tag{1}\label{equation:bpo1}
 \end{align}
 
-where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. This equation was shown previously in Section \ref{sec:cqt}. The difference between the logarithmic and octave scales is shown in Code Listing \ref{code:octvlog}. The resulting frequency scale is plotted in Figure \ref{fig:octvlog}.
+where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max}}$ are the minimum and maximum frequencies. This equation was shown previously in equation \eqref{equation:bpo} in Section \ref{sec:cqt}.
 
-\begin{figure}[h]
-  \centering
- \begin{minipage}{\textwidth}
-  \centering
-\setlength\partopsep{-\topsep}
-\begin{inputminted}[linenos,breaklines,frame=single,firstline=4,lastline=16,fontsize=\scriptsize]{text}{./scripts/fscale.py}
-\end{inputminted}
- \subfloat{(a) Code snippet defining octave and log scales}
- \vspace{1em}
- \end{minipage}
- \begin{minipage}{\textwidth}
-  \centering
-\begin{minted}[numbersep=\mintednumbersep,linenos,mathescape=true,breaklines,frame=single,escapeinside=||,fontsize=\scriptsize]{text}
-|\$ python scripts/fscale.py 3 # invoke script for bpo=3|
-|bpo: 3, bins: 21, len(oct): 21, len(log): 21|
-\end{minted}
- \subfloat{(b) Output printed by above}
- \end{minipage}
-  \captionof{listing}{Octave and log scales for the NSGT}
-  \label{code:octvlog}
-\end{figure}
+By contrast, the logarithmic scale takes the total number of frequency bins as a direct argument. Examples of the octave and logarithmic scales are shown in Figure \ref{fig:octvlog}.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\textwidth]{./images-freqscales/log_vs_oct.png}
-	\caption{Frequency bins for the octave and log scales}
+	\caption{The octave and log scales compared. The minimum frequency for both scales is set to $\xi_{\text{min}} = 82.41 \text{ Hz}$, which is the frequency of the $E2$ musical note. The maximum frequency for both scales is set to $\xi_{\text{max}} = 7902.13 \text{ Hz}$, which is the frequency of the $B8$ musical note. Note that both scales are identical. The octave scale uses $B = 3 \text{ bpo}$, resulting in $K = 21 \text{ frequency bins}$, from equation \eqref{equation:bpo1}. The log scale uses 21 frequency bins.}
 	\label{fig:octvlog}
 \end{figure}
 
@@ -122,7 +100,17 @@ where $K$ is the total bins, $B$ is the bins-per-octave, and $\xi_{\text{min,max
 \section{xumx-sliCQ experiments}
 \label{appendix:crazyexperiments}
 
-\todo[inline]{actually do this, talk about ISMIR2021 challenge, submission repo, experiments, etc.}
+In Section \ref{sec:slicqarches}, I mentioned a repeated tuning process where I evaluated different neural network architectures and parameters for xumx-sliCQ, until one experiment achieved the best results and was chosen to be the final model of this thesis. In this appendix, I will describe the nature of these experiments.
+
+Before starting this thesis in May 2021, I worked on two related projects. In February 2021, I released a project\footnote{\url{https://github.com/sevagh/MiXiN}} which used the NSGT (Nonstationary Gabor Transform) for music demixing using a CDAE (convolutional denoising autoencoder) neural architecture. In April 2021, I released a project\footnote{\url{https://github.com/sevagh/Music-Separation-TF}} which explored different time-frequency transforms and the time-frequency tradeoff in music source separation algorithms based on spectrogram masking. In the second project, I used Open-Unmix as a high-performance baseline to compare other algorithms against.
+
+In May 2021, Sony, the major Japanese technology company,\footnote{\url{https://www.sony.com/en/}} and Inria, a French national research institution,\footnote{\url{https://www.inria.fr/en}} sponsored a music demixing research challenge on the crowdsourced AI platform, AIcrowd.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} The challenge was called the ISMIR 2021 MDX (Music Demixing) Challenge, with an associated satellite workshop planned for the ISMIR 2021 conference.
+
+Combining ideas from my previous projects, I decided to participate in the challenge. The participants were encouraged to either modify the baselines (like Open-Unmix) or submit their own custom code to win the challenge. The MDX challenge ran from May to July 2021, giving participants three months to work on their neural networks. I chose to align my master's thesis project with the challenge, and made my goal the modification of Open-Unmix to use the sliCQT (sliced Constant-Q Transform).
+
+The collaborative environment of the challenge was very fun, and I made 32 total submissions\footnote{\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}} to the challenge, resulting in a final place of 34 on the leaderboard. In my submission process, I tested different neural architectures and parameters with both the CDAE and Bi-LSTM variants until one of them achieved good results.
+
+My work in the challenge resulted in the creation of xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} the final model of this thesis. I wrote two articles on xumx-sliCQ; one published at the MDX 21 workshop at ISMIR 2021,\footnote{\url{https://mdx-workshop.github.io/proceedings/hanssian.pdf}} and the same paper on arXiv.\footnote{\url{https://arxiv.org/abs/2112.05509}} I also participated in the virtual ISMIR 2021 conference, where I showed xumx-sliCQ at the poster session\footnote{\url{https://gitlab.com/sevagh/xumx_slicq_extra/-/blob/main/drafts-and-blobs/mdx21-poster.pdf}} of the MDX 21 challenge.
 
 \end{appendices}
 
