@@ -4,7 +4,7 @@
 \section{Experiment and discussion}
 \label{ch:experiment}
 
-This section contains the results of the experiments described in Section \ref{sec:methodology}, and a discussion of the results. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer which produced the results in this section.
+This section contains the results of the experiments described in Chapter \ref{ch:methodology}, and a discussion of the results. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer which produced the results in this section.
 
 The goal of this thesis was to use the sliced Constant-Q Transform (sliCQT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. X-UMX represents musical signals with the Short-Time Fourier Transform (STFT), which is limited by a fixed time-frequency resolution. In contrast, the sliCQT has a varying time-frequency resolution, which may be more suitable for musical applications such as music demixing.
 
@@ -216,7 +216,7 @@ The music demixing performance of the trained model of xumx-sliCQ with the CDAE 
 
 In this section, I will compare the music demixing results of the trained models of UMX, X-UMX, and xumx-sliCQ.
 
-In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that for convenience throughout Section \ref{sec:methodology} and \ref{sec:experiment}, I would use X-UMX to refer to the concepts of both UMX and X-UMX. In the results shown in this and the next section, I will treat UMX and X-UMX separately. They have a different music demixing performance and inference performance, due to the differences in their network architectures, shown in Figure \ref{fig:umxandxumx}, and the different deep learning frameworks used in their reference implementations.
+In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that for convenience throughout Chapter \ref{ch:methodology} and Chapter \ref{ch:experiment}, I would use X-UMX to refer to the concepts of both UMX and X-UMX. In the results shown in this and the next section, I will treat UMX and X-UMX separately. They have a different music demixing performance and inference performance, due to the differences in their network architectures, shown in Figure \ref{fig:umxandxumx}, and the different deep learning frameworks used in their reference implementations.
 
 The evaluated trained model of xumx-sliCQ uses the CDAE architecture. The Bi-LSTM architecture of xumx-sliCQ was not evaluated, due to requiring 36 days to train the full 1,000 epochs. The CDAE architecture was trained fully in four days, which is an acceptable training time for this thesis.
 
