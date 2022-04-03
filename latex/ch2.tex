@@ -2,7 +2,7 @@
 \begin{document}
 
 \section{Background}
-\label{sec:background}
+\label{ch:background}
 
 In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural network for music demixing written in the Python programming language. Open-Unmix uses the Short-Time Fourier Transform (STFT) as its representation of musical signals, which is subject to the limitations of the time-frequency uncertainty principle, or time-frequency tradeoff. I will be exploring the sliced Constant-Q Transform (sliCQT) as a replacement of the STFT, and my hypothesis is that using the sliCQT instead of the STFT will improve the music demixing performance of Open-Unmix due to the varying time-frequency resolution of the sliCQT that is more suitable for musical or auditory analysis.
 
@@ -171,7 +171,7 @@ More recently, according to \citeauthor{psycho1}:
 When performing joint time-frequency analysis, it is preferable to minimize time-frequency uncertainty, or to set the \textit{logon} ($\Delta t \Delta f$) to its lowest possible value. \citeauthor{gabor1946} asks:
 
 \begin{quote}
-	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function \parencite[435]{gabor1946}
+	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function \parencite[435]{gabor1946}.
 \end{quote}
 
 Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e., the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equations \eqref{equation:gabort}:
