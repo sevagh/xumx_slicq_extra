@@ -1264,17 +1264,7 @@ As a last step, the time-domain loss is multiplied by a mixing coefficient, $\al
 	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}
 
-A visualization of the multi-domain loss (MDL) and combination loss (CL) for four targets is shown in Figure \ref{fig:xumxlosses}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Multi-domain loss (MDL), showing the frequency-domain MSE loss from the spectrograms and time-domain SDR loss from the waveforms summed with a mixing coefficient $\alpha$ from equation \eqref{equation:totalloss}]{\includegraphics[width=\textwidth]{./images-neural/xumx1_2.png}}\\
-	\subfloat[Combination loss (CL), showing the 14 combinations of the four targets from Table \ref{table:14targets}]{\includegraphics[width=\textwidth]{./images-neural/xumx2.png}}
-	\caption{Diagrams of the loss functions of X-UMX \parencite[2]{xumx}}
-	\label{fig:xumxlosses}
-\end{figure}
-
-Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired four targets (vocals, drums, bass, other) are combined together in X-UMX, illustrating the key concepts of the multi-domain loss functions (MDL), which computes loss for both the magnitude spectrograms and time-domain waveforms, and the combination losses across the four targets (CL).
+Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired four targets (vocals, drums, bass, other) are combined together in X-UMX, illustrating the key concepts of the multi-domain loss functions (MDL), which computes loss for both the magnitude spectrograms and time-domain waveforms, and the combination losses across the four targets (CL). A visualization of the multi-domain loss (MDL) and combination loss (CL) for four targets is shown in Figure \ref{fig:xumxlosses}.
 
 \begin{figure}[ht]
 	\centering
@@ -1282,6 +1272,14 @@ Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired f
 	\subfloat[X-UMX network for all four targets with MDL and CL loss functions]{\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_multiple_targets.png}}
 	\caption{UMX and X-UMX loss functions compared. In UMX, a copy of the network is trained independently for each target, using single-target spectrogram loss. In X-UMX, four copies of the network are trained simultaneously for all four targets, using multi-domain and combination loss functions as shown in Figure \ref{fig:xumxlosses}.}
 	\label{fig:umxandxumx}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Multi-domain loss (MDL), showing the frequency-domain MSE loss from the spectrograms and time-domain SDR loss from the waveforms summed with a mixing coefficient $\alpha$ from equation \eqref{equation:totalloss}]{\includegraphics[width=\textwidth]{./images-neural/xumx1_2.png}}\\
+	\subfloat[Combination loss (CL), showing the 14 combinations of the four targets from Table \ref{table:14targets}]{\includegraphics[width=\textwidth]{./images-neural/xumx2.png}}
+	\caption{Diagrams of the loss functions of X-UMX \parencite[2]{xumx}}
+	\label{fig:xumxlosses}
 \end{figure}
 
 Figure \ref{fig:umxandxumx} shows how X-UMX encompasses UMX entirely, and adds parameter-free enhancements with the new MDL and CL loss functions. For simplicity, having a single training loop and single trained model to perform the separation is easier than training four independent models. For this reason, and that the music demixing performance of X-UMX is higher than UMX, I chose to base this thesis on the X-UMX variant of UMX.
