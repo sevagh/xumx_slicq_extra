@@ -1,4 +1,5 @@
 import argparse
+import time
 import musdb
 import museval
 import test
@@ -20,6 +21,8 @@ def separate_and_evaluate(
     eval_dir,
     device='cpu'
 ):
+    start = time.time()
+
     estimates = test.separate(
         audio=track.audio,
         targets=targets,
@@ -29,13 +32,16 @@ def separate_and_evaluate(
         softmask=softmask,
         device=device
     )
+
+    end = time.time()
+
     if output_dir:
         mus.save_estimates(estimates, track, output_dir)
 
     scores = museval.eval_mus_track(
         track, estimates, output_dir=eval_dir
     )
-    return scores
+    return scores, end-start
 
 
 if __name__ == '__main__':
@@ -144,8 +150,9 @@ if __name__ == '__main__':
 
     else:
         results = museval.EvalStore()
+        tot = 0.
         for track in tqdm.tqdm(mus.tracks):
-            scores = separate_and_evaluate(
+            scores, time_taken = separate_and_evaluate(
                 track,
                 targets=args.targets,
                 model_name=args.model,
@@ -158,7 +165,13 @@ if __name__ == '__main__':
             )
             results.add_track(scores)
 
+            print(f'time {time_taken} s for song {track.name}')
+            tot += time_taken
+
     print(results)
+
+    print(f'total time for {len(mus.tracks)} track evaluation: {tot}')
+    print(f'time averaged per track: {tot/len(mus.tracks)}')
     method = museval.MethodStore()
     method.add_evalstore(results, args.model)
-    method.save(args.model + '.pandas')
+    #method.save(args.model + '.pandas')

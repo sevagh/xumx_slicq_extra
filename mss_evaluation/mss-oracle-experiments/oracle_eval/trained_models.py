@@ -147,7 +147,7 @@ if __name__ == '__main__':
         raise ValueError(f'musdb18 data split {args.split} unsupported')
 
     max_tracks = min(int(os.getenv('MUSDB_MAX_TRACKS', sys.maxsize)), len(mus.tracks))
-    #disable_cupy()
+    disable_cupy()
 
     loaded_models = {
             'umx': umx_separator(
@@ -187,7 +187,6 @@ if __name__ == '__main__':
             swap_drums_bass=('slicq' in args.model)
         )
         print(f'time {time_taken} s for song {track.name}')
-
         tot += time_taken
 
         gc.collect()

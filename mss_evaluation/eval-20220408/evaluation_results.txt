@@ -1,0 +1,58 @@
+xumx:
+	Aggrated Scores (median over frames, median over tracks)
+	drums           ==> SDR:   6.459  SIR:  11.745  ISR:  11.329  SAR:   6.053
+	bass            ==> SDR:   5.354  SIR:  11.396  ISR:   6.170  SAR:   4.364
+	other           ==> SDR:   4.551  SIR:   4.924  ISR:  10.529  SAR:   3.834
+	vocals          ==> SDR:   6.785  SIR:  16.180  ISR:  14.293  SAR:   6.827
+	accompaniment   ==> SDR:  13.150  SIR:  19.360  ISR:  23.033  SAR:  14.476
+
+	median:
+		sevagh:mss_evaluation $ python -c 'import numpy; print(numpy.median([6.459, 5.354, 4.551, 6.785]))'
+		5.906499999999999
+
+umx, v1.0.0:
+	Aggrated Scores (median over frames, median over tracks)
+	vocals          ==> SDR:   6.160  SIR:   9.766  ISR:  13.787  SAR:   5.020
+	drums           ==> SDR:   5.781  SIR:  10.514  ISR:  11.309  SAR:   5.513
+	bass            ==> SDR:   5.033  SIR:  10.553  ISR:   5.353  SAR:   3.895
+	other           ==> SDR:   4.217  SIR:   4.203  ISR:   9.622  SAR:   3.286
+
+		sevagh:mss_evaluation $ python -c 'import numpy; print(numpy.median([6.160, 5.781, 5.033, 4.217]))'
+		5.407
+
+
+umx, main/latest code:
+	Aggrated Scores (median over frames, median over tracks)
+	drums           ==> SDR:   5.238  SIR:   9.556  ISR:  12.058  SAR:   4.858
+	bass            ==> SDR:   4.489  SIR:   9.115  ISR:   7.234  SAR:   3.388
+	other           ==> SDR:   3.745  SIR:   4.035  ISR:   7.882  SAR:   2.059
+	vocals          ==> SDR:   5.755  SIR:  13.550  ISR:  14.428  SAR:   5.875
+	accompaniment   ==> SDR:  12.035  SIR:  20.021  ISR:  20.391  SAR:  13.212
+
+	median:
+		sevagh:mss_evaluation $ python -c 'import numpy; print(numpy.median([5.238, 4.489, 3.745, 5.755]))'
+		4.8635
+
+slicq-wslicq:
+	Aggrated Scores (median over frames, median over tracks)
+	drums           ==> SDR:   4.244  SIR:   8.439  ISR:   7.085  SAR:   4.096
+	bass            ==> SDR:   3.566  SIR:   5.429  ISR:   7.616  SAR:   4.494
+	other           ==> SDR:   2.947  SIR:   1.898  ISR:   7.532  SAR:   3.972
+	vocals          ==> SDR:   3.839  SIR:   9.703  ISR:   7.815  SAR:   4.806
+	accompaniment   ==> SDR:  10.425  SIR:  13.886  ISR:  18.520  SAR:  13.541
+
+	median:
+		sevagh:mss_evaluation $ python -c 'import numpy; print(numpy.median([4.244, 3.566, 2.947, 3.839]))'
+		3.7024999999999997
+
+slicq-wstft:
+	Aggrated Scores (median over frames, median over tracks)
+	drums           ==> SDR:   4.154  SIR:   7.935  ISR:   6.846  SAR:   4.139
+	bass            ==> SDR:   3.570  SIR:   5.042  ISR:   7.416  SAR:   4.817
+	other           ==> SDR:   2.945  SIR:   1.670  ISR:   7.283  SAR:   4.136
+	vocals          ==> SDR:   3.768  SIR:   9.332  ISR:   7.800  SAR:   4.874
+	accompaniment   ==> SDR:  10.437  SIR:  13.679  ISR:  18.799  SAR:  13.607
+
+	median:
+		sevagh:mss_evaluation $ python -c 'import numpy; print(numpy.median([4.154, 3.570, 2.945, 3.768]))'
+		3.6689999999999996

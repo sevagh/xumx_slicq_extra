@@ -2,7 +2,9 @@
 
 set -eoxu pipefail
 
-pybin="/home/sevagh/venvs/thesis/bin/python3"
+maxmem="48" #GB
+firejailcmd="firejail --noprofile --rlimit-as=${maxmem}000000000"
+pybin="${firejailcmd} /home/sevagh/venvs/thesis/bin/python3"
 expdir="exp-04-trained-models"
 scriptdir="./mss-oracle-experiments/oracle_eval"
 umxorigdir="./vendor/open-unmix-pytorch-1.0.0"
