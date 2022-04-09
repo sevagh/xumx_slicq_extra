@@ -241,9 +241,9 @@ To maximize result reproducibility, all pretrained models and code were download
 	 \hline
 		Open-Unmix & umx & 5.41 & \url{https://github.com/sigsep/open-unmix-pytorch/tree/v1.0.0} & \url{https://zenodo.org/record/3370489} \\
 	 \hline
-		\makecell[l]{xumx-sliCQ \\ sliCQT-WEM} & slicq-wslicq & 3.7 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+		\makecell[l]{xumx-sliCQ \\ sliCQT-WEM} & slicq-wslicq & 3.70 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
-		\makecell[l]{xumx-sliCQ \\ STFT-WEM} & slicq-wstft & 3.6 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
+		\makecell[l]{xumx-sliCQ \\ STFT-WEM} & slicq-wstft & 3.67 & \url{https://github.com/sevagh/xumx-sliCQ} & \url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model} \\
 	 \hline
 \end{tabular}
 \end{table}
@@ -259,13 +259,13 @@ To maximize result reproducibility, all pretrained models and code were download
 
 To summarize and discuss these results, I will first note that in my evaluation, UMX and X-UMX scored a median SDR of 5.41 dB and 5.91 dB respectively. These results are in line with the published SDR scores for UMX and X-UMX, which are given as 5.41 dB and 5.79 dB respectively \parencite[4]{xumx}.
 
-xumx-sliCQ scored a median SDR of 3.6 dB with the STFT Wiener-EM step, and 3.7 dB with the sliCQT Wiener-EM step. xumx-sliCQ failed in its objective to improve the music demixing performance of UMX and X-UMX with both of its post-processing strategies.
+xumx-sliCQ scored a median SDR of 3.67 dB with the STFT Wiener-EM step, and 3.70 dB with the sliCQT Wiener-EM step. xumx-sliCQ failed in its objective to improve the music demixing performance of UMX and X-UMX with both of its post-processing strategies.
 
-One potential source of poor performance in xumx-sliCQ is the design choice of using an independent neural network for each of the sub-matrices of the ragged sliCQT, proposed in Section \ref{sec:slicqarches}. A target (or source) may output multiple frequencies that are in different sub-matrices of the ragged sliCQT, such that the time-frequency information of the target is divided among the independent neural networks which have no connections with each other. By contrast, UMX and X-UMX both use a single neural network applied to the STFT, which contains all of the time-frequency information of all of the targets.
+One potential source of poor performance in xumx-sliCQ is the design choice of using an independent neural network for each of the sub-matrices of the ragged sliCQT, proposed in Section \ref{sec:slicqarches}. A target (or source) may output frequencies from different sub-matrices of the ragged sliCQT, such that the frequencies of the target are divided among neural networks that are not connected. By contrast, UMX and X-UMX both use a single neural network applied to the STFT, which contains all of the frequencies of all of the targets.
 
-Another potential source of poor performance in xumx-sliCQ is the de-overlap layer, shown in Figure \ref{fig:cdaeslicqt} and described in Section \ref{sec:deoverlap}. The sliCQT must be overlap-added to create a spectrogram, which is an operation that has no exact inverse. In xumx-sliCQ, I implemented the de-overlap procedure with a transpose convolution layer added after the music demixing layers, shown in Figure \ref{fig:cdaeslicqt}. By contrast, UMX and X-UMX do not need any extra layers, since the STFT is can be used as a spectrogram directly.
+Another potential source of errors in xumx-sliCQ is the de-overlap layer, shown in Figure \ref{fig:cdaeslicqt} and described in Section \ref{sec:deoverlap}. The sliCQT must be overlap-added to create a spectrogram, which is an operation that has no inverse. In xumx-sliCQ, I implemented the inverse overlap with a transpose convolution layer added after the music demixing layers. By contrast, UMX and X-UMX do not need any extra layers, since the STFT can be used as a spectrogram directly.
 
-	Finally, the CDAE neural network architecture chosen for xumx-sliCQ was originally designed for the STFT \parencite{plumbley1, plumbley2}. In Section \ref{sec:replacestft}, I described how the STFT-based neural network code was adapted to the different data structure of the sliCQT. However, the convolution kernels sizes shown in Tables \ref{table:convtable1}--\ref{table:convtable4} in Section \ref{sec:slicqarches} were unchanged from the original STFT-based values (\cite[3]{plumbley1}, \cite[3]{plumbley2}).
+Finally, the CDAE neural network architecture chosen for xumx-sliCQ was originally designed for the STFT. The CDAE hyperparameters in xumx-sliCQ, shown in Tables \ref{table:convtable1}--\ref{table:convtable4} in Section \ref{sec:slicqarches}, were kept similar to the original STFT-based values (\cite[3]{plumbley1}) (\cite[3]{plumbley2}). Moreover, the same CDAE architecture and hyperparameters were copied for each sub-matrix of frequency bins in the sliCQT. A more sophisticated approach could take into account the nonlinear frequency scale and nonuniform time-frequency resolution of the sliCQT to choose optimal architectures and hyperparameters for each CDAE.
 
 \end{shaded}
 
@@ -291,15 +291,15 @@ To report the inference performance, only the CPU was used. The CPU is a more un
 	 \hline
 		UMX & 137 MB & 27.26 \\
 	 \hline
-		xumx-sliCQ, STFT-WEM & 28 MB & 55.59 \\
+		xumx-sliCQ, STFT-WEM & 28 MB & 47.32 \\
 	 \hline
-		xumx-sliCQ, sliCQT-WEM & 28 MB & 104.54 \\
+		xumx-sliCQ, sliCQT-WEM & 28 MB & 91.14 \\
 	 \hline
 		X-UMX & 136 MB & 528.19 \\
 	 \hline
 \end{tabular}
 \end{table}
 
-To discuss these results, I will first note that X-UMX shows an anomalously high execution time which is \textasciitilde20x slower than UMX. This is because it uses a different deep learning framework, NNabla, compared to the PyTorch-based UMX and xumx-sliCQ. The STFT Wiener-EM configuration of xumx-sliCQ is \textasciitilde2x slower than UMX, and the sliCQT Wiener-EM configuration is \textasciitilde4x slower than UMX. Wiener-EM with the sliCQT only adds \textasciitilde0.1 dB to the median SDR score compared to the Wiener-EM with the STFT, while doubling the running time. The pretrained model of xumx-sliCQ is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and \hlblu{X-UMX, respectively}.
+To discuss these results, I will first note that X-UMX shows an anomalously high execution time which is \textasciitilde20x slower than UMX. This is because it uses a different deep learning framework, NNabla, compared to the PyTorch-based UMX and xumx-sliCQ. The STFT Wiener-EM configuration of xumx-sliCQ is \textasciitilde1.7x slower than UMX, and the sliCQT Wiener-EM configuration is \textasciitilde3.4x slower than UMX. Wiener-EM with the sliCQT only adds \textasciitilde0.03 dB to the median SDR score compared to the Wiener-EM with the STFT, while doubling the running time. The pretrained model of xumx-sliCQ is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and \hlblu{X-UMX, respectively}.
 
 \end{document}

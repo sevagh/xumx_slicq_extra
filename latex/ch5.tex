@@ -10,8 +10,26 @@ Methods of music demixing based on the STFT have addressed the time-frequency li
 
 The sliced Constant-Q Transform (sliCQT) is a realtime implementation of the Nonstationary Gabor Transform (NSGT). The NSGT and sliCQT provide a method for computing time-frequency transforms with complex-valued Fourier coefficients and a perfect inverse. They were originally designed to implement an invertible CQT, but they support arbitrary nonuniform frequency scales (e.g., psychoacoustic scales like the mel and Bark scales).
 
-In this thesis, the sliCQT was explored as a replacement of the STFT in UMX and X-UMX, in a newly proposed model called xumx-sliCQ. The goal was to use the sliCQT with an custom frequency scale to see if it could improve on the STFT-based music demixing performance of UMX and X-UMX. Unfortunately, the proposed model, xumx-sliCQ, performed worse than UMX and X-UMX. However, the creation of xumx-sliCQ in this thesis led to several contributions to the current Python ecosystem of music demixing.
+In this thesis, the sliCQT was explored as a replacement of the STFT in UMX and X-UMX, in a newly proposed model called xumx-sliCQ. The goal was to use the sliCQT with a custom frequency scale to see if it could improve on the STFT-based music demixing performance of UMX and X-UMX. Unfortunately, the proposed model, xumx-sliCQ, performed worse than UMX and X-UMX. However, the creation of xumx-sliCQ in this thesis led to several contributions to the current Python ecosystem of music demixing.
 
-First, the PyTorch implementation of the NSGT/sliCQT allows these transforms to be used in future GPU neural networks, and it sped up the computation of the transforms compared to the original library by \textasciitilde4x. Second, the GPU speedup of the BSS (Blind Source Separation) metrics library can speed up evaluations of music demixing and source separation by \textasciitilde2x. Finally, xumx-sliCQ demonstrated the first working prototype of a sliCQT-based deep neural network for music demixing. Different frequency scales or network architectures may achieve greater success in the future.
+First, the PyTorch implementation of the NSGT/sliCQT allows these transforms to be used in future GPU neural networks, and it sped up the computation of the transforms compared to the original library by \textasciitilde4x. Second, the GPU acceleration of the BSS (Blind Source Separation) metrics library can speed up evaluations of music demixing and source separation by \textasciitilde2x. Finally, xumx-sliCQ demonstrated the first working prototype of a sliCQT-based deep neural network for music demixing.
+
+\subsection{Future work}
+
+\begin{shaded}
+
+To conclude my thesis, I will discuss ideas for xumx-sliCQ that I think are worth exploring, and that may lead to improved variants.
+
+The NSGT and sliCQT were shown to support arbitrary nonuniform frequency scales in Section \ref{sec:cqt}. In Section \ref{sec:slicqparamsrch}, I described how I chose a frequency scale for the sliCQT in the task of music demixing by searching for the highest SDR score of the mix-phase oracle, initially introduced in Section \ref{sec:noisyphaseoracle}. There can be any number of approaches to choosing the frequency scale that might improve the results of xumx-sliCQ. For example, the frequency scale can be tailored to a specific target, such as a human singing voice frequency scale, or a frequency scale specific to an instrument, such as a piano or guitar scale.
+
+In Section \ref{sec:demixresults}, I provided some of my guesses as to why xumx-sliCQ failed to achieve its objective of beating UMX and X-UMX.
+
+My first guess was that targets may have their frequencies distributed into independent, unconnected neural networks in xumx-sliCQ, due to how a different neural network is applied to each sub-matrix in the ragged sliCQT, shown in Section \ref{sec:slicqarches}. In UMX and X-UMX, the neural network operates on all of the frequency bins at once on the single matrix of the STFT. \textcite{variableq1} proposed a single matrix form for the sliCQT, which may be of interest in a future version of xumx-sliCQ.
+
+My next guess was that there could be an additional source of errors in xumx-sliCQ because of the necessary de-overlap layer, shown in Section \ref{sec:deoverlap}. In Section \ref{sec:theoryslicqt}, I described that the need to overlap-add the sliCQT comes from the symmetric zero-padding applied to each slice, to reduce time-domain aliasing \parencite{slicq}. One idea is to remove the symmetric zero-padding from the sliCQT; this will eliminate the need for a de-overlap layer, but it will also reintroduce time-domain aliasing, which may have a detrimental affect on the music demixing quality.
+
+My last guess was that neural network architectures and hyperparameters used in xumx-sliCQ were originally intended for the STFT, leading to subpar performance when copying them in xumx-sliCQ. Better results might be obtained by performing a more in-depth search for optimal neural network architectures and hyperparameters tuned to the time-frequency characteristics of the sliCQT.
+
+\end{shaded}
 
 \end{document}

@@ -166,8 +166,8 @@ def save_boxplot(pandas_in, pdf_out, single=False, colors_legend=None, print_med
                     #ax.artists[1].set_facecolor('magenta')
                     #ax.artists[2].set_facecolor('cyan')
                     #ax.artists[3].set_facecolor('cyan')
-                    ax.artists[6].set_facecolor('gold')
-                    ax.artists[7].set_facecolor('darkviolet')
+                    ax.artists[4].set_facecolor('gold')
+                    ax.artists[5].set_facecolor('darkviolet')
 
                 name_to_color = {
                     'slicq-wslicq': 'gold',

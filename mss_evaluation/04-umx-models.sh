@@ -2,7 +2,7 @@
 
 set -eoxu pipefail
 
-maxmem="48" #GB
+maxmem="56" #GB
 firejailcmd="firejail --noprofile --rlimit-as=${maxmem}000000000"
 pybin="${firejailcmd} /home/sevagh/venvs/thesis/bin/python3"
 expdir="exp-04-trained-models"
