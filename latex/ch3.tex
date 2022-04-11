@@ -6,7 +6,7 @@
 
 The proposed adaptation of CrossNet-Open-Unmix (X-UMX) to use the sliced Constant-Q Transform (sliCQ Transform or sliCQT) is named xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main}}\textsuperscript{,}\footnote{xumx-sliCQ is pronounced like ``X-U-M-X-slice-Q''} and is the subject and main result of this thesis.
 
-Decisions for the methodology were influenced by the limitations of the computer that xumx-sliCQ was developed on, e.g., the maximum GPU memory available. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer.
+Decisions for the methodology were influenced by the limitations of the computer that xumx-sliCQ was developed on, e.g., the maximum GPU memory available. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer. Appendix \ref{appendix:codeavail} contains links to all of the code referenced in this chapter.
 
 CrossNet-Open-Unmix (X-UMX) is a near-state-of-the-art neural network for music demixing based on Short-Time Fourier Transform (STFT) masking, an overview of which was given in Section \ref{sec:umx} and \ref{sec:xumx}. The STFT has a fixed time-frequency resolution, while the sliCQT has a varying time-frequency resolution that may be more suitable for musical and auditory applications, as described in Section \ref{sec:theorynsgt}. xumx-sliCQ will be an adaptation of X-UMX which uses the sliCQT instead of the STFT, to investigate how this impacts its music demixing performance.
 
