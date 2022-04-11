@@ -28,7 +28,7 @@ My first guess was that targets may have their frequencies distributed into inde
 
 My next guess was that there could be an additional source of errors in xumx-sliCQ because of the necessary de-overlap layer, shown in Section \ref{sec:deoverlap}. In Section \ref{sec:theoryslicqt}, I described that the need to overlap-add the sliCQT comes from the symmetric zero-padding applied to each slice, to reduce time-domain aliasing \parencite{slicq}. One idea is to remove the symmetric zero-padding from the sliCQT; this will eliminate the need for a de-overlap layer, but it will also reintroduce time-domain aliasing, which may have a detrimental affect on the music demixing quality.
 
-My last guess was that neural network architectures and hyperparameters used in xumx-sliCQ were originally intended for the STFT, leading to subpar performance when copying them in xumx-sliCQ. Better results might be obtained by performing a more in-depth search for optimal neural network architectures and hyperparameters tuned to the time-frequency characteristics of the sliCQT.
+My last guess was that neural network architectures and hyperparameters used in xumx-sliCQ were originally intended for the STFT, leading to subpar performance when copying them for the sliCQT in xumx-sliCQ. Better results might be obtained by performing a more in-depth search for optimal neural network architectures and hyperparameters tuned to the time-frequency characteristics of the sliCQT.
 
 \end{shaded}
 
