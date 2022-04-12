@@ -4,22 +4,22 @@
 \section{Experiment and discussion}
 \label{ch:experiment}
 
-This \hlblu{chapter} contains the results of the experiments described in Chapter \ref{ch:methodology}, and a discussion of the results. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer which produced the results in this \hlblu{chapter}. Appendix \ref{appendix:codeavail} contains links to all of the code for the experiments and results shown in this chapter.
+This chapter contains the results of the experiments described in Chapter \ref{ch:methodology}, and a discussion of the results. Refer to Appendix \ref{appendix:computerspec} for the hardware and software specifications of the computer which produced the results in this chapter. Appendix \ref{appendix:codeavail} contains links to all of the code for the experiments and results shown in this chapter.
 
-The goal of this thesis \hlblu{is} to use the sliced Constant-Q Transform (sliCQT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. X-UMX represents musical signals with the Short-Time Fourier Transform (STFT), which is limited by a fixed time-frequency resolution. In contrast, the sliCQT has a varying time-frequency resolution, which may be more suitable for musical applications such as music demixing.
+The goal of this thesis is to use the sliced Constant-Q Transform (sliCQT) in CrossNet-Open-Unmix (X-UMX), a neural network for music demixing. X-UMX represents musical signals with the Short-Time Fourier Transform (STFT), which is limited by a fixed time-frequency resolution. In contrast, the sliCQT has a varying time-frequency resolution, which may be more suitable for musical applications such as music demixing.
 
 To use the sliCQT in a neural network, I first ported the sliCQT library to use PyTorch, a Python framework for GPU-based deep neural networks. The porting effort was described in Section \ref{sec:torchslicq}. In Section \ref{sec:gpuexperimentpytorch}, I will show benchmark results of the port compared to the original library.
 
-In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT \hlblu{that} used the mix-phase inversion (MPI) oracle to pick sliCQT parameters. The MPI strategy, used by X-UMX and also by my proposed model xumx-sliCQ, combines the magnitude spectrogram of the estimate with the phase of the mix. Choosing sliCQT parameters that give the best MPI oracle score might result in a higher overall music demixing performance from the neural network, since the MPI oracle represents the upper limit of performance for any model that uses the MPI strategy. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the parameter search script. In Section \ref{sec:fasterbsscupy}, I used the GPU-accelerated CuPy library in the BSS (Blind Source Separation) metrics library to speed up the parameter search, and I will show the benchmark results of the CuPy BSS metrics in Section \ref{sec:cupyportbss}.
+In Section \ref{sec:slicqparamsrch}, I described a random parameter search for the sliCQT that used the mix-phase inversion (MPI) oracle to pick sliCQT parameters. The MPI strategy, used by X-UMX and also by my proposed model xumx-sliCQ, combines the magnitude spectrogram of the estimate with the phase of the mix. Choosing sliCQT parameters that give the best MPI oracle score might result in a higher overall music demixing performance from the neural network, since the MPI oracle represents the upper limit of performance for any model that uses the MPI strategy. In Section \ref{sec:slicqparamresults}, I will show the sliCQT parameters that were chosen by the parameter search script. In Section \ref{sec:fasterbsscupy}, I used the GPU-accelerated CuPy library in the BSS (Blind Source Separation) metrics library to speed up the parameter search, and I will show the benchmark results of the CuPy BSS metrics in Section \ref{sec:cupyportbss}.
 
-After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step \hlblu{is} to train and evaluate the xumx-sliCQ neural network. First, Section \ref{sec:hyperparams} will list all of the training hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing configurations described in Section \ref{sec:postprocessing}. Finally, Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
+After porting the sliCQT to PyTorch and choosing the sliCQT parameters, the next step is to train and evaluate the xumx-sliCQ neural network. First, Section \ref{sec:hyperparams} will list all of the training hyperparameters. Next, Section \ref{sec:networktraining} will describe the training times and losses of the network architectures described in Section \ref{sec:slicqarches}. Section \ref{sec:demixresults} will show the music demixing results of the fully trained xumx-sliCQ model, using both post-processing configurations described in Section \ref{sec:postprocessing}. Finally, Section \ref{sec:inferenceperf} will describe the inference performance and model size on disk.
 
 \subsection{PyTorch port of the sliCQT}
 \label{sec:gpuexperimentpytorch}
 
-The first step \hlblu{is} to port the sliCQT to PyTorch, a GPU-based neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
+The first step is to port the sliCQT to PyTorch, a GPU-based neural network framework for Python, so that it could be used in a neural network. In Section \ref{sec:torchslicq}, I described how I ported the original CPU-based NumPy implementation of the reference sliCQT Python library to PyTorch. In this section, I will show benchmark results of the PyTorch port.
 
-The benchmark script for the PyTorch implementation of the sliCQT performs the forward and backward sliCQT using the Bark scale with 50 bins between \hlblu{\mbox{20--22,050 Hz}}. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU \hlblu{is} not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results.
+The benchmark script for the PyTorch implementation of the sliCQT performs the forward and backward sliCQT using the Bark scale with 50 bins between \mbox{20--22,050 Hz}. The sliCQT is taken on a single 3:54 minute song from the MUSDB18-HQ dataset, ``Zeno - Signs.'' The sliCQT parameters were chosen so that the transform of the song occupied a maximum of 7.2 GB of memory and could fit on the device with the least memory, the NVIDIA 2070 Super GPU. The computation time was repeated for 100 iterations and averaged. The cost of the memory transfer of the song to the GPU is not included in the measurement. Table \ref{table:nsgttorchresultsragged} shows the benchmark results.
 
 \begin{table}[ht]
 	\centering
@@ -41,11 +41,7 @@ The benchmark script for the PyTorch implementation of the sliCQT performs the f
 \end{tabular}
 \end{table}
 
-\begin{shaded}
-
 These results show that the execution time of the transform improved with PyTorch in every case. The sliCQT computed with PyTorch was faster than the original library by \textasciitilde4.7x, \textasciitilde3.7x, and \textasciitilde3.5x using the CPU, NVIDIA 2070 Super GPU, and NVIDIA 3080 Ti GPU respectively.
-
-\end{shaded}
 
 \explanation{i removed the unnecessary mention of the buggy, off-by-default multithreaded behavior of the library. it's not relevant to the rest of the thesis}
 
@@ -54,7 +50,7 @@ Even though the sliCQT computed with PyTorch on the GPU was not faster than the 
 \subsection{Best sliCQT parameters with MPI oracle}
 \label{sec:slicqparamresults}
 
-In Section \ref{sec:slicqparamsrch}, I described the random search to choose the parameters of the sliCQT to use in xumx-sliCQ. Since the goal of xumx-sliCQ is to try to surpass X-UMX, which uses the STFT, the first step is to \hlblu{try} the sliCQT that has the most potential to surpass the STFT in music demixing. This was done by choosing the best Signal-to-Distortion (SDR) score on the mixed-phase inversion (MPI) oracle waveforms of validation tracks of MUSDB18-HQ. The MPI strategy is when the estimate of the magnitude spectrogram of the target is combined with the phase of the original mixed audio, described in Section \ref{sec:noisyphaseoracle}. The MPI strategy is used in both X-UMX and xumx-sliCQ.
+In Section \ref{sec:slicqparamsrch}, I described the random search to choose the parameters of the sliCQT to use in xumx-sliCQ. Since the goal of xumx-sliCQ is to try to surpass X-UMX, which uses the STFT, the first step is to try the sliCQT that has the most potential to surpass the STFT in music demixing. This was done by choosing the best Signal-to-Distortion (SDR) score on the mixed-phase inversion (MPI) oracle waveforms of validation tracks of MUSDB18-HQ. The MPI strategy is when the estimate of the magnitude spectrogram of the target is combined with the phase of the original mixed audio, described in Section \ref{sec:noisyphaseoracle}. The MPI strategy is used in both X-UMX and xumx-sliCQ.
 
 The parameter search script ran for 60 iterations using random combinations of sliCQT parameters chosen from the ranges in Table \ref{table:slicqparams} in Section \ref{sec:slicqparamsrch}. The best-performing sliCQT parameters chosen by the script used the following parameters: Bark scale, 262 bins, 32.9--22,050 Hz. These parameters were used in the final neural network, xumx-sliCQ. The slice length and transition length were chosen to be 18,060 and 4,514 samples respectively, using the automatic slice length picker described in Section \ref{sec:improvelib}. Figure \ref{fig:bipolarslicqs} shows a visual comparison of the magnitude spectrograms of the best-performing sliCQT parameters alongside the STFT with the X-UMX default window size of 4,096 samples.
 
@@ -66,7 +62,7 @@ The parameter search script ran for 60 iterations using random combinations of s
 	\label{fig:bipolarslicqs}
 \end{figure}
 
-The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, compared to the results from the STFT with different window sizes. The hypothesis of this thesis is that the varying time-frequency resolution of the sliCQT may provide an advantage in a musical application over the fixed time-frequency resolution of the STFT, and that the window size of the STFT must be changed to trade time and frequency resolution. In some music source separation papers, a short window STFT is used for a high time resolution, and a long window STFT is used for a high frequency resolution \parencite{fitzgerald2, driedger}. In particular, \textcite{driedger} use a window size of 256 for the short window STFT and \hlblu{4,096} for the long window STFT, and \textcite{fitzgerald2} use a window of \hlblu{1,024} for the short window STFT and \hlblu{16,384} for the long window STFT. Therefore, to demonstrate the effect of time-frequency resolution on music demixing, I compared the best sliCQT chosen from the parameter search with different STFT window sizes, selecting powers of two between 256 and \hlblu{16,384} in the boxplot. Table \ref{table:winsizes} shows the evaluated transforms and their parameters. Note that the range of window sizes between 256--\hlblu{16,384} contain \hlblu{4,096}, which is the STFT window size of X-UMX.
+The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown in the boxplot in Figure \ref{fig:oraclebssboxplot}, compared to the results from the STFT with different window sizes. The hypothesis of this thesis is that the varying time-frequency resolution of the sliCQT may provide an advantage in a musical application over the fixed time-frequency resolution of the STFT, and that the window size of the STFT must be changed to trade time and frequency resolution. In some music source separation papers, a short window STFT is used for a high time resolution, and a long window STFT is used for a high frequency resolution \parencite{fitzgerald2, driedger}. In particular, \textcite{driedger} use a window size of 256 for the short window STFT and 4,096 for the long window STFT, and \textcite{fitzgerald2} use a window of 1,024 for the short window STFT and 16,384 for the long window STFT. Therefore, to demonstrate the effect of time-frequency resolution on music demixing, I compared the best sliCQT chosen from the parameter search with different STFT window sizes, selecting powers of two between 256 and 16,384 in the boxplot. Table \ref{table:winsizes} shows the evaluated transforms and their parameters. Note that the range of window sizes between 256--16,384 contain 4,096, which is the STFT window size of X-UMX.
 
 \begin{table}[ht]
 	\centering
@@ -77,21 +73,21 @@ The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown
 		Transform name & Transform & Parameters \\
 	 \hline
 	 \hline
-		slicqt-bark-262-32 & sliCQT & Bark scale, 262 bins, 32.9--\hlblu{22,050} Hz \\
+		slicqt-bark-262-32 & sliCQT & Bark scale, 262 bins, 32.9--22,050 Hz \\
 	 \hline
 		stft-256 & STFT & 256 sample window size \\
 	 \hline
 		stft-512 & STFT & 512 sample window size \\
 	 \hline
-		stft-1024 & STFT & \hlblu{1,024} sample window size \\
+		stft-1024 & STFT & 1,024 sample window size \\
 	 \hline
-		stft-2048 & STFT & \hlblu{2,048} sample window size \\
+		stft-2048 & STFT & 2,048 sample window size \\
 	 \hline
-		stft-4096 & STFT & \hlblu{4,096} sample window size \\
+		stft-4096 & STFT & 4,096 sample window size \\
 	 \hline
-		stft-8192 & STFT & \hlblu{8,192} sample window size \\
+		stft-8192 & STFT & 8,192 sample window size \\
 	 \hline
-		stft-16384 & STFT & \hlblu{16,384} sample window size \\
+		stft-16384 & STFT & 16,384 sample window size \\
 	 \hline
 \end{tabular}
 \end{table}
@@ -105,7 +101,7 @@ The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown
 
 The median SDR achieved by the chosen sliCQT parameters in the MPI oracle was 7.42 dB, surpassing the 6.23 dB achieved by the STFT with the X-UMX default window and overlap of 4,096 and 1,024 samples, respectively.
 
-To discuss these results, the MPI oracle result indicates that a music demixing system that uses the sliCQT with 262 frequency bins between 32.9--\hlblu{22,050} Hz on the Bark scale has the potential to surpass a system that uses the STFT with any window size between 256--16,384 samples. To translate this potential to a real advantage in the final model, it is still a challenge to find a neural network architecture that can create a good estimate of the magnitude sliCQT spectrograms of the targets.
+To discuss these results, the MPI oracle result indicates that a music demixing system that uses the sliCQT with 262 frequency bins between 32.9--22,050 Hz on the Bark scale has the potential to surpass a system that uses the STFT with any window size between 256--16,384 samples. To translate this potential to a real advantage in the final model, it is still a challenge to find a neural network architecture that can create a good estimate of the magnitude sliCQT spectrograms of the targets.
 
 I stated as a hypothesis in this thesis that the additional musical information in the sliCQT might give the neural network an advantage when learning how to perform the task of music demixing, compared to the STFT. Note the sharper clarity of musical events in both time and frequency in the sliCQT spectrogram in Figure \ref{fig:bipolarslicqs}(a) compared to the STFT spectrogram in Figure \ref{fig:bipolarslicqs}(b).
 
@@ -169,7 +165,7 @@ This section will cover the details of the hyperparameters of the xumx-sliCQ tra
 	 \hline
 	 	Seed & 42 & Copied from X-UMX \\
 	 \hline
-		Bandwidth & \hlblu{16,000} Hz & Copied from X-UMX \\
+		Bandwidth & 16,000 Hz & Copied from X-UMX \\
 	 \hline
 	 	Number of channels & 2 & Copied from X-UMX \\
 	 \hline
@@ -220,7 +216,7 @@ The music demixing performance of the trained model of xumx-sliCQ with the CDAE 
 
 In this section, I will compare the music demixing results of the trained models of UMX, X-UMX, and xumx-sliCQ.
 
-In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that for convenience throughout \hlblu{Chapter} \ref{ch:methodology} and \hlblu{Chapter} \ref{ch:experiment}, I \hlblu{will} use X-UMX to refer to the concepts of both UMX and X-UMX. In the results shown in this and the next section, I will treat UMX and X-UMX separately. They have a different music demixing performance and inference performance, due to the differences in their network architectures, shown in Figure \ref{fig:umxandxumx}, and the different deep learning frameworks used in their reference implementations.
+In Section \ref{sec:xumx}, I described how X-UMX (CrossNet-Open-Unmix) is an evolution of UMX (Open-Unmix), and that for convenience throughout Chapter \ref{ch:methodology} and Chapter \ref{ch:experiment}, I will use X-UMX to refer to the concepts of both UMX and X-UMX. In the results shown in this and the next section, I will treat UMX and X-UMX separately. They have a different music demixing performance and inference performance, due to the differences in their network architectures, shown in Figure \ref{fig:umxandxumx}, and the different deep learning frameworks used in their reference implementations.
 
 The evaluated trained model of xumx-sliCQ uses the CDAE architecture. The Bi-LSTM architecture of xumx-sliCQ was not evaluated, due to requiring 36 days to train the full 1,000 epochs. The CDAE architecture was trained fully in four days, which is an acceptable training time for this thesis.
 
@@ -255,8 +251,6 @@ To maximize result reproducibility, all pretrained models and code were download
 	\label{fig:bssboxplot}
 \end{figure}
 
-\begin{shaded}
-
 To summarize and discuss these results, I will first note that in my evaluation, UMX and X-UMX scored a median SDR of 5.41 dB and 5.91 dB respectively. These results are in line with the published SDR scores for UMX and X-UMX, which are given as 5.41 dB and 5.79 dB respectively \parencite[4]{xumx}.
 
 xumx-sliCQ scored a median SDR of 3.67 dB with the STFT Wiener-EM step, and 3.70 dB with the sliCQT Wiener-EM step. xumx-sliCQ failed in its objective to improve the music demixing performance of UMX and X-UMX with both of its post-processing strategies.
@@ -266,8 +260,6 @@ One potential source of poor performance in xumx-sliCQ is the design choice of u
 Another potential source of errors in xumx-sliCQ is the de-overlap layer, shown in Figure \ref{fig:cdaeslicqt} and described in Section \ref{sec:deoverlap}. In Section \ref{sec:theoryslicqt}, I showed that the sliCQT has a symmetric zero-padding step to reduce time-domain aliasing. The sliCQT must be overlap-added to create a spectrogram, a procedure shown in Section \ref{sec:stftslicqtcomp1} that has has no inverse. In xumx-sliCQ, I implemented a learned inverse overlap by adding a transpose convolution layer added after the music demixing layers. By contrast, UMX and X-UMX do not need any extra layers, since the STFT can be used as a spectrogram directly.
 
 Finally, the CDAE hyperparameters in xumx-sliCQ, shown in Tables \ref{table:convtable1}--\ref{table:convtable4} in Section \ref{sec:slicqarches}, were kept too similar to the original STFT-based values (\cite[3]{plumbley1}) (\cite[3]{plumbley2}). The STFT and sliCQT, as has been shown throughout this thesis, are significantly different time-frequency transforms, and neural network architectures or hyperparameters for the STFT and sliCQT are not necessarily interchangeable. A more sophisticated approach should take into account the frequency bins of the nonlinear frequency scale and nonuniform time-frequency resolution of the sliCQT to choose optimal architectures and hyperparameters independently for each CDAE.
-
-\end{shaded}
 
 \newpagefill
 
@@ -300,6 +292,6 @@ To report the inference performance, only the CPU was used. The CPU is a more un
 \end{tabular}
 \end{table}
 
-To discuss these results, I will first note that X-UMX shows an anomalously high execution time which is \textasciitilde20x slower than UMX. This is because it uses a different deep learning framework, NNabla, compared to the PyTorch-based UMX and xumx-sliCQ. The STFT Wiener-EM configuration of xumx-sliCQ is \textasciitilde1.7x slower than UMX, and the sliCQT Wiener-EM configuration is \textasciitilde3.4x slower than UMX. Wiener-EM with the sliCQT only adds \textasciitilde0.03 dB to the median SDR score compared to the Wiener-EM with the STFT, while doubling the running time. The pretrained model of xumx-sliCQ is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and \hlblu{X-UMX, respectively}.
+To discuss these results, I will first note that X-UMX shows an anomalously high execution time which is \textasciitilde20x slower than UMX. This is because it uses a different deep learning framework, NNabla, compared to the PyTorch-based UMX and xumx-sliCQ. The STFT Wiener-EM configuration of xumx-sliCQ is \textasciitilde1.7x slower than UMX, and the sliCQT Wiener-EM configuration is \textasciitilde3.4x slower than UMX. Wiener-EM with the sliCQT only adds \textasciitilde0.03 dB to the median SDR score compared to the Wiener-EM with the STFT, while doubling the running time. The pretrained model of xumx-sliCQ is \textasciitilde4.9x smaller on disk than both of the original STFT-based models, using 28 MB instead of the 137 and 136 MB of UMX and X-UMX, respectively.
 
 \end{document}
