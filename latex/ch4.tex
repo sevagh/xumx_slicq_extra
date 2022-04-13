@@ -41,9 +41,7 @@ The benchmark script for the PyTorch implementation of the sliCQT performs the f
 \end{tabular}
 \end{table}
 
-These results show that the execution time of the transform improved with PyTorch in every case. The sliCQT computed with PyTorch was faster than the original library by \textasciitilde4.7x, \textasciitilde3.7x, and \textasciitilde3.5x using the CPU, NVIDIA 2070 Super GPU, and NVIDIA 3080 Ti GPU respectively.
-
-\explanation{i removed the unnecessary mention of the buggy, off-by-default multithreaded behavior of the library. it's not relevant to the rest of the thesis}
+These results show that the execution time of the transform improved with PyTorch in every case. The sliCQT computed with PyTorch was faster than the original library by \textasciitilde4.7x, \textasciitilde3.7x, and \textasciitilde3.5x using the CPU, NVIDIA 2070 Super GPU, and NVIDIA 3080 Ti GPU, respectively.
 
 Even though the sliCQT computed with PyTorch on the GPU was not faster than the CPU for the tested parameters, having the transform on the GPU allows the use of the sliCQT inside any PyTorch-based neural network, which was the original goal of the port.
 
@@ -259,7 +257,7 @@ One potential source of poor performance in xumx-sliCQ is the design choice of u
 
 Another potential source of errors in xumx-sliCQ is the de-overlap layer, shown in Figure \ref{fig:cdaeslicqt} and described in Section \ref{sec:deoverlap}. In Section \ref{sec:theoryslicqt}, I showed that the sliCQT has a symmetric zero-padding step to reduce time-domain aliasing. The sliCQT must be overlap-added to create a spectrogram, a procedure shown in Section \ref{sec:stftslicqtcomp1} that has has no inverse. In xumx-sliCQ, I implemented a learned inverse overlap by adding a transpose convolution layer added after the music demixing layers. By contrast, UMX and X-UMX do not need any extra layers, since the STFT can be used as a spectrogram directly.
 
-Finally, the CDAE hyperparameters in xumx-sliCQ, shown in Tables \ref{table:convtable1}--\ref{table:convtable4} in Section \ref{sec:slicqarches}, were kept too similar to the original STFT-based values (\cite[3]{plumbley1}) (\cite[3]{plumbley2}). The STFT and sliCQT, as has been shown throughout this thesis, are significantly different time-frequency transforms, and neural network architectures or hyperparameters for the STFT and sliCQT are not necessarily interchangeable. A more sophisticated approach should take into account the frequency bins of the nonlinear frequency scale and nonuniform time-frequency resolution of the sliCQT to choose optimal architectures and hyperparameters independently for each CDAE.
+Finally, the CDAE hyperparameters in xumx-sliCQ, shown in Tables \ref{table:convtable1}--\ref{table:convtable4} in Section \ref{sec:slicqarches}, were perhaps kept too similar to the original STFT-based values (\cite[3]{plumbley1}) (\cite[3]{plumbley2}). The STFT and sliCQT, as has been shown throughout this thesis, are significantly different time-frequency transforms, and neural network architectures or hyperparameters for the STFT and sliCQT are not necessarily interchangeable. A more sophisticated approach should take into account the frequency bins of the nonlinear frequency scale and nonuniform time-frequency resolution of the sliCQT to choose optimal architectures and hyperparameters independently for each CDAE.
 
 \newpagefill
 
