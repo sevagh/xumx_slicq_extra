@@ -195,9 +195,9 @@ The optimizer used is the Adam optimizer with an adaptive learning rate schedule
 
 In this section, I will describe the neural network architectures and training results for both the Bi-LSTM and CDAE architectures of xumx-sliCQ. I will use the torchinfo\footnote{\url{https://github.com/TylerYep/torchinfo}} package to get a count of the total trainable parameters of the neural network, and show the loss curves of the training process with Tensorboard,\footnote{\url{https://www.tensorflow.org/tensorboard/}} a neural network training visualization tool.
 
-For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1000 epochs. I did not fully train this configuration, since a training time of 36 days is not feasible for this thesis.
+For the Bi-LSTM configuration of xumx-sliCQ, there are 1,889,512 trainable parameters in total. The training time per epoch within the first 10 epochs was 53 minutes, which would result in a hypothetical total of 36 days to train the full 1,000 epochs. I did not fully train this configuration, since a training time of 36 days is not feasible for this thesis.
 
-For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable parameters in total. The training time per epoch took 350 seconds, or almost 6 minutes, representing a total of 100 hours or 4 days of training. The total training curves for the full 1000 epochs can be seen in Figure \ref{fig:networkloss}. The lowest validation loss achieved was -0.449 at epoch 583.
+For the CDAE configuration of xumx-sliCQ, there are 6,669,912 trainable parameters in total. The training time per epoch took 350 seconds, or almost 6 minutes, representing a total of 100 hours or 4 days of training. The total training curves for the full 1,000 epochs can be seen in Figure \ref{fig:networkloss}. The lowest validation loss achieved was -0.449 at epoch 583.
 
 The music demixing performance of the trained model of xumx-sliCQ with the CDAE architecture will be shown in Section \ref{sec:demixresults}, and the execution time of inference and the size of the model on disk will be shown in Section \ref{sec:inferenceperf}.
 

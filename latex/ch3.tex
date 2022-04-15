@@ -218,7 +218,7 @@ The random search parameters are shown in Table \ref{table:slicqparams}. Note th
 The space of possible parameters is infinite, even with the ranges constrained as in Table \ref{table:slicqparams}. Therefore, an exhaustive grid search over all the possible parameters is impossible. To search for hyperparameters in a neural network, \textcite{randomgrid} found that:
 
 \begin{quote}
-	[o]ften the extent of a search is determined by a computational budget, and with random search 64 trials are enough to find better models in a larger less promising space \parencite[293]{randomgrid}
+	[o]ften the extent of a search is determined by a computational budget, and with random search 64 trials are enough to find better models in a larger less promising space \parencite[293]{randomgrid}.
 \end{quote}
 
 I decided to use a random search with at least 64 iterations for the sliCQT parameters, since the sliCQT parameters are hyperparameters of the xumx-sliCQ neural network. I ran two instances of the random parameter search script with 60 iterations each, resulting in 120 total iterations of the random parameter search for each of the four frequency scales. Each instance of the script used a different random seed (42 and 1337). The purpose of fixing the seed of Python's random number generator (RNG) is discussed in Section \ref{sec:pythonbasics}.
