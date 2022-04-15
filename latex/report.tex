@@ -5,6 +5,7 @@
 \usepackage[left=4cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}
+\usepackage{svg}
 \usepackage{xfrac}
 \usepackage{afterpage}
 \usepackage{amsmath}
@@ -90,14 +91,28 @@
 \renewcommand\listingscaption{Code Listing}
 \renewcommand\listoflistingscaption{List of Code Listings}
 
-\title{\ThesisTitle}
-
-\author{\vspace{1em}\\Sevag Hanssian \\
-  McGill University \\
- \small{\texttt{sevag.hanssian@mail.mcgill.ca}} \\
- \small{\texttt{sevagh@protonmail.com}} \\\ \\\ \\
- \small{Thesis for Master of Arts in Music Technology}\\
- \small{April 15, 2022}}
+\renewcommand{\maketitle}{
+  \begin{center}
+\ \vspace{7.5em}\\
+\Huge{\textbf{\ThesisTitle}}\\
+\vspace{2em}
+\Large{\textit{Sevag Hanssian}}\\
+\vspace{2em}
+\includesvg[width=1.75cm]{./images-misc/mcgill-coa}\\
+\vspace{1.5em}
+\large{Music Technology Area}\\
+\large{Department of Music Research}\\
+\large{Schulich School of Music}\\
+\large{McGill University, Montreal, Canada}\\
+\vspace{0.75em}
+\large{April 2022}\\
+\vspace{8em}
+\rule{15cm}{0.1em}
+\small{A thesis submitted to McGill University in partial fulfillment of the requirements of the degree of Master of Arts.}\\
+\vspace{1em}
+\small{\textcopyright\hspace{0.25em}2022 Sevag Hanssian}
+  \end{center}
+}
 
 % nil out the auto date
 \date{}
@@ -105,8 +120,10 @@
 \begin{document}
 
 \maketitle
+\thispagestyle{empty}
 
 \newpagefill
+\setcounter{page}{1}
 
 \subfile{ch0.tex}
 \newpagefill
