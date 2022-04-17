@@ -75,7 +75,7 @@ Also, throughout this section and the rest of this chapter, an example waveform 
 \begin{figure}[ht]
 	\centering
 	\subfloat[Glockenspiel waveform]{\includegraphics[width=0.656325\textwidth]{./images-gspi/glock_waveform.png}}\\
-	\subfloat[Glockenspiel notes]{\includegraphics[width=\textwidth]{./images-gspi/sheetmusic.png}}
+	\subfloat[Glockenspiel notes]{\includegraphics[width=0.9375\textwidth]{./images-gspi/sheetmusic.png}}
 	\caption{Glockenspiel waveform in (a) playing a C minor pentatonic melody with 15 strikes. The struck notes are $C, Eb, G, Bb, C, Eb, G, Bb$, shown in (b)}
 	\label{fig:glockwaveform}
 \end{figure}
@@ -652,10 +652,10 @@ The kernel parameters define the size and movement of the 2D convolution kernel 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[2D convolution kernel]{\includegraphics[width=\textwidth]{./images-neural/conv1.png}}\\
-	\subfloat[2D convolution kernel with padding > 0]{\includegraphics[width=\textwidth]{./images-neural/conv2.png}}\\
-	\subfloat[2D convolution kernel with stride > 1]{\includegraphics[width=\textwidth]{./images-neural/conv3.png}}\\
-	\subfloat[2D convolution kernel with dilation > 1]{\includegraphics[width=\textwidth]{./images-neural/conv4.png}}
+	\subfloat[2D convolution kernel]{\includegraphics[width=0.9375\textwidth]{./images-neural/conv1.png}}\\
+	\subfloat[2D convolution kernel with padding > 0]{\includegraphics[width=0.9375\textwidth]{./images-neural/conv2.png}}\\
+	\subfloat[2D convolution kernel with stride > 1]{\includegraphics[width=0.9375\textwidth]{./images-neural/conv3.png}}\\
+	\subfloat[2D convolution kernel with dilation > 1]{\includegraphics[width=0.9375\textwidth]{./images-neural/conv4.png}}
 	\caption{Different behaviors of kernel parameters \parencite[14, 29]{convguide}}
 	\label{fig:convdiags}
 \end{figure}
@@ -679,7 +679,7 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 	\centering
 	\subfloat[Regular RNN with cyclic connections to past data {\parencite[3]{birnn}}]{\includegraphics[width=0.5391\textwidth]{./images-neural/simple_rnn.png}}\\
 	\subfloat[Bi-directional LSTM with cyclic connections to past and future data {\parencite[3]{birnn}}]{\includegraphics[width=0.5859\textwidth]{./images-neural/birnn.png}}\\
-	\subfloat[Different recurrent units {\parencite[7]{lstmrnngru}}]{\includegraphics[width=\textwidth]{./images-neural/gates.png}}
+	\subfloat[Different recurrent units {\parencite[7]{lstmrnngru}}]{\includegraphics[width=0.9375\textwidth]{./images-neural/gates.png}}
 	\caption{RNN diagrams}
 	\label{fig:rnndiags}
 \end{figure}
@@ -805,7 +805,7 @@ GitHub\footnote{\url{https://github.com}} is a social website, designed for shar
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-misc/github.png}
+	\includegraphics[width=0.9375\textwidth]{./images-misc/github.png}
 	\caption{GitHub's code browser showing a file from the PyTorch source code}
 	\label{fig:githubpytorch}
 \end{figure}
@@ -954,7 +954,7 @@ Diverse music source separation algorithms based on spectrograms use the techniq
         \begin{minipage}{1.\textwidth}
                \renewcommand\footnoterule{} % optional removing footnote bar
                \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
-               \includegraphics[width=\textwidth]{./images-mss/mask_simple.png}
+               \includegraphics[width=0.9375\textwidth]{./images-mss/mask_simple.png}
 		\caption[Simple example of applying a time-frequency mask to a spectrogram]{Simple example of applying a time-frequency mask to a spectrogram\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/tf_and_masking.html}}}
                \label{fig:simplemasks}
        \end{minipage}
@@ -1024,7 +1024,7 @@ In this section, I mentioned that discarding the phase of the complex STFT and a
         \begin{minipage}{1.\textwidth}
                \renewcommand\footnoterule{} % optional removing footnote bar
                \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
-               \includegraphics[width=\textwidth]{./images-mss/whynophase.png}
+               \includegraphics[width=0.9375\textwidth]{./images-mss/whynophase.png}
 		\caption[Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model]{Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/phase.html}}}
                \label{fig:noisyphase}
        \end{minipage}
@@ -1138,8 +1138,8 @@ In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrogra
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[UMX Bi-LSTM architecture\protect\footnotemark]{\includegraphics[width=\textwidth]{./images-neural/umx.png}}\\
-	\subfloat[Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}]{\includegraphics[width=\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
+	\subfloat[UMX Bi-LSTM architecture\protect\footnotemark]{\includegraphics[width=0.9375\textwidth]{./images-neural/umx.png}}\\
+	\subfloat[Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}]{\includegraphics[width=0.9375\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
 	\caption{Architecture of UMX and one of its simpler predecessors}
 	\label{fig:umxes}
 \end{figure}
@@ -1179,7 +1179,7 @@ Figure \ref{fig:umxes2}(a) shows the training of a single UMX Bi-LSTM network, a
 \begin{figure}[ht]
 	\centering
 	\subfloat[UMX, single target training]{\includegraphics[width=0.7500\textwidth]{./images-blockdiagrams/umx_new_single.png}}\\
-	\subfloat[UMX, four targets inference]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_new_multiple.png}}
+	\subfloat[UMX, four targets inference]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_new_multiple.png}}
 	\caption{UMX training for a single target and inference for four targets}
 	\label{fig:umxes2}
 \end{figure}
@@ -1268,16 +1268,16 @@ Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired f
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[UMX system for a single target with loss function]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_single_target.png}}\\
-	\subfloat[X-UMX network for all four targets with MDL and CL loss functions]{\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_multiple_targets.png}}
+	\subfloat[UMX system for a single target with loss function]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_single_target.png}}\\
+	\subfloat[X-UMX network for all four targets with MDL and CL loss functions]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_multiple_targets.png}}
 	\caption{UMX and X-UMX loss functions compared. In UMX, a copy of the network is trained independently for each target, using single-target spectrogram loss. In X-UMX, four copies of the network are trained simultaneously for all four targets, using multi-domain and combination loss functions as shown in Figure \ref{fig:xumxlosses}.}
 	\label{fig:umxandxumx}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Multi-domain loss (MDL), showing the frequency-domain MSE loss from the spectrograms and time-domain SDR loss from the waveforms summed with a mixing coefficient $\alpha$ from equation \eqref{equation:totalloss}]{\includegraphics[width=\textwidth]{./images-neural/xumx1_2.png}}\\
-	\subfloat[Combination loss (CL), showing the 14 combinations of the four targets from Table \ref{table:14targets}]{\includegraphics[width=\textwidth]{./images-neural/xumx2.png}}
+	\subfloat[Multi-domain loss (MDL), showing the frequency-domain MSE loss from the spectrograms and time-domain SDR loss from the waveforms summed with a mixing coefficient $\alpha$ from equation \eqref{equation:totalloss}]{\includegraphics[width=0.9375\textwidth]{./images-neural/xumx1_2.png}}\\
+	\subfloat[Combination loss (CL), showing the 14 combinations of the four targets from Table \ref{table:14targets}]{\includegraphics[width=0.9375\textwidth]{./images-neural/xumx2.png}}
 	\caption{Diagrams of the loss functions of X-UMX \parencite[2]{xumx}}
 	\label{fig:xumxlosses}
 \end{figure}
@@ -1295,7 +1295,7 @@ The architecture of a simple CDAE is shown in Figure \ref{fig:cdaes}, where 2D c
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-neural/cdae_1.png}
+	\includegraphics[width=0.9375\textwidth]{./images-neural/cdae_1.png}
 	\caption{Diagram of a CDAE {\parencite[2]{plumbley1}}, where 2D convolutional layers are applied to the input spectrogram. Max-pooling layers are used in the encoder to reduce the dimensionality, and up-sampling layers are used in the decoder to increase the dimensionality.}
 	\label{fig:cdaes}
 \end{figure}

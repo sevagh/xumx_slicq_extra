@@ -14,7 +14,7 @@ Figure \ref{fig:generalmdx} shows a block diagram for a general deep neural netw
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/generic_mdx.png}
+	\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/generic_mdx.png}
 	\caption{General DNN music demixing system with magnitude spectrograms. This diagram is shown for a single estimated waveform, but music demixing systems often estimate four waveforms for vocals, bass, drums, and other, following the example of the MUSDB18-HQ dataset}
 	\label{fig:generalmdx}
 \end{figure}
@@ -23,8 +23,8 @@ Figure \ref{fig:umxandxumxslicq} shows how X-UMX and xumx-sliCQ are variants of 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[X-UMX for one target]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
-	\subfloat[xumx-sliCQ for one target]{\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_clean_botharch.png}}
+	\subfloat[X-UMX for one target]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
+	\subfloat[xumx-sliCQ for one target]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_slicq_clean_botharch.png}}
 	\caption{X-UMX and xumx-sliCQ compared. Note that only one target is shown for simplicity, but that both X-UMX and xumx-sliCQ estimate the four targets of vocals, drums, bass, and other from MUSDB18-HQ}
 	\label{fig:umxandxumxslicq}
 \end{figure}
@@ -72,7 +72,7 @@ Figure \ref{fig:raggedslicqtoverlapadd} shows the procedure of overlap-adding ra
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/overlapprocess.png}
+	\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/overlapprocess.png}
 	\caption{Overlap-adding adjacent ragged slices of the sliCQT to produce the final ragged output. The green-colored matrix represents the frequency bins analyzed with the first time-frequency resolution, and the pink-colored matrix represents the frequency bins analyzed with the second time-frequency resolution. The red rectangle shows the overlap between slice 1 and 2, and the blue rectangle shows the overlap between slice 2 and 3.}
 	\label{fig:raggedslicqtoverlapadd}
 \end{figure}
@@ -105,7 +105,7 @@ As described in the previous section, the sliCQT returns 2D time-frequency matri
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/3dslicqola2d.png}
+	\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/3dslicqola2d.png}
 	\caption{Overlap-adding the list of 3D tensors to create a list of 2D tensors in the sliCQT. The green-colored matrices represent the first time-frequency resolution, and the pink-colored matrices represent the second time-frequency resolution in the ragged list.}
 	\label{fig:3dslicqola2d}
 \end{figure}
@@ -159,7 +159,7 @@ The first frequency scale I added was the Variable-Q scale,\footnote{\url{https:
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-freqscales/vqlog.png}
+	\includegraphics[width=0.9375\textwidth]{./images-freqscales/vqlog.png}
 	\caption{Frequency bins and Q-factors for the Constant-Q and Variable-Q scales}
 	\label{fig:vq}
 \end{figure}
@@ -168,7 +168,7 @@ The next frequency scale I added was the Bark psychoacoustic scale,\footnote{\ur
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-freqscales/melbarkpitchesqs.png}
+	\includegraphics[width=0.9375\textwidth]{./images-freqscales/melbarkpitchesqs.png}
 	\caption{Frequency bins and Q-factors for the mel and Bark scales}
 	\label{fig:melbarkfsandqs}
 \end{figure}
@@ -269,7 +269,7 @@ Note that both the Bi-LSTM and CDAE architectures use the 2D overlap-added sliCQ
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget_cdae_bilstm.png}
+	\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_slicq_pertarget_cdae_bilstm.png}
 	\caption{Block diagram of the individual CNNs of xumx-sliCQ, using a simplified ragged sliCQT for demonstration purposes. The green-colored matrix represents the first time-frequency (TF) resolution and the pink-colored matrix represents the second time-frequency resolution in the ragged transform. The de-overlap layer is described in Section \ref{sec:deoverlap}.}
 	\label{fig:cdaeslicqt}
 \end{figure}
@@ -280,7 +280,7 @@ Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
+	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
 	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins]{\includegraphics[width=0.5625\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
 	\caption{The original X-UMX Bi-LSTM for the STFT, and the variant adapted for the sliCQT.}
 	\label{fig:umxnetworkdetails}
@@ -292,7 +292,7 @@ Using the values from \textcite{plumbley2}, the two layers of convolution in the
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-blockdiagrams/xumx_slicq_cdae.png}
+	\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_slicq_cdae.png}
 	\caption{Symmetric encoder/decoder architecture of the xumx-sliCQ CDAE. The green-colored matrices represent the first time-frequency (TF) resolution and the pink-colored matrices represent the second time-frequency resolution of the ragged sliCQT.}
 	\label{fig:newcdaefig}
 \end{figure}

@@ -92,7 +92,7 @@ The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-bss/oracle_boxplot.pdf}
+	\includegraphics[width=0.9375\textwidth]{./images-bss/oracle_boxplot.pdf}
 	\caption{Boxplot for MPI oracle mask evaluations}
 	\label{fig:oraclebssboxplot}
 \end{figure}
@@ -203,8 +203,8 @@ The music demixing performance of the trained model of xumx-sliCQ with the CDAE 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Train loss]{\includegraphics[width=\textwidth]{./images-neural/train_loss.png}}\\
-	\subfloat[Validation loss]{\includegraphics[width=\textwidth]{./images-neural/valid_loss.png}}
+	\subfloat[Train loss]{\includegraphics[width=0.9375\textwidth]{./images-neural/train_loss.png}}\\
+	\subfloat[Validation loss]{\includegraphics[width=0.9375\textwidth]{./images-neural/valid_loss.png}}
 	\caption{Tensorboard loss curves for xumx-sliCQ using the CDAE architecture}
 	\label{fig:networkloss}
 \end{figure}
@@ -242,7 +242,7 @@ The BSS metrics for the demixing results of UMX, X-UMX, and xumx-sliCQ were comp
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=\textwidth]{./images-bss/boxplot_full.pdf}
+	\includegraphics[width=0.9375\textwidth]{./images-bss/boxplot_full.pdf}
 	\caption{Boxplot of UMX, X-UMX, and xumx-sliCQ alongside the oracles}
 	\label{fig:bssboxplot}
 \end{figure}
@@ -264,7 +264,7 @@ Finally, the CDAE hyperparameters in xumx-sliCQ, shown in Tables \ref{table:conv
 
 In this section, I will show measurements of inference time and the size on disk of the compared models.
 
-The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined. The ``-HQ'' suffix denotes that this the pretrained model of UMX that was trained on MUSDB18-HQ, as opposed to the original MUSDB18. MUSDB18-HQ is same the dataset used for X-UMX and xumx-sliCQ. The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} for the NNabla deep learning framework has a size on disk of 136 MB for the four combined targets, which is almost the same as the size of the UMX PyTorch weights. The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model}} for the PyTorch deep learning framework has a size on disk of 28 MB, making xumx-sliCQ the smallest network from the comparison.
+The pretrained UMX-HQ model\footnote{\url{https://zenodo.org/record/3370489}} for the PyTorch deep learning framework has a size on disk of 137 MB for all four targets combined. The pretrained X-UMX model\footnote{\url{https://nnabla.org/pretrained-models/ai-research-code/x-umx/x-umx.h5}} for the NNabla deep learning framework has a size on disk of 136 MB for the four combined targets, which is almost the same size as the UMX PyTorch weights. The pretrained xumx-sliCQ model\footnote{\url{https://github.com/sevagh/xumx-sliCQ/tree/main/pretrained-model}} for PyTorch has a size on disk of 28 MB, making it the smallest network in the comparison.
 
 To report the inference performance, only the CPU was used. The CPU is a more universal device for performing inference, as almost every computing device (desktop, laptop, server, smartphone, etc.) has a CPU while not all have deep-learning capable GPUs \parencite{deepcpuinf, deepcpuinf2}. The time to perform the separation of a mixed song into four stems (including the Wiener-EM step) was averaged across the first 10 songs of the 50-song test set of MUSDB18-HQ. Table \ref{table:infperf} shows the measured times. For xumx-sliCQ, both the STFT and sliCQT configurations of the post-processing Wiener-EM step were measured, denoted as STFT-WEM and sliCQT-WEM respectively.
 
