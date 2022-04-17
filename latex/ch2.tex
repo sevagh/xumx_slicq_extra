@@ -27,8 +27,8 @@ According to \textcite{melbook}, the waveform is a natural and mathematically co
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Continuous-time waveform]{\includegraphics[width=0.9\textwidth]{./images-tftheory/continuoustime.png}}\\
-	\subfloat[Discrete-time waveform]{\includegraphics[width=0.9\textwidth]{./images-tftheory/discretetime.png}}
+	\subfloat[Continuous-time waveform]{\includegraphics[width=0.8438\textwidth]{./images-tftheory/continuoustime.png}}\\
+	\subfloat[Discrete-time waveform]{\includegraphics[width=0.8438\textwidth]{./images-tftheory/discretetime.png}}
 	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ \parencite[10]{discretebook}}
 	\label{fig:discretecontinuous}
 \end{figure}
@@ -41,7 +41,7 @@ Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for t
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{./images-tftheory/aliasing_undersampling.png}
+	\includegraphics[width=0.4688\textwidth]{./images-tftheory/aliasing_undersampling.png}
 	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) \parencite[82]{dspfirst}}
 	\label{fig:aliasing}
 \end{figure}
@@ -54,7 +54,7 @@ Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{di
 	\hspace{0.1em}
 	\subfloat[ADC details: sampler and quantizer]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
 	\vspace{0.1em}
-	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.85\textwidth]{./images-tftheory/adc3.png}}\\
+	\subfloat[Waveform results of the ADC process]{\includegraphics[width=0.7969\textwidth]{./images-tftheory/adc3.png}}\\
 	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations \parencite[188, 190, 192]{discretebook}}
 	\label{fig:adccircuit}
 \end{figure}
@@ -74,7 +74,7 @@ Also, throughout this section and the rest of this chapter, an example waveform 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Glockenspiel waveform]{\includegraphics[width=0.725\textwidth]{./images-gspi/glock_waveform.png}}\\
+	\subfloat[Glockenspiel waveform]{\includegraphics[width=0.656325\textwidth]{./images-gspi/glock_waveform.png}}\\
 	\subfloat[Glockenspiel notes]{\includegraphics[width=\textwidth]{./images-gspi/sheetmusic.png}}
 	\caption{Glockenspiel waveform in (a) playing a C minor pentatonic melody with 15 strikes. The struck notes are $C, Eb, G, Bb, C, Eb, G, Bb$, shown in (b)}
 	\label{fig:glockwaveform}
@@ -113,8 +113,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[2,048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_2048.png}}\\
-	\subfloat[262,144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.95\textwidth]{./images-gspi/glock_dft_262144.png}}
+	\subfloat[2,048-point DFT, $\mathit{df} = 21.533 Hz$]{\includegraphics[width=0.8906\textwidth]{./images-gspi/glock_dft_2048.png}}\\
+	\subfloat[262,144-point DFT, $\mathit{df} = 0.168 Hz$]{\includegraphics[width=0.8906\textwidth]{./images-gspi/glock_dft_262144.png}}
 	\caption{DFT of the Glockenspiel waveform, using a low frequency resolution with 2,048 points in (a), and a high frequency resolution with 262,144 points in (b). Note the more detailed frequency components shown in the higher frequency resolution transform in (b)}
 	\label{fig:glockdft}
 \end{figure}
@@ -148,8 +148,8 @@ Another way of visualizing the tradeoff of time and frequency is shown in Figure
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[width=0.6\textwidth]{./images-tftheory/gabor13.png}}\\
-	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[width=0.6\textwidth]{./images-tftheory/gabor2.png}}
+	\subfloat[Mutually exclusive formulations of time and frequency by two extremes, the unit impulse (bottom left) and the 0 Hz cosine DFT spectrum (top right)]{\includegraphics[width=0.5625\textwidth]{./images-tftheory/gabor13.png}}\\
+	\subfloat[The periodicity of the sine wave is more apparent with a longer $\Delta t$, at the expense of temporally localized samples]{\includegraphics[width=0.5625\textwidth]{./images-tftheory/gabor2.png}}
 	\caption{Time-frequency tradeoff intuitions \parencite[103, 106]{gabor2}}
 	\label{fig:gaborfirst}
 \end{figure}
@@ -196,7 +196,7 @@ where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT 
 		\renewcommand\footnoterule{} % optional removing footnote bar
 		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
 		\centering
-		\includegraphics[width=0.8\textwidth]{./images-tftheory/stft_diagram.png}
+		\includegraphics[width=0.7500\textwidth]{./images-tftheory/stft_diagram.png}
 		\caption[Forward and inverse STFT or Gabor transform]{Forward and inverse STFT or Gabor transform\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}}
 		\label{fig:stftdiagram}
 	\end{minipage}
@@ -216,7 +216,7 @@ The number of output frequency bins of the STFT is the same as the DFT, since th
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{./images-blockdiagrams/stft_diag.png}
+	\includegraphics[width=0.4688\textwidth]{./images-blockdiagrams/stft_diag.png}
 	\caption{Rectangular matrix output of the STFT}
 	\label{fig:stftdiag}
 \end{figure}
@@ -227,7 +227,7 @@ The time-frequency tradeoff limitation of the STFT and Gabor transform is a resu
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-tftheory/hamming_vs_gauss.png}
+	\includegraphics[width=0.7500\textwidth]{./images-tftheory/hamming_vs_gauss.png}
 	\caption{2,048-sample Hamming and Gaussian windows}
 	\label{fig:gaussvshamm}
 \end{figure}
@@ -236,18 +236,18 @@ The time-frequency tradeoff limitation of the STFT and Gabor transform is a resu
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_128.png}}\\
-	\subfloat[STFT, 2,048-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_2048.png}}\\
-	\subfloat[STFT, 16,384-sample Hamming]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_hamm_16384.png}}
-	\caption{Magnitude spectrograms with the Hamming window STFT. The spectrograms are shown in order of the smallest to largest window size. The horizontal lines (i.e., frequency components) are becoming sharper from the increasing frequency resolution, while the vertical lines (i.e., temporal events or note onsets) are becoming blurrier from the decreasing time resolution.}
+	\subfloat[STFT, 128-sample Hamming]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_hamm_128.png}}\\
+	\subfloat[STFT, 2,048-sample Hamming]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_hamm_2048.png}}\\
+	\subfloat[STFT, 16,384-sample Hamming]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_hamm_16384.png}}
+	\caption{Magnitude spectrograms with the Hamming window STFT, shown in order of the smallest to largest window size. The horizontal lines (i.e., frequency components) are becoming sharper from the increasing frequency resolution, while the vertical lines (i.e., temporal events or note onsets) are becoming blurrier from the decreasing time resolution.}
 	\label{fig:stfts1}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_128.png}}\\
-	\subfloat[Gabor transform, 2,048-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
-	\subfloat[Gabor transform, 16,384-sample Gaussian]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_gauss_16384.png}}
+	\subfloat[Gabor transform, 128-sample Gaussian]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_gauss_128.png}}\\
+	\subfloat[Gabor transform, 2,048-sample Gaussian]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_gauss_2048.png}}\\
+	\subfloat[Gabor transform, 16,384-sample Gaussian]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_gauss_16384.png}}
 	\caption{Magnitude spectrograms with the Gabor transform, i.e., the STFT with a Gaussian window. Note that they look identical to the STFT with a Hamming window in Figure \ref{fig:stfts1}. The different window functions are compared in Figure \ref{fig:gaussvshamm}.}
 	\label{fig:stfts2}
 \end{figure}
@@ -269,8 +269,8 @@ The name ``Constant-Q'' refers to the constant ratio of the frequency being anal
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Properties of DFT, CQT]{\includegraphics[width=0.65\textwidth]{./images-tftheory/dftvcqt.png}}\\
-	\subfloat[Window sizes for computing the CQT]{\includegraphics[width=0.65\textwidth]{./images-tftheory/qwindowchanges.png}}
+	\subfloat[Properties of DFT, CQT]{\includegraphics[width=0.6094\textwidth]{./images-tftheory/dftvcqt.png}}\\
+	\subfloat[Window sizes for computing the CQT]{\includegraphics[width=0.6094\textwidth]{./images-tftheory/qwindowchanges.png}}
 	\caption{Various aspects of the original CQT \parencite[427, 428]{jbrown}}
 	\label{fig:jbrowncqt}
 \end{figure}
@@ -296,20 +296,20 @@ As mentioned throughout this section, the best implementation choice for the CQT
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_256.png}}\\
-	\subfloat[STFT spectrogram, window size 1,024]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_1024.png}}\\
-	\subfloat[STFT spectrogram, window size 4,096]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_stft_4096.png}}
+	\subfloat[STFT spectrogram, window size 256]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_stft_256.png}}\\
+	\subfloat[STFT spectrogram, window size 1,024]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_stft_1024.png}}\\
+	\subfloat[STFT spectrogram, window size 4,096]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_stft_4096.png}}
 	\caption{STFT magnitude spectrograms of the glockenspiel signal. Three different window sizes are shown in increasing order, demonstrating an increasing frequency resolution (sharper horizontal lines) and decreasing time resolution (blurrier vertical lines).}
 	\label{fig:cqtvsstft1}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[CQT spectrogram, 12 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt12.png}}\\
+	\subfloat[CQT spectrogram, 12 bins-per-octave]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_cqt12.png}}\\
 	\vspace{-0.35em}
-	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt24.png}}\\
+	\subfloat[CQT spectrogram, 24 bins-per-octave]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_cqt24.png}}\\
 	\vspace{-0.35em}
-	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.675\textwidth]{./images-gspi/glock_cqt48.png}}
+	\subfloat[CQT spectrogram, 48 bins-per-octave]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_cqt48.png}}
 	\vspace{-0.35em}
 	\caption{CQT magnitude spectrograms of the glockenspiel signal. Three different bins-per-octave are shown in increasing order. The time and frequency resolution is varied within a single spectrogram, unlike the fixed time-frequency resolution of each spectrogram in Figure \ref{fig:cqtvsstft1}. Using more bins-per-octave increases the highest frequency resolution and decreases the lowest time resolution.}
 	\label{fig:cqtvsstft2}
@@ -324,7 +324,7 @@ As mentioned throughout this section, the best implementation choice for the CQT
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./images-tftheory/tf_tradeoff_dorfler.png}
+	\includegraphics[width=0.8438\textwidth]{./images-tftheory/tf_tradeoff_dorfler.png}
 	\caption{Time-frequency tradeoff for a glockenspiel signal \parencite[20]{doerflerphd}}
 	\label{fig:dorflertradeoff}
 \end{figure}
@@ -362,7 +362,7 @@ As stated by \citeauthor{adaptivecqt}, ``[w]e will indicate such a frame as \tex
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.5\textwidth]{./images-tftheory/stationarygabor.png}
+	\includegraphics[width=0.4688\textwidth]{./images-tftheory/stationarygabor.png}
 	\caption{Uniform time-frequency resolution of the stationary Gabor transform \parencite[3]{adaptivecqt}}
 	\label{fig:uniformtflattice}
 \end{figure}
@@ -433,16 +433,16 @@ Finally, the Bark psychoacoustic scale is introduced to complement the included 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT, Constant-Q scale, 100 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_cqlog_100.png}}\\
-	\subfloat[NSGT, Constant-Q scale, 500 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}
+	\subfloat[NSGT, Constant-Q scale, 100 bins]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_cqlog_100.png}}\\
+	\subfloat[NSGT, Constant-Q scale, 500 bins]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_cqlog_500.png}}
 	\caption{Constant-Q NSGT spectrograms of the glockenspiel signal}
 	\label{fig:bunchansgts1}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT, mel scale, 100 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_100.png}}\\
-	\subfloat[NSGT, mel scale, 500 bins]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_500.png}}
+	\subfloat[NSGT, mel scale, 100 bins]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_100.png}}\\
+	\subfloat[NSGT, mel scale, 500 bins]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_500.png}}
 	\caption{mel-scale NSGT spectrograms of the glockenspiel signal}
 	\label{fig:bunchansgts2}
 \end{figure}
@@ -521,7 +521,7 @@ The NSGT processes the entire input signal at once. In cases where the input sig
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.55\textwidth]{./images-misc/slicq_windows.png}
+	\includegraphics[width=0.5156\textwidth]{./images-misc/slicq_windows.png}
 	\caption{Slicing the input signal with 50\% overlapping Tukey windows. N is the slice length and M is the transition area \parencite{slicq}}
 	\label{fig:slicqtukeys}
 \end{figure}
@@ -532,8 +532,8 @@ Note the terminology of the sliCQT, which uses slice length instead of the windo
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Adjacent slices placed side-by-side without overlap-adding]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
-	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_overlap_proper.png}}
+	\subfloat[Adjacent slices placed side-by-side without overlap-adding]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_overlap_flatten.png}}\\
+	\subfloat[Adjacent slices with 50\%-overlap-add]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_overlap_proper.png}}
 	\caption{sliCQT spectrograms demonstrating the necessary slice 50\% overlap-add due to the symmetric zero-padding of each slice}
 	\label{fig:slicqoverlaps}
 \end{figure}
@@ -550,7 +550,7 @@ This same statement also applies to the NSGT, where different frequency bins hav
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{./images-misc/slicq_shape.png}
+	\includegraphics[width=0.8438\textwidth]{./images-misc/slicq_shape.png}
 	\caption{Illustration of the ragged NSGT, where frequency bins are grouped by their time resolution. The green-colored matrix represents the frequency bins analyzed with the highest frequency resolution and lowest time resolution, resulting in frequencies spaced close together and the lowest number of temporal frames. Moving upwards, the yellow, pink, and blue matrices have a decreasing frequency resolution and increasing time resolution, resulting in an increasing spacing between frequencies and an increasing number of temporal frames.}
 	\label{fig:raggedslicqt}
 \end{figure}
@@ -572,7 +572,7 @@ According to \citeauthor{introtodl}, deep learning (DL) ``is the subfield of mac
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.65\textwidth]{./images-neural/dnn.png}
+	\includegraphics[width=0.6094\textwidth]{./images-neural/dnn.png}
 	\caption{Deep neural network with hidden layers \parencite[2]{introtodl}}
 	\label{fig:fcdn}
 \end{figure}
@@ -587,7 +587,7 @@ Optimization techniques have been used in statistical, approximate, or stochasti
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.65\textwidth]{./images-neural/dspmlmix.jpg}
+	\includegraphics[width=0.6094\textwidth]{./images-neural/dspmlmix.jpg}
 	\caption{Synergy of physical models and machine learning methods \parencite[3591]{mldspmix}}
 	\label{fig:dspmlmix}
 \end{figure}
@@ -609,8 +609,8 @@ Convolutional neural networks (CNN) ``are based on convolving their input with l
 		\renewcommand\footnoterule{} % optional removing footnote bar
 		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
 		\centering
-		\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_1.png}}\\
-		\subfloat{\includegraphics[width=0.575\textwidth]{./images-neural/sliding_conv_2.png}}
+		\subfloat{\includegraphics[width=0.5391\textwidth]{./images-neural/sliding_conv_1.png}}\\
+		\subfloat{\includegraphics[width=0.5391\textwidth]{./images-neural/sliding_conv_2.png}}
 		\caption[$3 \times 3$ convolution kernel sliding over patches of input pixels]{$3 \times 3$ convolution kernel sliding over patches of input pixels\footnote[1]{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}}
 		\label{fig:cnnbasic}
 	\end{minipage}
@@ -620,7 +620,7 @@ Figure \ref{fig:convtranspose} shows how a convolutional and transpose convoluti
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-neural/convtranspose.png}
+	\includegraphics[width=0.7500\textwidth]{./images-neural/convtranspose.png}
 	\caption{Deconvolution operation \parencite[11]{convtranspose}}
 	\label{fig:convtranspose}
 \end{figure}
@@ -629,8 +629,8 @@ The network architecture and feature map for an audio CNN is shown in Figure \re
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[CNN architecture for audio waveforms {\parencite[7]{audiocnn2}}]{\includegraphics[width=0.9\textwidth]{./images-neural/audio_cnn.png}}\\
-	\subfloat[Audio spectral features learned by each layer {\parencite[4]{audiocnn3}}]{\includegraphics[width=0.9\textwidth]{./images-neural/audio_cnn2.png}}
+	\subfloat[CNN architecture for audio waveforms {\parencite[7]{audiocnn2}}]{\includegraphics[width=0.8438\textwidth]{./images-neural/audio_cnn.png}}\\
+	\subfloat[Audio spectral features learned by each layer {\parencite[4]{audiocnn3}}]{\includegraphics[width=0.8438\textwidth]{./images-neural/audio_cnn2.png}}
 	\caption{Example of an audio CNN architecture and spectral feature maps}
 	\label{fig:audiocnn}
 \end{figure}
@@ -677,8 +677,8 @@ Figure \ref{fig:rnndiags} shows some example RNN architectures, as well as an il
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Regular RNN with cyclic connections to past data {\parencite[3]{birnn}}]{\includegraphics[width=0.575\textwidth]{./images-neural/simple_rnn.png}}\\
-	\subfloat[Bi-directional LSTM with cyclic connections to past and future data {\parencite[3]{birnn}}]{\includegraphics[width=0.625\textwidth]{./images-neural/birnn.png}}\\
+	\subfloat[Regular RNN with cyclic connections to past data {\parencite[3]{birnn}}]{\includegraphics[width=0.5391\textwidth]{./images-neural/simple_rnn.png}}\\
+	\subfloat[Bi-directional LSTM with cyclic connections to past and future data {\parencite[3]{birnn}}]{\includegraphics[width=0.5859\textwidth]{./images-neural/birnn.png}}\\
 	\subfloat[Different recurrent units {\parencite[7]{lstmrnngru}}]{\includegraphics[width=\textwidth]{./images-neural/gates.png}}
 	\caption{RNN diagrams}
 	\label{fig:rnndiags}
@@ -788,8 +788,8 @@ Git is a popular tool for DVCS written by Linus Torvalds, who is also known for 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[How git stores snapshots of files]{\includegraphics[width=0.8\textwidth]{./images-misc/git.png}}\\
-	\subfloat[Recommended git workflow]{\includegraphics[width=0.6\textwidth]{./images-misc/git2.png}}
+	\subfloat[How git stores snapshots of files]{\includegraphics[width=0.7500\textwidth]{./images-misc/git.png}}\\
+	\subfloat[Recommended git workflow]{\includegraphics[width=0.5625\textwidth]{./images-misc/git2.png}}
 	\caption{How git works \parencite[6, 8]{gitbook}}
 	\label{fig:git}
 \end{figure}
@@ -886,8 +886,8 @@ Techniques more specific to music were developed as a necessity to deal with the
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Mixed spectrogram]{\includegraphics[width=0.675\textwidth]{./images-mss/mss1.png}}\\
-	\subfloat[Source spectrograms]{\includegraphics[width=0.675\textwidth]{./images-mss/mss2.png}}
+	\subfloat[Mixed spectrogram]{\includegraphics[width=0.6328\textwidth]{./images-mss/mss1.png}}\\
+	\subfloat[Source spectrograms]{\includegraphics[width=0.6328\textwidth]{./images-mss/mss2.png}}
 	\caption{Sparsity of music sources in the spectral domain \parencite[32]{musicsepgood}}
 \label{fig:sepgood}
 \end{figure}
@@ -898,8 +898,8 @@ Spectrogram factorization models are more sophisticated than KAM, and the most p
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.9\textwidth]{./images-mss/kamvnmf.png}}\\
-	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.9\textwidth]{./images-mss/mssdnn.png}}
+	\subfloat[KAM vs. NMF for spectral music demixing]{\includegraphics[width=0.8438\textwidth]{./images-mss/kamvnmf.png}}\\
+	\subfloat[Deep neural networks for spectral music demixing]{\includegraphics[width=0.8438\textwidth]{./images-mss/mssdnn.png}}
 	\caption{Techniques for spectral music demixing \parencite[36, 38]{musicsepgood}}
 	\label{fig:spectraldemix}
 \end{figure}
@@ -962,7 +962,7 @@ Diverse music source separation algorithms based on spectrograms use the techniq
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.8\textwidth]{./images-mss/maskdemo.png}
+	\includegraphics[width=0.7500\textwidth]{./images-mss/maskdemo.png}
 	\caption{Results of a soft and binary oracle mask applied for speech denoising \parencite[71]{masking}. When the binary mask is applied, there is a more dramatic separation, and there is starker contrast between the non-zero and zero parts of the resulting spectrogram. When the soft mask is applied, the separation is more gentle, and a range of zero to non-zero values can be seen in the resulting spectrogram.}
 	\label{fig:masks}
 \end{figure}
@@ -1070,10 +1070,10 @@ The entire process of median-filtering HPSS with binary masks applied to the spe
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Median filters applied to the STFT spectrogram]{{\includegraphics[width=0.5\textwidth]{./images-hpss/mix_stft_medianfilters.png}} }
-	\subfloat[Percussive estimate]{{\includegraphics[width=0.5\textwidth]{./images-hpss/perc_stft.png} }}\\
-	\subfloat[Harmonic estimate]{{\includegraphics[width=0.5\textwidth]{./images-hpss/harm_stft.png} }}
-	\subfloat[Residual estimate]{{\includegraphics[width=0.5\textwidth]{./images-hpss/resi_stft.png} }}
+	\subfloat[Median filters applied to the STFT spectrogram]{{\includegraphics[width=0.4688\textwidth]{./images-hpss/mix_stft_medianfilters.png}} }
+	\subfloat[Percussive estimate]{{\includegraphics[width=0.4688\textwidth]{./images-hpss/perc_stft.png} }}\\
+	\subfloat[Harmonic estimate]{{\includegraphics[width=0.4688\textwidth]{./images-hpss/harm_stft.png} }}
+	\subfloat[Residual estimate]{{\includegraphics[width=0.4688\textwidth]{./images-hpss/resi_stft.png} }}
 	\caption{Outputs median filtering HPSS with binary masking applied to the glockenspiel signal}
 	\label{fig:fitz12}
 \end{figure}
@@ -1104,7 +1104,7 @@ The wavelet and infinite sinusoid are compared in Figure \ref{fig:waveletinf}.
         \begin{minipage}{1.\textwidth}
                \renewcommand\footnoterule{} % optional removing footnote bar
                \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
-               \includegraphics[width=0.75\textwidth]{./images-wavelets/wavelet.png}
+               \includegraphics[width=0.65635\textwidth]{./images-wavelets/wavelet.png}
                \caption[Infinite sine wave of the Fourier transform vs. finite wavelet]{Infinite sine wave of the Fourier transform vs. finite wavelet\footnote[1]{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}}
                \label{fig:waveletinf}
        \end{minipage}
@@ -1120,7 +1120,7 @@ Figure \ref{fig:waveletsep} shows the wavelet scalogram-based source separation.
 
 \begin{figure}[ht]
        \centering
-       \includegraphics[width=0.75\textwidth]{./images-wavelets/wavelet_sep.png}
+       \includegraphics[width=0.65635\textwidth]{./images-wavelets/wavelet_sep.png}
        \caption{Source separation using wavelets. Cyan shows the first harmonic source, yellow shows the second harmonic source, and red shows the overlap \parencite[5]{wavelets}}
        \label{fig:waveletsep}
 \end{figure}
@@ -1178,7 +1178,7 @@ Figure \ref{fig:umxes2}(a) shows the training of a single UMX Bi-LSTM network, a
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[UMX, single target training]{\includegraphics[width=0.8\textwidth]{./images-blockdiagrams/umx_new_single.png}}\\
+	\subfloat[UMX, single target training]{\includegraphics[width=0.7500\textwidth]{./images-blockdiagrams/umx_new_single.png}}\\
 	\subfloat[UMX, four targets inference]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_new_multiple.png}}
 	\caption{UMX training for a single target and inference for four targets}
 	\label{fig:umxes2}

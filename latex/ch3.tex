@@ -86,8 +86,8 @@ After overlap-adding the sliCQT, the result is a ragged matrix representing a no
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[STFT, a uniform time-frequency transform. The entire matrix is colored yellow, since every frequency bin is analyzed with the same (i.e., uniform) time-frequency resolution.]{\includegraphics[width=0.5\textwidth]{./images-blockdiagrams/stftslicqtcmp1.png}}\\
-	\subfloat[A nonuniform time-frequency transform. The green, yellow, pink, and blue matrices represent the four different time-frequency resolutions used to analyze the different groupings of frequency bins.]{\includegraphics[width=0.65\textwidth]{./images-blockdiagrams/stftslicqtcmp2.png}}
+	\subfloat[STFT, a uniform time-frequency transform. The entire matrix is colored yellow, since every frequency bin is analyzed with the same (i.e., uniform) time-frequency resolution.]{\includegraphics[width=0.4688\textwidth]{./images-blockdiagrams/stftslicqtcmp1.png}}\\
+	\subfloat[A nonuniform time-frequency transform. The green, yellow, pink, and blue matrices represent the four different time-frequency resolutions used to analyze the different groupings of frequency bins.]{\includegraphics[width=0.6094\textwidth]{./images-blockdiagrams/stftslicqtcmp2.png}}
 	\caption{The uniform STFT compared to a ragged nonuniform transform like the NSGT}
 	\label{fig:contraststftslicqt}
 \end{figure}
@@ -114,7 +114,7 @@ The final data structure for the sliCQT in PyTorch is a list of 3D tensors. Each
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.75\textwidth]{./images-blockdiagrams/2dslicqolastft.png}
+	\includegraphics[width=0.65635\textwidth]{./images-blockdiagrams/2dslicqolastft.png}
 	\caption{Ragged list of 2D tensors representing the overlap-added sliCQT spectrogram, compared to the single 2D tensor representing the STFT spectrogram. The sliCQT contains two colors, green and pink, representing two different time-frequency resolutions for different groups of frequency bins. The STFT contains a single color, yellow, representing the uniform time-frequency resolution used for all the frequency bins.}
 	\label{fig:2dslicqolastft}
 \end{figure}
@@ -136,8 +136,8 @@ Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
-	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.675\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
+	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
+	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
 	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22,050 Hz}
 	\label{fig:overlappedspectrograms}
 \end{figure}
@@ -281,7 +281,7 @@ Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT
 \begin{figure}[ht]
 	\centering
 	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins]{\includegraphics[width=\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
-	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins]{\includegraphics[width=0.6\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
+	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins]{\includegraphics[width=0.5625\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
 	\caption{The original X-UMX Bi-LSTM for the STFT, and the variant adapted for the sliCQT.}
 	\label{fig:umxnetworkdetails}
 \end{figure}
