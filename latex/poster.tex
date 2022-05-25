@@ -1,0 +1,83 @@
+  \documentclass[final]{beamer}
+  \mode<presentation> {
+    \usetheme{Berlin} 
+  }
+\usepackage{xpatch}
+\usepackage{atbegshi} \AtBeginDocument{\AtBeginShipoutNext{\AtBeginShipoutDiscard}}
+  \setbeamertemplate{navigation symbols}{}
+  \usepackage[english]{babel}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    citestyle=authoryear,
+    sorting=none,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+%\xapptobibmacro{cite}{\setunit{\nametitledelim}\printfield{title}}{}{}
+\addbibresource{citations.bib}
+  \usepackage{amsmath,amsthm, amssymb, latexsym}
+  \usefonttheme[onlymath]{serif}
+  \boldmath
+  \usepackage[orientation=landscape,size=custom,width=121.92,height=91.44,scale=2.0]{beamerposter}
+  \title{xumx-sliCQ @ CIRMMT The Sound of the Future/The Future of Sound}
+  \author{Sevag Hanssian (\url{https://github.com/sevagh})}
+  \institute{McGill University}
+  \begin{document}
+  \begin{frame}{} 
+	\begin{block}{Music source separation and music demixing}
+		\begin{enumerate}
+			\item
+				Music source separation is the task of extracting an estimate of one or more isolated sources or instruments (e.g., drums or vocals) from musical audio
+			\item
+				Music demixing or unmixing separates the music into an estimate of \textbf{all} of its stems (that can be summed back to the original mixture)
+		  \item
+			  Many music source separation models use magnitude spectrograms and discard phase (they use phase of the mix a.k.a the ``noisy phase'' to create a waveform)
+		\end{enumerate}
+	\end{block}
+	  \begin{figure}
+		  \centering
+		  \includegraphics[width=0.3\textwidth]{./images-mss/mixdemix.png}
+		  \hspace{1em}
+		  \includegraphics[width=0.41\textwidth]{./images-blockdiagrams/generic_mdx.png}
+	  \end{figure}
+	\begin{block}{Time-frequency resolution: STFT, sliCQT, and human auditory system}
+	  \begin{enumerate}
+		  \item
+			  The Fourier transform represents the spectrum of audio as a sum of infinite sinusoids; interesting audio (e.g., music, speech) have spectra that change with time
+		  \item
+			  Short-Time Fourier Transform (STFT) or Gabor transform,\footnotemark\ take the spectrum of consecutive, overlapping, finite-duration, fixed-size windowed frames of the audio signal
+		  \item
+			  Signal contains only time information; spectrum contains only frequency information; STFT has a fixed time-frequency resolution determined by the window duration
+		  \item
+			``We have conducted the first direct psychoacoustical test of the Fourier uncertainty principle in human hearing, by measuring simultaneous temporal and frequency discrimination. Our data indicate that human subjects often beat the bound prescribed by the uncertainty theorem, by factors in excess of 10''\footnotemark
+		  \item
+			  Nonstationary Gabor Transform (NSGT) and sliCQT (realtime NSGT):\footnotemark\ time-frequency transform with Fourier coefficients, varying time-frequency resolution, and perfect inverse. Can demonstrate good tonal/transient representation without a tradeoff, and captures more musical information than the STFT
+	  \end{enumerate}
+    \end{block}
+	\begin{figure}
+		  \centering
+		  \includegraphics[width=0.23\textwidth]{./images-poster/slicq.png}
+		  \includegraphics[width=0.23\textwidth]{./images-poster/stft.png}
+		  \includegraphics[width=0.23\textwidth]{./images-poster/stft_small.png}
+		  \includegraphics[width=0.23\textwidth]{./images-poster/stft_big.png}
+	  \end{figure}
+	\begin{block}{Result: xumx-sliCQ}
+	  \begin{enumerate}
+		  \item
+			  sliCQT parameters chosen by maximizing SDR of ``noisy phase'' oracle: \textbf{7.42 dB} SDR (median of sources and tracks) vs. 6.23 on MUSDB18-HQ validation set
+		  \item
+			  Overall system adapted from UMX, XUMX, and CDAE:\footnotemark\ convolutional layers applied to ragged sliCQT\footnotemark
+		  \item
+			  xumx-sliCQ:\footnotemark\ \textbf{3.67 dB} SDR (median of sources and tracks) vs. 5.91 (xumx with STFT) on MUSDB18-HQ test set (trained only on MUSDB18-HQ)
+	  \end{enumerate}
+		\let\thefootnote\relax\footnotetext{\textsuperscript{1}\cite{stftindie, gabor1946}, \textsuperscript{2}\cite[4]{psycho1}, \textsuperscript{3}\cite{balazs, slicq}, \textsuperscript{4}\cite{umx, xumx, plumbley2}, \textsuperscript{6}\url{https://github.com/sevagh/xumx-sliCQ}, \textsuperscript{5}\cite{xumxslicq}}
+    \end{block}
+	  \begin{figure}
+		  \centering
+		  \includegraphics[width=0.4\textwidth]{./images-blockdiagrams/xumx_slicq_clean.png}
+		  \hspace{1em}
+		  \includegraphics[width=0.425\textwidth]{./images-poster/xumx_cdae_poster.png}
+	  \end{figure}
+  \end{frame}
+\end{document}

@@ -8,6 +8,11 @@ report-dev: report
 report: tex_fname="report.tex"
 report: texpdf
 
+poster-dev: export LATEXMK_FLAGS="-pvc"
+poster-dev: poster
+poster: tex_fname="poster.tex"
+poster: texpdf
+
 all: report
 
 ghostscript-compressed-thesis: report
