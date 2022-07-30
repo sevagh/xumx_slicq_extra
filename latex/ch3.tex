@@ -10,7 +10,7 @@ Decisions for the methodology were influenced by the limitations of the computer
 
 CrossNet-Open-Unmix (X-UMX) is a near-state-of-the-art neural network for music demixing based on Short-Time Fourier Transform (STFT) masking, an overview of which was given in Section \ref{sec:umx} and \ref{sec:xumx}. The STFT has a fixed time-frequency resolution, while the sliCQT has a varying time-frequency resolution that may be more suitable for musical and auditory applications, as described in Section \ref{sec:theorynsgt}. xumx-sliCQ will be an adaptation of X-UMX which uses the sliCQT instead of the STFT, to investigate how this impacts its music demixing performance.
 
-Figure \ref{fig:generalmdx} shows a block diagram for a general deep neural network (DNN) music demixing system that uses the magnitude STFT spectrogram as its input and output representation, and uses the phase of the mixture to swap back to the time domain. This strategy was described in Section \ref{sec:noisyphaseoracle}.
+Figure \ref{fig:generalmdx} shows a block diagram for a general deep neural network (DNN) music demixing system that uses the spectrogram as its input and output representation, and uses the phase of the mixture to swap back to the time domain. This strategy was described in Section \ref{sec:noisyphaseoracle}.
 
 \begin{figure}[ht]
 	\centering
@@ -130,7 +130,7 @@ The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} packag
 
 Many internal methods, functions, and utilities were modified during the port to PyTorch, and each in turn was also modified to take a \Verb#device# parameter. As these are internal to the library and not intended to be used directly by the end user, they will not be described here.
 
-Due to requirement of the 50\% overlap-add to create a meaningful spectrogram, the overlap-add utility is accompanied with a spectrogram plotting implementation. The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} uses the matplotlib\footnote{\url{matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} in its implementation.
+Due to requirement of the 50\% overlap-add to create a meaningful spectrogram, the overlap-add utility is accompanied with a spectrogram plotting implementation. The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} uses the matplotlib\footnote{\url{https://matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} in its implementation.
 
 Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram, generated with the overlap-add and spectrogram utilities.
 
@@ -187,7 +187,7 @@ As discussed in Section \ref{sec:ml}, the validation split of a dataset is often
 
 As described in Section \ref{sec:improvelib}, the time and frequency resolution of the sliCQT are defined from the frequency scale, and the parameters of the frequency scale are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz respectively, and the total frequency bins.
 
-The maximum frequency $f_{\text{max}}$ was fixed to 22,050 Hz, which is the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. I made this decision after early experiments showed that fixing the maximum frequency to 22,050 Hz led to a smaller size of the sliCQT, resulting in lower memory demands on the system. The minimum frequency $f_{\text{min}}$ was chosen from the range of 10.0--130.0 Hz, loosely based on the frequencies of the C0 (16.35 Hz) and C3 (130.81 Hz) notes of the standard piano.
+The maximum frequency $f_{\text{max}}$ was fixed to 22,050 Hz, which is the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. I made this decision after early experiments showed that fixing the maximum frequency to 22,050 Hz led to a smaller size of the sliCQT, resulting in lower memory demands on the system. The minimum frequency $f_{\text{min}}$ was chosen from the range of 10.0--130.0 Hz, loosely based on the frequencies of the C0 (16.35 Hz) and C3 (130.81 Hz) notes of the well-tempered scale.
 
 The total frequency bins were chosen from the range of 10--300 bins. The 300-bin maximum was determined by the maximum size of sliCQT that could fit in the 12 GB GPU memory of the NVIDIA 3080 Ti GPU. Details of the hardware limitations of the testbench computer are shown in Appendix \ref{appendix:computerspec}.
 
