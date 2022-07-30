@@ -23,7 +23,7 @@ The benchmark script for the PyTorch implementation of the sliCQT performs the f
 
 \begin{table}[ht]
 	\centering
-	\caption{Execution times for the forward + backward ragged sliCQT}
+	\caption{Execution times for the forward + backward ragged sliCQT.}
 	\label{table:nsgttorchresultsragged}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
@@ -56,7 +56,7 @@ The parameter search script ran for 60 iterations using random combinations of s
 	\centering
 	\subfloat[Best sliCQT from MPI oracle parameter search]{\includegraphics[width=0.6328\textwidth]{./images-gspi/slicqt_good.png}}\\
 	\subfloat[STFT, X-UMX default]{\includegraphics[width=0.6328\textwidth]{./images-gspi/glock_stft_4096.png}}
-	\caption{Magnitude spectrogram comparison; sliCQT vs. STFT}
+	\caption{Magnitude spectrogram comparison; sliCQT vs. STFT.}
 	\label{fig:bipolarslicqs}
 \end{figure}
 
@@ -64,7 +64,7 @@ The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown
 
 \begin{table}[ht]
 	\centering
-	\caption{Time-frequency transforms compared in the MPI oracle boxplot}
+	\caption{Time-frequency transforms compared in the MPI oracle boxplot.}
 	\label{table:winsizes}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
@@ -93,7 +93,7 @@ The BSS metrics of the MPI oracle evaluation of these sliCQT parameters is shown
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images-bss/oracle_boxplot.pdf}
-	\caption{Boxplot for MPI oracle mask evaluations}
+	\caption{Boxplot for MPI oracle mask evaluations.}
 	\label{fig:oraclebssboxplot}
 \end{figure}
 
@@ -112,7 +112,7 @@ The benchmark script for the CuPy BSS metrics library creates a random estimated
 
 \begin{table}[ht]
 	\centering
-	\caption{Execution times for the BSS metrics evaluation}
+	\caption{Execution times for the BSS metrics evaluation.}
 	\label{table:cupybssresults}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
@@ -144,7 +144,7 @@ This section will cover the details of the hyperparameters of the xumx-sliCQ tra
 
 \begin{table}[ht]
 	\centering
-	\caption{Hyperparameters in the xumx-sliCQ training script}
+	\caption{Hyperparameters in the xumx-sliCQ training script.}
 	\label{table:xumxslicqparams}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
@@ -205,7 +205,7 @@ The music demixing performance of the trained model of xumx-sliCQ with the CDAE 
 	\centering
 	\subfloat[Train loss]{\includegraphics[width=0.9375\textwidth]{./images-neural/train_loss.png}}\\
 	\subfloat[Validation loss]{\includegraphics[width=0.9375\textwidth]{./images-neural/valid_loss.png}}
-	\caption{Tensorboard loss curves for xumx-sliCQ using the CDAE architecture}
+	\caption{Tensorboard loss curves for xumx-sliCQ using the CDAE architecture.}
 	\label{fig:networkloss}
 \end{figure}
 
@@ -222,7 +222,7 @@ The BSS metrics for the demixing results of UMX, X-UMX, and xumx-sliCQ were comp
 
 \begin{table}[ht]
 	\centering
-	\caption{Evaluated pretrained models in the BSS boxplot}
+	\caption{Evaluated pretrained models in the BSS boxplot.}
 	\label{table:bsseval}
 	\begin{tabular}{ |p{2.5cm}|l|l|p{4cm}|p{4cm}| }
 	 \hline
@@ -243,7 +243,7 @@ The BSS metrics for the demixing results of UMX, X-UMX, and xumx-sliCQ were comp
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{./images-bss/boxplot_full.pdf}
-	\caption{Boxplot of UMX, X-UMX, and xumx-sliCQ alongside the oracles}
+	\caption{Boxplot of UMX, X-UMX, and xumx-sliCQ alongside the oracles.}
 	\label{fig:bssboxplot}
 \end{figure}
 
@@ -270,7 +270,7 @@ To report the inference performance, only the CPU was used. The CPU is a more un
 
 \begin{table}[ht]
 	\centering
-	\caption{Execution times of CPU inference and model sizes}
+	\caption{Execution times of CPU inference and model sizes.}
 	\label{table:infperf}
 	\begin{tabular}{ |l|l|l| }
 	 \hline

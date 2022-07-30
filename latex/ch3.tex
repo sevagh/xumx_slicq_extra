@@ -15,7 +15,7 @@ Figure \ref{fig:generalmdx} shows a block diagram for a general deep neural netw
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/generic_mdx.png}
-	\caption{General DNN music demixing system with magnitude spectrograms. This diagram is shown for a single estimated waveform, but music demixing systems often estimate four waveforms for vocals, bass, drums, and other, following the example of the MUSDB18-HQ dataset}
+	\caption{General DNN music demixing system with magnitude spectrograms. This diagram is shown for a single estimated waveform, but music demixing systems often estimate four waveforms for vocals, bass, drums, and other, following the example of the MUSDB18-HQ dataset.}
 	\label{fig:generalmdx}
 \end{figure}
 
@@ -25,7 +25,7 @@ Figure \ref{fig:umxandxumxslicq} shows how X-UMX and xumx-sliCQ are variants of 
 	\centering
 	\subfloat[X-UMX for one target]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
 	\subfloat[xumx-sliCQ for one target]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_slicq_clean_botharch.png}}
-	\caption{X-UMX and xumx-sliCQ compared. Note that only one target is shown for simplicity, but that both X-UMX and xumx-sliCQ estimate the four targets of vocals, drums, bass, and other from MUSDB18-HQ}
+	\caption{X-UMX and xumx-sliCQ compared. Note that only one target is shown for simplicity, but that both X-UMX and xumx-sliCQ estimate the four targets of vocals, drums, bass, and other from MUSDB18-HQ.}
 	\label{fig:umxandxumxslicq}
 \end{figure}
 
@@ -88,7 +88,7 @@ After overlap-adding the sliCQT, the result is a ragged matrix representing a no
 	\centering
 	\subfloat[STFT, a uniform time-frequency transform. The entire matrix is colored yellow, since every frequency bin is analyzed with the same (i.e., uniform) time-frequency resolution.]{\includegraphics[width=0.4688\textwidth]{./images-blockdiagrams/stftslicqtcmp1.png}}\\
 	\subfloat[A nonuniform time-frequency transform. The green, yellow, pink, and blue matrices represent the four different time-frequency resolutions used to analyze the different groupings of frequency bins.]{\includegraphics[width=0.6094\textwidth]{./images-blockdiagrams/stftslicqtcmp2.png}}
-	\caption{The uniform STFT compared to a ragged nonuniform transform like the NSGT}
+	\caption{The uniform STFT compared to a ragged nonuniform transform like the NSGT.}
 	\label{fig:contraststftslicqt}
 \end{figure}
 
@@ -138,7 +138,7 @@ Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram
 	\centering
 	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
 	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
-	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22,050 Hz}
+	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22,050 Hz.}
 	\label{fig:overlappedspectrograms}
 \end{figure}
 
@@ -160,7 +160,7 @@ The first frequency scale I added was the Variable-Q scale,\footnote{\url{https:
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9375\textwidth]{./images-freqscales/vqlog.png}
-	\caption{Frequency bins and Q-factors for the Constant-Q and Variable-Q scales}
+	\caption{Frequency bins and Q-factors for the Constant-Q and Variable-Q scales.}
 	\label{fig:vq}
 \end{figure}
 
@@ -169,7 +169,7 @@ The next frequency scale I added was the Bark psychoacoustic scale,\footnote{\ur
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9375\textwidth]{./images-freqscales/melbarkpitchesqs.png}
-	\caption{Frequency bins and Q-factors for the mel and Bark scales}
+	\caption{Frequency bins and Q-factors for the mel and Bark scales.}
 	\label{fig:melbarkfsandqs}
 \end{figure}
 
@@ -197,7 +197,7 @@ The random search parameters are shown in Table \ref{table:slicqparams}. Note th
 
 \begin{table}[ht]
 	\centering
-	\caption{Parameter ranges for the sliCQT parameter search}
+	\caption{Parameter ranges for the sliCQT parameter search.}
 	\label{table:slicqparams}
 \begin{tabular}{ |l|l|l|l| }
 	 \hline
@@ -301,7 +301,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 
 \begin{table}[ht]
 	\centering
-	\caption{Kernel parameters, time dimension}
+	\caption{Kernel parameters, time dimension.}
 	\label{table:convtable1}
 	\begin{tabular}{ |l|l|l| }
 	 \hline
@@ -314,7 +314,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 	 \hline
 \end{tabular}
 	\vspace{1em}
-	\caption{Kernel parameters, frequency dimension}
+	\caption{Kernel parameters, frequency dimension.}
 	\label{table:convtable2}
 \begin{tabular}{ |l|l|l| }
 	 \hline
@@ -329,7 +329,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 	 \hline
 \end{tabular}
 	\vspace{1em}
-	\caption{CDAE encoder layers}
+	\caption{CDAE encoder layers.}
 	\label{table:convtable3}
 \begin{tabular}{ |l|l|l|l|l| }
 	 \hline
@@ -340,7 +340,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 	 \hline
 \end{tabular}
 	\vspace{1em}
-	\caption{CDAE decoder layers}
+	\caption{CDAE decoder layers.}
 	\label{table:convtable4}
 \begin{tabular}{ |l|l|l|l|l| }
 	 \hline

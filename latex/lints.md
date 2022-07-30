@@ -32,3 +32,10 @@ ch2.tex
 ```
 $ rg '[^\s]([ ]{2,})[^\s]' -g 'ch*.tex'
 ```
+
+# fixing captions without trailing periods
+
+```
+rg '\\caption\{.*[^\.]\}$'
+rg '\\subfloat\[.*[^\.]\]'
+```
