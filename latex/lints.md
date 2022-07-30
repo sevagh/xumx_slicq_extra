@@ -37,5 +37,5 @@ $ rg '[^\s]([ ]{2,})[^\s]' -g 'ch*.tex'
 
 ```
 rg '\\caption\{.*[^\.]\}$'
-rg '\\subfloat\[.*[^\.]\]'
+rg '\\subfloat\[.*[^\.]\]\{\\includegraphics'
 ```

@@ -23,8 +23,8 @@ Figure \ref{fig:umxandxumxslicq} shows how X-UMX and xumx-sliCQ are variants of 
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[X-UMX for one target]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
-	\subfloat[xumx-sliCQ for one target]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_slicq_clean_botharch.png}}
+	\subfloat[X-UMX for one target.]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_clean.png}}\\
+	\subfloat[xumx-sliCQ for one target.]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/xumx_slicq_clean_botharch.png}}
 	\caption{X-UMX and xumx-sliCQ compared. Note that only one target is shown for simplicity, but that both X-UMX and xumx-sliCQ estimate the four targets of vocals, drums, bass, and other from MUSDB18-HQ.}
 	\label{fig:umxandxumxslicq}
 \end{figure}
@@ -136,8 +136,8 @@ Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
-	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
+	\subfloat[NSGT (non-sliced), length is exact same as input signal. No overlap-add required.]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_nooverlap.png}}\\
+	\subfloat[sliCQT with minimum automatic sllen (6,744 samples) and 50\% overlap-add.]{\includegraphics[width=0.6328\textwidth]{./images-gspi/gspi_nsgt_mel_perfect_slice.png}}
 	\caption{NSGT spectrograms for the mel scale with 96 bins in 20--22,050 Hz.}
 	\label{fig:overlappedspectrograms}
 \end{figure}
@@ -280,8 +280,8 @@ Figure \ref{fig:umxnetworkdetails} shows the details of the Bi-LSTM for the STFT
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
-	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins]{\includegraphics[width=0.5625\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
+	\subfloat[Dense encoder/decoder + Bi-LSTM architecture for the STFT with 2049 frequency bins.]{\includegraphics[width=0.9375\textwidth]{./images-blockdiagrams/umx_bilstm_orig.png}}\\
+	\subfloat[Bi-LSTM architecture for the sliCQT with $f \ll 2049$ frequency bins.]{\includegraphics[width=0.5625\textwidth]{./images-blockdiagrams/umx_bilstm_slicq.png}}
 	\caption{The original X-UMX Bi-LSTM for the STFT, and the variant adapted for the sliCQT.}
 	\label{fig:umxnetworkdetails}
 \end{figure}
