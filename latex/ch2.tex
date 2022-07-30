@@ -8,8 +8,6 @@ In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural n
 
 In this chapter, I will introduce the theoretical background necessary to understand my goal and hypothesis.
 
-In Section \ref{sec:timedomain}, I will give an overview of acoustic signals, including the time-domain waveform and discrete-time signals in digital systems.
-
 In Section \ref{sec:freqdomain}, I will introduce the frequency domain, which is alternative representation of acoustic signals. In Section \ref{sec:freqanal}, I will discuss frequency analysis and the Fourier transform. In Section \ref{sec:jointtfa}, I will describe joint time-frequency analysis, time-frequency transforms, and the Short-Time Fourier Transform (STFT). In Section \ref{sec:cqt}, I will introduce the Constant-Q Transform (CQT), which is a time-frequency transform designed to display more musical information than the STFT. In Section \ref{sec:theorynsgt}, I will introduce the Nonstationary Gabor Transform (NSGT), which is a time-frequency transform that can be used to implement the CQT with a perfect inverse. In Section \ref{sec:theoryslicqt}, I will introduce the sliced Constant-Q Transform (sliCQT), which is a realtime variant of the NSGT. Finally, in Section \ref{sec:raggedtf}, I will describe how nonuniform time-frequency transforms (e.g., CQT, NSGT, sliCQT) differ from a uniform time-frequency transform like the STFT.
 
 In Section \ref{sec:ml}, I will give an overview of machine learning and deep learning, and how these methods are typically applied to audio or musical applications, commonly in the form of convolutional neural networks (CNN) or recurrent neural networks (RNN). In Section \ref{sec:cnn}, I will describe convolutional neural networks (CNN) and their uses in audio applications. In Section \ref{sec:rnn}, I will describe recurrent neural networks (RNN) and their uses in audio applications.
@@ -17,47 +15,6 @@ In Section \ref{sec:ml}, I will give an overview of machine learning and deep le
 In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis. In Section \ref{sec:pythonbasics}, I will describe core concepts of the Python programming language that I will be using in subsequent sections to describe the code I wrote to implement and test my hypothesis. In Section \ref{sec:gitvcs}, I will describe version control for software projects and introduce Git, a tool for storing and tracking changes in code projects. In Section \ref{sec:ossgithub}, I will describe open-source software and GitHub, which is a social website for sharing open-source code that use Git. I will be releasing the code that I wrote for this thesis on GitHub for public availability.
 
 In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, and their motivations and uses, in Section \ref{sec:musicsepdefsmotivations}. In Section \ref{sec:musicsepbackground}, I will give an overview of computational approaches to general audio source separation, leading to current trends in music source separation and demixing. In Section \ref{sec:musicsepdatasets}, I will describe the public datasets used for music source separation research, and in Section \ref{sec:evalbss}, I will describe metrics that are commonly used for evaluating music source separation methods. In Section \ref{sec:masksandoracles}, I will describe the technique of time-frequency masking, which is a popular strategy used for spectrogram-based music source separation, and oracle estimators, which are methods for estimating the upper limit of quality achievable by time-frequency masking. In Section \ref{sec:noisyphaseoracle}, I will describe the noisy phase strategy, which is a common strategy for only estimating the magnitude STFT spectrogram and using the phase of the original mixed audio, or the ``noisy phase.'' In Section \ref{sec:hpss}, I will describe Harmonic/Percussive Source Separation (HPSS), which is a simple algorithm for music source separation based on the STFT spectrogram masking that exemplifies the time-frequency tradeoff of the STFT. In Section \ref{sec:umx}, I will describe Open-Unmix, the model that will be the starting point for this thesis, and in Section \ref{sec:xumx}, I will describe its closely-related variant, CrossNet-Open-Unmix. Finally, in Section \ref{sec:cdae}, I will describe Convolutional Denoising Autoencoders (CDAE), which are another type of music source separation model that I will incorporate in the final model of this thesis.
-
-\subsection{Acoustic signals and the time-domain waveform}
-\label{sec:timedomain}
-
-\citeauthor{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system'' \parencite[8]{discretebook}. Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \citeauthor{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure'' \parencite[2]{moore}.
-
-According to \textcite{melbook}, the waveform is a natural and mathematically convenient representation of a signal. For acoustic signals, the waveform represents the continuously varying pattern of the signal as a function of the continuous variable $t$, which represents time. A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers \parencite{discretebook}. The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$. A continuous-time signal and its discrete representation are shown in Figure \ref{fig:discretecontinuous}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Continuous-time waveform.]{\includegraphics[width=0.8438\textwidth]{./images-tftheory/continuoustime.png}}\\
-	\subfloat[Discrete-time waveform.]{\includegraphics[width=0.8438\textwidth]{./images-tftheory/discretetime.png}}
-	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ \parencite[10]{discretebook}.}
-	\label{fig:discretecontinuous}
-\end{figure}
-
-Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Points on the continuous time axis of the waveform are \textit{sampled} periodically, and the amplitude values of the waveform at these sampled points are \textit{quantized} to find the closest digital number \parencite{melbook}. Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
-
-First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem \parencite{discretebook}, described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
-
-Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation \parencite{dspfirst}. The diagram in Figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e., $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately.
-
-\begin{figure}[ht]
-	\centering
-	\includegraphics[width=0.4688\textwidth]{./images-tftheory/aliasing_undersampling.png}
-	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) \parencite[82]{dspfirst}.}
-	\label{fig:aliasing}
-\end{figure}
-
-Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values'' \parencite[190]{discretebook}. The second variable that relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation \parencite{discretebook}. An A/D or analog-to-digital converter (ADC) circuit and its operation on a waveform is shown in Figure \ref{fig:adccircuit}.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[Analog-to-digital converter (ADC).]{\includegraphics[height=2.2cm]{./images-tftheory/adc1.png}}
-	\hspace{0.1em}
-	\subfloat[ADC details: sampler and quantizer.]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
-	\vspace{0.1em}
-	\subfloat[Waveform results of the ADC process.]{\includegraphics[width=0.7969\textwidth]{./images-tftheory/adc3.png}}\\
-	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations \parencite[188, 190, 192]{discretebook}.}
-	\label{fig:adccircuit}
-\end{figure}
 
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
@@ -103,7 +60,7 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra, respectively \parencite{discretebook}.
 
-Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
+Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally. The discrete-time Fourier Transform (DTFT), also called the discrete Fourier Transform (DFT), is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
 \begin{align}
 	X(e^{j\omega}) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(e^{j\omega})e^{j\omega n}\mathit{d\omega}} \tag{6}\label{equation:idtft}
@@ -119,7 +76,7 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 	\label{fig:glockdft}
 \end{figure}
 
-For a real-valued input signal $x[n]$, the spectrum has the conjugate symmetry property, i.e., the DFT coefficients are mirrored symmetrically around the center frequency \parencite{dspfirst}. This center bin corresponds to the Nyquist frequency $\sfrac{F_{s}}{2}$ where $F_{s}$ is the sampling rate of the signal, described in Section \ref{sec:timedomain}. For a given DFT of $N$ points, the points of the output spectrum between 0--$\sfrac{N}{2}+1$ correspond to 0--$\sfrac{F_{s}}{2}$ Hz, and the points $\sfrac{N}{2}+1$--N correspond to the same frequency bins in reverse order, i.e., $\sfrac{F_{2}}{2}$--0 Hz. In practice, therefore, only the first $\sfrac{N}{2}+1$ points of the $N$-point DFT of a real signal are useful.
+For a real-valued input signal $x[n]$, the spectrum has the conjugate symmetry property, i.e., the DFT coefficients are mirrored symmetrically around the center frequency \parencite{dspfirst}. This center bin corresponds to the Nyquist frequency $\sfrac{F_{s}}{2}$ where $F_{s}$ is the sampling rate of the signal. For a given DFT of $N$ points, the points of the output spectrum between 0--$\sfrac{N}{2}+1$ correspond to 0--$\sfrac{F_{s}}{2}$ Hz, and the points $\sfrac{N}{2}+1$--N correspond to the same frequency bins in reverse order, i.e., $\sfrac{F_{2}}{2}$--0 Hz. In practice, therefore, only the first $\sfrac{N}{2}+1$ points of the $N$-point DFT of a real signal are useful.
 
 According to \textcite{skiena}, algorithms in computer science are often described by their time complexity using a hypothetical computer where simple operations take one time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, or in other words, the running time of the algorithm grows proportionally the size of the input signal squared \parencite{skiena}.  Starting from legendary mathematician Carl Friedrich Gauss in 1805 \parencite{gausshist}, and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century \parencite{ffttopten}.
 
