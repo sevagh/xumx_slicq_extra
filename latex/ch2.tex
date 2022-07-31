@@ -134,7 +134,7 @@ When performing joint time-frequency analysis, it is preferable to minimize time
 Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e., the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equations \eqref{equation:gabort}:
 \begin{flalign}\tag{7}\label{equation:gabort}
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
-	\nonumber G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha n}
+	\nonumber G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha f n}
 \end{flalign}
 
 where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform \parencite{dictionary}.
@@ -218,7 +218,7 @@ The time-frequency tradeoff of the STFT is a result of taking the Fourier transf
 
 The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in Figure \ref{fig:violin}.
 
-The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equations \eqref{equation:jbrowncqt} describe how the different windows $N[k]$ are applied to the signal:
+The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equations \eqref{equation:jbrowncqt} describe how the different windows $W[n, k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber & \text{window length} = N[k] = \frac{f_{s}}{f_{k}}Q\\
 	\nonumber & W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
@@ -892,7 +892,7 @@ Out of these four scores, SDR is the single global score that is commonly used t
 	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{18}\label{equation:sdrinstr}
 \end{align}
 
-The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, drums, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
+The SDR score is a relative scale given in decibels or dB, where $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, drums, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
 	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{19}\label{equation:sdrsong}
 \end{align}
