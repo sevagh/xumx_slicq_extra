@@ -363,7 +363,7 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
-The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows.
+The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows with a maximum length of $M$.
 
 I believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales \parencite{melbook}, or the Variable-Q scale, which combines the Constant-Q scale with the psychoacoustic concept of the equivalent rectangular bandwidth (ERB) \parencite{variableq1, variableq2}. In essence the NSGT can be thought of as a filterbank \parencite{variableq1}.
 
@@ -670,7 +670,7 @@ this is python
 
 The Python interpreter is widely distributed on most modern operating systems (OS) like Linux, Windows, and OS-X. Python has support for various high-level and user-friendly data structures. Python has seen widespread adoption in academia, and especially in numerical contexts \parencite{pythonscience}.
 
-One of the core features of the Python language is the \textit{list}.\footnote{\url{https://docs.python.org/3/tutorial/data structures.html\#more-on-lists}} The list in Python corresponds to the array data structure in computer science \parencite{skiena}. It allows for the construction of an ordered list of objects. For example, a discrete-time speech signal may be described by a list of its amplitude values:
+One of the core features of the Python language is the \textit{list}.\footnote{\url{https://docs.python.org/3/tutorial/datastructures.html\#more-on-lists}} The list in Python corresponds to the array data structure in computer science \parencite{skiena}. It allows for the construction of an ordered list of objects. For example, a discrete-time speech signal may be described by a list of its amplitude values:
 
 \hfill \Verb#speech_signal = [0.15, 0.28, 0.57, 0.98, -0.59]#
 
@@ -796,7 +796,7 @@ I provided definitions for music source separation and music demixing in Chapter
 Music source separation is the task of extracting an estimate of one or more isolated sources or instruments (for example, drums or vocals) from musical audio. The task of music demixing or unmixing considers the case where the musical audio is separated into an estimate of all of its constituent sources that can be summed back to the original mixture.
 \end{quote}
 
-Music demixing can be considered as the reverse of the mixing process of \textit{stems} in a recording studio, shown in Figure \ref{fig:mixingdiagrams}. First, I will provide a definition of what a stem is from online materials published by music production companies: a stem is a grouping of individually recorded instrument tracks that have been combined together in a common category.\footnote{\url{https://www.izotope.com/en/learn/stems-and-multitracks-whats-the-difference.html}, \url{https://blog.landr.com/stems-in-music/}} For example, a drum stem could include of all of the tracks of a drum kit (e.g., snare, tom, hihat), and a vocal stem could include all of the vocal tracks from the different singers in the song.
+Music demixing can be considered as the reverse of the mixing process of \textit{stems} in a recording studio, shown in Figure \ref{fig:mixingdiagrams}. First, I will provide a definition of what a stem is from online materials published by music production companies: a stem is a grouping of individually recorded instrument tracks that have been combined together in a common category.\footnote{\url{https://www.izotope.com/en/learn/stems-and-multitracks-whats-the-difference.html}, \url{https://blog.landr.com/stems-in-music/}} For example, a drum stem could include all of the tracks of a drum kit (e.g., snare, tom, hihat), and a vocal stem could include all of the vocal tracks from the different singers in the song.
 
 \begin{figure}[ht]
 	\centering
@@ -883,7 +883,7 @@ There are four distinct metrics that comprise BSS:
 \item
 	\textbf{SAR:} Signal to Artifacts Ratio
 \item
-	\textbf{ISR:} source Image to Spatial distortion Ratio
+	\textbf{ISR:} source Image to Spatial distortion Ratio\todo{what here?}
 \end{tight_itemize}
 
 Out of these four scores, SDR is the single global score that is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
@@ -892,12 +892,12 @@ Out of these four scores, SDR is the single global score that is commonly used t
 	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{18}\label{equation:sdrinstr}
 \end{align}
 
-The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, durms, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
+The unit of the SDR score is in decibels or dB, $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, drums, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
 	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{19}\label{equation:sdrsong}
 \end{align}
 
-In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4. BSS v4 uses time-invariant distortion filters to reduce the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/museval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used in this thesis.
+In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4, which reduced the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used in this thesis.
 
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
@@ -948,9 +948,9 @@ The waveforms $x_{v}[n]$ and $x_{d}[n]$ denote the isolated vocal and drum track
 
 Several interesting oracle masks can be calculated from the STFTs of the mix and ground truths of two sources shown in equations \eqref{equation:targetstfts}:
 \begin{align}\tag{24}\label{equation:targetstfts}
-	\nonumber X_{m} &= \mathit{STFT}(x_{m}[n])\\
-	\nonumber X_{v} &= \mathit{STFT}(x_{v}[n])\\
-	\nonumber X_{d} &= \mathit{STFT}(x_{d}[n])
+	\nonumber X_{m} &= \mathit{STFT}(x_{m})\\
+	\nonumber X_{v} &= \mathit{STFT}(x_{v})\\
+	\nonumber X_{d} &= \mathit{STFT}(x_{d})
 \end{align}
  
 \textcite{sisec2018} report the performance of several oracles called IRM1, IRM2, IBM1, and IBM2. These acronyms can be understood as follows; the ``I'' stands for Ideal, ``R|B'' denotes a Ratio (soft) vs. Binary (hard) mask, ``M'' stands for Mask, and the trailing number is the $p$th power which the magnitude spectrogram is raised to. For example, the IRM1 is a soft mask between the magnitude spectrograms (since the magnitude spectrogram raised to the power of one is simply itself), and IBM2 is a hard mask between the power spectrograms (i.e., the magnitude spectrogram raised to the power of two).
@@ -998,20 +998,20 @@ The name ``noisy phase'' originates from speech separation, where a common task 
 
 Equations \eqref{equation:mpineural} show how the phase of the mixture and magnitude of the estimated source are used to create a waveform by some arbitrary music demixing system:
 \begin{align}\tag{27}\label{equation:mpineural}
-	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
+	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}})\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \mathit{MusicDemixingSystem}(x_{\text{mix}})\\
 	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, est}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, est}})
+	\nonumber & \hat{x}_{\text{source, est}} = \mathit{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 
 In other words, the magnitude of the isolated source is combined with the phase, or the angle, of the mixed waveform, to produce a complex time-frequency transform, which is then inverted with the backward transform to obtain the estimated isolated source waveform. 
 
 The equations for the MPI oracle can be derived from equations \eqref{equation:mpineural}. The MPI oracle can be computed from ground-truth data, using equations \eqref{equation:mpioracle}:
 \begin{align}\tag{28}\label{equation:mpioracle}
-	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
-	\nonumber & X_{\text{source}} = \mathit{STFT}(x_{\text{source}}[n])\\
+	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}})\\
+	\nonumber & X_{\text{source}} = \mathit{STFT}(x_{\text{source}})\\
 	\nonumber & \hat{X}_{\text{source, MPI}} = |X_{\text{source}}| \cdot \angle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, MPI}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
+	\nonumber & \hat{x}_{\text{source, MPI}} = \mathit{iSTFT}(\hat{X}_{\text{source, MPI}})
 \end{align}
 
 The MPI oracle waveform should provide an idea of the upper limit of performance of a music source separation system that uses the MPI strategy.
@@ -1118,13 +1118,13 @@ where $n$ is the number of elements in the magnitude STFT matrix.
 
 There are four independent Bi-LSTM neural networks, shown in Figure \ref{fig:umxes2}, for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
 
-First, the four independently-trained Bi-LSTM models are used to obtain the estimated magnitude STFTs of the four target sources. The mix phase inversion is used to create a first estimate the waveforms for the four targets. Equations \eqref{equation:mpirepeat} show how the estimated magnitude STFT of UMX Bi-LSTM is converted to the time-domain waveform estimate:
+First, the four independently-trained Bi-LSTM models are used to obtain the estimated magnitude STFTs of the four target sources. The mix phase inversion is used to create a first estimate of the waveforms for the four targets. Equations \eqref{equation:mpirepeat} show how the estimated magnitude STFT of UMX Bi-LSTM is converted to the time-domain waveform estimate:
 
 \begin{align}\tag{30}\label{equation:mpirepeat}
-	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}}[n])\\
+	\nonumber & X_{\text{mix}} = \mathit{STFT}(x_{\text{mix}})\\
 	\nonumber & {|X_{\text{source}}|}_{\text{est}} = \mathit{UMX}(x_{\text{mix}})\\
 	\nonumber & X_{\text{source, est}} = {|X_{\text{source}}|}_{\text{est}} \cdot \angle{X_{\text{mix}}}\\
-	\nonumber & \hat{x}_{\text{source, est}}[n] = \mathit{iSTFT}(\hat{X}_{\text{source, est}})
+	\nonumber & \hat{x}_{\text{source, est}} = \mathit{iSTFT}(\hat{X}_{\text{source, est}})
 \end{align}
 
 Similar equations were previously described for the mix-phase inversion (MPI) oracle in Section \ref{sec:noisyphaseoracle}.
