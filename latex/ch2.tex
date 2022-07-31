@@ -8,11 +8,13 @@ In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural n
 
 In this chapter, I will introduce the theoretical background necessary to understand my goal and hypothesis.
 
-In Section \ref{sec:freqdomain}, I will introduce the frequency domain, which is alternative representation of acoustic signals. In Section \ref{sec:freqanal}, I will discuss frequency analysis and the Fourier transform. In Section \ref{sec:jointtfa}, I will describe joint time-frequency analysis, time-frequency transforms, and the Short-Time Fourier Transform (STFT). In Section \ref{sec:cqt}, I will introduce the Constant-Q Transform (CQT), which is a time-frequency transform designed to display more musical information than the STFT. In Section \ref{sec:theorynsgt}, I will introduce the Nonstationary Gabor Transform (NSGT), which is a time-frequency transform that can be used to implement the CQT with a perfect inverse. In Section \ref{sec:theoryslicqt}, I will introduce the sliced Constant-Q Transform (sliCQT), which is a realtime variant of the NSGT. Finally, in Section \ref{sec:raggedtf}, I will describe how nonuniform time-frequency transforms (e.g., CQT, NSGT, sliCQT) differ from a uniform time-frequency transform like the STFT.
+In Section \ref{sec:freqdomain}, I will introduce the frequency domain, which is alternative representation of acoustic signals. I will start by describing frequency analysis, the Fourier transform, and joint time-frequency analysis, leading to the ubiquitous Short-Time Fourier Transform (STFT). Continuing from the STFT, I will describe nonuniform time-frequency transforms that were designed for music analysis, including the Constant-Q Transform (CQT), the Nonstationary Gabor Transform (NSGT), and the sliced Constant-Q Transform (sliCQT).
 
-In Section \ref{sec:ml}, I will give an overview of machine learning and deep learning, and how these methods are typically applied to audio or musical applications, commonly in the form of convolutional neural networks (CNN) or recurrent neural networks (RNN). In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis.
+In Section \ref{sec:ml}, I will give an overview of machine learning and deep learning, and how these methods are typically applied to audio or musical applications, commonly in the form of convolutional neural networks (CNN) or recurrent neural networks (RNN).
 
-In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, their motivations and uses, a survey of historical approaches to computational audio source separation, and trends in music source separation leading to the current state of the art.
+In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis, including Python and Git version control.
+
+In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, their motivations and uses, a survey of historical approaches to computational audio source separation, and trends in STFT-based music source separation leading to the current state of the art.
 
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
