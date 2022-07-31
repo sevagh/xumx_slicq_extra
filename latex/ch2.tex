@@ -142,10 +142,10 @@ where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f
 The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work \parencite{stftindie}, but additional research in the 1980s \parencite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equations \eqref{equation:stft}:
 \begin{flalign}\tag{8}\label{equation:stft}
 	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)]\\
-	\nonumber X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-mR)e^{-j2\pi f n}
+	\nonumber X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-am)e^{-j2\pi f n}
 \end{flalign}
 
-where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $mR$, and $R$ is the hop size between successive time-shifts of the window \parencite{dictionary}. Note how similar equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes \parencite{stftinvertible}, as long as the constant overlap-add (COLA) constraint is respected \parencite{cola}. Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e., Gabor transform or STFT) is performed on a waveform.
+where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT of the audio signal centered about time $am$, and $a$ is the hop size between successive time-shifts of the window \parencite{dictionary}. Note how similar equations \eqref{equation:gabort} and \eqref{equation:stft} are, which is expected since the original Gabor transform is the STFT with a Gaussian window. In practice, the STFT allows the use of different windows and overlap sizes \parencite{stftinvertible}, as long as the constant overlap-add (COLA) constraint is respected \parencite{cola}. Figure \ref{fig:stftdiagram} shows how a windowed Fourier Transform (i.e., Gabor transform or STFT) is performed on a waveform.
 
 \begin{figure}[ht]
 	\centering
@@ -312,7 +312,7 @@ These requirements lead to invertibility of the frame operator and therefore to 
 
 The derivation of the NSGT starts from the definition of the Gabor transform from Section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal \parencite{adaptivecqt}, described by equation \eqref{equation:stationarygab}:
 \begin{align} \tag{11}\label{equation:stationarygab}
-g_{m, n}(t) = g(t - na)e^{2\pi i m b t}
+g_{m, n}(t) = g(t - na)e^{2\pi j m b t}
 \end{align}
 
 As stated by \citeauthor{adaptivecqt}, ``[w]e will indicate such a frame as \textit{stationary}, since the window used for time-frequency shifts does not change and the time-frequency shifts form a lattice of $a \times b$'' \parencite[3]{adaptivecqt}. Figure \ref{fig:uniformtflattice} shows the resulting uniform $a \times b$ tiling of the time-frequency plane.
@@ -347,7 +347,7 @@ For a resolution that changes with time, the Nonstationary Gabor atom is chosen 
 	[...] the functions $\{g_{n}\}$ are well-localized and centered around time-points $a_{n}$. This is similar to the standard Gabor scheme [...] with the possibility to vary the window $g_{n}$ for each position $a_{n}$. Thus, sampling of the time-frequency plane is done on a grid which is irregular over time, but regular over frequency at each temporal position \parencite[1485]{balazs}.
 \end{quote}
 
-For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are `well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$, shown in equation \eqref{equation:irregularfrequency} \parencite[1486]{balazs}:
+For a resolution that changes with frequency, the Nonstationary Gabor atom is chosen from a family of functions $\{h_{m}\}$, which are ``well-localized band-pass functions with center frequency $b_{n}$'' and a fixed time sampling step $a_{m}$, shown in equation \eqref{equation:irregularfrequency} \parencite[1486]{balazs}:
 \begin{align}\tag{15}\label{equation:irregularfrequency}
 	h_{m,n}(t) = h_{m}(t - na_{m}), m,n \in \mathbb{Z}
 \end{align}
@@ -558,7 +558,7 @@ A new music source separation model, which is the result of this thesis, will be
 \subsubsection{Convolutional neural networks (CNN)}
 \label{sec:cnn}
 
-Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' \parencite[3]{audiodeeplearning}. These are useful for both images and audio according because of their ability to exploit spatial or temporal correlation in data \parencite{cnns}. Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel slides over the pixels of the input image.
+Convolutional neural networks (CNN) ``are based on convolving their input with learnable kernels'' \parencite[3]{audiodeeplearning}. These are useful for both images and audio because of their ability to exploit spatial or temporal correlation in data \parencite{cnns}. Figure \ref{fig:cnnbasic} shows how a learnable convolution kernel slides over the pixels of the input image.
 
 \begin{figure}[ht]
 	\centering
