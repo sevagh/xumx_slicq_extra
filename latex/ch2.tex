@@ -216,12 +216,12 @@ The time-frequency tradeoff of the STFT is a result of taking the Fourier transf
 
 \citeauthor{cqtransient} stated that the problem with the STFT is its ``rigid time-frequency resolution trade-off providing a constant absolute frequency resolution throughout the entire range of audible frequencies'' \parencite[1]{cqtransient}. As described in Section \ref{sec:motivation}, music should be analyzed with a high frequency resolution in the low-frequency region, and with a high time resolution in the high-frequency region \parencite{doerflerphd, cqtransient}. 
 
-The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale to show the relationship between the fundamental frequency of a musical instrument and its harmonics better than the Fourier Transform's uniform frequency spacing. A demonstration of a violin analyzed with the DFT and CQT was shown in Figure \ref{fig:violin}.
+The Constant-Q Transform was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale that matched the notes of a musical pitch scale. A demonstration of a violin analyzed with the DFT and CQT was shown in Figure \ref{fig:violin}.
 
 The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. The transform uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the Constant-Q Transform, and the different window sizes used for each frequency bin of interest. Equations \eqref{equation:jbrowncqt} describe how the different windows $W[n, k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber & \text{window length} = N[k] = \frac{f_{s}}{f_{k}}Q\\
-	\nonumber & W[k, n] = \alpha + (1 - \alpha)\cos\big(\frac{2\pi n}{N[k]}\big)
+	\nonumber & W[k, n] = \rho + (1 - \rho)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
 
 \begin{figure}[ht]
@@ -378,7 +378,7 @@ The Variable-Q scale \parencite{variableq1, variableq2} is the same as the Const
 
 Both \textcite{variableq1} and \textcite{variableq2} cite the ERBlet transform \parencite{erblet} as a psychoacoustic transform, which in turn motivates the Variable-Q Transform. \textcite{variableq1, variableq2} provide the following equations \eqref{equation:variablebw} for computing the bandwidth $B_{k}$ of the frequency bin (or filter channel) $k$ where $b$ is the bins-per-octave or bpo:
 \begin{align}\tag{16}\label{equation:variablebw}
-	\nonumber & B_{k} = \alpha f_{k} + \gamma, \alpha = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
+	\nonumber & B_{k} = \sigma f_{k} + \gamma, \sigma = 2^{\frac{1}{b}} - 2^{\frac{1}{b}}
 \end{align}
 
 The effect is to widen the bandwidths of the windows at the low frequency bins significantly, since the offset is comparable in its order of magnitude to the lower frequency bandwidths. \textcite{variableq1} show some examples with $\gamma = [0, 3, 6.6, 10, 30] \text{ Hz}$. As the center frequency increases, the effect of the small offset becomes negligible. This results in a widening of the Q-factors in the low frequency bins, but it becomes Constant-Q in the high frequency bins. 
@@ -1216,9 +1216,9 @@ For the time-domain loss, the same 14 combinations are considered in the time do
 	\nonumber & \text{sdr\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{sdr\_loss}_{n}}
 \end{align}
 
-As a last step, the time-domain loss is multiplied by a mixing coefficient, $\alpha$, before adding it to the frequency-domain loss to create the total loss function in equation \eqref{equation:totalloss}:
+As a last step, the time-domain loss is multiplied by a mixing coefficient before adding it to the frequency-domain loss. The coefficient is set to 10 to ``approximately equalize the ranges'' of the two losses \parencite[4]{xumx}. The total loss function of X-UMX is calculated by equation \eqref{equation:totalloss}:
 \begin{align}\tag{33}\label{equation:totalloss}
-	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + \alpha \cdot \text{sdr\_loss}_{\text{total}}
+	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + 10 \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}
 
 Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired four targets (vocals, drums, bass, other) are combined together in X-UMX, illustrating the key concepts of the multi-domain loss functions (MDL), which computes loss for both the magnitude spectrograms and time-domain waveforms, and the combination losses across the four targets (CL). A visualization of the multi-domain loss (MDL) and combination loss (CL) for four targets is shown in Figure \ref{fig:xumxlosses}.
@@ -1233,7 +1233,7 @@ Figure \ref{fig:umxandxumx} shows how independent UMX networks for the desired f
 
 \begin{figure}[ht]
 	\centering
-	\subfloat[Multi-domain loss (MDL), showing the frequency-domain MSE loss from the spectrograms and time-domain SDR loss from the waveforms summed with a mixing coefficient $\alpha$ from equation \eqref{equation:totalloss}.]{\includegraphics[width=0.9375\textwidth]{./images-neural/xumx1_2.png}}\\
+	\subfloat[Multi-domain loss (MDL), showing the frequency-domain MSE loss from the spectrograms and time-domain SDR loss from the waveforms summed with a mixing coefficient from equation \eqref{equation:totalloss}.]{\includegraphics[width=0.9375\textwidth]{./images-neural/xumx1_2.png}}\\
 	\subfloat[Combination loss (CL), showing the 14 combinations of the four targets from Table \ref{table:14targets}.]{\includegraphics[width=0.9375\textwidth]{./images-neural/xumx2.png}}
 	\caption{Diagrams of the loss functions of X-UMX \parencite[2]{xumx}.}
 	\label{fig:xumxlosses}
