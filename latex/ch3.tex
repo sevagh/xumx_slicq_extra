@@ -130,7 +130,7 @@ The line-profiler\footnote{\url{https://pypi.org/project/line-profiler/}} packag
 
 Many internal methods, functions, and utilities were modified during the port to PyTorch, and each in turn was also modified to take a \Verb#device# parameter. As these are internal to the library and not intended to be used directly by the end user, they will not be described here.
 
-Due to requirement of the 50\% overlap-add to create a meaningful spectrogram, the overlap-add utility is accompanied with a spectrogram plotting implementation. The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} uses the matplotlib\footnote{\url{https://matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} in its implementation.
+Due to requirement of the 50\% overlap-add to create a spectrogram, the overlap-add utility is accompanied with a spectrogram plotting implementation. The spectrogram utility function\footnote{\url{https://github.com/sevagh/nsgt/blob/main/nsgt/plot.py}} uses the matplotlib\footnote{\url{https://matplotlib.org/}} library functions pcolormesh\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pcolormesh.html}} and colorbar\footnote{\url{https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html}} in its implementation.
 
 Figure \ref{fig:overlappedspectrograms} compares the non-sliced NSGT spectrogram with the overlap-added sliCQT spectrogram, generated with the overlap-add and spectrogram utilities.
 
