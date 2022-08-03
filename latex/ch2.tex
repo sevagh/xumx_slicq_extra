@@ -8,6 +8,8 @@ In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural n
 
 In this chapter, I will introduce the theoretical background necessary to understand my goal and hypothesis.
 
+In Section \ref{sec:timedomain}, I will give an overview of acoustic signals, including the time-domain waveform and discrete-time signals in digital systems.
+
 In Section \ref{sec:freqdomain}, I will introduce the frequency domain, which is alternative representation of acoustic signals. I will start by describing frequency analysis, the Fourier transform, and joint time-frequency analysis, leading to the ubiquitous Short-Time Fourier Transform (STFT). Continuing from the STFT, I will describe nonuniform time-frequency transforms that were designed for music analysis, including the Constant-Q Transform (CQT), the Nonstationary Gabor Transform (NSGT), and the sliced Constant-Q Transform (sliCQT).
 
 In Section \ref{sec:ml}, I will give an overview of machine learning and deep learning, and how these methods are typically applied to audio or musical applications, commonly in the form of convolutional neural networks (CNN) or recurrent neural networks (RNN).
@@ -15,6 +17,47 @@ In Section \ref{sec:ml}, I will give an overview of machine learning and deep le
 In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis, including Python and Git version control.
 
 In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, their motivations and uses, a survey of historical approaches to computational audio source separation, and trends in STFT-based music source separation leading to the current state of the art.
+
+\subsection{Acoustic signals and the time-domain waveform}
+\label{sec:timedomain}
+
+\citeauthor{discretebook} define a signal as a function of one or more variables which ``conveys information about the state or behavior of a physical system'' \parencite[8]{discretebook}. Some examples of signals are a 2-dimensional image, which is a brightness function of two spatial variables, and a speech signal, which is a function of time. \citeauthor{moore} describes the more specific case of a sound or audio signal as being the description of the vibration of an object and how it impresses this vibration upon the ``surrounding medium (usually air) as a pattern of changes in pressure'' \parencite[2]{moore}.
+
+According to \textcite{melbook}, the waveform is a natural and mathematically convenient representation of a signal. For acoustic signals, the waveform represents the continuously varying pattern of the signal as a function of the continuous variable $t$, which represents time. A continuous-time signal $x$, also called an analog signal, is denoted by $x_{a}(t)$. For digital processing, continuous-time signals need to be sampled periodically to form a sequence of numbers \parencite{discretebook}. The resultant domain is called discrete time, and a discrete-time signal is denoted by $x[n]$. A continuous-time signal and its discrete representation are shown in Figure \ref{fig:discretecontinuous}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Continuous-time waveform.]{\includegraphics[width=0.8438\textwidth]{./images-tftheory/continuoustime.png}}\\
+	\subfloat[Discrete-time waveform.]{\includegraphics[width=0.8438\textwidth]{./images-tftheory/discretetime.png}}
+	\caption{A continuous-time signal and its discrete-time representation sampled with $T = 125\mu s$ \parencite[10]{discretebook}.}
+	\label{fig:discretecontinuous}
+\end{figure}
+
+Continuous-time signals are converted into discrete-time representations by two processes: sampling and quantization. Points on the continuous time axis of the waveform are \textit{sampled} periodically, and the amplitude values of the waveform at these sampled points are \textit{quantized} to find the closest digital number \parencite{melbook}. Time sampling is controlled by the sampling period $T \text{ seconds}$, or the sampling rate $F_{s} = \sfrac{1}{T} \text{ Hz}$, which define the periodicity of the sampling. Amplitude quantization is controlled by the number of quantization levels $2^{B}$, where $B$ is the number of bits per sample of the representation.
+
+First, continuous time needs to be sampled into the discrete time domain. The relationship of a discrete-time signal $x[n]$ of a continuous-time signal $x_{a}(t)$ is defined by $x[n] = x_{a}(nT)$, where $n$ is an integer and $T = \sfrac{1}{F_{s}}$ is the sampling period. The Nyquist-Shannon sampling theorem \parencite{discretebook}, described independently by \textcite{nyquist1928} and \textcite{shannon1948}, states that the maximum frequency of a signal that can be represented by a sampling rate $F_{s}$ is $F_{\text{nyq}} = \sfrac{F_{s}}{2}$, which is also called the Nyquist rate or Nyquist frequency.
+
+Aliasing is one of the pitfalls of choosing an inappropriate sampling rate for the frequencies present in the signal under observation \parencite{dspfirst}. The diagram in Figure \ref{fig:aliasing} shows the phenomenon of aliasing due to undersampling, which occurs when a time-domain signal is undersampled, i.e., $F_{\text{sig}} > F_{\text{nyq}}$, and the continuous-time signal cannot be reconstructed accurately.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.4688\textwidth]{./images-tftheory/aliasing_undersampling.png}
+	\caption{An undersampled cosine wave (red) and the resulting incorrect reconstruction (black) \parencite[82]{dspfirst}.}
+	\label{fig:aliasing}
+\end{figure}
+
+Second, the continuous amplitude needs to be quantized. Stated by \citeauthor{discretebook}, ``the quantizer is a nonlinear system whose purpose is to transform the input sample $x[n]$ into one of a finite set of prescribed values'' \parencite[190]{discretebook}. The second variable that relates to the quantization process is the number of quantization levels. The quantization operation is represented as $ \hat{x}[n] = Q(x[n])$, where $\hat{x}[n]$ is the quantized sample. Quantization levels can be defined to be uniform (evenly spaced) or nonuniform, and in essence the sample values are rounded to the nearest quantization level $2^{B}$, recalling that $B$ is the number of bits per sample in the representation \parencite{discretebook}. An A/D or analog-to-digital converter (ADC) circuit and its operation on a waveform is shown in Figure \ref{fig:adccircuit}.
+
+\begin{figure}[ht]
+	\centering
+	\subfloat[Analog-to-digital converter (ADC).]{\includegraphics[height=2.2cm]{./images-tftheory/adc1.png}}
+	\hspace{0.1em}
+	\subfloat[ADC details: sampler and quantizer.]{\includegraphics[height=2.2cm]{./images-tftheory/adc2.png}}\\
+	\vspace{0.1em}
+	\subfloat[Waveform results of the ADC process.]{\includegraphics[width=0.7969\textwidth]{./images-tftheory/adc3.png}}\\
+	\caption{An ADC converter circuit showing the time sampling and amplitude quantizing operations \parencite[188, 190, 192]{discretebook}.}
+	\label{fig:adccircuit}
+\end{figure}
 
 \subsection{Transforms of acoustic signals}
 \label{sec:freqdomain}
@@ -60,7 +103,7 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra, respectively \parencite{discretebook}.
 
-Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally. The discrete-time Fourier Transform (DTFT) is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
+Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT) is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
 \begin{align}
 	X(\omega) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(\omega)e^{j\omega n}\mathit{d\omega}} \tag{6}\label{equation:idtft}
