@@ -1098,7 +1098,7 @@ UMX is based on time-frequency masking of the STFT, which was described previous
 
 UMX uses the openly available MUSDB18 and MUSB18-HQ datasets for its training data \parencite{musdb18, musdb18hq} to encourage reproducible research \parencite{umx}. The Python source code of the reference implementation of UMX is openly available,\footnote{\url{https://github.com/sigsep/open-unmix-pytorch}} which uses PyTorch \parencite{pytorch} for GPU-accelerated numerical computation and deep learning.
 
-In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture of the DNN is a variant of a sequence2sequence model. UMX uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
+In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture of the DNN is a variant of a sequence2sequence model. UMX uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes1} shows the architecture of UMX, and Figure \ref{fig:umxes1point5} shows one of its early predecessors.
 
 \begin{figure}[ht]
 	\centering
@@ -1107,11 +1107,17 @@ In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrogra
 		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
 
 		\centering
-		\subfloat[]{UMX Bi-LSTM architecture.\footnote[1]{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}}{\includegraphics[width=0.9375\textwidth]{./images-neural/umx.png}}\\
-		\subfloat[Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}.]{\includegraphics[width=0.9375\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
-		\caption{Architecture of UMX and one of its simpler predecessors.}
-		\label{fig:umxes}
+		\includegraphics[width=0.9375\textwidth]{./images-neural/umx.png}
+		\caption[UMX Bi-LSTM architecture.]{UMX Bi-LSTM architecture.\footnote[1]{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}}
+		\label{fig:umxes1}
 	\end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9375\textwidth]{./images-neural/typical_simple_mss_dnn.png}
+	\caption{Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}.}
+	\label{fig:umxes1point5}
 \end{figure}
 
 The MUSDB18-HQ data loader is the starting point of the neural network, and it returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. The final output of UMX is $\hat{y}$, the estimated target waveform. In between the input and output time-domain waveforms, the magnitude STFT domain is used by UMX. The important training and inference steps are as follows.
