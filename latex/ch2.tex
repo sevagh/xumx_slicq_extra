@@ -184,9 +184,14 @@ The time-frequency tradeoff of the STFT is a result of taking the Fourier transf
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.7500\textwidth]{./images-tftheory/hamming_vs_gauss.png}
-	\caption{2,048-sample Hamming and Gaussian windows.}
-	\label{fig:gaussvshamm}
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+		\centering
+		\includegraphics[width=0.7500\textwidth]{./images-tftheory/hamming_vs_gauss.png}
+		\caption[2,048-sample Hamming and Gaussian windows. The Gaussian window is truncated, and uses a width factor of $2.5$.]{2,048-sample Hamming and Gaussian windows. The Gaussian window is truncated and uses a width factor of $2.5$.\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/gausswin.html}}}
+		\label{fig:gaussvshamm}
+	\end{minipage}
 \end{figure}
 
 \newpagefill
@@ -1095,6 +1100,20 @@ UMX uses the openly available MUSDB18 and MUSB18-HQ datasets for its training da
 
 In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture of the DNN is a variant of a sequence2sequence model. UMX uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
 
+\begin{figure}[ht]
+	\centering
+        \begin{minipage}{1.\textwidth}
+		\renewcommand\footnoterule{} % optional removing footnote bar
+		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+
+		\centering
+		\subfloat[]{UMX Bi-LSTM architecture.\footnote[1]{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}}{\includegraphics[width=0.9375\textwidth]{./images-neural/umx.png}}\\
+		\subfloat[Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}.]{\includegraphics[width=0.9375\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
+		\caption{Architecture of UMX and one of its simpler predecessors.}
+		\label{fig:umxes}
+	\end{minipage}
+\end{figure}
+
 The MUSDB18-HQ data loader is the starting point of the neural network, and it returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. The final output of UMX is $\hat{y}$, the estimated target waveform. In between the input and output time-domain waveforms, the magnitude STFT domain is used by UMX. The important training and inference steps are as follows.
 
 Data whitening refers to a process in machine learning where the mean $\mu$ and standard deviation $\sigma$ of a training dataset $X$ is used to normalize $X$, or to transform $X$ into a normal Gaussian distribution $X'$ with a mean of zero and a standard deviation of one \parencite{Kessy_2018}. Data whitening is important because it ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and ``whitening is a critically important tool, most often employed in preprocessing'' \parencite[309]{Kessy_2018}.
@@ -1107,16 +1126,6 @@ The loss function is the mean-squared error (MSE) function. In the loss function
 \end{align}
 
 where $n$ is the number of elements in the magnitude STFT matrix.
-
-\begin{figure}[ht]
-	\centering
-	\subfloat[UMX Bi-LSTM architecture.\protect\footnotemark]{\includegraphics[width=0.9375\textwidth]{./images-neural/umx.png}}\\
-	\subfloat[Simple DNN architecture for music source separation {\parencite[262]{umxorig1}}.]{\includegraphics[width=0.9375\textwidth]{./images-neural/typical_simple_mss_dnn.png}}
-	\caption{Architecture of UMX and one of its simpler predecessors.}
-	\label{fig:umxes}
-\end{figure}
-
-\footnotetext{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}
 
 There are four independent Bi-LSTM neural networks, shown in Figure \ref{fig:umxes2}, for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
 
