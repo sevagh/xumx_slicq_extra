@@ -154,7 +154,7 @@ where $g(\cdot)$ are the time-shifted, localized windows, $X_{m}(f)$ is the DFT 
 		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
 		\centering
 		\includegraphics[width=0.7500\textwidth]{./images-tftheory/stft_diagram.png}
-		\caption[Forward and inverse STFT or Gabor transform]{Forward and inverse STFT or Gabor transform\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}}
+		\caption[Forward and inverse STFT or Gabor transform.]{Forward and inverse STFT or Gabor transform.\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/iscola.html}}}
 		\label{fig:stftdiagram}
 	\end{minipage}
 \end{figure}
@@ -223,6 +223,8 @@ The name ``Constant-Q'' refers to the constant ratio of the frequency being anal
 	\nonumber & \text{window length} = N[k] = \frac{f_{s}}{f_{k}}Q\\
 	\nonumber & W[k, n] = \rho + (1 - \rho)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
+
+The parameter $\rho$ in the window function $W[k, n]$ in equation \eqref{equation:jbrowncqt} should be set to 0.5 for a Hann window or $\sfrac{25}{46}$ for a Hamming window.
 
 \begin{figure}[ht]
 	\centering
@@ -568,7 +570,7 @@ Convolutional neural networks (CNN) ``are based on convolving their input with l
 		\centering
 		\subfloat{\includegraphics[width=0.5391\textwidth]{./images-neural/sliding_conv_1.png}}\\
 		\subfloat{\includegraphics[width=0.5391\textwidth]{./images-neural/sliding_conv_2.png}}
-		\caption[$3 \times 3$ convolution kernel sliding over patches of input pixels]{$3 \times 3$ convolution kernel sliding over patches of input pixels\footnote[1]{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}}
+		\caption[$3 \times 3$ convolution kernel sliding over patches of input pixels.]{$3 \times 3$ convolution kernel sliding over patches of input pixels.\footnote[1]{\url{https://developers.google.com/machine-learning/practica/image-classification/convolutional-neural-networks}}}
 		\label{fig:cnnbasic}
 	\end{minipage}
 \end{figure}
@@ -805,7 +807,7 @@ Music demixing can be considered as the reverse of the mixing process of \textit
 		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
 		\centering
 		\subfloat{\includegraphics[height=4cm]{./images-mss/mixdemix.png}}
-		\caption[Music mixing and demixing block diagrams]{Music mixing and demixing block diagrams\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}}
+		\caption[Music mixing and demixing block diagrams.]{Music mixing and demixing block diagrams.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}}}
 		\label{fig:mixingdiagrams}
 	\end{minipage}
 \end{figure}
@@ -912,7 +914,7 @@ Diverse music source separation algorithms based on spectrograms use the techniq
                \renewcommand\footnoterule{} % optional removing footnote bar
                \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
                \includegraphics[width=0.9375\textwidth]{./images-mss/mask_simple.png}
-		\caption[Simple example of applying a time-frequency mask to a spectrogram]{Simple example of applying a time-frequency mask to a spectrogram\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/tf_and_masking.html}}}
+		\caption[Simple example of applying a time-frequency mask to a spectrogram.]{Simple example of applying a time-frequency mask to a spectrogram.\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/tf_and_masking.html}}}
                \label{fig:simplemasks}
        \end{minipage}
 \end{figure}
@@ -982,7 +984,7 @@ In this section, I mentioned that discarding the phase of the complex STFT and a
                \renewcommand\footnoterule{} % optional removing footnote bar
                \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
                \includegraphics[width=0.9375\textwidth]{./images-mss/whynophase.png}
-		\caption[Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model]{Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/phase.html}}}
+		\caption[Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model.]{Phase spectrograms of an audio signal on the left and random noise on the right, showing that phase is difficult to model.\footnote[1]{\url{https://source-separation.github.io/tutorial/basics/phase.html}}}
                \label{fig:noisyphase}
        \end{minipage}
 \end{figure}
@@ -1062,7 +1064,7 @@ The wavelet and infinite sinusoid are compared in Figure \ref{fig:waveletinf}.
                \renewcommand\footnoterule{} % optional removing footnote bar
                \renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
                \includegraphics[width=0.65635\textwidth]{./images-wavelets/wavelet.png}
-               \caption[Infinite sine wave of the Fourier transform vs. finite wavelet]{Infinite sine wave of the Fourier transform vs. finite wavelet\footnote[1]{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}}
+               \caption[Infinite sine wave of the Fourier transform vs. finite wavelet.]{Infinite sine wave of the Fourier transform vs. finite wavelet.\footnote[1]{\url{https://www.mathworks.com/help/wavelet/gs/what-is-a-wavelet.html}}}
                \label{fig:waveletinf}
        \end{minipage}
 \end{figure}
@@ -1093,6 +1095,19 @@ UMX uses the openly available MUSDB18 and MUSB18-HQ datasets for its training da
 
 In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrograms of the sources from an input mixed song. The architecture of the DNN is a variant of a sequence2sequence model. UMX uses a bidirectional LSTM or Bi-LSTM architecture, which is based on two predecessor networks by \textcite{umxorig1} and \textcite{umxorig2}. Figure \ref{fig:umxes} shows the architecture of UMX and one of its predecessors.
 
+The MUSDB18-HQ data loader is the starting point of the neural network, and it returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. The final output of UMX is $\hat{y}$, the estimated target waveform. In between the input and output time-domain waveforms, the magnitude STFT domain is used by UMX. The important training and inference steps are as follows.
+
+Data whitening refers to a process in machine learning where the mean $\mu$ and standard deviation $\sigma$ of a training dataset $X$ is used to normalize $X$, or to transform $X$ into a normal Gaussian distribution $X'$ with a mean of zero and a standard deviation of one \parencite{Kessy_2018}. Data whitening is important because it ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and ``whitening is a critically important tool, most often employed in preprocessing'' \parencite[309]{Kessy_2018}.
+
+In the training loop, the $(x, y)$ pairs of mixed audio and the ground-truth of the target source waveform are converted to the magnitude STFT domain $(|X|, |Y|)$. To apply data whitening, the mean and standard deviation of $|X|$ are computed, or $\mu_{|X|} = \mathit{mean}(\{|X|\})$ and $\sigma_{|X|} = \mathit{std}(\{|X|\})$. The training input to the Bi-LSTM neural network is $(|X|+\mu_{|X|})\times\sigma_{|X|}$. The Bi-LSTM neural network outputs $|\hat{Y}|$, the estimated magnitude STFT of the target sources.
+
+The loss function is the mean-squared error (MSE) function. In the loss function, the estimated magnitude STFT of the target source is compared to the ground-truth, shown in equation \eqref{equation:mselossstft}.
+\begin{align}\tag{29}\label{equation:mselossstft}
+	\nonumber & \mathit{MSE}(Y, \hat{Y}) = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i})^{2}}
+\end{align}
+
+where $n$ is the number of elements in the magnitude STFT matrix.
+
 \begin{figure}[ht]
 	\centering
 	\subfloat[UMX Bi-LSTM architecture.\protect\footnotemark]{\includegraphics[width=0.9375\textwidth]{./images-neural/umx.png}}\\
@@ -1102,19 +1117,6 @@ In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrogra
 \end{figure}
 
 \footnotetext{\url{https://github.com/sigsep/open-unmix-pytorch\#-the-model-for-one-source}}
-
-The MUSDB18-HQ data loader is the starting point of the neural network, and it returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. The final output of UMX is $\hat{y}$, the estimated target waveform. In between the input and output time-domain waveforms, the magnitude STFT domain is used by UMX. The important training and inference steps are as follows.
-
-Before the training of the neural network, the mixed waveforms of the training set $\{x\}_{\text{train}}$ have their magnitude STFTs taken, $\{|X|\}_{\text{train}}$. These are used to compute the mean and standard deviation, or $\mathit{mean}(\{|X|\}_{\text{train}})$ and $\mathit{std}(\{|X|\}_{\text{train}})$. This is to perform data whitening, which \citeauthor{Kessy_2018} describes as a process that ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and that ``whitening is a critically important tool, most often employed in preprocessing'' \parencite[309]{Kessy_2018}.
-
-In the training loop, the $(x, y)$ pairs of mixed audio and the ground-truth of the target source waveform are converted to the magnitude STFT domain $(|X|, |Y|)$. The data whitening from the previous step is applied to the input mixed magnitude spectrogram $|X|$, to use $(|X|+\mathit{mean}(\{|X|\}_{\text{train}}))\times\mathit{std}(\{|X|\}_{\text{train}})$ as the input to the Bi-LSTM neural network. The Bi-LSTM neural network outputs $|\hat{Y}|$, the estimated magnitude STFT of the target sources.
-
-The loss function is the mean-squared error (MSE) function. In the loss function, the estimated magnitude STFT of the target source is compared to the ground-truth, shown in equation \eqref{equation:mselossstft}.
-\begin{align}\tag{29}\label{equation:mselossstft}
-	\nonumber & \mathit{MSE}(Y, \hat{Y}) = \frac{1}{n} \sum_{i = 1}^{n}{(Y_{i}-\hat{Y}_{i})^{2}}
-\end{align}
-
-where $n$ is the number of elements in the magnitude STFT matrix.
 
 There are four independent Bi-LSTM neural networks, shown in Figure \ref{fig:umxes2}, for each of the four sources: vocals, bass, drums, and other. The four Bi-LSTM models are trained until the loss stops improving. At this point, UMX is ready to perform inference.
 
