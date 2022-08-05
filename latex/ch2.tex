@@ -103,13 +103,14 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra, respectively \parencite{discretebook}.
 
-Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT) is derived from a sampled version of the continuous-time Fourier Transform shown previously in equations \eqref{equation:ctft} and \eqref{equation:ictft}, and is defined by the pair of equations \eqref{equation:dtft} and \eqref{equation:idtft} \parencite[289]{melbook}:
+Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT) is is defined by equation \eqref{equation:dtft}, and its inverse is defined by equation \eqref{equation:idtft} \parencite[289]{melbook}:
+
 \begin{align}
 	X(\omega) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft} \\
 	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(\omega)e^{j\omega n}\mathit{d\omega}} \tag{6}\label{equation:idtft}
 \end{align}
 
-\todo[inline]{describe DTFT -> DFT since i use DFT all over the paper}
+\todo[inline]{derived from a sampled version of the continuous-time Fourier Transform and also explain DFT here describe DTFT -> DFT since i use DFT all over the paper}
 
 The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
@@ -297,7 +298,7 @@ where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\t
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT \parencite{invertiblecqt, slicq, variableq1}. However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction \parencite{klapuricqt}. Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
-Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox. Note how the CQT spectrograms contain more musical information than the STFT spectrograms at all frequency resolutions.
+Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms generated from the standard STFT spectrogram\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox. Note how the CQT spectrograms show more spectral information than the STFT spectrograms at all frequency resolutions.
 
 As mentioned throughout this section, the best implementation choice for the CQT is the NSGT, which allows for a perfect inverse transform. Section \ref{sec:theorynsgt} will introduce and describe the general NSGT, and Section \ref{sec:theoryslicqt} will introduce and describe the sliCQT, which is a realtime variant of the NSGT. The NSGT and sliCQT allow the analysis of audio with an arbitrary nonuniform frequency scale not limited to the Constant-Q scale, which will give me more freedom in this thesis to find a frequency scale that performs best for music source separation applications.
 
@@ -413,7 +414,7 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
-The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows with a maximum length of $M$.
+The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows, where $M = \text{max}(M_{n})$.
 
 I believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales \parencite{melbook}, or the Variable-Q scale, which combines the Constant-Q scale with the psychoacoustic concept of the equivalent rectangular bandwidth (ERB) \parencite{variableq1, variableq2}. In essence the NSGT can be thought of as a filterbank \parencite{variableq1}.
 
@@ -927,13 +928,13 @@ There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
-	\textbf{SDR:} Signal to Distortion Ratio
+	\textbf{SDR:} \textbf{S}ignal to \textbf{D}istortion \textbf{R}atio
 \item
-	\textbf{SIR:} Signal to Interference Ratio
+	\textbf{SIR:} \textbf{S}ignal to \textbf{I}nterference \textbf{R}atio
 \item
-	\textbf{SAR:} Signal to Artifacts Ratio
+	\textbf{SAR:} \textbf{S}ignal to \textbf{A}rtifacts \textbf{R}atio
 \item
-	\textbf{ISR:} source Image to Spatial distortion Ratio\todo{what here?}
+	\textbf{ISR:} Source \textbf{I}mage to \textbf{S}patial distortion \textbf{R}atio
 \end{tight_itemize}
 
 Out of these four scores, SDR is the single global score that is commonly used to summarize the overall performance of a music demixing system \parencite{sdruseful}. The SDR can be computed from equation \eqref{equation:sdrinstr}:
