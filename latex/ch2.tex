@@ -103,14 +103,15 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra, respectively \parencite{discretebook}.
 
-Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. The discrete-time Fourier Transform (DTFT) is is defined by equation \eqref{equation:dtft}, and its inverse is defined by equation \eqref{equation:idtft} \parencite[289]{melbook}:
-
+In contrast to the CTFT, which maps a continuous-time signal $x(t)$ to a continuous frequency $X(\omega)$, the discrete-time Fourier Transform (DTFT) maps a discrete-time signal $x[n]$ to a continuous frequency $X(\omega)$. The DTFT is derived by sampling the CTFT in time, and is defined by equation \eqref{equation:dtft} \parencite[289]{melbook}:
 \begin{align}
-	X(\omega) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft} \\
-	x[n] = \frac{1}{2\pi}\int_{-\pi}^{\pi}{X(\omega)e^{j\omega n}\mathit{d\omega}} \tag{6}\label{equation:idtft}
+	X(\omega) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft}
 \end{align}
 
-\todo[inline]{derived from a sampled version of the continuous-time Fourier Transform and also explain DFT here describe DTFT -> DFT since i use DFT all over the paper}
+Finally, the discrete Fourier Transform (DFT) maps a discrete-time signal $x[n]$ to a discrete frequency $X[k]$. The DFT is derived from the DTFT by evaluating \eqref{equation:dtft} at a discrete set of equally spaced frequencies $\omega = (\sfrac{2\pi}{N})k, \text{ where } k = 0, 1, ..., N-1$, and considering it for a finite-length sequence $x[n]$ which is non-zero only within the interval $0 \le n \le L-1$. The DFT is defined by equation \eqref{equation:dft} \parencite[393]{dspfirst}:
+\begin{align}
+	X[k] = \sum_{n = 0}^{L-1}{x[n]e^{-j(\frac{2\pi}{N})kn}} \tag{6}\label{equation:dft}
+\end{align}
 
 The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
@@ -123,6 +124,8 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 \end{figure}
 
 For a real-valued input signal $x[n]$, the spectrum has the conjugate symmetry property, i.e., the magnitudes of the DFT coefficients are mirrored symmetrically around the center frequency, while the phases of the DFT coefficients are mirrored anti-symmetrically around the center frequency \parencite{dspfirst}. This center bin corresponds to the Nyquist frequency $\sfrac{F_{s}}{2}$ where $F_{s}$ is the sampling rate of the signal. For a given DFT of $N$ points, the points of the output spectrum between 0--$\sfrac{N}{2}+1$ correspond to 0--$\sfrac{F_{s}}{2}$ Hz, and the points $\sfrac{N}{2}+1$--N correspond to the same frequency bins in reverse order, i.e., $\sfrac{F_{2}}{2}$--0 Hz. In practice, therefore, only the first $\sfrac{N}{2}+1$ points of the $N$-point DFT of a real signal are useful.
+
+The CTFT is continuous in both time and frequency, and the DTFT is discrete in time and continuous in frequency. Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. Therefore, the DFT, which is discrete in both time and frequency, is used in digital computations \parencite{dspfirst}.
 
 According to \textcite{skiena}, algorithms in computer science are often described by their time complexity using a hypothetical computer where simple operations take one time step. The ``Big-O'' notation, or $O(N)$, provides the upper bound of algorithm running time in relation to number of input elements. In \textcite[Chapter~9]{discretebook} it is described that in its original formulation, the algorithmic complexity of the DFT is $O(N^{2})$, or in other words, the running time of the algorithm grows proportionally the size of the input signal squared \parencite{skiena}.  Starting from legendary mathematician Carl Friedrich Gauss in 1805 \parencite{gausshist}, and reaching its most famous formulation published by \textcite{cooleytukey}, a family of efficient algorithms for the computation of the DFT by computing a series of smaller DFTs, known collectively as the Fast Fourier Transform (FFT), reduced this computation time to $O(N \log{N})$. This resulted in the FFT becoming one of the most important algorithms of the 20th century \parencite{ffttopten}.
 
@@ -213,12 +216,12 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-The number of output frequency bins of the STFT is the same as the DFT, since the output of the STFT is a matrix of columns where each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that the output coefficients of an N-point DFT for a real-valued input signal $x[n]$ were conjugate-symmetrically mirrored around the center bin, such that bins 0 to $(\sfrac{N}{2}+1)$ corresponded to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz, and bins $(\sfrac{N}{2}+2)$ to 0 were redundant. The STFT has the same behavior, such that an STFT with a window size of N, which is the same as the N points of the DFT for each window of the signal, outputs $(\sfrac{N}{2}+1)$ non-redundant frequency bins. For an $N$-point DFT, the frequency spacing between each bin $\mathit{df} = \sfrac{F_{s}}{N}$, which is that of the DFT shown in Section \ref{sec:freqanal}. The frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0 to $(\sfrac{N}{2}+1)$ therefore correspond to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
+The STFT shown in equation \eqref{equation:stft} outputs a continuous frequency $X(f)$ from a discrete-time signal $x(n)$. To use the STFT in digital computations, it must be sampled in frequency, in the same way that was shown for the DFT in equation \eqref{equation:dft}. The frequency-sampled STFT has the same number of output frequency bins as the DFT. Its output is a matrix of columns where each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that half of the coefficients of an N-point DFT for a real-valued input signal $x[n]$ were redundant. The frequency-sampled STFT has the same behavior, such that it outputs $(\sfrac{N}{2}+1)$ non-redundant frequency bins. The frequency spacing between each bin is $\mathit{df} = \sfrac{F_{s}}{N}$, and the frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0 to $(\sfrac{N}{2}+1)$ therefore correspond to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.4688\textwidth]{./images-blockdiagrams/stft_diag.png}
-	\caption{Rectangular matrix output of the STFT.}
+	\caption{Rectangular matrix output of the frequency-sampled STFT.}
 	\label{fig:stftdiag}
 \end{figure}
 
