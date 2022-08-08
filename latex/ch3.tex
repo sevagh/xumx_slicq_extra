@@ -357,7 +357,7 @@ The exact parameters and configuration of the convolutional kernels and layers a
 \subsubsection{Bandwidth parameter}
 \label{sec:bandwidth}
 
-X-UMX has a bandwidth parameter that controls how much of the 2049 output frequencies of the STFT with a window size of 4096 are used as an input to the neural network. The default value of the bandwidth parameter is 16,000 Hz, which means that the frequency bins of the STFT $> 16,000 \text{ Hz}$ are cropped before the STFT is input into the neural network. I implemented the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ, by not using frequency bins of the sliCQT $> 16,000 \text{ Hz}$ as inputs to the neural network.
+X-UMX has a bandwidth parameter that controls how many of the 2049 output frequencies of the STFT with a window size of 4096 are used as an input to the neural network. The default value of the bandwidth parameter is 16,000 Hz, which means that the frequency bins of the STFT $> 16,000 \text{ Hz}$ are cropped before the STFT is input into the neural network. I implemented the same parameter in both Bi-LSTM and CDAE architectures of xumx-sliCQ, by not using frequency bins of the sliCQT $> 16,000 \text{ Hz}$ as inputs to the neural network.\footnote{Note that cropping frequency bins above 16,000 Hz may result in different effective spectral bandwidths in the sliCQT and the STFT, since they are different time-frequency transforms.}
 
 \subsubsection{De-overlap layer}
 \label{sec:deoverlap}
