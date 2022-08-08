@@ -165,6 +165,39 @@ Table \ref{table:slicqdimdegen1} shows some examples of sliCQT parameters for th
 \section{STFT and sliCQT dimensionality compared}
 \label{appendix:slicqdim2}
 
+In Section \ref{sec:replacestft}, I described that X-UMX uses the STFT of six-second audio sequences as its input, and that I had to use one second sequences for the sliCQT in xumx-sliCQ so that it could fit in the GPU memory during training. This is because the sliCQT of an audio sequence is larger than the STFT. In this section, I will show several different configurations of sliCQT to support this claim.
+
+Out of 122 examples evaluated for this section, in every single case the sliCQT was larger than the STFT. The evaluation was done on one song from the MUSDB18-HQ dataset, ``Skelpolu - Human Mistakes,'' which has a duration of 324.69 seconds, or 14,318,640 samples at a 44,100 Hz sample rate.
+
+Table \ref{table:slicqdimstft1} shows some examples of sliCQT parameters for the Constant-Q scale compared to the dimensionality and number of coefficients of the STFT. Alongside the STFT with a window size of 4,096 samples and overlap of 1,024 samples as used by X-UMX, I included a smaller STFT with a window size of 1,024 and overlap of 256 samples, and a larger STFT with a window size of 8,192 and an overlap of 2,048 samples.
+
+\begin{table}[ht]
+	\centering
+	\caption{sliCQT examples with the Constant-Q scale, compared to the STFT.}
+	\label{table:slicqdimstft1}
+\begin{tabular}{ |l|l|l| }
+	 \hline
+	 Transform & Tensor shape & Number of coefficients \\
+	 \hline
+	 \hline
+	 STFT, 1024 & (2, 513, 18646) & 19,130,796  \\
+	 \hline
+	 STFT, 4096 & (2, 2049, 4663) & 19,108,974  \\
+	 \hline
+	 STFT, 8192 & (2, 4097, 2332) & 19,108,408  \\
+	 \hline
+	 \hline
+	 sliCQT, 91 bins, 107.13--10078.31 Hz & (880, 2, 91, 752) & 120,440,320 \\
+	 \hline
+	 sliCQT, 20 bins, 39.75--22050 Hz & (2157, 2, 19, 3184) & 260,979,744 \\
+	 \hline
+	 sliCQT, 171 bins, 58.14--22050 Hz & (331, 2, 171, 3036) & 343,681,272 \\
+	 \hline
+	 sliCQT, 25 bins, 20.43--22050 Hz & (970, 2, 25, 8632) & 418,652,000 \\
+	 \hline
+\end{tabular}
+\end{table}
+
 \newpagefill
 
 \section{xumx-sliCQ experiments}
