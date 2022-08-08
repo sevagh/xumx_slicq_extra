@@ -187,7 +187,7 @@ As discussed in Section \ref{sec:ml}, the validation split of a dataset is often
 
 As described in Section \ref{sec:improvelib}, the time and frequency resolution of the sliCQT are defined from the frequency scale, and the parameters of the frequency scale are $f_{\text{min}}$ and $f_{\text{max}}$, which are the minimum and maximum frequency in Hz respectively, and the total frequency bins.
 
-The maximum frequency $f_{\text{max}}$ was fixed to 22,050 Hz, which is the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. I made this decision after early experiments showed that fixing the maximum frequency to 22,050 Hz in some cases led to a smaller size of the sliCQT than choosing a smaller $f_{\text{max}}$, resulting in lower memory demands on the system. The results of these early experiments are described in Appendix \ref{appendix:slicqdim1}.
+The maximum frequency $f_{\text{max}}$ was fixed to 22,050 Hz, which is the Nyquist rate of the 44,100 Hz sample rate of MUSDB18-HQ. I made this decision after early experiments showed that fixing the maximum frequency to 22,050 Hz in several cases led to a smaller size of the sliCQT than choosing a smaller $f_{\text{max}}$, resulting in lower memory demands on the system. The results of these early experiments are shown in Appendix \ref{appendix:slicqdim1}.
 
 The minimum frequency $f_{\text{min}}$ was chosen from the range of 10.0--130.0 Hz, loosely based on the frequencies of the C0 (16.35 Hz) and C3 (130.81 Hz) notes of the well-tempered scale.
 

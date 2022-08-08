@@ -132,6 +132,8 @@ def dimensionality_cmp(track, tfs):
 
         if tf.transform_type == 'nsgt':
             print(f'\nNSGT stats: {tf.fscale} {tf.fbins} {tf.fmin:.2f} {tf.fmax:.2f} {tf.sllen} {Xmag.shape} {totel}\n')
+        elif tf.transform_type == 'stft':
+            print(f'\nSTFT stats: {tf.nperseg} {Xmag.shape} {totel}\n')
 
         print('\n')
         totels.append(totel)

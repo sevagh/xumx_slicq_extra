@@ -59,7 +59,9 @@ if __name__ == '__main__':
         tracks = mus.tracks[:max_tracks]
 
     # stft
-    tf_stft = TFTransform(44100, window=4096)
+    tf_stft_1 = TFTransform(44100, window=1024)
+    tf_stft_2 = TFTransform(44100, window=4096)
+    tf_stft_3 = TFTransform(44100, window=8192)
 
     t = TrackEvaluator(tracks)
 
@@ -76,7 +78,7 @@ if __name__ == '__main__':
         tf_1 = TFTransform(44100, transform_type="nsgt", fscale="cqlog", fbins=fbins, fmin=fmin, fmax=fmax)
         tf_2 = TFTransform(44100, transform_type="nsgt", fscale="cqlog", fbins=fbins, fmin=fmin, fmax=22050)
 
-        totels = t.dimcmp([tf_1, tf_2])
+        totels = t.dimcmp([tf_stft_1, tf_stft_2, tf_stft_3, tf_1, tf_2])
 
         nyquist_delta = totels[-1]-totels[0]
         print(f'nyquist_delta: {nyquist_delta}')
