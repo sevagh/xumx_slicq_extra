@@ -1,0 +1,1172 @@
+looking for degenerate nsgts with fmin=74.34737097456409 fmax=21726.044955951416 fbins=203...
+comparing 21726.044955951416 with 22050
+auto-selected sllen=84416, trlen=21104
+ncqlog-203-74.35-21726.04-84416
+auto-selected sllen=84196, trlen=21050
+ncqlog-203-74.35-22050.00-84196
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 203 74.35 21726.04 84416 torch.Size([341, 2, 203, 2336]) 323409856
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 203 74.35 22050.00 84196 torch.Size([342, 2, 202, 2308]) 318891744
+
+
+
+nyquist_delta: -4518112
+--
+looking for degenerate nsgts with fmin=16.070599542985747 fmax=22041.353744373355 fbins=17...
+comparing 22041.353744373355 with 22050
+auto-selected sllen=24108, trlen=6028
+ncqlog-17-16.07-22041.35-24108
+auto-selected sllen=24108, trlen=6028
+ncqlog-17-16.07-22050.00-24108
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 17 16.07 22041.35 24108 torch.Size([1189, 2, 17, 10972]) 443554072
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 17 16.07 22050.00 24108 torch.Size([1189, 2, 16, 6988]) 265879424
+
+
+
+nyquist_delta: -177674648
+--
+looking for degenerate nsgts with fmin=55.476774277229936 fmax=21872.971567545697 fbins=145...
+comparing 21872.971567545697 with 22050
+auto-selected sllen=76604, trlen=19152
+ncqlog-145-55.48-21872.97-76604
+auto-selected sllen=76500, trlen=19126
+ncqlog-145-55.48-22050.00-76500
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 145 55.48 21872.97 76604 torch.Size([375, 2, 145, 3156]) 343215000
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 145 55.48 22050.00 76500 torch.Size([376, 2, 144, 3052]) 330494976
+
+
+
+nyquist_delta: -12720024
+--
+looking for degenerate nsgts with fmin=45.60493905934771 fmax=21672.947847878364 fbins=287...
+comparing 21672.947847878364 with 22050
+auto-selected sllen=179472, trlen=44868
+ncqlog-287-45.60-21672.95-179472
+auto-selected sllen=178972, trlen=44744
+ncqlog-287-45.60-22050.00-178972
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 287 45.60 21672.95 179472 torch.Size([161, 2, 287, 3800]) 351173200
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 287 45.60 22050.00 178972 torch.Size([162, 2, 286, 3784]) 350640576
+
+
+
+nyquist_delta: -532624
+--
+looking for degenerate nsgts with fmin=28.89192735273799 fmax=21577.385784457125 fbins=51...
+comparing 21577.385784457125 with 22050
+auto-selected sllen=46112, trlen=11528
+ncqlog-51-28.89-21577.39-46112
+auto-selected sllen=45960, trlen=11490
+ncqlog-51-28.89-22050.00-45960
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 51 28.89 21577.39 46112 torch.Size([623, 2, 51, 5976]) 379750896
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 51 28.89 22050.00 45960 torch.Size([625, 2, 50, 5348]) 334250000
+
+
+
+nyquist_delta: -45500896
+--
+looking for degenerate nsgts with fmin=72.73392586383507 fmax=21263.21040572395 fbins=114...
+comparing 21263.21040572395 with 22050
+auto-selected sllen=48264, trlen=12066
+ncqlog-114-72.73-21263.21-48264
+auto-selected sllen=47956, trlen=11990
+ncqlog-114-72.73-22050.00-47956
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 114 72.73 21263.21 48264 torch.Size([595, 2, 114, 2340]) 317444400
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 114 72.73 22050.00 47956 torch.Size([599, 2, 113, 2304]) 311901696
+
+
+
+nyquist_delta: -5542704
+--
+looking for degenerate nsgts with fmin=31.42813794069564 fmax=21598.538504926742 fbins=145...
+comparing 21598.538504926742 with 22050
+auto-selected sllen=123716, trlen=30930
+ncqlog-145-31.43-21598.54-123716
+auto-selected sllen=123324, trlen=30832
+ncqlog-145-31.43-22050.00-123324
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 145 31.43 21598.54 123716 torch.Size([233, 2, 145, 5500]) 371635000
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 145 31.43 22050.00 123324 torch.Size([234, 2, 144, 5364]) 361490688
+
+
+
+nyquist_delta: -10144312
+--
+looking for degenerate nsgts with fmin=21.20646400906752 fmax=21471.59593255233 fbins=130...
+comparing 21471.59593255233 with 22050
+auto-selected sllen=155044, trlen=38762
+ncqlog-130-21.21-21471.60-155044
+auto-selected sllen=154452, trlen=38614
+ncqlog-130-21.21-22050.00-154452
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 130 21.21 21471.60 155044 torch.Size([186, 2, 130, 8100]) 391716000
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 130 21.21 22050.00 154452 torch.Size([187, 2, 129, 7884]) 380371464
+
+
+
+nyquist_delta: -11344536
+--
+looking for degenerate nsgts with fmin=56.73721752003295 fmax=19276.03905639169 fbins=20...
+comparing 19276.03905639169 with 22050
+auto-selected sllen=10096, trlen=2524
+ncqlog-20-56.74-19276.04-10096
+auto-selected sllen=9868, trlen=2468
+ncqlog-20-56.74-22050.00-9868
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 20 56.74 19276.04 10096 torch.Size([2838, 2, 20, 2716]) 308320320
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 20 56.74 22050.00 9868 torch.Size([2904, 2, 19, 2272]) 250719744
+
+
+
+nyquist_delta: -57600576
+--
+looking for degenerate nsgts with fmin=43.390793876656716 fmax=21462.00964431977 fbins=225...
+comparing 21462.00964431977 with 22050
+auto-selected sllen=146784, trlen=36696
+ncqlog-225-43.39-21462.01-146784
+auto-selected sllen=146148, trlen=36538
+ncqlog-225-43.39-22050.00-146148
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 225 43.39 21462.01 146784 torch.Size([197, 2, 225, 3956]) 350699400
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 225 43.39 22050.00 146148 torch.Size([197, 2, 224, 3952]) 348787712
+
+
+
+nyquist_delta: -1911688
+--
+looking for degenerate nsgts with fmin=100.50798448714315 fmax=21442.821379227666 fbins=112...
+comparing 21442.821379227666 with 22050
+auto-selected sllen=36324, trlen=9082
+ncqlog-112-100.51-21442.82-36324
+auto-selected sllen=36136, trlen=9034
+ncqlog-112-100.51-22050.00-36136
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 112 100.51 21442.82 36324 torch.Size([790, 2, 112, 1708]) 302247680
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 112 100.51 22050.00 36136 torch.Size([794, 2, 111, 1672]) 294720096
+
+
+
+nyquist_delta: -7527584
+--
+looking for degenerate nsgts with fmin=18.274808382356863 fmax=17802.8962113845 fbins=16...
+comparing 17802.8962113845 with 22050
+auto-selected sllen=20860, trlen=5216
+ncqlog-16-18.27-17802.90-20860
+auto-selected sllen=20220, trlen=5056
+ncqlog-16-18.27-22050.00-20220
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 16 18.27 17802.90 20860 torch.Size([1374, 2, 16, 7796]) 342774528
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 16 18.27 22050.00 20220 torch.Size([1418, 2, 15, 6016]) 255920640
+
+
+
+nyquist_delta: -86853888
+--
+looking for degenerate nsgts with fmin=96.95020013116618 fmax=21768.114625740833 fbins=278...
+comparing 21768.114625740833 with 22050
+auto-selected sllen=93092, trlen=23274
+ncqlog-278-96.95-21768.11-93092
+auto-selected sllen=92872, trlen=23218
+ncqlog-278-96.95-22050.00-92872
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 278 96.95 21768.11 93092 torch.Size([309, 2, 278, 1796]) 308559984
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 278 96.95 22050.00 92872 torch.Size([310, 2, 277, 1784]) 306384160
+
+
+
+nyquist_delta: -2175824
+--
+looking for degenerate nsgts with fmin=81.6148888614762 fmax=21815.153097073282 fbins=109...
+comparing 21815.153097073282 with 22050
+auto-selected sllen=41768, trlen=10442
+ncqlog-109-81.61-21815.15-41768
+auto-selected sllen=41688, trlen=10422
+ncqlog-109-81.61-22050.00-41688
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 109 81.61 21815.15 41768 torch.Size([687, 2, 109, 2140]) 320499240
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 109 81.61 22050.00 41688 torch.Size([688, 2, 108, 2052]) 304943616
+
+
+
+nyquist_delta: -15555624
+--
+looking for degenerate nsgts with fmin=83.87826568613876 fmax=21315.589441849545 fbins=153...
+comparing 21315.589441849545 with 22050
+auto-selected sllen=57724, trlen=14432
+ncqlog-153-83.88-21315.59-57724
+auto-selected sllen=57372, trlen=14344
+ncqlog-153-83.88-22050.00-57372
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 153 83.88 21315.59 57724 torch.Size([498, 2, 153, 2032]) 309652416
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 153 83.88 22050.00 57372 torch.Size([501, 2, 152, 2028]) 308872512
+
+
+
+nyquist_delta: -779904
+--
+looking for degenerate nsgts with fmin=46.19563948337065 fmax=17752.25524467614 fbins=25...
+comparing 17752.25524467614 with 22050
+auto-selected sllen=15360, trlen=3840
+ncqlog-25-46.20-17752.26-15360
+auto-selected sllen=14820, trlen=3706
+ncqlog-25-46.20-22050.00-14820
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 25 46.20 17752.26 15360 torch.Size([1866, 2, 25, 3076]) 286990800
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 25 46.20 22050.00 14820 torch.Size([1934, 2, 24, 2952]) 274040064
+
+
+
+nyquist_delta: -12950736
+--
+looking for degenerate nsgts with fmin=13.150459774430008 fmax=21195.465706488983 fbins=146...
+comparing 21195.465706488983 with 22050
+auto-selected sllen=263344, trlen=65836
+ncqlog-146-13.15-21195.47-263344
+auto-selected sllen=261944, trlen=65486
+ncqlog-146-13.15-22050.00-261944
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 146 13.15 21195.47 263344 torch.Size([110, 2, 146, 12896]) 414219520
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 146 13.15 22050.00 261944 torch.Size([111, 2, 145, 12744]) 410229360
+
+
+
+nyquist_delta: -3990160
+--
+looking for degenerate nsgts with fmin=18.35025054980037 fmax=18928.67716237696 fbins=25...
+comparing 18928.67716237696 with 22050
+auto-selected sllen=33136, trlen=8284
+ncqlog-25-18.35-18928.68-33136
+auto-selected sllen=32416, trlen=8104
+ncqlog-25-18.35-22050.00-32416
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 25 18.35 18928.68 33136 torch.Size([866, 2, 25, 8252]) 357311600
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 25 18.35 22050.00 32416 torch.Size([885, 2, 24, 7152]) 303816960
+
+
+
+nyquist_delta: -53494640
+--
+looking for degenerate nsgts with fmin=34.53077492244781 fmax=21391.155251081058 fbins=80...
+comparing 21391.155251081058 with 22050
+auto-selected sllen=62760, trlen=15690
+ncqlog-80-34.53-21391.16-62760
+auto-selected sllen=62464, trlen=15616
+ncqlog-80-34.53-22050.00-62464
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 80 34.53 21391.16 62760 torch.Size([458, 2, 80, 4956]) 363175680
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 80 34.53 22050.00 62464 torch.Size([460, 2, 79, 4708]) 342177440
+
+
+
+nyquist_delta: -20998240
+--
+looking for degenerate nsgts with fmin=18.64905959105894 fmax=20384.26056237219 fbins=31...
+comparing 20384.26056237219 with 22050
+auto-selected sllen=40468, trlen=10118
+ncqlog-31-18.65-20384.26-40468
+auto-selected sllen=40016, trlen=10004
+ncqlog-31-18.65-22050.00-40016
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 31 18.65 20384.26 40468 torch.Size([709, 2, 31, 8744]) 384368752
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 31 18.65 22050.00 40016 torch.Size([717, 2, 30, 7472]) 321445440
+
+
+
+nyquist_delta: -62923312
+--
+looking for degenerate nsgts with fmin=58.603876847794545 fmax=21642.70627694917 fbins=97...
+comparing 21642.70627694917 with 22050
+auto-selected sllen=48876, trlen=12220
+ncqlog-97-58.60-21642.71-48876
+auto-selected sllen=48720, trlen=12180
+ncqlog-97-58.60-22050.00-48720
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 97 58.60 21642.71 48876 torch.Size([587, 2, 97, 2956]) 336623368
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 97 58.60 22050.00 48720 torch.Size([589, 2, 96, 2828]) 319812864
+
+
+
+nyquist_delta: -16810504
+--
+looking for degenerate nsgts with fmin=19.259810116105157 fmax=20175.36208366489 fbins=61...
+comparing 20175.36208366489 with 22050
+auto-selected sllen=78980, trlen=19746
+ncqlog-61-19.26-20175.36-78980
+auto-selected sllen=77984, trlen=19496
+ncqlog-61-19.26-22050.00-77984
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 61 19.26 20175.36 78980 torch.Size([364, 2, 61, 8380]) 372139040
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 61 19.26 22050.00 77984 torch.Size([369, 2, 60, 8144]) 360616320
+
+
+
+nyquist_delta: -11522720
+--
+looking for degenerate nsgts with fmin=61.67285824041363 fmax=21990.93288637111 fbins=102...
+comparing 21990.93288637111 with 22050
+auto-selected sllen=49156, trlen=12290
+ncqlog-102-61.67-21990.93-49156
+auto-selected sllen=49132, trlen=12284
+ncqlog-102-61.67-22050.00-49132
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 102 61.67 21990.93 49156 torch.Size([584, 2, 102, 2852]) 339775872
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 102 61.67 22050.00 49132 torch.Size([584, 2, 101, 2700]) 318513600
+
+
+
+nyquist_delta: -21262272
+--
+looking for degenerate nsgts with fmin=53.458069905210486 fmax=21441.078698153033 fbins=26...
+comparing 21441.078698153033 with 22050
+auto-selected sllen=13732, trlen=3434
+ncqlog-26-53.46-21441.08-13732
+auto-selected sllen=13668, trlen=3418
+ncqlog-26-53.46-22050.00-13668
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 26 53.46 21441.08 13732 torch.Size([2087, 2, 26, 3208]) 348144992
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 26 53.46 22050.00 13668 torch.Size([2097, 2, 25, 2592]) 271771200
+
+
+
+nyquist_delta: -76373792
+--
+looking for degenerate nsgts with fmin=75.06056334706747 fmax=20740.54677236436 fbins=90...
+comparing 20740.54677236436 with 22050
+auto-selected sllen=37204, trlen=9302
+ncqlog-90-75.06-20740.55-37204
+auto-selected sllen=36800, trlen=9200
+ncqlog-90-75.06-22050.00-36800
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 90 75.06 20740.55 37204 torch.Size([771, 2, 90, 2212]) 306981360
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 90 75.06 22050.00 36800 torch.Size([780, 2, 89, 2204]) 306003360
+
+
+
+nyquist_delta: -978000
+--
+looking for degenerate nsgts with fmin=95.41709248086552 fmax=21174.25970351429 fbins=99...
+comparing 21174.25970351429 with 22050
+auto-selected sllen=33536, trlen=8384
+ncqlog-99-95.42-21174.26-33536
+auto-selected sllen=33284, trlen=8322
+ncqlog-99-95.42-22050.00-33284
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 99 95.42 21174.26 33536 torch.Size([855, 2, 99, 1776]) 300659040
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 99 95.42 22050.00 33284 torch.Size([862, 2, 98, 1748]) 295328096
+
+
+
+nyquist_delta: -5330944
+--
+looking for degenerate nsgts with fmin=51.52276988102477 fmax=21337.893861924993 fbins=155...
+comparing 21337.893861924993 with 22050
+auto-selected sllen=87488, trlen=21872
+ncqlog-155-51.52-21337.89-87488
+auto-selected sllen=87016, trlen=21754
+ncqlog-155-51.52-22050.00-87016
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 155 51.52 21337.89 87488 torch.Size([329, 2, 155, 3312]) 337790880
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 155 51.52 22050.00 87016 torch.Size([331, 2, 154, 3292]) 335612816
+
+
+
+nyquist_delta: -2178064
+--
+looking for degenerate nsgts with fmin=19.746742587204388 fmax=21429.98959034322 fbins=145...
+comparing 21429.98959034322 with 22050
+auto-selected sllen=184024, trlen=46006
+ncqlog-145-19.75-21429.99-184024
+auto-selected sllen=183276, trlen=45820
+ncqlog-145-19.75-22050.00-183276
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 145 19.75 21429.99 184024 torch.Size([157, 2, 145, 8680]) 395200400
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 145 19.75 22050.00 183276 torch.Size([158, 2, 144, 8508]) 387148032
+
+
+
+nyquist_delta: -8052368
+--
+looking for degenerate nsgts with fmin=12.781155785962124 fmax=21390.05528903431 fbins=268...
+comparing 21390.05528903431 with 22050
+auto-selected sllen=496436, trlen=124110
+ncqlog-268-12.78-21390.06-496436
+auto-selected sllen=494412, trlen=123604
+ncqlog-268-12.78-22050.00-494412
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 268 12.78 21390.06 496436 torch.Size([59, 2, 268, 13388]) 423382112
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 268 12.78 22050.00 494412 torch.Size([59, 2, 267, 13420]) 422810520
+
+
+
+nyquist_delta: -571592
+--
+looking for degenerate nsgts with fmin=26.773718292682624 fmax=21222.993263136377 fbins=173...
+comparing 21222.993263136377 with 22050
+auto-selected sllen=169752, trlen=42438
+ncqlog-173-26.77-21222.99-169752
+auto-selected sllen=168788, trlen=42198
+ncqlog-173-26.77-22050.00-168788
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 173 26.77 21222.99 169752 torch.Size([170, 2, 173, 6340]) 372918800
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 173 26.77 22050.00 168788 torch.Size([171, 2, 172, 6336]) 372708864
+
+
+
+nyquist_delta: -209936
+--
+looking for degenerate nsgts with fmin=105.61057767161766 fmax=18740.156761249855 fbins=23...
+comparing 18740.156761249855 with 22050
+auto-selected sllen=7080, trlen=1770
+ncqlog-23-105.61-18740.16-7080
+auto-selected sllen=6864, trlen=1716
+ncqlog-23-105.61-22050.00-6864
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 23 105.61 18740.16 7080 torch.Size([4046, 2, 23, 1420]) 264284720
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 23 105.61 22050.00 6864 torch.Size([4174, 2, 22, 1312]) 240956672
+
+
+
+nyquist_delta: -23328048
+--
+looking for degenerate nsgts with fmin=27.733084996039818 fmax=18202.75908536068 fbins=26...
+comparing 18202.75908536068 with 22050
+auto-selected sllen=24448, trlen=6112
+ncqlog-26-27.73-18202.76-24448
+auto-selected sllen=23740, trlen=5936
+ncqlog-26-27.73-22050.00-23740
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 26 27.73 18202.76 24448 torch.Size([1173, 2, 26, 5252]) 320350992
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 26 27.73 22050.00 23740 torch.Size([1208, 2, 25, 4868]) 294027200
+
+
+
+nyquist_delta: -26323792
+--
+looking for degenerate nsgts with fmin=102.99667621685091 fmax=21092.27744626139 fbins=41...
+comparing 21092.27744626139 with 22050
+auto-selected sllen=12864, trlen=3216
+ncqlog-41-103.00-21092.28-12864
+auto-selected sllen=12760, trlen=3190
+ncqlog-41-103.00-22050.00-12760
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 41 103.00 21092.28 12864 torch.Size([2228, 2, 41, 1640]) 299621440
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 41 103.00 22050.00 12760 torch.Size([2246, 2, 40, 1500]) 269520000
+
+
+
+nyquist_delta: -30101440
+--
+looking for degenerate nsgts with fmin=55.21897314228349 fmax=21528.060180968405 fbins=245...
+comparing 21528.060180968405 with 22050
+auto-selected sllen=130656, trlen=32664
+ncqlog-245-55.22-21528.06-130656
+auto-selected sllen=130132, trlen=32534
+ncqlog-245-55.22-22050.00-130132
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 245 55.22 21528.06 130656 torch.Size([221, 2, 245, 3120]) 337864800
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 245 55.22 22050.00 130132 torch.Size([222, 2, 244, 3116]) 337574976
+
+
+
+nyquist_delta: -289824
+--
+looking for degenerate nsgts with fmin=55.5633022449259 fmax=21810.934474722417 fbins=186...
+comparing 21810.934474722417 with 22050
+auto-selected sllen=98336, trlen=24584
+ncqlog-186-55.56-21810.93-98336
+auto-selected sllen=98156, trlen=24540
+ncqlog-186-55.56-22050.00-98156
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 186 55.56 21810.93 98336 torch.Size([293, 2, 186, 3140]) 342247440
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 186 55.56 22050.00 98156 torch.Size([293, 2, 185, 3072]) 333035520
+
+
+
+nyquist_delta: -9211920
+--
+looking for degenerate nsgts with fmin=15.047978419927063 fmax=21511.530298034864 fbins=50...
+comparing 21511.530298034864 with 22050
+auto-selected sllen=78992, trlen=19748
+ncqlog-50-15.05-21511.53-78992
+auto-selected sllen=78724, trlen=19682
+ncqlog-50-15.05-22050.00-78724
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 50 15.05 21511.53 78992 torch.Size([364, 2, 50, 11436]) 416270400
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 50 15.05 22050.00 78724 torch.Size([365, 2, 49, 10104]) 361420080
+
+
+
+nyquist_delta: -54850320
+--
+looking for degenerate nsgts with fmin=96.79360957900028 fmax=14771.181954936754 fbins=11...
+comparing 14771.181954936754 with 22050
+auto-selected sllen=3588, trlen=898
+ncqlog-11-96.79-14771.18-3588
+auto-selected sllen=3320, trlen=830
+ncqlog-11-96.79-22050.00-3320
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 11 96.79 14771.18 3588 torch.Size([7983, 2, 11, 1220]) 214263720
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 11 96.79 22050.00 3320 torch.Size([8627, 2, 10, 1060]) 182892400
+
+
+
+nyquist_delta: -31371320
+--
+looking for degenerate nsgts with fmin=19.629999115524008 fmax=21617.939735387266 fbins=286...
+comparing 21617.939735387266 with 22050
+auto-selected sllen=365640, trlen=91410
+ncqlog-286-19.63-21617.94-365640
+auto-selected sllen=364612, trlen=91154
+ncqlog-286-19.63-22050.00-364612
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 286 19.63 21617.94 365640 torch.Size([80, 2, 286, 8812]) 403237120
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 286 19.63 22050.00 364612 torch.Size([80, 2, 285, 8768]) 399820800
+
+
+
+nyquist_delta: -3416320
+--
+looking for degenerate nsgts with fmin=25.958776760280806 fmax=20366.45330258181 fbins=70...
+comparing 20366.45330258181 with 22050
+auto-selected sllen=70324, trlen=17582
+ncqlog-70-25.96-20366.45-70324
+auto-selected sllen=69496, trlen=17374
+ncqlog-70-25.96-22050.00-69496
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 70 25.96 20366.45 70324 torch.Size([409, 2, 70, 6276]) 359363760
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 70 25.96 22050.00 69496 torch.Size([414, 2, 69, 6164]) 352161648
+
+
+
+nyquist_delta: -7202112
+--
+looking for degenerate nsgts with fmin=25.28165047871303 fmax=21793.628743167348 fbins=11...
+comparing 21793.628743167348 with 22050
+auto-selected sllen=10132, trlen=2534
+ncqlog-11-25.28-21793.63-10132
+auto-selected sllen=10112, trlen=2528
+ncqlog-11-25.28-22050.00-10112
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 11 25.28 21793.63 10132 torch.Size([2828, 2, 11, 6900]) 429290400
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 11 25.28 22050.00 10112 torch.Size([2834, 2, 10, 3544]) 200873920
+
+
+
+nyquist_delta: -228416480
+--
+looking for degenerate nsgts with fmin=100.74152978307185 fmax=21790.812726283624 fbins=247...
+comparing 21790.812726283624 with 22050
+auto-selected sllen=80116, trlen=20030
+ncqlog-247-100.74-21790.81-80116
+auto-selected sllen=79940, trlen=19986
+ncqlog-247-100.74-22050.00-79940
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 247 100.74 21790.81 80116 torch.Size([359, 2, 247, 1732]) 307163272
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 247 100.74 22050.00 79940 torch.Size([360, 2, 246, 1712]) 303229440
+
+
+
+nyquist_delta: -3933832
+--
+looking for degenerate nsgts with fmin=13.866077789197725 fmax=17955.382113917538 fbins=18...
+comparing 17955.382113917538 with 22050
+auto-selected sllen=29960, trlen=7490
+ncqlog-18-13.87-17955.38-29960
+auto-selected sllen=29112, trlen=7278
+ncqlog-18-13.87-22050.00-29112
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 18 13.87 17955.38 29960 torch.Size([957, 2, 18, 10360]) 356922720
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 18 13.87 22050.00 29112 torch.Size([985, 2, 17, 8248]) 276225520
+
+
+
+nyquist_delta: -80697200
+--
+looking for degenerate nsgts with fmin=26.816269013788553 fmax=21971.475466978733 fbins=129...
+comparing 21971.475466978733 with 22050
+auto-selected sllen=125500, trlen=31376
+ncqlog-129-26.82-21971.48-125500
+auto-selected sllen=125432, trlen=31358
+ncqlog-129-26.82-22050.00-125432
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 129 26.82 21971.48 125500 torch.Size([230, 2, 129, 6556]) 389033040
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 129 26.82 22050.00 125432 torch.Size([230, 2, 128, 6244]) 367646720
+
+
+
+nyquist_delta: -21386320
+--
+looking for degenerate nsgts with fmin=120.66713254134667 fmax=20207.957300331323 fbins=57...
+comparing 20207.957300331323 with 22050
+auto-selected sllen=15984, trlen=3996
+ncqlog-57-120.67-20207.96-15984
+auto-selected sllen=15716, trlen=3930
+ncqlog-57-120.67-22050.00-15716
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 57 120.67 20207.96 15984 torch.Size([1793, 2, 57, 1340]) 273898680
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 57 120.67 22050.00 15716 torch.Size([1824, 2, 56, 1332]) 272111616
+
+
+
+nyquist_delta: -1787064
+--
+looking for degenerate nsgts with fmin=122.45917158426973 fmax=21593.034551179233 fbins=70...
+comparing 21593.034551179233 with 22050
+auto-selected sllen=19212, trlen=4804
+ncqlog-70-122.46-21593.03-19212
+auto-selected sllen=19136, trlen=4784
+ncqlog-70-122.46-22050.00-19136
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 70 122.46 21593.03 19212 torch.Size([1492, 2, 70, 1412]) 294938560
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 70 122.46 22050.00 19136 torch.Size([1498, 2, 69, 1336]) 276183264
+
+
+
+nyquist_delta: -18755296
+--
+looking for degenerate nsgts with fmin=113.69018097633787 fmax=18932.091163533692 fbins=18...
+comparing 18932.091163533692 with 22050
+auto-selected sllen=5140, trlen=1286
+ncqlog-18-113.69-18932.09-5140
+auto-selected sllen=4988, trlen=1248
+ncqlog-18-113.69-22050.00-4988
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 18 113.69 18932.09 5140 torch.Size([5573, 2, 18, 1332]) 267236496
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 18 113.69 22050.00 4988 torch.Size([5743, 2, 17, 1140]) 222598680
+
+
+
+nyquist_delta: -44637816
+--
+looking for degenerate nsgts with fmin=76.07710390204902 fmax=21368.747767823945 fbins=182...
+comparing 21368.747767823945 with 22050
+auto-selected sllen=74440, trlen=18610
+ncqlog-182-76.08-21368.75-74440
+auto-selected sllen=74028, trlen=18508
+ncqlog-182-76.08-22050.00-74028
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 182 76.08 21368.75 74440 torch.Size([386, 2, 182, 2248]) 315852992
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 182 76.08 22050.00 74028 torch.Size([388, 2, 181, 2248]) 315745088
+
+
+
+nyquist_delta: -107904
+--
+looking for degenerate nsgts with fmin=72.87332984848953 fmax=20110.775347819203 fbins=48...
+comparing 20110.775347819203 with 22050
+auto-selected sllen=20232, trlen=5058
+ncqlog-48-72.87-20110.78-20232
+auto-selected sllen=19908, trlen=4978
+ncqlog-48-72.87-22050.00-19908
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 48 72.87 20110.78 20232 torch.Size([1417, 2, 48, 2208]) 300358656
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 48 72.87 22050.00 19908 torch.Size([1440, 2, 47, 2144]) 290211840
+
+
+
+nyquist_delta: -10146816
+--
+looking for degenerate nsgts with fmin=106.74012387369147 fmax=20962.769060285133 fbins=64...
+comparing 20962.769060285133 with 22050
+auto-selected sllen=19716, trlen=4930
+ncqlog-64-106.74-20962.77-19716
+auto-selected sllen=19528, trlen=4882
+ncqlog-64-106.74-22050.00-19528
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 64 106.74 20962.77 19716 torch.Size([1454, 2, 64, 1572]) 292568064
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 64 106.74 22050.00 19528 torch.Size([1468, 2, 63, 1520]) 281151360
+
+
+
+nyquist_delta: -11416704
+--
+looking for degenerate nsgts with fmin=31.522540386408288 fmax=20247.652581256185 fbins=18...
+comparing 20247.652581256185 with 22050
+auto-selected sllen=14628, trlen=3658
+ncqlog-18-31.52-20247.65-14628
+auto-selected sllen=14436, trlen=3610
+ncqlog-18-31.52-22050.00-14436
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 18 31.52 20247.65 14628 torch.Size([1959, 2, 18, 5140]) 362493360
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 18 31.52 22050.00 14436 torch.Size([1985, 2, 17, 3808]) 257001920
+
+
+
+nyquist_delta: -105491440
+--
+looking for degenerate nsgts with fmin=70.09514219652701 fmax=21740.596095603756 fbins=37...
+comparing 21740.596095603756 with 22050
+auto-selected sllen=15776, trlen=3944
+ncqlog-37-70.10-21740.60-15776
+auto-selected sllen=15736, trlen=3934
+ncqlog-37-70.10-22050.00-15736
+track=Skelpolu - Human Mistakes
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 37 70.10 21740.60 15776 torch.Size([1817, 2, 37, 2480]) 333455840
+
+
+
+track duration: 14318640 samples, 324.69 s
+forward nsgt
+
+NSGT stats: cqlog 37 70.10 22050.00 15736 torch.Size([1821, 2, 36, 2144]) 281104128
+
+
+
+nyquist_delta: -52351712

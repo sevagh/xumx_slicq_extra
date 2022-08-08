@@ -15,7 +15,7 @@ class TrackEvaluator:
     def dimcmp(self, tfs):
         for track in self.tracks:
             print(f'{track=}')
-            dimensionality_cmp(track, tfs)
+            return dimensionality_cmp(track, tfs)
 
 
 if __name__ == '__main__':
@@ -27,12 +27,6 @@ if __name__ == '__main__':
         type=int,
         default=4096,
         help='stft window size',
-    )
-    parser.add_argument(
-        '--sllen',
-        type=int,
-        default=4096,
-        help='nsgt slice length',
     )
     parser.add_argument(
         '--n-random-tracks',
@@ -65,10 +59,31 @@ if __name__ == '__main__':
         tracks = mus.tracks[:max_tracks]
 
     # stft
-    tf_stft = TFTransform(44100, window=9216)
-
-    # nsgt sliced
-    tf_nsgt = TFTransform(44100, transform_type="nsgt", sllen=65536, trlen=16384, fscale="bark", fbins=800, fmin=78.0)
+    tf_stft = TFTransform(44100, window=4096)
 
     t = TrackEvaluator(tracks)
-    t.dimcmp([tf_stft, tf_nsgt])
+
+    most_negative_nyquist_delta = 0
+
+    while True:
+        fmin = random.uniform(10.0, 130.0)
+        fmax = random.uniform(10000.0, 22050.0)
+        fbins = random.randrange(10, 300)
+
+        print(f'looking for degenerate nsgts with {fmin=} {fmax=} {fbins=}...')
+
+        print(f'comparing {fmax} with 22050')
+        tf_1 = TFTransform(44100, transform_type="nsgt", fscale="cqlog", fbins=fbins, fmin=fmin, fmax=fmax)
+        tf_2 = TFTransform(44100, transform_type="nsgt", fscale="cqlog", fbins=fbins, fmin=fmin, fmax=22050)
+
+        totels = t.dimcmp([tf_1, tf_2])
+
+        nyquist_delta = totels[-1]-totels[0]
+        print(f'nyquist_delta: {nyquist_delta}')
+        print(f'most_negative_nyquist_delta: {most_negative_nyquist_delta}')
+
+        # nyquist is smaller
+        if nyquist_delta < most_negative_nyquist_delta:
+            most_negative_nyquist_delta = nyquist_delta
+
+            print(f'\nNEW BIGGER DEGENERATE CASE! {fbins} {fmin} {fmax}\n')

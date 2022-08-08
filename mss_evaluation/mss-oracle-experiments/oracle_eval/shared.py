@@ -49,6 +49,9 @@ class TFTransform:
             else:
                 raise ValueError(f"unsupported scale {fscale}")
 
+            self.fscale = fscale
+            self.fmin = fmin
+            self.fmax = fmax
             if sllen is None or trlen is None:
                 # use slice length required to support desired frequency scale/q factors
                 sllen, trlen = scl.suggested_sllen_trlen(fs)
@@ -58,7 +61,7 @@ class TFTransform:
 
             self.sllen = sllen
             self.nsgt = NSGT_sliced(scl, sllen, trlen, fs, real=True, matrixform=True, multichannel=True, reducedform=True, device="cpu")
-            self.name = f'n{fscale}-{fbins}-{fmin:.2f}-{sllen}'
+            self.name = f'n{fscale}-{fbins}-{fmin:.2f}-{fmax:.2f}-{sllen}'
             print(self.name)
         else:
             self.name = f's{window}'
@@ -102,25 +105,34 @@ def dimensionality_cmp(track, tfs):
     N = track.audio.shape[0]
     track_dur = N/track.rate
 
+    totels = []
     for tf in tfs:
         print(f'track duration: {N} samples, {track_dur:.2f} s')
-        if tf.transform_type == "stft":
-            track_multiples = N//(tf.nperseg-tf.nperseg//4) + 2
-            print(f'track in multiples of stft window size {tf.nperseg}: {track_multiples}')
-            print(f'expected f bins: {tf.nperseg//2+1}')
-        elif tf.transform_type == "nsgt":
-            track_multiples = N//(tf.sllen-tf.sllen//4) + 2
-            print(f'nsgt coef factor: {tf.nsgt.coef_factor}')
-            print(f'total ncoefs: {tf.nsgt.coef_factor*tf.sllen}')
-            print(f'track in multiples of nsgt slice size {tf.sllen}: {track_multiples}')
-            print(f'expected f bins: {tf.fbins+1}')
+        #if tf.transform_type == "stft":
+        #    track_multiples = N//(tf.nperseg-tf.nperseg//4) + 2
+        #    print(f'track in multiples of stft window size {tf.nperseg}: {track_multiples}')
+        #    print(f'expected f bins: {tf.nperseg//2+1}')
+        #elif tf.transform_type == "nsgt":
+        #    track_multiples = N//(tf.sllen-tf.sllen//4) + 2
+        #    print(f'nsgt coef factor: {tf.nsgt.coef_factor}')
+        #    print(f'total ncoefs: {tf.nsgt.coef_factor*tf.sllen}')
+        #    print(f'track in multiples of nsgt slice size {tf.sllen}: {track_multiples}')
+        #    print(f'expected f bins: {tf.fbins+1}')
 
-            track_real_multiples = N//X.shape[0]
-            print(f'nsgt actual track multiples: {track_real_multiples}')
+        #    track_real_multiples = N//X.shape[0]
+        #    print(f'nsgt actual track multiples: {track_real_multiples}')
 
         X = tf.forward(track.audio)
-        print(f'forward transform: {X.dtype=}, {X.shape=}')
+        #print(f'forward transform: {X.dtype=}, {X.shape=}')
         Xmag = np.abs(X)
-        print(f'abs forward transform: {Xmag.dtype=}, {Xmag.shape=}')
+        #print(f'abs forward transform: {Xmag.dtype=}, {Xmag.shape=}')
         #(I, F, T) = X.shape
+
+        totel = torch.numel(Xmag)
+
+        if tf.transform_type == 'nsgt':
+            print(f'\nNSGT stats: {tf.fscale} {tf.fbins} {tf.fmin:.2f} {tf.fmax:.2f} {tf.sllen} {Xmag.shape} {totel}\n')
+
         print('\n')
+        totels.append(totel)
+    return totels
