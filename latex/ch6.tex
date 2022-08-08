@@ -97,13 +97,72 @@ By contrast, the logarithmic scale takes the total number of frequency bins as a
 
 \newpagefill
 
-\section{sliCQT dimensionality and size experiments}
-\label{appendix:slicqdim}
-
-\subsection{Fixing $f_{\text{max}}$ to the Nyquist rate}
+\section{sliCQT dimensionality: fixing $f_{\text{max}}$ to the Nyquist rate}
 \label{appendix:slicqdim1}
 
-\subsection{STFT and sliCQT compared}
+In Section \ref{sec:slicqparamsrch}, I described that in the parameter search for the frequency scale of the sliCQT, the maximum frequency $f_{\text{max}}$ was fixed to 22,050 Hz (the Nyquist rate of the 44,100 Hz sample rate of the music data set), because it sometimes led to a smaller sliCQT than $f_{\text{max}} < 22,050 \text{ Hz}$. Note that this is not always true, and depends on the other sliCQT parameters. Out of 809 examples evaluated for this section, 758 of them (the majority) had a smaller transform when using the smaller value of $f_{\text{max}}$, and 51 of them had a larger transform with the smaller value of $f_{\text{max}}$.
+
+Table \ref{table:slicqdimdegen1} shows some examples of sliCQT parameters for the Constant-Q scale from the more rare case where setting $f_{\text{max}} = \text{Nyquist rate}$ led to a smaller transform that occupied less memory than setting $f_{\text{max}} < \text{Nyquist rate}$. Table \ref{table:slicqdimdegen2} shows more typical counter-examples, where the smaller frequency range resulted in a smaller transform.
+
+\begin{table}[ht]
+	\centering
+	\caption{sliCQT examples where $f_{\text{max}} = \text{Nyquist rate}$ resulted in a smaller transform.}
+	\label{table:slicqdimdegen1}
+\begin{tabular}{ |l|l|l|l|l| }
+	 \hline
+	 Total bins & $f_{\text{min}}$ (Hz) & $f_{\text{max}}$ (Hz) & Number of coefficients \\
+	 \hline
+	 \hline
+	 11 & 96.8 & 14,771.2 & 214,263,720 \\
+	 \hline
+	 11 & 96.8 & 22,050 & 182,892,400 (-14\%) \\
+	 \hline
+	 \hline
+	 26 & 27.7 & 18,202.8 & 320,350,992 \\
+	 \hline
+	 26 & 27.7 & 22,050 & 294,027,200 (-8\%) \\
+	 \hline
+	 \hline
+	 64 & 106.7 & 20,962.8 & 292,568,064 \\
+	 \hline
+	 64 & 106.7 & 22,050 & 281,151,360 (-3.7\%) \\
+	 \hline
+	 \hline
+	 203 & 74.4 & 21,726 & 323,409,856 \\
+	 \hline
+	 203 & 74.4 & 22,050 & 318,891,744 (-1.5\%) \\
+	 \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+	\centering
+	\caption{sliCQT examples where $f_{\text{max}} = \text{Nyquist rate}$ resulted in a larger transform.}
+	\label{table:slicqdimdegen2}
+\begin{tabular}{ |l|l|l|l|l| }
+	 \hline
+	 Total bins & $f_{\text{min}}$ (Hz) & $f_{\text{max}}$ (Hz) & Number of coefficients \\
+	 \hline
+	 26 & 88.4 & 20,341.5 & 299,574,080 \\
+	 \hline
+	 26 & 88.4 & 22,050 & 329,643,392 (+10\%) \\
+	 \hline
+	 \hline
+	 135 & 23.4 & 18,935.7 & 334,379,880 \\
+	 \hline
+	 135 & 23.4 & 22,050 & 397,612,800 (+18\%) \\
+	 \hline
+	 \hline
+	 289 & 36.8 & 18,874.5 & 310,746,672 \\
+	 \hline
+	 289 & 36.8 & 22,050 & 362,147,328 (+16\%) \\
+	 \hline
+\end{tabular}
+\end{table}
+
+\newpagefill
+
+\section{STFT and sliCQT dimensionality compared}
 \label{appendix:slicqdim2}
 
 \newpagefill
