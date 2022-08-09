@@ -8,8 +8,6 @@ In this thesis, my starting point is Open-Unmix \parencite{umx}, a deep neural n
 
 In this chapter, I will introduce the theoretical background necessary to understand my goal and hypothesis.
 
-\begin{shaded}
-
 In Section \ref{sec:timedomain}, I will give an overview of acoustic signals, including the time-domain waveform and discrete-time signals in digital systems.
 
 In Section \ref{sec:freqdomain}, I will introduce the frequency domain, which is alternative representation of acoustic signals. I will start by describing frequency analysis, the Fourier transform, and joint time-frequency analysis, leading to the ubiquitous Short-Time Fourier Transform (STFT). Continuing from the STFT, I will describe nonuniform time-frequency transforms that were designed for music analysis, including the Constant-Q Transform (CQT), the Nonstationary Gabor Transform (NSGT), and the sliced Constant-Q Transform (sliCQT).
@@ -19,8 +17,6 @@ In Section \ref{sec:ml}, I will give an overview of machine learning and deep le
 In Section \ref{sec:softcode}, I will give an overview of important concepts in software and code relevant to this thesis, including Python and Git version control.
 
 In Section \ref{sec:musicsep}, I will describe the tasks of music source separation and music demixing. I will provide a definition of the tasks, their motivations and uses, a survey of historical approaches to computational audio source separation, and trends in STFT-based music source separation leading to the current state of the art.
-
-\end{shaded}
 
 \subsection{Acoustic signals and the time-domain waveform}
 \label{sec:timedomain}
@@ -93,7 +89,7 @@ The Fourier Transform originated as an integral transform in mathematics, which 
 	[b]eyond the scope of thermal conduction, Joseph Fourier's treatise on the Analytical Theory of Heat (1822) profoundly altered our understanding of acoustic waves. It posits that any function of unit period can be decomposed into a sum of sinusoids, whose respective contribution represents some essential property of the underlying periodic phenomenon. In acoustics, such a decomposition reveals the resonant modes of a freely vibrating string \parencite[461]{fouriermusic}.
 \end{quote}
 
-The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by equation \eqref{equation:ctft}, and its inverse is defined by equation\explanation{removed j, clarified 2nd eqn is inverse} \eqref{equation:ictft} \parencite[308]{dspfirst}:
+The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform is defined by equation \eqref{equation:ctft}, and its inverse is defined by equation \eqref{equation:ictft} \parencite[308]{dspfirst}:
 \begin{align}
 	X(\omega) = \int_{-\infty}^{\infty}{x(t)e^{-j\omega t}\mathit{dt}} \tag{1}\label{equation:ctft} \\
 	x(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}{X(\omega)e^{j\omega t}\mathit{d\omega}} \tag{2}\label{equation:ictft}
@@ -107,8 +103,6 @@ The continuous-time Fourier Transform (CTFT) of a time-domain acoustic waveform 
 
 The quantities $|X(e^{j\omega})|$ and $\angle X(e^{j\omega})$ are referred to as the magnitude and phase respectively. The Fourier Transform is also referred to as the spectrum, while its magnitude and phase are the magnitude and phase spectra, respectively \parencite{discretebook}.
 
-\begin{shaded}
-
 In contrast to the CTFT, which maps a continuous-time signal $x(t)$ to a continuous frequency $X(\omega)$, the discrete-time Fourier Transform (DTFT) maps a discrete-time signal $x[n]$ to a continuous frequency $X(\omega)$. The DTFT is derived by sampling the CTFT in time, and is defined by equation \eqref{equation:dtft} \parencite[289]{melbook}:
 \begin{align}
 	X(\omega) = \sum_{n = -\infty}^{\infty}{x[n]e^{-j\omega n}} \tag{5}\label{equation:dtft}
@@ -118,8 +112,6 @@ Finally, the discrete Fourier Transform (DFT) maps a discrete-time signal $x[n]$
 \begin{align}
 	X[k] = \sum_{n = 0}^{L-1}{x[n]e^{-j(\frac{2\pi}{N})kn}} \tag{6}\label{equation:dft}
 \end{align}
-
-\end{shaded}
 
 The number of points, or samples, of the DFT, determines the frequency resolution, also called $\mathit{df}$ or $\mathit{\Delta f}$, which is the frequency spacing between each point in the resulting spectrum \parencite{discretebook}. The frequency resolution of an $N$-point DFT is $\mathit{df} = \sfrac{F_{s}}{N}$, where $F_{s}$ is the sampling rate of the input signal. An illustration of the magnitude and phase spectra of the DFT are shown in Figure \ref{fig:glockdft}, using two different lengths of DFT to show the difference in the low and high frequency resolutions.
 
@@ -131,7 +123,7 @@ The number of points, or samples, of the DFT, determines the frequency resolutio
 	\label{fig:glockdft}
 \end{figure}
 
-For a real-valued input signal $x[n]$, the spectrum has the conjugate symmetry property, i.e., the magnitudes of the DFT coefficients are mirrored symmetrically around the center frequency, \hlblu{while the phases of the DFT coefficients are mirrored anti-symmetrically} around the center frequency \parencite{dspfirst}. This center bin corresponds to the Nyquist frequency $\sfrac{F_{s}}{2}$ where $F_{s}$ is the sampling rate of the signal. For a given DFT of $N$ points, the points of the output spectrum between 0--$\sfrac{N}{2}+1$ correspond to 0--$\sfrac{F_{s}}{2}$ Hz, and the points $\sfrac{N}{2}+1$--N correspond to the same frequency bins in reverse order, i.e., $\sfrac{F_{2}}{2}$--0 Hz. In practice, therefore, only the first $\sfrac{N}{2}+1$ points of the $N$-point DFT of a real signal are useful.
+For a real-valued input signal $x[n]$, the spectrum has the conjugate symmetry property, i.e., the magnitudes of the DFT coefficients are mirrored symmetrically around the center frequency, while the phases of the DFT coefficients are mirrored anti-symmetrically around the center frequency \parencite{dspfirst}. This center bin corresponds to the Nyquist frequency $\sfrac{F_{s}}{2}$ where $F_{s}$ is the sampling rate of the signal. For a given DFT of $N$ points, the points of the output spectrum between 0--$\sfrac{N}{2}+1$ correspond to 0--$\sfrac{F_{s}}{2}$ Hz, and the points $\sfrac{N}{2}+1$--N correspond to the same frequency bins in reverse order, i.e., $\sfrac{F_{2}}{2}$--0 Hz. In practice, therefore, only the first $\sfrac{N}{2}+1$ points of the $N$-point DFT of a real signal are useful.
 
 The CTFT is continuous in both time and frequency, and the DTFT is discrete in time and continuous in frequency. Signals need to be transformed from the continuous to the discrete domain via sampling to be processed digitally or computationally, which was covered previously in Section \ref{sec:timedomain}. Therefore, the DFT, which is discrete in both time and frequency, is used in digital computations \parencite{dspfirst}.
 
@@ -166,7 +158,7 @@ Another way of visualizing the tradeoff of time and frequency is shown in Figure
 	\label{fig:gaborfirst}
 \end{figure}
 
-The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. Several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit, \hlblu{indicating that there are processes involved in the perception of sounds that cannot be explained by the Fourier Transform alone}. \citeauthor{psycho2} describes one of these experiments:
+The result of the time-frequency uncertainty principle is a consequence of how the Fourier Transform is used to swap between the mutually exclusive domains of time and frequency. Several psychacoustic studies have shown that humans can exhibit better time-frequency resolution than the Gabor limit, indicating that there are processes involved in the perception of sounds that cannot be explained by the Fourier Transform alone. \citeauthor{psycho2} describes one of these experiments:
 
 \begin{quote}
 	It is concluded that models based on a place (spectral) analysis should be subject to a limitation of the type $\Delta f \cdot d \ge \text{constant}$, where $\Delta f$ is the frequency difference limen for a tone pulse of duration d. [...] It was found that at short durations the product of $\Delta f$ and d was about one order of magnitude smaller than the minimum predicted [...] \parencite[610]{psycho2}.
@@ -186,7 +178,7 @@ When performing joint time-frequency analysis, it is preferable to minimize time
 	What is the shape of the signal for which the product $\Delta t \Delta f$ actually assumes the smallest possible value? [... it is] the modulation product of a harmonic oscillation of any frequency with a pulse of the form of the probability function \parencite[435]{gabor1946}.
 \end{quote}
 
-Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e., the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equations\explanation{add f to exp} \eqref{equation:gabort}:
+Gabor performed joint time-frequency analysis by multiplying overlapping, temporally consecutive portions of the input signal with shifted copies of the Gaussian window function (i.e., the probability function), and by taking the Fourier Transform of the windowed segments of the signal. The Gabor transform $G(f)$ of a discrete-time signal $x(n)$ is described by equations \eqref{equation:gabort}:
 \begin{flalign}\tag{7}\label{equation:gabort}
 	\nonumber \mathbf{G(f)} &= [G_{1}(f), G_{2}(f), ..., G_{k}(f)]\\
 	\nonumber G_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-\beta m)e^{-j2\pi \alpha f n}
@@ -194,7 +186,7 @@ Gabor performed joint time-frequency analysis by multiplying overlapping, tempor
 
 where $g(\cdot)$ is a Gaussian low-pass window function localized at 0, $G_{m}(f)$ is the DFT of the signal centered around time $\beta m$, and $\alpha$ and $\beta$ control the time and frequency resolution of the transform \parencite{dictionary}.
 
-The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work \parencite{stftindie}, but additional research in the 1980s \parencite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equations\explanation{change R to a} \eqref{equation:stft}:
+The STFT, or Short-Time Fourier Transform, has been described independently from Gabor's work \parencite{stftindie}, but additional research in the 1980s \parencite{dictionary} led to the STFT being formalized and described as a special case of the Gabor transform, in recognition of Gabor's pioneering work. The STFT $X(f)$ of a discrete-time signal $x(n)$ is described by equations \eqref{equation:stft}:
 \begin{flalign}\tag{8}\label{equation:stft}
 	\nonumber \mathbf{X(f)} &= [X_{1}(f), X_{2}(f), ..., X_{k}(f)]\\
 	\nonumber X_{m}(f) &= \sum_{n = -\infty}^{\infty}x(n)g(n-am)e^{-j2\pi f n}
@@ -224,12 +216,12 @@ Figure \ref{fig:gabortf} shows different sizes of \textit{logon} in the time-fre
 	\label{fig:gabortf}
 \end{figure}
 
-\hlblu{The STFT shown in equation} \eqref{equation:stft} \hlblu{outputs a continuous frequency} $X(f)$ \hlblu{from a discrete-time signal} $x(n)$. \hlblu{To use the STFT in digital computations, it must be sampled in frequency, in the same way that was shown for the DFT in equation} \eqref{equation:dft}. The \hlblu{frequency-sampled} STFT has the same number of output frequency bins as the DFT. Its output is a matrix of columns where each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that half of the coefficients of an N-point DFT for a real-valued input signal $x[n]$ were redundant.\explanation{refer to DFT redundant sec, dont repeat} The \hlblu{frequency-sampled STFT} has the same behavior, such that it outputs $(\sfrac{N}{2}+1)$ non-redundant frequency bins. The frequency spacing between each bin is $\mathit{df} = \sfrac{F_{s}}{N}$, and the frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0 to $(\sfrac{N}{2}+1)$ therefore correspond to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
+The STFT shown in equation \eqref{equation:stft} outputs a continuous frequency $X(f)$ from a discrete-time signal $x(n)$. To use the STFT in digital computations, it must be sampled in frequency, in the same way that was shown for the DFT in equation \eqref{equation:dft}. The frequency-sampled STFT has the same number of output frequency bins as the DFT. Its output is a matrix of columns where each column contains the DFT coefficients from one window of the input signal. The rows represent the frequency bins and the columns represent the time windows or frames. Section \ref{sec:freqanal} described that half of the coefficients of an N-point DFT for a real-valued input signal $x[n]$ were redundant. The frequency-sampled STFT has the same behavior, such that it outputs $(\sfrac{N}{2}+1)$ non-redundant frequency bins. The frequency spacing between each bin is $\mathit{df} = \sfrac{F_{s}}{N}$, and the frequency in Hz corresponding to each bin is $f \text{ (Hz)} = \text{bin}\times\sfrac{F_{s}}{N}$. The frequency bins 0 to $(\sfrac{N}{2}+1)$ therefore correspond to the frequency range of 0 to $(\sfrac{F_{s}}{2})$ Hz. Figure \ref{fig:stftdiag} shows the rectangular matrix of coefficients which is the output of the STFT, and the frequency bins and frequencies in Hz corresponding to the rows of the matrix.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.4688\textwidth]{./images-blockdiagrams/stft_diag.png}
-	\caption{Rectangular matrix output of the \hlblu{frequency-sampled} STFT.}
+	\caption{Rectangular matrix output of the frequency-sampled STFT.}
 	\label{fig:stftdiag}
 \end{figure}
 
@@ -244,7 +236,7 @@ The time-frequency tradeoff of the STFT is a result of taking the Fourier transf
 		\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
 		\centering
 		\includegraphics[width=0.7500\textwidth]{./images-tftheory/hamming_vs_gauss.png}
-		\caption[2,048-sample Hamming and Gaussian windows. The Gaussian window is truncated, and uses a width factor of $2.5$.]{2,048-sample Hamming and Gaussian windows. \hlblu{The Gaussian window is truncated and uses a width factor of} $2.5$.\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/gausswin.html}}}
+		\caption[2,048-sample Hamming and Gaussian windows. The Gaussian window is truncated, and uses a width factor of $2.5$.]{2,048-sample Hamming and Gaussian windows. The Gaussian window is truncated and uses a width factor of $2.5$.\footnote[1]{\url{https://www.mathworks.com/help/signal/ref/gausswin.html}}}
 		\label{fig:gaussvshamm}
 	\end{minipage}
 \end{figure}
@@ -278,15 +270,15 @@ The time-frequency tradeoff of the STFT is a result of taking the Fourier transf
 
 The Constant-Q Transform (CQT) was proposed by \textcite{jbrown, msp} to analyze musical signals with a logarithmic frequency scale that matched the notes of a musical pitch scale. A demonstration of a violin analyzed with the DFT and CQT was shown in Figure \ref{fig:violin}.
 
-The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. $Q$ comes from the term ``quality factor,'' used to characterize\explanation{add quality factor} resonant structures in physics \parencite{qphysics1}; \citeauthor{moore} also uses $Q$ to describe the spectral bandwidth of the human auditory system \parencite{moore}.
+The name ``Constant-Q'' refers to the constant ratio of the frequency being analyzed to the frequency resolution of analysis, or $\sfrac{f}{\delta f} = Q$, such that the frequency resolution increases with the center frequency to maintain the $Q$ factor. $Q$ comes from the term ``quality factor,'' used to characterize resonant structures in physics \parencite{qphysics1}; \citeauthor{moore} also uses $Q$ to describe the spectral bandwidth of the human auditory system \parencite{moore}.
 
-The CQT uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the CQT, and the different window sizes used for each frequency bin of interest. Equations \eqref{equation:jbrowncqt} describe how the different windows $W[n, k]$ are applied\explanation{windows Wn,k} to the signal:
+The CQT uses long-duration windows in the low frequency regions and short-duration windows in the high frequency regions, resulting in good time resolution for transients \parencite{cqtransient}. Figure \ref{fig:jbrowncqt} shows some properties of the linearly-spaced DFT spectrum compared to the CQT, and the different window sizes used for each frequency bin of interest. Equations \eqref{equation:jbrowncqt} describe how the different windows $W[n, k]$ are applied to the signal:
 \begin{align}\tag{9}\label{equation:jbrowncqt}
 	\nonumber & \text{window length} = N[k] = \frac{f_{s}}{f_{k}}Q\\
 	\nonumber & W[k, n] = \rho + (1 - \rho)\cos\big(\frac{2\pi n}{N[k]}\big)
 \end{align}
 
-The parameter $\rho$ in the window\explanation{switch from alpha to rho} function $W[k, n]$ in equation \eqref{equation:jbrowncqt} should be set to 0.5 for a Hann window or $\sfrac{25}{46}$ for a Hamming window\explanation{add rho values}.
+The parameter $\rho$ in the window function $W[k, n]$ in equation \eqref{equation:jbrowncqt} should be set to 0.5 for a Hann window or $\sfrac{25}{46}$ for a Hamming window.
 
 \begin{figure}[ht]
 	\centering
@@ -311,7 +303,7 @@ where $K$ is the total bins of the CQT, $B$ is the bins-per-octave, and $\xi_{\t
 
 In the landscape of music analysis libraries, Essentia,\footnote{\url{https://essentia.upf.edu/}} LTFAT,\footnote{\url{https://ltfat.org/}} and the MATLAB Wavelet Toolbox\footnote{\url{https://www.mathworks.com/help/wavelet/ref/cqt.html}} have converged on the CQ-NSGT \parencite{invertiblecqt, slicq, variableq1}. However, librosa\footnote{\url{https://librosa.org/}} still uses the older implementation with the approximate reconstruction \parencite{klapuricqt}. Finally, \textcite{invertiblecqt} have released an open-source reference Python implementation\footnote{\url{https://github.com/grrrr/nsgt}} of the CQ-NSGT and the sliCQT.
 
-Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms were generated from the standard STFT spectrogram in MATLAB\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.\footnote{The CQT is included in the MATLAB Wavelet Toolbox because the CQT is considered to be a type of wavelet transform \parencite{klapuricqt}. Wavelet transforms are an important topic in time-frequency analysis, and have many uses in audio and musical applications. However, they are beyond the scope of this thesis.} Note how the CQT spectrograms \hlblu{show more spectral information} than the STFT spectrograms at all frequency resolutions.
+Several examples of magnitude spectrograms of the glockenspiel signal are generated using the STFT, shown in Figure \ref{fig:cqtvsstft1}, and the CQT, shown in Figure \ref{fig:cqtvsstft2}. The spectrograms were generated from the standard STFT spectrogram in MATLAB\footnote{\url{https://www.mathworks.com/help/signal/ref/spectrogram.html}} and the CQ-NSGT implementation of the CQT from the MATLAB Wavelet Toolbox.\footnote{The CQT is included in the MATLAB Wavelet Toolbox because the CQT is considered to be a type of wavelet transform \parencite{klapuricqt}. Wavelet transforms are an important topic in time-frequency analysis, and have many uses in audio and musical applications. However, they are beyond the scope of this thesis.} Note how the CQT spectrograms show more spectral information than the STFT spectrograms at all frequency resolutions.
 
 As mentioned throughout this section, the best implementation choice for the CQT is the NSGT, which allows for a perfect inverse transform. Section \ref{sec:theorynsgt} will introduce and describe the general NSGT, and Section \ref{sec:theoryslicqt} will introduce and describe the sliCQT, which is a realtime variant of the NSGT. The NSGT and sliCQT allow the analysis of audio with an arbitrary nonuniform frequency scale not limited to the Constant-Q scale, which will give me more freedom in this thesis to find a frequency scale that performs best for music source separation applications.
 
@@ -374,7 +366,7 @@ These requirements lead to invertibility of the frame operator and therefore to 
 	[m]oreover, the frame operator is diagonal and its inversion is straightforward. Further, the canonical dual frame has the same structure as the original one. Because of these pleasant consequences following from the three above-mentioned requirements, the frames satisfying all of them will be called painless nonstationary Gabor frames and we refer to this situation as the painless case \parencite[1482]{balazs}
 \end{quote}
 
-The derivation of the NSGT starts from the definition of the Gabor transform from Section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal \parencite{adaptivecqt}, described by equation\explanation{change i to j} \eqref{equation:stationarygab}:
+The derivation of the NSGT starts from the definition of the Gabor transform from Section \ref{sec:jointtfa}. In the standard Gabor transform, the same window function (also called the Gabor atom or Gabor function) is shifted in time to cover entire signal \parencite{adaptivecqt}, described by equation \eqref{equation:stationarygab}:
 \begin{align} \tag{11}\label{equation:stationarygab}
 g_{m, n}(t) = g(t - na)e^{2\pi j m b t}
 \end{align}
@@ -394,7 +386,7 @@ The definition of the multiple Gabor systems of \textcite{doerflerphd} continues
 	\nonumber f(t) &= \sum_{m,n \in \mathbb{Z}}c_{m,n}g_{m,n}(t) \tag{12}\label{equation:onegabor}
 \end{align}
 
-An overcomplete system that uses $R$ distinct STFTs\explanation{keep R here} (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, can be described with equations \eqref{equation:multigabor}:
+An overcomplete system that uses $R$ distinct STFTs (or Gabor transforms) with different window sizes, where $a_{r}$ and $b_{r}$ are the time-frequency shift parameters for each window size, can be described with equations \eqref{equation:multigabor}:
 \begin{align}
 	\nonumber g_{m,n}^{r}(t) &= g(t - na_{r})e^{j2\pi m b_{r} t}, m,n \in \mathbb{Z}\\
 	\nonumber f(t) &= \sum_{r=0}^{R-1}\sum_{m,n \in \mathbb{Z}}c^{r}_{m,n}g^{r}_{m,n}(t) \tag{13}\label{equation:multigabor}
@@ -427,7 +419,7 @@ Figure \ref{fig:nonuniformtflattices} show both the cases of the varying resolut
 	\label{fig:nonuniformtflattices}
 \end{figure}
 
-The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows, where\explanation{explain M = max Mn} $M = \text{max}(M_{n})$.
+The NSGT coefficients for a signal of length $L$ are given by an FFT of length $M_{n}$ for each window $g_{n}$. For each window, there are $L$ window operations and $O(M_{n} \cdot \log(M_{n}))$ FFT operations. The overall algorithmic complexity of the NSGT is therefore $O(N \cdot (M \log(M)))$ for $N$ windows, where $M = \text{max}(M_{n})$.
 
 I believe that the general NSGT is more interesting to study than the CQ-NSGT (Constant-Q NSGT), as it can be constructed with nonuniform frequency scales besides the Constant-Q scale, such as the psychoacoustic mel and Bark scales \parencite{melbook}, or the Variable-Q scale, which combines the Constant-Q scale with the psychoacoustic concept of the equivalent rectangular bandwidth (ERB) \parencite{variableq1, variableq2}. In essence the NSGT can be thought of as a filterbank \parencite{variableq1}.
 
@@ -937,7 +929,7 @@ The MUSDB18-HQ dataset has fixed train, validation, and test subsets of data. Th
 
 To fairly rank and evaluate different systems for music source separation, an objective measurement of the source separation quality is necessary. \textcite{bss, bss2} introduced the BSS (Blind Source Separation) Eval metrics, a ``new numerical performance criteria that can help evaluate and compare algorithms when applied on [blind audio source separation] problems'' \parencite[1463]{bss}. BSS metrics have been widely used in papers introducing new music source separation models \parencite{umx, xumx, dannasep, choi2021, kong2021decoupling, demucs} and in large-scale evaluation campaigns of diverse music source separation systems \parencite{sisec2016, sisec2018, mdx21}. Due to their prominence in source separation literature, I decided to use the BSS metrics in this thesis to measure the performance of my proposed model.
 
-There are four distinct metrics that comprise BSS\explanation{bold acronym letters}:
+There are four distinct metrics that comprise BSS:
 
 \begin{tight_itemize}
 \item
@@ -956,12 +948,12 @@ Out of these four scores, SDR is the single global score that is commonly used t
 	&10 \log_{10}\frac{\sum_{n}\big(s_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n)\big)^{2}}{\sum_{n}\big(s_{\text{instr, left}}(n) - \hat{s}_{\text{instr, left}}(n)\big)^{2} + \sum_{n}\big(s_{\text{instr, right}}(n) - \hat{s}_{\text{instr, right}}(n)\big)^{2}} \tag{18}\label{equation:sdrinstr}
 \end{align}
 
-The SDR score is a relative scale given in decibels or dB\explanation{remove unit from dB}, where $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, drums, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
+The SDR score is a relative scale given in decibels or dB, where $s_{\text{instr}}(n)$ denotes the ground truth waveform of the instrument, $\hat{s}_{\text{instr}}(n)$ is the estimate, and left and right refer to the two channels in the stereo dataset of MUSDB18-HQ. Given the four stems (vocals, drums, bass, other) of MUSDB18-HQ, the SDR is computed for each stem from equation \eqref{equation:sdrinstr} above. Then, the four SDR scores are combined for a total song score in equation \eqref{equation:sdrsong}:
 \begin{align}
 	\mathit{SDR}_{\text{song}} = \frac{1}{4}(\mathit{SDR}_{\text{bass}} + \mathit{SDR}_{\text{drums}} + \mathit{SDR}_{\text{vocals}} + \mathit{SDR}_{\text{other}}) \tag{19}\label{equation:sdrsong}
 \end{align}
 
-In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4, which reduced the computational cost over the original BSS metrics\explanation{omit time invariant} used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used in this thesis.
+In the 2018 Signal Source Separation Evaluation Compaign (SiSEC), \textcite{sisec2018} introduced an evolution of BSS metrics, called BSS v4, which reduced the computational cost over the original BSS metrics used in SiSec 2016 \parencite{sisec2016}. The new BSS v4 metrics were also made available in the Python libraries museval\footnote{\url{https://github.com/sigsep/sigsep-mus-eval}} and bsseval,\footnote{\url{https://github.com/sigsep/bsseval}} which were used in this thesis.
 
 \subsubsection{Time-frequency masking and oracle estimators}
 \label{sec:masksandoracles}
@@ -1134,13 +1126,9 @@ In UMX, a deep neural network (DNN) is used to estimate the magnitude spectrogra
 
 The MUSDB18-HQ data loader is the starting point of the neural network, and it returns a single target at a time, or an $(x, y)$ pair where $x$ is the mixed waveform and $y$ is the desired target. The final output of UMX is $\hat{y}$, the estimated target waveform. In between the input and output time-domain waveforms, the magnitude STFT domain is used by UMX. The important training and inference steps are as follows.
 
-\begin{shaded}
-
 Data whitening refers to a process in machine learning where the mean $\mu$ and standard deviation $\sigma$ of a training dataset $X$ is used to normalize $X$, or to transform $X$ into a normal Gaussian distribution $X'$ with a mean of zero and a standard deviation of one \parencite{Kessy_2018}. Data whitening is important because it ``greatly simplifies multivariate data analysis both from a computational and a statistical standpoint,'' and ``whitening is a critically important tool, most often employed in preprocessing'' \parencite[309]{Kessy_2018}.
 
 In the training loop, the $(x, y)$ pairs of mixed audio and the ground-truth of the target source waveform are converted to the magnitude STFT domain $(|X|, |Y|)$. To apply data whitening, the mean and standard deviation of $|X|$ are computed, or $\mu_{|X|} = \mathit{mean}(\{|X|\})$ and $\sigma_{|X|} = \mathit{std}(\{|X|\})$. The training input to the Bi-LSTM neural network is $(|X|+\mu_{|X|})\times\sigma_{|X|}$. The Bi-LSTM neural network outputs $|\hat{Y}|$, the estimated magnitude STFT of the target sources.
-
-\end{shaded}
 
 The loss function is the mean-squared error (MSE) function. In the loss function, the estimated magnitude STFT of the target source is compared to the ground-truth, shown in equation \eqref{equation:mselossstft}.
 \begin{align}\tag{29}\label{equation:mselossstft}
@@ -1249,7 +1237,7 @@ For the time-domain loss, the same 14 combinations are considered in the time do
 	\nonumber & \text{sdr\_loss}_{\text{total}} = \frac{1}{14} \cdot \sum_{n = 1}^{14}{\text{sdr\_loss}_{n}}
 \end{align}
 
-As a last step, the time-domain loss is multiplied by a mixing coefficient before adding it to the frequency-domain loss. The coefficient is set to 10\explanation{remove alpha, explain value of 10} to ``approximately equalize the ranges'' of the two losses \parencite[4]{xumx}. The total loss function of X-UMX is calculated by equation \eqref{equation:totalloss}:
+As a last step, the time-domain loss is multiplied by a mixing coefficient before adding it to the frequency-domain loss. The coefficient is set to 10 to ``approximately equalize the ranges'' of the two losses \parencite[4]{xumx}. The total loss function of X-UMX is calculated by equation \eqref{equation:totalloss}:
 \begin{align}\tag{33}\label{equation:totalloss}
 	\nonumber & \text{loss}_{X-UMX} = \text{mse\_loss}_{\text{total}} + 10 \cdot \text{sdr\_loss}_{\text{total}}
 \end{align}

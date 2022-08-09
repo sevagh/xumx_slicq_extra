@@ -2,14 +2,12 @@
 \usepackage[svgnames]{xcolor}
 \usepackage{setspace}
 \usepackage{framed}
-\usepackage{soul} % for annotations
 \usepackage{subfiles}
 \usepackage[left=1in, right=1in, top=1in, bottom=1in]{geometry}
 \usepackage[shortlabels]{enumitem}
 \usepackage{graphicx}
 \usepackage{svg}
 \usepackage{xfrac} % for annotations
-\usepackage{todonotes}
 \usepackage{afterpage}
 \usepackage{amsmath}
 \usepackage[titletoc,title]{appendix}
@@ -79,10 +77,6 @@
 	\clearpage
 }
 
-\newcommand{\explanation}{
-        \todo[color=green!40]
-}
-
 \DeclareCiteCommand{\secondaryciteauthor}{}{\printtext[bibhyperref]{\printnames{labelname}}}{}{}
 \DeclareCiteCommand{\secondaryciteyear}{}{\bibhyperref{\printdate}}{\multicitedelim}{}
 \newcommand{\secondarycitedirect}[2]{\secondaryciteauthor{#1} (\secondaryciteyear{#1}, cited in \secondaryciteauthor{#2}, \secondaryciteyear{#2})}
@@ -98,11 +92,6 @@
 
 \renewcommand\listingscaption{Code Listing}
 \renewcommand\listoflistingscaption{List of Code Listings}
-
-\colorlet{shadecolor}{blue!15}
-%\colorlet{hlcolor}{blue!10}
-
-\DeclareRobustCommand{\hlblu}[1]{{\sethlcolor{shadecolor}\hl{#1}}}
 
 \renewcommand{\maketitle}{
   \begin{center}
