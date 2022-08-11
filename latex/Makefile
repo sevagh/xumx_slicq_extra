@@ -14,6 +14,10 @@ ghostscript-compressed-thesis: report
 ghostscript-compressed-thesis:
 	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=/printer -dNOPAUSE -dQUIET -dBATCH -sOutputFile=thesis.pdf report.pdf
 
+ghostscript-final-thesis-pdfa: report
+ghostscript-final-thesis-pdfa:
+	gs -sDEVICE=pdfwrite -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -dPDFACompatibilityPolicy=2 -sOutputFile=thesis.pdf report.pdf
+
 clean:
 	latexmk -C
 	-rm *.lol
