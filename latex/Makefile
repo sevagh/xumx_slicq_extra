@@ -18,6 +18,10 @@ ghostscript-final-thesis-pdfa: report
 ghostscript-final-thesis-pdfa:
 	gs -sDEVICE=pdfwrite -dPDFA -dBATCH -dNOPAUSE -sColorConversionStrategy=UseDeviceIndependentColor -dPDFACompatibilityPolicy=2 -sOutputFile=thesis.pdf report.pdf
 
+pdf2archive-final-thesis-pdfa: report
+pdf2archive-final-thesis-pdfa:
+	cd ./pdf2archive-0.3.2 && ./pdf2archive --validate ../report.pdf ../thesis-pdfa.pdf
+
 clean:
 	latexmk -C
 	-rm *.lol

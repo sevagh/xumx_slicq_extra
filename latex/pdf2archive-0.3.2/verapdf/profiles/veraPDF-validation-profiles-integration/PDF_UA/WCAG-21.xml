@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<profile xmlns="http://www.verapdf.org/ValidationProfile" flavour="WCAG2_1">
+    <details creator="veraPDF Consortium" created="2020-03-13T10:58:04.098+03:00">
+        <name>WCAG 2.1 validation profile</name>
+        <description>Extra rules for WCAG 2.1 validation in addition to PDF/UA-1</description>
+    </details>
+    <hash></hash>
+    <rules>
+        <rule object="SARepeatedCharacters">
+            <id specification="WCAG_2_1" clause="1.3.1" testNumber="1"/>
+            <description>Text should not contain repeated non space characters</description>
+            <test>isNonSpace == false || numberOfRepeatedCharacters &lt; 5</test>
+            <error>
+                <message>Text contains repeated non space characters</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SARepeatedCharacters">
+            <id specification="WCAG_2_1" clause="1.3.1" testNumber="2"/>
+            <description>Text should not contain repeated space characters</description>
+            <test>isNonSpace == true || numberOfRepeatedCharacters &lt; 3</test>
+            <error>
+                <message>Text contains repeated space characters</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATextChunk">
+            <id specification="WCAG_2_1" clause="1.3.1" testNumber="3"/>
+            <description>Underlined text</description>
+            <test>parentsStandardTypes.split('&amp;').filter(elem =&gt; elem == 'Link').length &gt; 0 || isUnderlined == false</test>
+            <error>
+                <message>Underlined text is detected</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATextChunk">
+            <id specification="WCAG_2_1" clause="1.3.1" testNumber="4"/>
+            <description>If text has a different style, it shall be tagged as Span</description>
+            <test>hasSpecialStyle == false</test>
+            <error>
+                <message>Text has a different style and not tagged as Span</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="PDPage">
+            <id specification="WCAG_2_1" clause="1.3.4" testNumber="1"/>
+            <description>Pages shall have the same orientation</description>
+            <test>orientation == 'Square' || gMostCommonPageOrientation == orientation</test>
+            <error>
+                <message>Page %1 has different orientation</message>
+                <arguments>
+                    <argument>pageNumber + 1</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATextChunk">
+            <id specification="WCAG_2_1" clause="1.4.3" testNumber="1"/>
+            <description>The visual presentation of text and images of text has a contrast ratio of at least 4.5:1.
+                Large-scale text and images of large-scale text have a contrast ratio of at least 3:1.</description>
+            <test>textSize &lt; 4.5 || ((textSize >= 18.0 || (textSize >= 14.0 &amp;&amp; textWeight >= 700.0)) ? (contrastRatio >= 3) : (contrastRatio >= 4.5))</test>
+            <error>
+                <message>contrastRatio = %1</message>
+                <arguments>
+                    <argument>contrastRatio</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATextChunk">
+            <id specification="WCAG_2_1" clause="1.4.4" testNumber="1"/>
+            <description>Font size is too small: text may not be resized without assistive technology
+                up to 200 percent without loss of content or functionality.</description>
+            <test>textSize >= 4.5</test>
+            <error>
+                <message>textSize = %1</message>
+                <arguments>
+                    <argument>textSize</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="PDFont">
+            <id specification="WCAG_2_1" clause="1.4.8" testNumber="1"/>
+            <description>Document should not contain illegible font</description>
+            <test>fontName != null &amp;&amp; fontName.indexOf('AdobeDevanagari') == -1 &amp;&amp; fontName.indexOf('AgencyFB') == -1 &amp;&amp;
+                fontName.indexOf('BlackadderITC') == -1 &amp;&amp; fontName.indexOf('BodoniMTPosterCompressed') == -1 &amp;&amp;
+                fontName.indexOf('BradleyHandITC') == -1 &amp;&amp; fontName.indexOf('BrushScriptMT') == -1 &amp;&amp;
+                fontName.indexOf('Chiller') == -1 &amp;&amp; fontName.indexOf('ColonnaMT') == -1 &amp;&amp;
+                fontName.indexOf('CurlzMT') == -1 &amp;&amp; fontName.indexOf('EdwardianScriptITC') == -1 &amp;&amp;
+                fontName.indexOf('ESRIArcGISTDN') == -1 &amp;&amp; fontName.indexOf('FreestyleScript') == -1 &amp;&amp;
+                fontName.indexOf('FrenchScriptMT') == -1 &amp;&amp; fontName.indexOf('Gabriola') == -1 &amp;&amp;
+                fontName.indexOf('Gigi') == -1 &amp;&amp; fontName.indexOf('GillSansMT-ExtraCondensedBold') == -1 &amp;&amp;
+                fontName.indexOf('HarlowSolidItalic') == -1 &amp;&amp; fontName.indexOf('Harrington') == -1 &amp;&amp;
+                fontName.indexOf('InformalRoman') == -1 &amp;&amp; fontName.indexOf('Jokerman') == -1 &amp;&amp;
+                fontName.indexOf('FrenchScriptMT') == -1 &amp;&amp; fontName.indexOf('Gabriola') == -1 &amp;&amp;
+                fontName.indexOf('JuiceITC') == -1 &amp;&amp; fontName.indexOf('KunstlerScript') == -1 &amp;&amp;
+                fontName.indexOf('Magneto') == -1 &amp;&amp; fontName.indexOf('MaturaMTScriptCapitals') == -1 &amp;&amp;
+                fontName.indexOf('MicrosoftUighur') == -1 &amp;&amp; fontName.indexOf('Mistral') == -1 &amp;&amp;
+                fontName.indexOf('OldEnglishTextMT') == -1 &amp;&amp; fontName.indexOf('Onyx') == -1 &amp;&amp;
+                fontName.indexOf('PalaceScriptMT') == -1 &amp;&amp; fontName.indexOf('Parchment') == -1 &amp;&amp;
+                fontName.indexOf('Playbill') == -1 &amp;&amp; fontName.indexOf('Pristina') == -1 &amp;&amp;
+                fontName.indexOf('RageItalic') == -1 &amp;&amp; fontName.indexOf('Ravie') == -1 &amp;&amp;
+                fontName.indexOf('SegoeScript') == -1 &amp;&amp; fontName.indexOf('ShowcardGothic') == -1 &amp;&amp;
+                fontName.indexOf('SnapITC') == -1 &amp;&amp; fontName.indexOf('Vivaldi') == -1 &amp;&amp;
+                fontName.indexOf('VladimirScript') == -1 &amp;&amp;
+                (fontName.indexOf('HarlowSolid') == -1 || isItalic != true)</test>
+            <error>
+                <message>Document contains illegible font</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAFigure">
+            <id specification="WCAG_2_1" clause="1.4.10" testNumber="1"/>
+            <description>Bounding box should be present for a figure appearing in its entirety on a single page to indicate the area of the figure on the page</description>
+            <test>page != lastPage || hasBBox == true</test>
+            <error>
+                <message>"Figure" structure element on a single page with no bounding box</message>
+                <arguments/>
+            </error>
+            <references>
+                <reference specification="ISO 32000-1" clause="14.8.5.4.3"/>
+            </references>
+        </rule>
+        <rule object="SALinkAnnotation">
+            <id specification="WCAG_2_1" clause="2.4.9" testNumber="1"/>
+            <description>Links shall contain an alternate description via their Contents or Alt keys or in the text value</description>
+            <test>(Contents != null &amp;&amp; Contents != '' &amp;&amp; contentsIsLink == false) || isOutsideCropBox == true ||
+                (F &amp; 2) == 2 || (textValue != null &amp;&amp; textValue != '' &amp;&amp; textValueIsLink == false) ||
+                (Alt != null &amp;&amp; Alt != '' &amp;&amp; altIsLink == false)</test>
+            <error>
+                <message>A link annotation does not include an alternate description in the Contents or Alt Keys or in the text value</message>
+                <arguments/>
+            </error>
+            <references>
+                <reference specification="ISO 32000-1" clause="14.9.3"/>
+            </references>
+        </rule>
+        <rule object="SETD">
+            <id specification="WCAG_2_1" clause="4.1.1" testNumber="1"/>
+            <description>Table shouldn't have merged cells</description>
+            <test>ColSpan == 1 &amp;&amp; RowSpan == 1</test>
+            <error>
+                <message>Table has merged cells</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SETH">
+            <id specification="WCAG_2_1" clause="4.1.1" testNumber="2"/>
+            <description>Table shouldn't have merged cells</description>
+            <test>ColSpan == 1 &amp;&amp; RowSpan == 1</test>
+            <error>
+                <message>Table has merged cells</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATableBorderCell">
+            <id specification="WCAG_2_1" clause="4.1.1" testNumber="3"/>
+            <description>Table shouldn't have merged cells</description>
+            <test>colSpan == 1 &amp;&amp; rowSpan == 1</test>
+            <error>
+                <message>Table has merged cells</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAPDFDocument">
+            <id specification="WCAG_2_1" clause="4.1.1" testNumber="4"/>
+            <description>The logical structure of the conforming file shall be described by a structure hierarchy rooted in the StructTreeRoot entry
+                of the document's Catalog dictionary</description>
+            <test>StructTreeRoot_size == 1</test>
+            <error>
+                <message>StructTreeRoot entry is not present in the document catalog</message>
+                <arguments/>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAP">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="1"/>
+            <description>Incorrect use of a paragraph</description>
+            <test>correctType != 'P' || correctSemanticScore >= 0.75</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SASpan">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="2"/>
+            <description>Incorrect use of a span</description>
+            <test>correctType != 'Span' || correctSemanticScore >= 0.75</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATable">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="3"/>
+            <description>The structure type and attributes of a table shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'Table' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'TD' ||
+                correctType == 'TH' || correctType == 'TBody' || correctType == 'THead' ||
+                correctType == 'TFoot' || correctType == 'TR' || correctType == 'L' || correctType == 'LI' ||
+                correctType == 'Lbl' || correctType == 'LBody' || correctType == 'TOC' || correctType == 'TOCI'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAH">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="4"/>
+            <description>Incorrect use of a heading</description>
+            <test>correctType != 'H' || correctSemanticScore >= 0.75</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAHn">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="5"/>
+            <description>Incorrect use of a numbered heading</description>
+            <test>correctType != 'Hn' || correctSemanticScore >= 0.75</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATR">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="6"/>
+            <description>The structure type and attributes of a table row shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'TR' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'TD' ||
+                correctType == 'TH' || correctType == 'TBody' || correctType == 'THead' ||
+                correctType == 'TFoot' || correctType == 'Table' || correctType == 'L' ||
+                correctType == 'LI' || correctType == 'Lbl' || correctType == 'LBody'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATH">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="7"/>
+            <description>The structure type and attributes of a table header cell shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'TH' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'TD' ||
+                correctType == 'TR' || correctType == 'TBody' || correctType == 'THead' ||
+                correctType == 'TFoot' || correctType == 'Table' || correctType == 'L' ||
+                correctType == 'LI' || correctType == 'Lbl' || correctType == 'LBody' || correctType == null</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SATD">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="8"/>
+            <description>The structure type and attributes of a table cell shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'TD' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'TR' ||
+                correctType == 'TH' || correctType == 'TBody' || correctType == 'THead' ||
+                correctType == 'TFoot' || correctType == 'Table' || correctType == 'L' ||
+                correctType == 'LI' || correctType == 'Lbl' || correctType == 'LBody' || correctType == null</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAStructElem">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="9"/>
+            <description>Missing table element</description>
+            <test>hasLowestDepthError == false || (correctSemanticScore >= 0.75 &amp;&amp; standardType == correctType) || (correctType != 'TD' &amp;&amp;
+                correctType != 'TR' &amp;&amp; correctType != 'TH' &amp;&amp; correctType != 'TBody' &amp;&amp; correctType != 'THead' &amp;&amp;
+                correctType != 'TFoot' &amp;&amp; correctType != 'Table') || (standardType == 'L' ||
+                parentsStandardTypes.split('&amp;').filter(elem =&gt; elem == 'L').length &gt; 0) || (standardType == 'TOC' ||
+                parentsStandardTypes.split('&amp;').filter(elem =&gt; elem == 'TOC').length &gt; 0)</test>
+            <error>
+                <message>score = %1, correct type = %2, structure id = %3</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                    <argument>structureID</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAP">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="10"/>
+            <description>This structure element should be a heading instead of a paragraph</description>
+            <test>correctType != 'H' &amp;&amp; correctType != 'Hn'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAP">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="11"/>
+            <description>This structure element should be a span instead of a paragraph</description>
+            <test>correctType != 'Span'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SASpan">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="12"/>
+            <description>This structure element should be a paragraph instead of a span</description>
+            <test>correctType != 'P'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SASpan">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="13"/>
+            <description>This structure element should be a heading instead of a span</description>
+            <test>correctType != 'H' &amp;&amp; correctType != 'Hn'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAH">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="14"/>
+            <description>This structure element should be a paragraph instead of a heading</description>
+            <test>correctType != 'P'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAHn">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="15"/>
+            <description>This structure element should be a paragraph instead of a numbered heading</description>
+            <test>correctType != 'P'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAP">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="16"/>
+            <description>Redundant paragraph</description>
+            <test>correctType != null</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SASpan">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="17"/>
+            <description>Redundant span</description>
+            <test>correctType != null</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAH">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="18"/>
+            <description>Redundant heading</description>
+            <test>correctType != null</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAHn">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="19"/>
+            <description>Redundant numbered heading</description>
+            <test>correctType != null</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAP">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="20"/>
+            <description>This structure element should be a caption instead of a paragraph</description>
+            <test>correctType != 'Caption'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAStructElem">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="21"/>
+            <description>The structure type and attributes of list elements shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctSemanticScore >= 0.75 &amp;&amp; standardType == correctType) || (correctType != 'LI' &amp;&amp;
+                correctType != 'Lbl' &amp;&amp; correctType != 'LBody' &amp;&amp; correctType != 'L') || (isTableElem == true) || (standardType == 'TOC' ||
+                parentsStandardTypes.split('&amp;').filter(elem =&gt; elem == 'TOC').length &gt; 0)</test>
+            <error>
+                <message>score = %1, correct type = %2, structure id = %3</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                    <argument>structureID</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAL">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="22"/>
+            <description>The structure type and attributes of a list shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'L' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'LI' ||
+                correctType == 'Lbl' || correctType == 'LBody' || correctType == 'TR' || correctType == 'TD' ||
+                correctType == 'TH' || correctType == 'TBody' || correctType == 'THead' || correctType == 'TFoot' ||
+                correctType == 'Table' || correctType == 'TOC' || correctType == 'TOCI'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SALI">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="23"/>
+            <description>The structure type and attributes of a list item shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'LI' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'L' ||
+                correctType == 'Lbl' || correctType == 'LBody' || correctType == 'TR' || correctType == 'TD' ||
+                correctType == 'TH' || correctType == 'TBody' || correctType == 'THead' || correctType == 'TFoot' ||
+                correctType == 'Table' || correctType == 'TOC' || correctType == 'TOCI'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SALBody">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="25"/>
+            <description>The structure type and attributes of a list body shall be semantically appropriate.</description>
+            <test>hasLowestDepthError == false || (correctType == 'LBody' &amp;&amp; correctSemanticScore >= 0.75) || correctType == 'L' ||
+                correctType == 'LI' || correctType == 'Lbl' || correctType == 'TR' || correctType == 'TD' ||
+                correctType == 'TH' || correctType == 'TBody' || correctType == 'THead' || correctType == 'TFoot' ||
+                correctType == 'Table' || correctType == 'TOC' || correctType == 'TOCI'</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+        <rule object="SAStructElem">
+            <id specification="WCAG_2_1" clause="4.1.2" testNumber="26"/>
+            <description>A table element is incorrectly tagged as a list element or a list has the wrong numbering </description>
+            <test>hasLowestDepthError == false || (correctType != 'TD' &amp;&amp; correctType != 'TR' &amp;&amp; correctType != 'TH' &amp;&amp;
+                correctType != 'TBody' &amp;&amp; correctType != 'THead' &amp;&amp; correctType != 'TFoot' &amp;&amp;
+                correctType != 'Table') || (standardType != 'L' &amp;&amp; standardType != 'LI' &amp;&amp;
+                standardType != 'Lbl' &amp;&amp; standardType != 'LBody')</test>
+            <error>
+                <message>score = %1, correct type = %2</message>
+                <arguments>
+                    <argument>correctSemanticScore</argument>
+                    <argument>correctType</argument>
+                </arguments>
+            </error>
+            <references/>
+        </rule>
+    </rules>
+    <variables>
+        <variable name="gMostCommonPageOrientation" object="PDDocument">
+            <defaultValue>null</defaultValue>
+            <value>mostCommonOrientation</value>
+        </variable>
+    </variables>
+</profile>
