@@ -62,14 +62,12 @@ All Python environments were designed to be reproducible with pip requirements.t
 
 \begin{tight_itemize}
 	\item
-		Pip file for oracles, trained model evaluations, boxplot creation, and performance benchmarks:\\
-		\url{https://github.com/sevagh/xumx_slicq_extra/blob/main/mss_evaluation/mss-oracle-experiments/requirements-cupy.txt}
+		Pip file for oracles, trained model evaluations, boxplot creation, and performance benchmarks: \url{https://github.com/sevagh/xumx_slicq_extra/blob/main/mss_evaluation/mss-oracle-experiments/requirements-cupy.txt}
 	\item
 		Conda environment file for the NSGT/sliCQT PyTorch implementation:\\
 		\url{https://github.com/sevagh/nsgt/blob/main/conda-env.yml}
 	\item
-		Conda environment file for the xumx-sliCQ neural network:\\
-		\url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}
+		Conda environment file for the xumx-sliCQ neural network: \url{https://github.com/sevagh/xumx-sliCQ/blob/main/scripts/environment-gpu-linux-cuda11.yml}
 \end{tight_itemize}
 
 I take code availability and reproducibility seriously. Feel free to e-mail me\footnote{\href{mailto:sevag.hanssian@mail.mcgill.ca}{sevag.hanssian@mail.mcgill.ca}, \href{mailto:sevagh+thesis@pm.me}{sevagh+thesis@pm.me}} if you encounter any errors, discrepancies, or difficulties with reproducing any of the results.
@@ -207,13 +205,9 @@ In Section \ref{sec:slicqarches}, I mentioned a repeated tuning process where I 
 
 Before starting this thesis in May 2021, I worked on two related projects; a project\footnote{\url{https://github.com/sevagh/MiXiN}} which used the NSGT (Nonstationary Gabor Transform) for music demixing using a CDAE (convolutional denoising autoencoder) neural architecture, and a project\footnote{\url{https://github.com/sevagh/Music-Separation-TF}} which explored different time-frequency transforms and the time-frequency tradeoff in music source separation algorithms based on spectrogram masking. In the second project, I used Open-Unmix as a high-performance baseline.
 
-In May 2021, Sony, the major Japanese technology company,\footnote{\url{https://www.sony.com/en/}} and Inria, a French national research institution,\footnote{\url{https://www.inria.fr/en}} sponsored a music demixing research challenge on the crowdsourced AI platform, AIcrowd.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} The challenge was called the ISMIR 2021 MDX (Music Demixing) Challenge, with an associated satellite workshop planned for the ISMIR 2021 conference.
+In May 2021, Sony, the major Japanese technology company,\footnote{\url{https://www.sony.com/en/}} and Inria, a French national research institution,\footnote{\url{https://www.inria.fr/en}} sponsored a music demixing research challenge on the crowdsourced AI platform, AIcrowd.\footnote{\url{https://www.aicrowd.com/challenges/music-demixing-challenge-ismir-2021}} The challenge was called the ISMIR 2021 MDX (Music Demixing) Challenge, with an associated satellite workshop planned for the ISMIR 2021 conference. The participants were encouraged to either modify the baselines (like Open-Unmix) or submit their own custom code to win the challenge. The MDX challenge ran from May to July 2021, giving participants three months to work on their neural networks. I chose to align my master's thesis project with the challenge, and made my goal the modification of Open-Unmix to use the sliCQT (sliced Constant-Q Transform).
 
-The participants were encouraged to either modify the baselines (like Open-Unmix) or submit their own custom code to win the challenge. The MDX challenge ran from May to July 2021, giving participants three months to work on their neural networks. I chose to align my master's thesis project with the challenge, and made my goal the modification of Open-Unmix to use the sliCQT (sliced Constant-Q Transform).
-
-The collaborative environment of the challenge was very fun, and I made 32 total submissions\footnote{\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}} to the challenge, resulting in a final place of 34 on the leaderboard. In my submission process, I tested different neural architectures and parameters with both the CDAE and Bi-LSTM variants until one of them achieved good results.
-
-My work in the challenge resulted in the creation of xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} the final model of this thesis. I wrote an article on xumx-sliCQ,\footnote{\url{https://mdx-workshop.github.io/proceedings/hanssian.pdf}, \url{https://arxiv.org/abs/2112.05509}} and I participated in the virtual ISMIR 2021 conference, where I showed xumx-sliCQ at the poster session\footnote{\url{https://github.com/sevagh/xumx_slicq_extra/blob/main/drafts-and-blobs/mdx21-poster.pdf}} of the MDX 21 challenge.
+The collaborative environment of the challenge was very fun, and I made 32 total submissions\footnote{\url{https://gitlab.aicrowd.com/sevagh/music-demixing-challenge-starter-kit}} to the challenge, resulting in a final place of 34 on the leaderboard. In my submission process, I tested different neural architectures and parameters with both the CDAE and Bi-LSTM variants until one of them achieved good results. My work in the challenge resulted in the creation of xumx-sliCQ,\footnote{\url{https://github.com/sevagh/xumx-sliCQ}} the final model of this thesis. I wrote an article on xumx-sliCQ,\footnote{\url{https://mdx-workshop.github.io/proceedings/hanssian.pdf}, \url{https://arxiv.org/abs/2112.05509}} and I participated in the virtual ISMIR 2021 conference, where I showed xumx-sliCQ at the poster session\footnote{\url{https://github.com/sevagh/xumx_slicq_extra/blob/main/drafts-and-blobs/mdx21-poster.pdf}} of the MDX 21 challenge.
 
 \end{appendices}
 
