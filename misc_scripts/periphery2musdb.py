@@ -9,10 +9,10 @@ import argparse
 sample_rate = 44100
 
 
-def write_stems(split_name, song_name_instruments_tup, root_dir):
+def write_stems(song_name_instruments_tup, root_dir):
     song_name, instruments = song_name_instruments_tup
 
-    print(f'{split_name}: {song_name}')
+    print(f'{song_name}')
     loaded_wavs = [None] * len(instruments)
     drums_idx = -1
     vocals_idx = -1
@@ -117,7 +117,6 @@ def prepare_stems(
     pool.starmap(
         write_stems,
         zip(
-            itertools.repeat(split_name),
             song_stems, # unpack song_name/instruments tuple in the function
             itertools.repeat(data_dir),
         ),
@@ -152,9 +151,6 @@ if __name__ == "__main__":
     prepare_stems(
         args.stem_dirs,
         args.outdir,
-        args.train,
-        args.valid,
-        args.test,
         args.n_pool
     )
 
