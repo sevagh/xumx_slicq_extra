@@ -1,43 +1,30 @@
-## Roadmap
-
-http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
-    * cuDemixUtils - with cuSignal
-        * sdr, isr, sar, sir, haaqi, mse (for both loss + eval)
-        * HAAQI: https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py
-    * cuNSGT - with cuSignal again (or cuFFT)
-        - fresh take on original NSGT code, written for performance
-        - address invertible interpolation/matrixform for CQNSGT (rasterization?)
-        - address deoverlap
+# xumx-sliCQ-V2
 
 ## Goals
 
-1. Adapt xumx-sliCQ for HAAQI
+1. Adapt xumx-sliCQ for HAAQI: http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
 2. Showcase RAPIDS tools or other NVIDIA SDKs (cuSignal, cuFFT) for kgmon
 3. Improve SDR of xumx-sliCQ
-4. Have adaptible HAAQI or SDR variants of xumx-sliCQ
-5. Use mix of SAR/SIR/SDR/ISR for training
 
-## Initial plan
+## Code roadmap
 
-Create repo structure:
-* xumx_sliCQ_V2
-    - the deep learning model
-    - original repo: sevagh/xumx-sliCQ
-* cuNSGT
-    - cuSignal/cuFFT fresh take on original NSGT code
-    - address invertible interpolation/matrixform for CQNSGT (rasterization?)
-        - look into Essentia CQT for rasterization
-    - address deoverlap (giant slice!)
-    - less focus on frequency scales, stick with CQ with giant slice
-    - original repo: sevag/nsgt
-* cuDemixUtils
-    - cuSignal/cuFFT/CuPY all accelerated
-    - sdr, isr, sar, sir, haaqi, mse (losses, evaluation)
-    - original repo: sevagh/sigsep-mus-eval
-* extra from repo: sevagh/xumx_slicq_extra
+`xumx_slicq_v2/{metrics.py,loss.py}`:
+* implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
+* implement mixed SDR/SAR/SIR/ISR loss
+* MSE loss
+* mega-ultimate-everything-loss??
+* cuSignal/cuFFT
 
-meta-tools:
-- Python: pyproject.toml, pytest
-- mamba env + pyproject.toml for each subproject
-- poetry on main binary xumx-sliCQ-V2
-- nvidia-docker2 runtime for reproducible
+`xumx_slicq_v2/nsgt/`:
+* fresh take on original NSGT code, written for performance
+* address invertible interpolation/matrixform for CQNSGT (rasterization?)
+* address deoverlap (_or_ use giant slices)
+* cuSignal/cuFFT
+
+Running/packaging:
+- nvidia-docker2 runtime for reproducible training
+- wheel stuff (setup/pyproject.toml/poetry)
+
+`xumx_slicq_v2/model.py`:
+* use a single NSGT
+* forget weird param search, use a basic cqlog scale
