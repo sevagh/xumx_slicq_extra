@@ -12,8 +12,8 @@ import json
 import sys
 
 import xumx_slicq
-from xumx_slicq import model
-from xumx_slicq import transforms
+from xumx_slicq_v2 import model
+from xumx_slicq_v2 import transforms
 
 
 def save_checkpoint(state: dict, is_best: bool, path: str):

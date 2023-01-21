@@ -10,7 +10,7 @@ import torch
 import tqdm
 import random
 
-from xumx_slicq import utils
+from xumx_slicq_v2 import utils
 
 
 def separate_and_evaluate(

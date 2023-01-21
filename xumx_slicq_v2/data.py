@@ -7,9 +7,9 @@ import torch
 import torch.utils.data
 import torchaudio
 import tqdm
-from xumx_slicq import transforms
-from xumx_slicq import filtering
-from xumx_slicq import model
+from xumx_slicq_v2 import transforms
+from xumx_slicq_v2 import filtering
+from xumx_slicq_v2 import model
 
 
 def load_info(path: str) -> dict:

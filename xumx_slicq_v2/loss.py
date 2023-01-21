@@ -1,4 +1,4 @@
-from xumx_slicq import transforms
+from xumx_slicq_v2 import transforms
 import torch
 import auraloss
 

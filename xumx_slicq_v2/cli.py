@@ -5,14 +5,14 @@ import json
 import numpy as np
 
 
-from xumx_slicq import utils
-from xumx_slicq import predict
-from xumx_slicq import data
+from xumx_slicq_v2 import utils
+from xumx_slicq_v2 import predict
+from xumx_slicq_v2 import data
 
 import argparse
 
 
-def separate():
+def separate_main():
     parser = argparse.ArgumentParser(
         description="UMX Inference",
         add_help=True,

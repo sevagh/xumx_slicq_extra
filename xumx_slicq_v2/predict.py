@@ -1,4 +1,4 @@
-from xumx_slicq import utils
+from xumx_slicq_v2 import utils
 import argparse
 import torch
 import musdb
