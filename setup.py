@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
-
-xumx_version = "0.1.0"
+import os
 
 with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
+
 setup(
     name="xumx_slicq_v2",
-    version=xumx_version,
+    version=os.getenv("XUMX_SLICQ_V2_VERSION", "UKNOWN"),
     author="Sevag Hanssian",
     author_email="sevagh@pm.me",
     url="https://github.com/sevagh/xumx-sliCQ-V2",
@@ -25,18 +25,19 @@ setup(
         "numba",
         "scipy",
         "scikit-learn",
+        "tensorboard",
+        "torchinfo",
+        "matplotlib",
+        "musdb==0.3.1",
+        "museval==0.3.1",
+        "gitpython",
         "tqdm",
+        "auraloss @ git+git://github.com/csteinmetz1/auraloss@main#egg=auraloss"
     ],
     extra_requires={
         "test": [
             "pytest",
         ],
-    },
-    entry_points={
-        "console_scripts": [
-            "xumx-slicq-v2-inference=xumx_slicq_v2.cli:separate_main",
-            "xumx-slicq-v2-training=xumx_slicq_v2.train:train_main"
-        ]
     },
     packages=find_packages(),
     include_package_data=True,

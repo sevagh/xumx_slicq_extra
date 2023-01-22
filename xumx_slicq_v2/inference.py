@@ -12,7 +12,7 @@ from xumx_slicq_v2 import data
 import argparse
 
 
-def separate_main():
+def main():
     parser = argparse.ArgumentParser(
         description="UMX Inference",
         add_help=True,
@@ -160,3 +160,7 @@ def separate_main():
                     torch.squeeze(estimate).to("cpu"),
                     sample_rate=separator.sample_rate,
                 )
+
+
+if __name__ == '__main__':
+    main()

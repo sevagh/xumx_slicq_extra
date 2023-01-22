@@ -50,6 +50,5 @@ Running/packaging:
 
 ## Random stuff, nice to have
 
-ONNX, fast inference, CPU-only inference
 something wacky like RNNNoise Zig to build a fast realtime variant!
 extra periphery training data for fine tuning, or OnAir??

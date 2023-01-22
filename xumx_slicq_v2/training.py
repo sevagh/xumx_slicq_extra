@@ -27,7 +27,7 @@ from xumx_slicq_v2 import model
 from xumx_slicq_v2 import utils
 from xumx_slicq_v2 import transforms
 from xumx_slicq_v2 import filtering
-from xumx_slicq.loss import LossCriterion
+from xumx_slicq_v2.loss import LossCriterion
 
 tqdm.monitor_interval = 0
 
@@ -119,7 +119,7 @@ def get_statistics(args, encoder, dataset, time_blocks):
     return [scaler.mean_ for scaler in scalers], std
 
 
-def train_main():
+def main():
     parser = argparse.ArgumentParser(description="Open Unmix Trainer")
 
     # Dataset paramaters
@@ -464,3 +464,7 @@ def train_main():
             break
 
         gc.collect()
+
+
+if __name__ == '__main__':
+    main()

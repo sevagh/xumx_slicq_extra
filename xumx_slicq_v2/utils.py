@@ -11,7 +11,7 @@ import io
 import json
 import sys
 
-import xumx_slicq
+import xumx_slicq_v2
 from xumx_slicq_v2 import model
 from xumx_slicq_v2 import transforms
 

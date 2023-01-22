@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import torch
-from xumx_slicq import transforms
+from xumx_slicq_v2 import transforms
 
 import matplotlib.pyplot as plt
 
