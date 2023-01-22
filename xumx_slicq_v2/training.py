@@ -136,7 +136,7 @@ def main():
         ],
         help="Name of the dataset.",
     )
-    parser.add_argument("--root", type=str, help="root path of dataset")
+    parser.add_argument("--root", type=str, help="root path of dataset", default="/MUSDB18-HQ")
     parser.add_argument(
         "--output",
         type=str,
@@ -144,16 +144,10 @@ def main():
         help="provide output path base folder name",
     )
     parser.add_argument("--model", type=str, help="Path to checkpoint folder")
-    parser.add_argument(
-        "--audio-backend",
-        type=str,
-        default="soundfile",
-        help="Set torchaudio backend (`sox_io` or `soundfile`",
-    )
 
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
-    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
     parser.add_argument(
         "--patience",
@@ -247,16 +241,13 @@ def main():
         help="less verbose during training",
     )
     parser.add_argument(
-        "--no-cuda", action="store_true", default=False, help="disables CUDA training"
-    )
-    parser.add_argument(
         "--cuda-device", type=int, default=-1, help="choose which gpu to train on (-1 = 'cuda' in pytorch)"
     )
 
     args, _ = parser.parse_known_args()
 
-    torchaudio.set_audio_backend(args.audio_backend)
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    torchaudio.set_audio_backend("soundfile")
+    use_cuda = torch.cuda.is_available()
     print("Using GPU:", use_cuda)
 
     if use_cuda:
@@ -286,8 +277,15 @@ def main():
         valid_dataset.seq_duration = args.seq_dur_valid
 
     # create output dir if not exist
-    target_path = Path(args.output)
+    target_path = Path("/model")
     target_path.mkdir(parents=True, exist_ok=True)
+
+    # check if it already contains a pytorch model
+    model_exists = False
+    for file in os.listdir(target_path):
+        if file.endswith(".pth") or file.endswith(".json") or file.endswith(".chkpnt"):
+            model_exists = True
+            break
 
     tboard_path = target_path / f"logdir"
     tboard_writer = SummaryWriter(tboard_path)
@@ -335,7 +333,7 @@ def main():
     n_blocks = len(jagged_slicq)
 
     # data whitening
-    if args.model or args.debug:
+    if model_exists or args.debug:
         scaler_mean = None
         scaler_std = None
     else:
@@ -366,12 +364,13 @@ def main():
     es = utils.EarlyStopping(patience=args.patience)
 
     # if a model is specified: resume training
-    if args.model:
-        model_path = Path(args.model).expanduser()
-        with open(Path(model_path, "xumx_slicq.json"), "r") as stream:
+    if model_exists:
+        print("Model exists, resuming training...")
+
+        with open(Path(target_path, "xumx_slicq_v2.json"), "r") as stream:
             results = json.load(stream)
 
-        target_model_path = Path(model_path, "xumx_slicq.chkpnt")
+        target_model_path = Path(target_path, "xumx_slicq_v2.chkpnt")
         checkpoint = torch.load(target_model_path, map_location=device)
         unmix.load_state_dict(checkpoint["state_dict"], strict=False)
         optimizer.load_state_dict(checkpoint["optimizer"])
@@ -379,7 +378,8 @@ def main():
         # train for another epochs_trained
         t = tqdm.trange(
             results["epochs_trained"],
-            results["epochs_trained"] + args.epochs + 1,
+            args.epochs+1,
+            initial=results["epochs_trained"],
             disable=args.quiet,
         )
         train_losses = results["train_loss_history"]
@@ -397,7 +397,7 @@ def main():
         best_epoch = 0
 
     print('Starting Tensorboard')
-    tboard_proc = subprocess.Popen(["tensorboard", "--logdir", tboard_path, "--host", "0.0.0.0"])
+    tboard_proc = subprocess.Popen(["tensorboard", "--logdir", tboard_path])
     tboard_pid = tboard_proc.pid
 
     def kill_tboard():
@@ -450,7 +450,7 @@ def main():
             "commit": commit,
         }
 
-        with open(Path(target_path, "xumx_slicq.json"), "w") as outfile:
+        with open(Path(target_path, "xumx_slicq_v2.json"), "w") as outfile:
             outfile.write(json.dumps(params, indent=4, sort_keys=True))
 
         train_times.append(time.time() - end)

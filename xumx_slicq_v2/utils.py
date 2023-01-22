@@ -25,10 +25,10 @@ def save_checkpoint(state: dict, is_best: bool, path: str):
         path (str): model path
     """
     # save full checkpoint including optimizer
-    torch.save(state, os.path.join(path, "xumx_slicq.chkpnt"))
+    torch.save(state, os.path.join(path, "xumx_slicq_v2.chkpnt"))
     if is_best:
         # save just the weights
-        torch.save(state["state_dict"], os.path.join(path, "xumx_slicq.pth"))
+        torch.save(state["state_dict"], os.path.join(path, "xumx_slicq_v2.pth"))
 
 
 class AverageMeter(object):
@@ -105,7 +105,7 @@ def load_target_models(model_str_or_path="umxhq", device="cpu", pretrained=True,
     model_path = Path(model_str_or_path).expanduser()
 
     # load model from disk
-    with open(Path(model_path, "xumx_slicq.json"), "r") as stream:
+    with open(Path(model_path, "xumx_slicq_v2.json"), "r") as stream:
         results = json.load(stream)
 
     # need to configure an NSGT object to peek at its params to set up the neural network
@@ -122,7 +122,7 @@ def load_target_models(model_str_or_path="umxhq", device="cpu", pretrained=True,
 
     seq_dur = results["args"]["seq_dur"]
 
-    target_model_path = Path(model_path, "xumx_slicq.pth")
+    target_model_path = Path(model_path, "xumx_slicq_v2.pth")
     state = torch.load(target_model_path, map_location=device)
 
     jagged_slicq = nsgt_base.predict_input_size(1, nb_channels, seq_dur)

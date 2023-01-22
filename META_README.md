@@ -23,8 +23,6 @@ Using guides:
 
 ## Realistic roadmap
 
-1. Get everything training and working right now with new xumx_slicq_v2 name and directory structure
-    * Using nvidia-docker2 Docker image for training + inference
 2. Prepare optimal training/tuning environment
     * Tensorboard to show spectrograms, losses, etc.
     * Prepare a few for-overfitting sets of data
@@ -32,6 +30,7 @@ Using guides:
     * code files: `xumx_slicq_v2/{metrics.py,loss.py}`
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
     * implement mixed SDR/SAR/SIR/ISR loss, MSE loss
+    * gets rid of auraloss
     * cuSignal/cuFFT
 4. Address overlap issue: normal cqlog sliCQT, delete deoverlap (focus on mega-slices)
 5. Address ragged tensor issue (interpolated matrix form - separate magnitude/phase interpolation)
@@ -51,4 +50,3 @@ Running/packaging:
 ## Random stuff, nice to have
 
 something wacky like RNNNoise Zig to build a fast realtime variant!
-extra periphery training data for fine tuning, or OnAir??
