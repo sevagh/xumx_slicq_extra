@@ -2,7 +2,6 @@ from typing import Optional
 
 import numpy as np
 import torch
-import torchaudio
 from torch import Tensor
 import torch.nn as nn
 from .filtering import atan2

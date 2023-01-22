@@ -1,3 +1,29 @@
-FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+FROM nvcr.io/nvidia/pytorch:22.12-py3 as devel
 
-RUN echo hello
+RUN python -m pip install --upgrade pip
+
+# build a wheel for cusignal from source
+RUN git clone https://github.com/rapidsai/cusignal /cusignal
+WORKDIR /cusignal
+RUN python -m pip wheel --no-deps ./python --wheel-dir /wheelhouse
+
+# build a wheel for torchaudio from source to correspond to $PYTORCH_VERSION from nvcr
+RUN git clone https://github.com/pytorch/audio /torchaudio
+WORKDIR /torchaudio
+RUN python -m pip wheel --no-build-isolation --no-deps ./ --wheel-dir /wheelhouse
+
+# build a wheel for xumx-slicq-v2 from source
+COPY . /xumx-sliCQ-V2
+WORKDIR /xumx-sliCQ-V2
+RUN python -m pip wheel --no-deps ./ --wheel-dir /wheelhouse
+
+FROM nvcr.io/nvidia/pytorch:22.12-py3 as runtime
+
+RUN python -m pip install --upgrade pip
+
+COPY --from=devel /wheelhouse /wheelhouse
+
+ARG XUMX_SLICQ_V2_VERSION="0.1.0"
+RUN python -m pip install --pre /wheelhouse/xumx_slicq_v2-${XUMX_SLICQ_V2_VERSION}-py3-none-any.whl --find-links /wheelhouse
+
+CMD ["xumx-slicq-v2-inference"]
