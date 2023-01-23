@@ -23,9 +23,9 @@ $ docker build -t "xumx-slicq-v2" .
 ```
 $ docker run --rm -it \
     --gpus=all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
-    -v /path/to/MUSDB18-HQ/dataset:/MUSDB18-HQ
-    -v /path/to/save/trained/model:/model
-    -p 6006:6006
+    -v /path/to/MUSDB18-HQ/dataset:/MUSDB18-HQ \
+    -v /path/to/save/trained/model:/model \
+    -p 6006:6006 \
     xumx-slicq-v2 \
     python -m xumx_slicq_v2.training --help
 ```
@@ -38,8 +38,8 @@ $ docker run --rm -it \
 $ docker run --rm -it \
     --gpus=all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
     xumx-slicq-v2 \
-    -v /path/to/input/tracks:/input
-    -v /path/to/output/tracks:/output
-    -v /path/to/trained/model:/model
+    -v /path/to/input/tracks:/input \
+    -v /path/to/output/tracks:/output \
+    -v /path/to/trained/model:/model \
     python -m xumx_slicq_v2.inference --help
 ```

@@ -283,7 +283,7 @@ def main():
     # check if it already contains a pytorch model
     model_exists = False
     for file in os.listdir(target_path):
-        if file.endswith(".pth") or file.endswith(".json") or file.endswith(".chkpnt"):
+        if file.endswith(".pth") or file.endswith(".chkpnt"):
             model_exists = True
             break
 
