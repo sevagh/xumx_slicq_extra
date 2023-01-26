@@ -20,7 +20,7 @@ setup(
         "torch>=0.13.1",
         "torchaudio",
         "cusignal",
-        "cupy-cuda11x",
+        "cupy-cuda118",
         "numpy",
         "numba",
         "scipy",
@@ -32,7 +32,7 @@ setup(
         "museval==0.3.1",
         "gitpython",
         "tqdm",
-        "auraloss @ git+git://github.com/csteinmetz1/auraloss@main#egg=auraloss"
+        "auraloss"
     ],
     extra_requires={
         "test": [

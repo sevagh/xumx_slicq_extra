@@ -1,5 +1,9 @@
 # xumx-sliCQ-V2
 
+## Target to beat
+
+Time for epoch: ~2:20
+
 ## Goals
 
 1. Adapt xumx-sliCQ for HAAQI: http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
@@ -26,17 +30,13 @@ Using guides:
 2. Prepare optimal training/tuning environment
     * Tensorboard to show spectrograms, losses, etc.
     * Prepare a few for-overfitting sets of data
-3. Apply everything-loss metrics calculations
-    * code files: `xumx_slicq_v2/{metrics.py,loss.py}`
+3. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
-    * implement mixed SDR/SAR/SIR/ISR loss, MSE loss
-    * gets rid of auraloss
-    * cuSignal/cuFFT
+        * with cuSignal and/or cuFFT?
 4. Address overlap issue: normal cqlog sliCQT, delete deoverlap (focus on mega-slices)
 5. Address ragged tensor issue (interpolated matrix form - separate magnitude/phase interpolation)
-    * cuSignal/cuFFT or other matrix tools
-    * code files: `xumx_slicq_v2/nsgt/`
     * improve performance with cuFFT/cuSignal
+    * code files: `xumx_slicq_v2/nsgt/`
     * address invertible interpolation/matrixform for CQNSGT (rasterization?) from paper
 6. Use [Optuna](https://optuna.org/) to tune sliCQT hyperparameters
 7. Apply NVIDIA NGC container tools/tooling (DALI data loading, TensorRT inference, cuFFT, cuSignal)
@@ -45,8 +45,3 @@ Using guides:
 
 Running/packaging:
 - nvidia-docker2 runtime for reproducible training
-- wheel stuff (setup/pyproject.toml/poetry)
-
-## Random stuff, nice to have
-
-something wacky like RNNNoise Zig to build a fast realtime variant!
