@@ -54,7 +54,7 @@ def make_filterbanks(nsgt_base, sample_rate=44100.0):
 
 
 class NSGTBase(nn.Module):
-    def __init__(self, scale, fbins, fmin, fs=44100, device="cuda", gamma=25., matrixform=False):
+    def __init__(self, scale, fbins, fmin, fs=44100, device="cuda", gamma=25):
         super(NSGTBase, self).__init__()
         self.fbins = fbins
         self.fmin = fmin
@@ -78,7 +78,7 @@ class NSGTBase(nn.Module):
         self.sllen, self.trlen = self.scl.suggested_sllen_trlen(fs)
         print(f'sllen, trlen: {self.sllen}, {self.trlen}')
 
-        self.nsgt = NSGT_sliced(self.scl, self.sllen, self.trlen, fs, real=True, matrixform=matrixform, multichannel=True, device=device)
+        self.nsgt = NSGT_sliced(self.scl, self.sllen, self.trlen, fs, real=True, matrixform='none', multichannel=True, device=device)
         self.M = self.nsgt.ncoefs
         self.fs = fs
         self.fbins_actual = self.nsgt.fbins_actual

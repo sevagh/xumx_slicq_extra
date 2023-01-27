@@ -1,23 +1,18 @@
 # xumx-sliCQ-V2
 
-## Target to beat
+## Current running command
 
-Time for epoch: ~2:20
+```
+sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 -v /home/sevagh/Music/MUSDB18-HQ/:/MUSDB18-HQ -v /home/sevagh/repos/xumx-sliCQ-V2:/xumx-sliCQ-V2 -p 6006:6006 xumx-slicq-v2 python -m xumx_slicq_v2.training --debug  --valid-chunk-dur=60 --batch-size=8
+```
 
 ## Goals
 
-1. Adapt xumx-sliCQ for HAAQI: http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
-2. Improve SDR of xumx-sliCQ
-3. Showcase NVIDIA/RAPIDS tools/SDKs for kgmon
-
-### Showcase NVIDIA tools
-
-1. NGC pytorch for enhanced GPU acceleration
-    1. Data: DALI ETL (load MUSDB18-HQ faster)
-    2. Training: cuDNN (nothing to do, pytorch as usual)
-    3. Inference: TensorRT
-2. cuFFT
-3. cuSignal
+1. Improve SDR of xumx-sliCQ
+1. Adapt for HAAQI: http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
+1. Showcase NVIDIA/RAPIDS tools/SDKs for kgmon
+    1. NGC pytorch container with cuSignal installed
+    1. Improve performance of training/inference with DALI, TensorRT, cuSignal, cuFFT, etc.
 
 ## ML/DL Training decisions
 
@@ -27,21 +22,10 @@ Using guides:
 
 ## Realistic roadmap
 
-2. Prepare optimal training/tuning environment
-    * Tensorboard to show spectrograms, losses, etc.
-    * Prepare a few for-overfitting sets of data
-3. Apply HAAQI metrics calculations for time-domain
+1. Train fully with iNSGT gradients
+1. Remove bandwidth parameter, train again
+1. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
-        * with cuSignal and/or cuFFT?
-4. Address overlap issue: normal cqlog sliCQT, delete deoverlap (focus on mega-slices)
-5. Address ragged tensor issue (interpolated matrix form - separate magnitude/phase interpolation)
-    * improve performance with cuFFT/cuSignal
-    * code files: `xumx_slicq_v2/nsgt/`
-    * address invertible interpolation/matrixform for CQNSGT (rasterization?) from paper
-6. Use [Optuna](https://optuna.org/) to tune sliCQT hyperparameters
-7. Apply NVIDIA NGC container tools/tooling (DALI data loading, TensorRT inference, cuFFT, cuSignal)
-
-## Code roadmap
-
-Running/packaging:
-- nvidia-docker2 runtime for reproducible training
+    * replace SISDR with HAAQI (with a flag?) or mix both
+1. Apply NVIDIA NGC container tools/tooling (DALI data loading, TensorRT inference, cuFFT, cuSignal)
+1. Look into where cuFFT or cuSignal can speed things up

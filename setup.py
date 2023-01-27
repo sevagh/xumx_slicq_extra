@@ -32,7 +32,7 @@ setup(
         "museval==0.3.1",
         "gitpython",
         "tqdm",
-        "auraloss"
+        "auraloss",
     ],
     extra_requires={
         "test": [

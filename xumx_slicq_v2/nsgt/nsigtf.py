@@ -54,7 +54,7 @@ from .fft import fftp, ifftp, irfftp
     
 
 #@profile
-def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, matrixform=False, measurefft=False, multithreading=False, device="cpu"):
+def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, matrixform='none', measurefft=False, multithreading=False, device="cpu"):
     dtype = gd[0].dtype
 
     fft = fftp(measure=measurefft, dtype=dtype)
@@ -105,7 +105,7 @@ def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, matrixform
         for i,(wr1,wr2,Lg) in enumerate(loopparams[fbin_ptr:fbin_ptr+nb_fbins][:fbins]):
             freq_idx = fbin_ptr+i
 
-            if not matrixform:
+            if matrixform != 'zeropad':
                 assert Lg == Lg_outer
 
             t = fc[:, :, i]
@@ -130,9 +130,3 @@ def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, matrixform
     sig = ifft(ftr, outn=nn)
     sig = sig[:, :, :Ls] # Truncate the signal to original length (if given)
     return sig
-
-
-# non-sliced version
-def nsigtf(c, gd, wins, nn, Ls=None, real=False, reducedform=0, measurefft=False, multithreading=False, device="cpu"):
-    ret = nsigtf_sl(torch.unsqueeze(c, dim=0), gd, wins, nn, Ls=Ls, real=real, reducedform=reducedform, measurefft=measurefft, multithreading=multithreading, device=device)
-    return torch.squeeze(ret, dim=0)

@@ -62,14 +62,9 @@ def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True
 
             X = nsgt(x)
             Xmag = cnorm(X)
-            Ymag_bass = cnorm(nsgt(y_bass))
-            Ymag_vocals = cnorm(nsgt(y_vocals))
-            Ymag_drums = cnorm(nsgt(y_drums))
-            Ymag_other = cnorm(nsgt(y_other))
 
             loss = criterion(
                 *unmix(Xmag), # forward call to unmix returns bass, vocals, other, drums
-                *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
                 *(y_bass, y_vocals, y_other, y_drums),
                 X,
                 x.shape[-1]
@@ -198,12 +193,6 @@ def main():
         type=float,
         default=16000.,
         help="network won't consider frequencies above this"
-    )
-    parser.add_argument(
-        "--umx-bilstm",
-        action="store_true",
-        default=False,
-        help="use the original umx bi-lstm architecture",
     )
     parser.add_argument(
         "--fscale",
@@ -342,7 +331,6 @@ def main():
     unmix = model.OpenUnmix(
         jagged_slicq,
         max_bin=nsgt_base.max_bins(args.bandwidth),
-        umx_bilstm=args.umx_bilstm,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)

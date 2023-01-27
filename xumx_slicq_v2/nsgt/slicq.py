@@ -33,31 +33,7 @@ from .nsigtf import nsigtf_sl
 from .util import calcwinrange
 from .fscale import OctScale
 from .reblock import reblock
-
-
-def overlap_add_slicq(slicq, flatten=False):
-    # proper 50% overlap-add
-    if not flatten:
-        nb_samples, nb_slices, nb_channels, nb_f_bins, nb_m_bins = slicq.shape
-
-        window = nb_m_bins
-        hop = window//2 # 50% overlap window
-
-        ncoefs = nb_slices*nb_m_bins//2 + hop
-        out = torch.zeros((nb_samples, nb_channels, nb_f_bins, ncoefs), dtype=slicq.dtype, device=slicq.device)
-
-        ptr = 0
-
-        for i in range(nb_slices):
-            out[:, :, :, ptr:ptr+window] += slicq[:, i, :, :, :]
-            ptr += hop
-
-        return out
-    # flatten adjacent slices, just for demo purposes
-    else:
-        slicq = slicq.permute(0, 2, 3, 1, 4)
-        out = torch.flatten(slicq, start_dim=-2, end_dim=-1)
-        return out
+from .rasterize import rasterize, derasterize
 
 
 def arrange(cseq, fwd, device="cpu"):
@@ -71,11 +47,13 @@ def arrange(cseq, fwd, device="cpu"):
             odd_mid = 3*M//4
             even_mid = M//4
 
+        cseq_copy = torch.zeros_like(cseq)
         # odd indices
-        cseq[1::2, :, :, :] = torch.cat((cseq[1::2, :, :, odd_mid:], cseq[1::2, :, :, :odd_mid]), dim=-1)
+        cseq_copy[1::2, :, :, :] = torch.cat((cseq[1::2, :, :, odd_mid:], cseq[1::2, :, :, :odd_mid]), dim=-1)
 
         # even indices
-        cseq[::2, :, :, :] = torch.cat((cseq[::2, :, :, even_mid:], cseq[::2, :, :, :even_mid]), dim=-1)
+        cseq_copy[::2, :, :, :] = torch.cat((cseq[::2, :, :, even_mid:], cseq[::2, :, :, :even_mid]), dim=-1)
+        cseq = cseq_copy
     elif type(cseq) == list:
         for i, cseq_tsor in enumerate(cseq):
             cseq[i] = arrange(cseq_tsor, fwd, device)
@@ -116,7 +94,7 @@ def chnmap_forward(gen, seq, device="cpu"):
 class NSGT_sliced(torch.nn.Module):
     def __init__(self, scale, sl_len, tr_area, fs,
                  min_win=16, Qvar=1,
-                 real=False, recwnd=False, matrixform=False, reducedform=0,
+                 real=False, recwnd=False, matrixform='none', reducedform=0,
                  multichannel=False,
                  measurefft=False,
                  multithreading=False,
@@ -163,9 +141,12 @@ class NSGT_sliced(torch.nn.Module):
         # coefficients per slice
         self.ncoefs = max(int(ceil(float(len(gii))/mii))*mii for mii,gii in zip(self.M[sl],self.g[sl]))
 
+        if matrixform not in ['none', 'rasterize', 'zeropad']:
+            raise ValueError("choose one of 'none', 'rasterize', or 'zeropad' for matrixform")
+
         self.matrixform = matrixform
         
-        if self.matrixform:
+        if self.matrixform == 'zeropad':
             if self.reducedform:
                 rm = self.M[self.reducedform:len(self.M)//2+1-self.reducedform]
                 self.M[:] = rm.max()
@@ -218,10 +199,18 @@ class NSGT_sliced(torch.nn.Module):
     
         cseq = self.unchannelize(cseq)
 
-        return cseq
+        if self.matrixform != 'rasterize':
+            return cseq
+        else:
+            ragged_shapes = [cseq_.shape for cseq_ in cseq]
+            return rasterize(cseq), ragged_shapes
 
     #@profile
-    def backward(self, cseq, length):
+    def backward(self, cseq, length, ragged_shapes=None):
+        if self.matrixform == 'rasterize':
+            assert ragged_shapes != None
+            cseq = derasterize(cseq, ragged_shapes)
+
         'inverse transform - c: iterable sequence of coefficients'
         cseq = self.channelize(cseq)
 
@@ -237,12 +226,11 @@ class NSGT_sliced(torch.nn.Module):
 
         # convert to tensor
         ret = next(reblock(sig, length, fulllast=False, multichannel=self.multichannel, device=self.device))
-
         return ret
 
 
 class CQ_NSGT_sliced(NSGT_sliced):
-    def __init__(self, fmin, fmax, bins, sl_len, tr_area, fs, min_win=16, Qvar=1, real=False, recwnd=False, matrixform=False, reducedform=0, multichannel=False, measurefft=False, multithreading=False):
+    def __init__(self, fmin, fmax, bins, sl_len, tr_area, fs, min_win=16, Qvar=1, real=False, recwnd=False, matrixform='none', reducedform=0, multichannel=False, measurefft=False, multithreading=False):
         assert fmin > 0
         assert fmax > fmin
         assert bins > 0
