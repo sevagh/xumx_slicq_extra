@@ -33,7 +33,6 @@ from .nsigtf import nsigtf_sl
 from .util import calcwinrange
 from .fscale import OctScale
 from .reblock import reblock
-from .rasterize import rasterize, derasterize
 
 
 def arrange(cseq, fwd, device="cpu"):
@@ -94,10 +93,8 @@ def chnmap_forward(gen, seq, device="cpu"):
 class NSGT_sliced(torch.nn.Module):
     def __init__(self, scale, sl_len, tr_area, fs,
                  min_win=16, Qvar=1,
-                 real=False, recwnd=False, matrixform='none', reducedform=0,
+                 real=False, recwnd=False, reducedform=0,
                  multichannel=False,
-                 measurefft=False,
-                 multithreading=False,
                  dtype=torch.float32,
                  device="cpu"):
         assert fs > 0
@@ -118,8 +115,6 @@ class NSGT_sliced(torch.nn.Module):
         self.tr_area = tr_area
         self.fs = fs
         self.real = real
-        self.measurefft = measurefft
-        self.multithreading = multithreading
         self.userecwnd = recwnd
         self.reducedform = reducedform
         self.multichannel = multichannel
@@ -141,18 +136,6 @@ class NSGT_sliced(torch.nn.Module):
         # coefficients per slice
         self.ncoefs = max(int(ceil(float(len(gii))/mii))*mii for mii,gii in zip(self.M[sl],self.g[sl]))
 
-        if matrixform not in ['none', 'rasterize', 'zeropad']:
-            raise ValueError("choose one of 'none', 'rasterize', or 'zeropad' for matrixform")
-
-        self.matrixform = matrixform
-        
-        if self.matrixform == 'zeropad':
-            if self.reducedform:
-                rm = self.M[self.reducedform:len(self.M)//2+1-self.reducedform]
-                self.M[:] = rm.max()
-            else:
-                self.M[:] = self.M.max()
-
         if multichannel:
             self.channelize = lambda seq: seq
             self.unchannelize = lambda seq: seq
@@ -166,8 +149,8 @@ class NSGT_sliced(torch.nn.Module):
         self.setup_lambdas()
         
     def setup_lambdas(self):
-        self.fwd = lambda fc: nsgtf_sl(fc, self.g, self.wins, self.nn, self.M, real=self.real, reducedform=self.reducedform, matrixform=self.matrixform, measurefft=self.measurefft, multithreading=self.multithreading, device=self.device)
-        self.bwd = lambda cc: nsigtf_sl(cc, self.gd, self.wins, self.nn, self.sl_len ,real=self.real, reducedform=self.reducedform, matrixform=self.matrixform, measurefft=self.measurefft, multithreading=self.multithreading, device=self.device)
+        self.fwd = lambda fc: nsgtf_sl(fc, self.g, self.wins, self.nn, self.M, real=self.real, reducedform=self.reducedform, device=self.device)
+        self.bwd = lambda cc: nsigtf_sl(cc, self.gd, self.wins, self.nn, self.sl_len ,real=self.real, reducedform=self.reducedform, device=self.device)
 
     def _apply(self, fn):
         super(NSGT_sliced, self)._apply(fn)
@@ -199,18 +182,10 @@ class NSGT_sliced(torch.nn.Module):
     
         cseq = self.unchannelize(cseq)
 
-        if self.matrixform != 'rasterize':
-            return cseq
-        else:
-            ragged_shapes = [cseq_.shape for cseq_ in cseq]
-            return rasterize(cseq), ragged_shapes
+        return cseq
 
     #@profile
     def backward(self, cseq, length, ragged_shapes=None):
-        if self.matrixform == 'rasterize':
-            assert ragged_shapes != None
-            cseq = derasterize(cseq, ragged_shapes)
-
         'inverse transform - c: iterable sequence of coefficients'
         cseq = self.channelize(cseq)
 
@@ -227,17 +202,3 @@ class NSGT_sliced(torch.nn.Module):
         # convert to tensor
         ret = next(reblock(sig, length, fulllast=False, multichannel=self.multichannel, device=self.device))
         return ret
-
-
-class CQ_NSGT_sliced(NSGT_sliced):
-    def __init__(self, fmin, fmax, bins, sl_len, tr_area, fs, min_win=16, Qvar=1, real=False, recwnd=False, matrixform='none', reducedform=0, multichannel=False, measurefft=False, multithreading=False):
-        assert fmin > 0
-        assert fmax > fmin
-        assert bins > 0
-
-        self.fmin = fmin
-        self.fmax = fmax
-        self.bins = bins  # bins per octave
-
-        scale = OctScale(fmin, fmax, bins)
-        NSGT_sliced.__init__(self, scale, sl_len, tr_area, fs, min_win, Qvar, real, recwnd, matrixform=matrixform, reducedform=reducedform, multichannel=multichannel, measurefft=measurefft, multithreading=multithreading)

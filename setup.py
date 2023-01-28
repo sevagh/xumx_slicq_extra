@@ -19,11 +19,9 @@ setup(
     install_requires=[
         "torch>=0.13.1",
         "torchaudio",
-        "cusignal",
         "cupy-cuda118",
         "numpy",
         "numba",
-        "scipy",
         "scikit-learn",
         "tensorboard",
         "torchinfo",

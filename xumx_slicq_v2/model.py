@@ -16,132 +16,6 @@ import copy
 eps = 1.e-10
 
 
-# just pass input through directly
-class DummyTimeBucket(nn.Module):
-    def __init__(
-        self,
-        slicq_sample_input,
-    ):
-        super(DummyTimeBucket, self).__init__()
-
-    def freeze(self):
-        # set all parameters as not requiring gradient, more RAM-efficient
-        # at test time
-        for p in self.parameters():
-            #p.requires_grad = False
-            p.grad = None
-        self.eval()
-
-    def forward(self, x: Tensor) -> Tensor:
-        return x
-
-
-class OpenUnmixTimeBucketBiLSTM(nn.Module):
-    def __init__(
-        self,
-        slicq_sample_input,
-        nb_layers=2,
-        input_mean=None,
-        input_scale=None,
-    ):
-        super(OpenUnmixTimeBucketBiLSTM, self).__init__()
-
-        nb_samples, nb_channels, nb_f_bins, nb_slices, nb_t_bins = slicq_sample_input.shape
-
-        self.nb_bins = nb_f_bins
-        hidden_size = nb_f_bins*nb_channels
-        self.hidden_size = hidden_size
-
-        self.bn1 = BatchNorm1d(self.hidden_size)
-
-        lstm_hidden_size = hidden_size // 2
-
-        self.lstm = LSTM(
-            input_size=hidden_size,
-            hidden_size=lstm_hidden_size,
-            num_layers=nb_layers,
-            bidirectional=True,
-            batch_first=False,
-            dropout=0.4,
-        )
-
-        fc2_hiddensize = hidden_size * 2
-        self.fc2 = Linear(in_features=fc2_hiddensize, out_features=hidden_size, bias=False)
-
-        self.bn2 = BatchNorm1d(hidden_size)
-
-        self.growth_layer = ConvTranspose2d(nb_channels, nb_channels, (1, 3), stride=(1, 2), bias=True)
-        self.growth_act = Sigmoid()
-
-        if input_mean is not None:
-            input_mean = torch.from_numpy(-input_mean).float()
-        else:
-            input_mean = torch.zeros(nb_f_bins)
-
-        if input_scale is not None:
-            input_scale = torch.from_numpy(1.0 / input_scale).float()
-        else:
-            input_scale = torch.ones(nb_f_bins)
-
-        self.input_mean = Parameter(input_mean)
-        self.input_scale = Parameter(input_scale)
-
-
-    def freeze(self):
-        # set all parameters as not requiring gradient, more RAM-efficient
-        # at test time
-        for p in self.parameters():
-            p.requires_grad = False
-        self.eval()
-
-    def forward(self, x: Tensor) -> Tensor:
-        mix = x.detach().clone()
-
-        x_shape = x.shape
-        nb_samples, nb_channels, nb_f_bins, nb_slices, nb_t_bins = x_shape
-        nb_t_frames_deola = nb_slices*nb_t_bins
-
-        x = overlap_add_slicq(x)
-
-        # to (nb_frames*nb_samples, nb_channels*nb_bins)
-        # and encode to (nb_frames*nb_samples, hidden_size)
-        x = x.reshape(-1, nb_channels * self.nb_bins)
-        # normalize every instance in a batch
-        x = self.bn1(x)
-        x = x.reshape(-1, nb_samples, self.hidden_size)
-        # squash range ot [-1, 1]
-        x = torch.tanh(x)
-
-        # apply 3-layers of stacked LSTM
-        lstm_out = self.lstm(x)
-
-        # lstm skip connection
-        x = torch.cat([x, lstm_out[0]], -1)
-
-        # first dense stage + batch norm
-        x = self.fc2(x.reshape(-1, x.shape[-1]))
-        x = self.bn2(x)
-        x = F.relu(x)
-
-        # reshape to grow
-        x = x.reshape(nb_samples, nb_channels, self.nb_bins, -1)
-
-        # growth layer
-        x = self.growth_layer(x)
-        x = self.growth_act(x)
-
-        # crop
-        x = x[:, :, :, : nb_t_frames_deola]
-
-        # reshape back to original dim
-        x = x.reshape(x_shape)
-
-        # since our output is non-negative, we can apply RELU
-        x = x * mix
-        # permute back to (nb_samples, nb_channels, nb_bins, nb_frames)
-        return x
-
-
 class OpenUnmixTimeBucketCDAE(nn.Module):
     def __init__(
         self,
@@ -265,7 +139,6 @@ class OpenUnmix(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
-        max_bin=None,
         umx_bilstm=False,
         input_means=None,
         input_scales=None,
@@ -281,27 +154,13 @@ class OpenUnmix(nn.Module):
 
             freq_start = freq_idx
 
-            if max_bin is not None and freq_start >= max_bin:
-                bucketed_unmixes.append(
-                    DummyTimeBucket(C_block)
+            bucketed_unmixes.append(
+                OpenUnmixTimeBucketCDAE(
+                    C_block,
+                    input_mean=input_mean,
+                    input_scale=input_scale,
                 )
-            else:
-                if not umx_bilstm:
-                    bucketed_unmixes.append(
-                        OpenUnmixTimeBucketCDAE(
-                            C_block,
-                            input_mean=input_mean,
-                            input_scale=input_scale,
-                        )
-                    )
-                else:
-                    bucketed_unmixes.append(
-                        OpenUnmixTimeBucketBiLSTM(
-                            C_block,
-                            input_mean=input_mean,
-                            input_scale=input_scale,
-                        )
-                    )
+            )
 
             # advance global frequency pointer
             freq_idx += C_block.shape[2]

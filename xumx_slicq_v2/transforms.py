@@ -10,6 +10,7 @@ import warnings
 from .nsgt import NSGT_sliced, BarkScale, MelScale, LogScale, VQLogScale, OctScale
 
 
+@torch.jit.script
 def overlap_add_slicq(slicq):
     nb_samples, nb_channels, nb_f_bins, nb_slices, nb_m_bins = slicq.shape
 
@@ -28,19 +29,19 @@ def overlap_add_slicq(slicq):
     return out
 
 
+@torch.jit.script
+def _phasemix_block_sep(X_block, Ymag_block):
+    Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
+    Ycomplex_block = torch.empty_like(X_block)
+    Ycomplex_block[..., 0] = Ymag_block * torch.cos(Xphase_block)
+    Ycomplex_block[..., 1] = Ymag_block * torch.sin(Xphase_block)
+    return Ycomplex_block
+
+
 def phasemix_sep(X, Ymag):
-    Ycomplex = [None]*len(X)
-
-    for i, X_block in enumerate(X):
-        Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
-        Ycomplex_block = torch.empty_like(X_block)
-
-        Ycomplex_block[..., 0] = Ymag[i] * torch.cos(Xphase_block)
-        Ycomplex_block[..., 1] = Ymag[i] * torch.sin(Xphase_block)
-
-        Ycomplex[i] = Ycomplex_block
-
-    return Ycomplex
+    phasemix_futures = [torch.jit.fork(_phasemix_block_sep, X_block, Ymag_block) for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag))]
+    ret = [torch.jit.wait(future) for future in phasemix_futures]
+    return ret
 
 
 def make_filterbanks(nsgt_base, sample_rate=44100.0):
@@ -78,17 +79,10 @@ class NSGTBase(nn.Module):
         self.sllen, self.trlen = self.scl.suggested_sllen_trlen(fs)
         print(f'sllen, trlen: {self.sllen}, {self.trlen}')
 
-        self.nsgt = NSGT_sliced(self.scl, self.sllen, self.trlen, fs, real=True, matrixform='none', multichannel=True, device=device)
+        self.nsgt = NSGT_sliced(self.scl, self.sllen, self.trlen, fs, real=True, multichannel=True, device=device)
         self.M = self.nsgt.ncoefs
         self.fs = fs
         self.fbins_actual = self.nsgt.fbins_actual
-
-    def max_bins(self, bandwidth): # convert hz bandwidth into bins
-        if bandwidth is None:
-            return None
-        freqs, _ = self.scl()
-        max_bin = min(np.argwhere(freqs > bandwidth))[0]
-        return max_bin+1
 
     def predict_input_size(self, batch_size, nb_channels, seq_dur_s):
         fwd = NSGT_SL(self)
@@ -128,7 +122,7 @@ class NSGT_SL(nn.Module):
         nb_samples, nb_channels, nb_timesteps = shape
 
         # pack batch
-        x = x.view(-1, shape[-1])
+        x = x.contiguous().view(-1, shape[-1])
 
         C = self.nsgt.nsgt.forward((x,))
 
@@ -140,19 +134,6 @@ class NSGT_SL(nn.Module):
             C[i] = nsgt_f
 
         return C
-
-    def plot_spectrogram(self, mls, ax):
-        assert mls.shape[0] == 1
-        # remove batch
-        mls = torch.squeeze(mls, dim=0)
-        # mix down multichannel
-        mls = torch.mean(mls, dim=-1)
-        fs_coef = self.nsgt.fs*self.nsgt.nsgt.coef_factor
-        mls_dur = len(mls)/fs_coef # final duration of MLS
-        mls_max = torch.quantile(mls, 0.9)
-
-        mls = mls.detach().cpu().numpy()
-        ax.imshow(mls.T, aspect=mls_dur/mls.shape[1]*0.2, interpolation='nearest', origin='lower', vmin=mls_max-60., vmax=mls_max, extent=(0,mls_dur,0,mls.shape[1]))
 
 
 class INSGT_SL(nn.Module):
@@ -201,6 +182,11 @@ class INSGT_SL(nn.Module):
         return y
 
 
+@torch.jit.script
+def _single_block_spec(C_block):
+    return torch.pow(torch.abs(torch.view_as_complex(C_block)), 1.0)
+
+
 class ComplexNorm(nn.Module):
     r"""Compute the norm of complex tensor input.
 
@@ -212,21 +198,11 @@ class ComplexNorm(nn.Module):
             to maximize
     """
 
-    def __init__(self, power: float = 1.0, mono: bool = False):
+    def __init__(self):
         super(ComplexNorm, self).__init__()
-        self.power = power
-        self.mono = mono
 
     def forward(self, spec):
-        # take the magnitude
-
-        ret = [None]*len(spec)
-        for i, C_block in enumerate(spec):
-            C_block = torch.pow(torch.abs(torch.view_as_complex(C_block)), self.power)
-
-            # downmix in the mag domain to preserve energy
-            if self.mono:
-                C_block = torch.mean(C_block, 1, keepdim=True)
-            ret[i] = C_block
-
+        # take the magnitude of the ragged slicqt list
+        spec_futures = [torch.jit.fork(_single_block_spec, C_block) for i, C_block in enumerate(spec)]
+        ret = [torch.jit.wait(future) for future in spec_futures]
         return ret

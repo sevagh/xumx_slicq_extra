@@ -9,11 +9,6 @@ ENV XUMX_SLICQ_V2_VERSION="${XUMX_SLICQ_V2_VERSION}"
 
 RUN python -m pip install --upgrade pip
 
-# build a wheel for cusignal from source
-RUN git clone https://github.com/rapidsai/cusignal /cusignal
-WORKDIR /cusignal
-RUN python -m pip wheel --no-deps ./python --wheel-dir /wheelhouse
-
 # build a wheel for torchaudio from source to correspond to $PYTORCH_VERSION from nvcr
 RUN git clone https://github.com/pytorch/audio /torchaudio
 WORKDIR /torchaudio

@@ -5,11 +5,28 @@ from typing import Optional, Union, Tuple, List, Any, Callable
 
 import torch
 import torch.utils.data
+from torch.nn.functional import pad
 import torchaudio
 import tqdm
 from xumx_slicq_v2 import transforms
 from xumx_slicq_v2 import filtering
 from xumx_slicq_v2 import model
+
+
+def custom_collate(batch):
+    # sort to group similar-size tracks together for better padding behavior
+    batch.sort(key=lambda x: x.shape[-1], reverse=True)
+    batch_max_samples = batch[-1].shape[-1]
+    batch_len = len(batch)
+
+    ret = torch.cat([
+        torch.unsqueeze(
+            # zero-pad each track to the maximum length
+            pad(batch_item, (0, batch_max_samples-batch_item.shape[-1]), mode='constant', value=0.),
+            dim=0) for batch_item in batch
+    ], dim=0)
+
+    return ret
 
 
 def load_info(path: str) -> dict:
@@ -328,7 +345,15 @@ class MUSDBDataset(UnmixDataset):
             y_other = torch.as_tensor(track.targets["other"].audio.T, dtype=torch.float32)
             y_drums = torch.as_tensor(track.targets["drums"].audio.T, dtype=torch.float32)
 
-        return x, y_bass, y_vocals, y_other, y_drums
+        return torch.cat(
+            [
+                torch.unsqueeze(x, dim=0),
+                torch.unsqueeze(y_bass, dim=0),
+                torch.unsqueeze(y_vocals, dim=0),
+                torch.unsqueeze(y_other, dim=0),
+                torch.unsqueeze(y_drums, dim=0)
+            ], dim=0
+        )
 
     def __len__(self):
         return len(self.mus.tracks) * self.samples_per_track

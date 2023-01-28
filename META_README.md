@@ -10,16 +10,24 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 
 1. Improve SDR of xumx-sliCQ
 1. Adapt for HAAQI: http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
-1. Showcase NVIDIA/RAPIDS tools/SDKs for kgmon: NGC pytorch (+ DALI + TensorRT), cuSignal, cuFFT
+1. Showcase NVIDIA/RAPIDS tools/SDKs for kgmon: NGC pytorch (+ DALI + TensorRT)
+
+## Guides
+
+* <https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html>
+* <https://github.com/google-research/tuning_playbook>
+* <https://karpathy.github.io/2019/04/25/recipe/>
 
 ## Code roadmap
 
+1. At this point, delete all unused code paths (zeropadding, rasterization, etc.)
+1. Optimize more code
 1. Train fully with iNSGT gradients
-1. Create cpu-only inference/evaluation commands
-1. Remove bandwidth parameter, train again
-1. Explore nested tensors
-1. Apply different sliCQ per-target for even more gains
 1. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
     * replace SISDR with HAAQI (with a flag?) or mix both
-1. Apply NVIDIA NGC container tools/tooling (DALI data loading, TensorRT inference, cuFFT, cuSignal) wherever it can speed things up
+1. Apply NVIDIA NGC container tools/tooling (DALI data loading, TensorRT inference) wherever it can speed things up
+1. Apply different sliCQ per-target for even more gains
+    1. use string representation of slicq parameters
+        `--fscales <dbov>` etc.
+    1. Optuna?

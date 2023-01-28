@@ -17,7 +17,7 @@ import copy
 import sys
 import torchaudio
 import torchinfo
-from contextlib import nullcontext
+from contextlib import nullcontext, contextmanager, ExitStack
 import sklearn.preprocessing
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
@@ -34,7 +34,7 @@ tqdm.monitor_interval = 0
 
 def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True):
     # unpack encoder object
-    nsgt, _, cnorm = encoder
+    nsgt, insgt, cnorm = encoder
 
     losses = utils.AverageMeter()
 
@@ -51,23 +51,40 @@ def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True
 
     pbar = tqdm.tqdm(sampler, disable=args.quiet)
 
-    with cm():
-        for x, y_bass, y_vocals, y_other, y_drums in pbar:
+    with torch.autocast(device_type="cuda", dtype=torch.bfloat16), cm():
+        for track_tensor in pbar:
             pbar.set_description(f"{name} batch")
 
-            x, y_bass, y_vocals, y_other, y_drums = x.to(device), y_bass.to(device), y_vocals.to(device), y_other.to(device), y_drums.to(device)
+            track_tensor_gpu = track_tensor.to(device)
+
+            x = track_tensor_gpu[:, 0, ...]
+            n_samples = x.shape[-1]
+
+            y_bass = track_tensor_gpu[:, 1, ...]
+            y_vocals = track_tensor_gpu[:, 2, ...]
+            y_other = track_tensor_gpu[:, 3, ...]
+            y_drums = track_tensor_gpu[:, 4, ...]
 
             if train:
                 optimizer.zero_grad()
 
-            X = nsgt(x)
-            Xmag = cnorm(X)
+            X, Y_bass, Y_vocals, Y_other, Y_drums = nsgt(x), nsgt(y_bass), nsgt(y_vocals), nsgt(y_other), nsgt(y_drums)
+
+            Xmag, Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = cnorm(X), cnorm(Y_bass), cnorm(Y_vocals), cnorm(Y_other), cnorm(Y_drums)
+
+            # forward call to unmix returns bass, vocals, other, drums
+            Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred = unmix(Xmag)
+
+            y_bass_pred = insgt(transforms.phasemix_sep(X, Ymag_bass_pred), n_samples)
+            y_vocals_pred = insgt(transforms.phasemix_sep(X, Ymag_vocals_pred), n_samples)
+            y_other_pred = insgt(transforms.phasemix_sep(X, Ymag_other_pred), n_samples)
+            y_drums_pred = insgt(transforms.phasemix_sep(X, Ymag_drums_pred), n_samples)
 
             loss = criterion(
-                *unmix(Xmag), # forward call to unmix returns bass, vocals, other, drums
+                *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
+                *(Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred),
                 *(y_bass, y_vocals, y_other, y_drums),
-                X,
-                x.shape[-1]
+                *(y_bass_pred, y_vocals_pred, y_other_pred, y_drums_pred),
             )
 
             if train:
@@ -143,6 +160,7 @@ def main():
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--batch-size-valid", type=int, default=4)
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
     parser.add_argument(
         "--patience",
@@ -183,18 +201,6 @@ def main():
         help="Sequence duration in seconds" "value of <=0.0 will use full/variable length",
     )
     parser.add_argument(
-        "--seq-dur-valid",
-        type=float,
-        default=-1.0,
-        help="Sequence duration for validation" "value of <=0.0 will use full/variable length",
-    )
-    parser.add_argument(
-        "--bandwidth",
-        type=float,
-        default=16000.,
-        help="network won't consider frequencies above this"
-    )
-    parser.add_argument(
         "--fscale",
         choices=('bark','mel', 'cqlog', 'vqlog', 'oct'),
         default='bark',
@@ -213,13 +219,7 @@ def main():
         help="min frequency for NSGT scale",
     )
     parser.add_argument(
-        "--nb-channels",
-        type=int,
-        default=2,
-        help="set number of channels for model (1, 2)",
-    )
-    parser.add_argument(
-        "--nb-workers", type=int, default=0, help="Number of workers for dataloader."
+        "--nb-workers", type=int, default=4, help="Number of workers for dataloader."
     )
 
     # Misc Parameters
@@ -262,9 +262,6 @@ def main():
 
     train_dataset, valid_dataset, args = data.load_datasets(parser, args)
 
-    if args.seq_dur_valid is not None and args.seq_dur_valid > 0.0:
-        valid_dataset.seq_duration = args.seq_dur_valid
-
     # create output dir if not exist
     target_path = Path("/model")
     target_path.mkdir(parents=True, exist_ok=True)
@@ -283,7 +280,7 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=True, **dataloader_kwargs
     )
 
-    valid_sampler = torch.utils.data.DataLoader(valid_dataset, batch_size=1, **dataloader_kwargs)
+    valid_sampler = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size_valid, collate_fn=data.custom_collate, **dataloader_kwargs)
 
     # need to globally configure an NSGT object to peek at its params to set up the neural network
     # e.g. M depends on the sllen which depends on fscale+fmin+fmax
@@ -298,7 +295,7 @@ def main():
     nsgt, insgt = transforms.make_filterbanks(
         nsgt_base, sample_rate=train_dataset.sample_rate
     )
-    cnorm = model.ComplexNorm(mono=args.nb_channels == 1)
+    cnorm = model.ComplexNorm()
 
     nsgt = nsgt.to(device)
     insgt = insgt.to(device)
@@ -309,14 +306,14 @@ def main():
 
     separator_conf = {
         "sample_rate": train_dataset.sample_rate,
-        "nb_channels": args.nb_channels,
+        "nb_channels": 2,
         "seq_dur": args.seq_dur, # have to do inference in chunks of seq_dur in CNN architecture
     }
 
     with open(Path(target_path, "separator.json"), "w") as outfile:
         outfile.write(json.dumps(separator_conf, indent=4, sort_keys=True))
 
-    jagged_slicq = nsgt_base.predict_input_size(args.batch_size, args.nb_channels, args.seq_dur)
+    jagged_slicq = nsgt_base.predict_input_size(args.batch_size, 2, args.seq_dur)
 
     jagged_slicq = cnorm(jagged_slicq)
     n_blocks = len(jagged_slicq)
@@ -330,7 +327,6 @@ def main():
 
     unmix = model.OpenUnmix(
         jagged_slicq,
-        max_bin=nsgt_base.max_bins(args.bandwidth),
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)
@@ -340,7 +336,7 @@ def main():
 
     optimizer = torch.optim.Adam(unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-    criterion = LossCriterion(encoder, args.mcoef)
+    criterion = LossCriterion(args.mcoef)
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
@@ -395,6 +391,9 @@ def main():
         os.kill(tboard_pid, signal.SIGTERM)
 
     atexit.register(kill_tboard)
+
+    print("Enabling cuDNN tuning...")
+    torch.backends.cudnn.benchmark = True
 
     for epoch in t:
         t.set_description("Training Epoch")
