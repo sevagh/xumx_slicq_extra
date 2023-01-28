@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--model",
-        default="umxhq",
+        default="/model",
         type=str,
         help="path to mode base directory of pretrained models",
     )
@@ -72,9 +72,9 @@ if __name__ == "__main__":
         help="Results path where audio evaluation results are stored",
     )
 
-    parser.add_argument("--evaldir", type=str, help="Results path for museval estimates")
+    parser.add_argument("--evaldir", type=str, default="/evaluations", help="Results path for museval estimates")
 
-    parser.add_argument("--root", type=str, help="Path to MUSDB18")
+    parser.add_argument("--root", type=str, default="/MUSDB18-HQ", help="Path to MUSDB18")
 
     parser.add_argument("--track", type=str, default=None, help="evaluate only this track name")
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, default=1)
 
     parser.add_argument(
-        "--no-cuda", action="store_true", default=False, help="disables CUDA inference"
+        "--no-cuda", action="store_true", default=True, help="disables CUDA inference"
     )
 
     parser.add_argument(
@@ -125,16 +125,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
+    use_cuda = False
+    device = torch.device("cpu")
 
     mus = musdb.DB(
         root=args.root,
-        download=args.root is None,
+        download=False,
         subsets=args.subset,
         is_wav=True,
     )
     aggregate_dict = None if args.aggregate is None else json.loads(args.aggregate)
+
+    if len(mus.tracks) == 0:
+        raise ValueError("dataset is empty")
 
     if args.cores > 1:
         pool = multiprocessing.Pool(args.cores)

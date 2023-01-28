@@ -36,10 +36,27 @@ $ docker run --rm -it \
 
 ```
 $ docker run --rm -it \
-    --gpus=all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
-    xumx-slicq-v2 \
+    --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
     -v /path/to/input/tracks:/input \
     -v /path/to/output/tracks:/output \
     -v /path/to/trained/model:/model \
+    xumx-slicq-v2 \
     python -m xumx_slicq_v2.inference --help
 ```
+
+**N.B.** no GPUs for now; later, use TensorRT for fast GPU inference
+
+4. Run evaluation on `/MUSDB18-HQ` tracks with `/model`, save into `/output` and `/evaluation`
+
+```
+$ docker run --rm -it \
+    --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
+    -v /path/to/MUSDB18-HQ:/MUSDB18-HQ \
+    -v /path/to/trained/model:/model \
+    -v /path/to/output/tracks:/output \
+    -v /path/to/store/evaluations:/evaluation \
+    xumx-slicq-v2 \
+    python -m xumx_slicq_v2.evaluation --help
+```
+
+**N.B.** no GPUs for now; later, use TensorRT for fast GPU inference

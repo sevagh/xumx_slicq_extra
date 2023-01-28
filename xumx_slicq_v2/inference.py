@@ -3,8 +3,7 @@ import torch
 import torchaudio
 import json
 import numpy as np
-
-
+import os
 from xumx_slicq_v2 import utils
 from xumx_slicq_v2 import predict
 from xumx_slicq_v2 import data
@@ -19,26 +18,19 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("input", type=str, nargs="+", help="List of paths to wav/flac files.")
+    parser.add_argument("--indir", type=str, default="/input", help="Directory with wav files to process.")
 
     parser.add_argument(
         "--model",
-        default="umxhq",
+        default="/model",
         type=str,
         help="path to mode base directory of pretrained models",
     )
 
     parser.add_argument(
-        "--targets",
-        nargs="+",
-        type=str,
-        help="provide targets to be processed. \
-              If none, all available targets will be computed",
-    )
-
-    parser.add_argument(
         "--outdir",
         type=str,
+        default="/output",
         help="Results path where audio evaluation results are stored",
     )
 
@@ -64,19 +56,9 @@ def main():
     parser.add_argument(
         "--audio-backend",
         type=str,
-        default="sox_io",
+        default="soundfile",
         help="Set torchaudio backend "
-        "(`sox_io`, `sox`, `soundfile` or `stempeg`), defaults to `sox_io`",
-    )
-    parser.add_argument(
-        "--aggregate",
-        type=str,
-        default=None,
-        help="if provided, must be a string containing a valid expression for "
-        "a dictionary, with keys as output target names, and values "
-        "a list of targets that are used to build it. For instance: "
-        '\'{"vocals":["vocals"], "accompaniment":["drums",'
-        '"bass","other"]}\'',
+        "(`sox_io`, `sox`, `soundfile` or `stempeg`), defaults to `soundfile`",
     )
 
     args = parser.parse_args()
@@ -84,17 +66,16 @@ def main():
     if args.audio_backend != "stempeg":
         torchaudio.set_audio_backend(args.audio_backend)
 
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    # explicitly use no GPUs for inference
+    use_cuda = False
+
     device = torch.device("cuda" if use_cuda else "cpu")
     print("Using ", device)
-    # parsing the output dict
-    aggregate_dict = None if args.aggregate is None else json.loads(args.aggregate)
 
     # create separator only once to reduce model loading
     # when using multiple files
     separator = utils.load_separator(
         model_str_or_path=args.model,
-        targets=args.targets,
         device=device,
         pretrained=True
     )
@@ -109,7 +90,8 @@ def main():
             raise RuntimeError("Please install pip package `stempeg`")
 
     # loop over the files
-    for input_file in args.input:
+    for wav_file in os.listdir(args.indir):
+        input_file = os.path.join(args.indir, wav_file)
         if args.audio_backend == "stempeg":
             audio, rate = stempeg.read_stems(
                 input_file,
@@ -124,7 +106,6 @@ def main():
         estimates = predict.separate(
             audio=audio,
             rate=rate,
-            aggregate_dict=aggregate_dict,
             separator=separator,
             device=device,
         )
