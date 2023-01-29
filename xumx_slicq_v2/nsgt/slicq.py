@@ -1,29 +1,7 @@
-# -*- coding: utf-8
-
-"""
-Python implementation of Non-Stationary Gabor Transform (NSGT)
-derived from MATLAB code by NUHAG, University of Vienna, Austria
-
-Thomas Grill, 2011-2015
-http://grrrr.org/nsgt
-
-Austrian Research Institute for Artificial Intelligence (OFAI)
-AudioMiner project, supported by Vienna Science and Technology Fund (WWTF)
-
---
-
-% Perfect reconstruction sliCQ
-
-% right now, even slice length (sl_len) is required. Parameters are the
-% same as NSGTF plus slice length, minimal required window length, 
-% Q-factor variation, and test run parameters.
-"""
-
 import torch
 import numpy as np
 from itertools import cycle, chain, tee
 from math import ceil
-
 from .slicing import slicing
 from .unslicing import unslicing
 from .nsdual import nsdual
@@ -35,6 +13,7 @@ from .fscale import OctScale
 from .reblock import reblock
 
 
+@torch.no_grad()
 def arrange(cseq, fwd, device="cpu"):
     if type(cseq) == torch.Tensor:
         M = cseq.shape[-1]
@@ -62,6 +41,7 @@ def arrange(cseq, fwd, device="cpu"):
     return cseq
 
 
+@torch.no_grad()
 def starzip(iterables):
     def inner(itr, i):
         for t in itr:
@@ -72,7 +52,7 @@ def starzip(iterables):
     return [inner(itr, i) for i,itr in enumerate(tee(iterables, len(it)))]
 
 
-#@profile
+@torch.no_grad()
 def chnmap_forward(gen, seq, device="cpu"):
     chns = starzip(seq) # returns a list of generators (one for each channel)
 
@@ -167,7 +147,6 @@ class NSGT_sliced(torch.nn.Module):
     def slice_coefs(self):
         return self.ncoefs
     
-    #@profile
     def forward(self, sig):
         'transform - s: iterable sequence of sequences' 
 
@@ -184,7 +163,6 @@ class NSGT_sliced(torch.nn.Module):
 
         return cseq
 
-    #@profile
     def backward(self, cseq, length, ragged_shapes=None):
         'inverse transform - c: iterable sequence of coefficients'
         cseq = self.channelize(cseq)

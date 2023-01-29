@@ -10,7 +10,6 @@ import warnings
 from .nsgt import NSGT_sliced, BarkScale, MelScale, LogScale, VQLogScale, OctScale
 
 
-@torch.jit.script
 def overlap_add_slicq(slicq):
     nb_samples, nb_channels, nb_f_bins, nb_slices, nb_m_bins = slicq.shape
 

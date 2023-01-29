@@ -1,16 +1,3 @@
-# -*- coding: utf-8
-
-"""
-Python implementation of Non-Stationary Gabor Transform (NSGT)
-derived from MATLAB code by NUHAG, University of Vienna, Austria
-
-Thomas Grill, 2011-2015
-http://grrrr.org/nsgt
-
-Austrian Research Institute for Artificial Intelligence (OFAI)
-AudioMiner project, supported by Vienna Science and Technology Fund (WWTF)
-"""
-
 import numpy as np
 import torch
 from math import ceil
@@ -78,5 +65,4 @@ def nsgtf_sl(f_slices, g, wins, nn, M=None, real=False, reducedform=0, device="c
             bucketed_tensors[block_ptr] = torch.cat([bucketed_tensors[block_ptr], c], dim=2)
 
     # bucket-wise ifft
-    ifft_futures = [torch.jit.fork(torch.fft.ifft, bucketed_tensor) for bucketed_tensor in bucketed_tensors]
-    return [torch.jit.wait(future) for future in ifft_futures]
+    return [torch.fft.ifft(bucketed_tensor) for bucketed_tensor in bucketed_tensors]

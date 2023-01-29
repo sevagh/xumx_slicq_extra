@@ -21,7 +21,7 @@ from contextlib import nullcontext
 import sklearn.preprocessing
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
-from torch.cuda.amp import autocast
+#from torch.cuda.amp import autocast
 
 from xumx_slicq_v2 import data
 from xumx_slicq_v2 import model
@@ -33,14 +33,14 @@ from xumx_slicq_v2.loss import LossCriterion
 tqdm.monitor_interval = 0
 
 
-@profile
-def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True):
+#@profile
+def loop(args, unmix, encoder, device, sampler, criterion, optimizer, amp_cm_cuda, amp_cm_cpu, train=True):
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
 
     losses = utils.AverageMeter()
 
-    cm1 = nullcontext
+    grad_cm = nullcontext
     name = ''
     if train:
         unmix.train()
@@ -48,53 +48,47 @@ def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True
     else:
         unmix.eval()
         name = 'Validation'
-        cm1 = torch.no_grad
-
-    cm2 = nullcontext
-    if args.cuda_mixed_precision_bfloat16:
-        print("Enabling Automatic Mixed Precision with bfloat16")
-        cm2 = lambda: autocast(dtype=torch.bfloat16)
-    elif args.cuda_mixed_precision_float16:
-        print("Enabling Automatic Mixed Precision with float16")
-        cm2 = lambda: autocast(dtype=torch.float16)
+        grad_cm = torch.no_grad
 
     pbar = tqdm.tqdm(sampler, disable=args.quiet)
 
-    with cm1(), cm2():
+    with grad_cm():
         for track_tensor in pbar:
             pbar.set_description(f"{name} batch")
 
-            track_tensor_gpu = track_tensor.to(device)
+            # autocast/AMP on forward pass + loss only, _not_ backward pass
+            with amp_cm_cuda(), amp_cm_cpu():
+                track_tensor_gpu = track_tensor.to(device)
 
-            x = track_tensor_gpu[:, 0, ...]
-            n_samples = x.shape[-1]
+                x = track_tensor_gpu[:, 0, ...]
+                n_samples = x.shape[-1]
 
-            y_bass = track_tensor_gpu[:, 1, ...]
-            y_vocals = track_tensor_gpu[:, 2, ...]
-            y_other = track_tensor_gpu[:, 3, ...]
-            y_drums = track_tensor_gpu[:, 4, ...]
+                y_bass = track_tensor_gpu[:, 1, ...]
+                y_vocals = track_tensor_gpu[:, 2, ...]
+                y_other = track_tensor_gpu[:, 3, ...]
+                y_drums = track_tensor_gpu[:, 4, ...]
 
-            if train:
-                optimizer.zero_grad()
+                if train:
+                    optimizer.zero_grad()
 
-            X, Y_bass, Y_vocals, Y_other, Y_drums = nsgt(x), nsgt(y_bass), nsgt(y_vocals), nsgt(y_other), nsgt(y_drums)
+                X, Y_bass, Y_vocals, Y_other, Y_drums = nsgt(x), nsgt(y_bass), nsgt(y_vocals), nsgt(y_other), nsgt(y_drums)
 
-            Xmag, Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = cnorm(X), cnorm(Y_bass), cnorm(Y_vocals), cnorm(Y_other), cnorm(Y_drums)
+                Xmag, Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = cnorm(X), cnorm(Y_bass), cnorm(Y_vocals), cnorm(Y_other), cnorm(Y_drums)
 
-            # forward call to unmix returns bass, vocals, other, drums
-            Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred = unmix(Xmag)
+                # forward call to unmix returns bass, vocals, other, drums
+                Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred = unmix(Xmag)
 
-            y_bass_pred = insgt(transforms.phasemix_sep(X, Ymag_bass_pred), n_samples)
-            y_vocals_pred = insgt(transforms.phasemix_sep(X, Ymag_vocals_pred), n_samples)
-            y_other_pred = insgt(transforms.phasemix_sep(X, Ymag_other_pred), n_samples)
-            y_drums_pred = insgt(transforms.phasemix_sep(X, Ymag_drums_pred), n_samples)
+                y_bass_pred = insgt(transforms.phasemix_sep(X, Ymag_bass_pred), n_samples)
+                y_vocals_pred = insgt(transforms.phasemix_sep(X, Ymag_vocals_pred), n_samples)
+                y_other_pred = insgt(transforms.phasemix_sep(X, Ymag_other_pred), n_samples)
+                y_drums_pred = insgt(transforms.phasemix_sep(X, Ymag_drums_pred), n_samples)
 
-            loss = criterion(
-                *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
-                *(Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred),
-                *(y_bass, y_vocals, y_other, y_drums),
-                *(y_bass_pred, y_vocals_pred, y_other_pred, y_drums_pred),
-            )
+                loss = criterion(
+                    *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
+                    *(Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred),
+                    *(y_bass, y_vocals, y_other, y_drums),
+                    *(y_bass_pred, y_vocals_pred, y_other_pred, y_drums_pred),
+                )
 
             if train:
                 loss.backward()
@@ -169,7 +163,7 @@ def main():
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--batch-size-valid", type=int, default=1)
+    parser.add_argument("--batch-size-valid", type=int, default=3)
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
     parser.add_argument(
         "--patience",
@@ -202,24 +196,6 @@ def main():
         action="store_true",
         default=False,
         help="skip dataset statistics calculation",
-    )
-    parser.add_argument(
-        "--cuda-cudnn-tuning",
-        action="store_true",
-        default=False,
-        help="enable cudnn tuning",
-    )
-    parser.add_argument(
-        "--cuda-mixed-precision-bfloat16",
-        action="store_true",
-        default=False,
-        help="enable AMP with bfloat16",
-    )
-    parser.add_argument(
-        "--cuda-mixed-precision-float16",
-        action="store_true",
-        default=False,
-        help="enable AMP with float16",
     )
     parser.add_argument(
         "--dlprof",
@@ -267,10 +243,6 @@ def main():
     )
 
     args, _ = parser.parse_known_args()
-
-
-    if args.cuda_mixed_precision_bfloat16 and args.cuda_mixed_precision_float16:
-        raise ValueError("choose one of bfloat16, float16 mixed precision, not both")
 
     torchaudio.set_audio_backend("soundfile")
     use_cuda = torch.cuda.is_available()
@@ -429,9 +401,22 @@ def main():
 
     atexit.register(kill_tboard)
 
-    if args.cuda_cudnn_tuning:
-        print("Enabling cuDNN tuning...")
-        torch.backends.cudnn.benchmark = True
+    ######################
+    # PERFORMANCE TUNING #
+    ######################
+    print("Performance tuning settings")
+    print("Enabling cuDNN benchmark...")
+    torch.backends.cudnn.benchmark = True
+
+    print("Enabling FP32 (ampere) optimizations for matmul and cudnn")
+    torch.backends.cudnn.allow_tf32 = True
+    torch.set_float32_matmul_precision = 'medium'
+
+    print("Enabling CUDA Automatic Mixed Precision with bfloat16 for forward pass + loss")
+    amp_cm_cuda = lambda: torch.autocast("cuda", dtype=torch.bfloat16)
+
+    print("Enabling CPU Automatic Mixed Precision with bfloat16 for forward pass + loss")
+    amp_cm_cpu = lambda: torch.autocast("cpu", dtype=torch.bfloat16)
 
     if args.dlprof:
         import nvidia_dlprof_pytorch_nvtx as nvtx
@@ -447,8 +432,8 @@ def main():
     for epoch in t:
         t.set_description("Training Epoch")
         end = time.time()
-        train_loss = loop(args, unmix, encoder, device, train_sampler, criterion, optimizer, train=True)
-        valid_loss = loop(args, unmix, encoder, device, valid_sampler, criterion, None, train=False)
+        train_loss = loop(args, unmix, encoder, device, train_sampler, criterion, optimizer, amp_cm_cuda, amp_cm_cpu, train=True)
+        valid_loss = loop(args, unmix, encoder, device, valid_sampler, criterion, None, amp_cm_cuda, amp_cm_cpu, train=False)
 
         scheduler.step(valid_loss)
         train_losses.append(train_loss)

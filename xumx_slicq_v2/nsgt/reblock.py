@@ -15,6 +15,7 @@ import numpy as np
 import torch
 
 
+@torch.no_grad()
 def reblock(sseq, blocksize, dtype=None, fulllast=True, padding=0, multichannel=False, device="cpu"):
     block = None
     dt = None

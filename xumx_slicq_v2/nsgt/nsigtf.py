@@ -3,7 +3,6 @@ import torch
 from itertools import chain
     
 
-#@profile
 def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, device="cpu"):
     dtype = gd[0].dtype
 

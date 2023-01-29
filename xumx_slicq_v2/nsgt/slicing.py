@@ -18,6 +18,7 @@ from .reblock import reblock
 from itertools import chain, cycle
 
 
+@torch.no_grad()
 def makewnd(sl_len, tr_area, device="cpu"):
     hhop = sl_len//4
     htr = tr_area//2
@@ -32,6 +33,7 @@ def makewnd(sl_len, tr_area, device="cpu"):
     return tw
 
 
+@torch.no_grad()
 def slicing(f, sl_len, tr_area, device="cpu"):
     if tr_area%2 != 0:
         raise ValueError("Transition area 'tr_area' must be modulo 2")

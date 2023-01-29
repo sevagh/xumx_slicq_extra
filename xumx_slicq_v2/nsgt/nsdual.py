@@ -4,6 +4,7 @@ import torch
 from .util import chkM
 
 
+@torch.no_grad()
 def nsdual(g, wins, nn, M=None, device="cpu"):
     M = chkM(M,g)
 

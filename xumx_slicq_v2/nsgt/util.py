@@ -16,6 +16,7 @@ import torch
 from math import exp, floor, ceil, pi
 
 
+@torch.no_grad()
 def hannwin(l, device="cpu"):
     r = torch.arange(l,dtype=float, device=torch.device(device))
     r *= np.pi*2./l
@@ -25,6 +26,7 @@ def hannwin(l, device="cpu"):
     return r
 
 
+@torch.no_grad()
 def blackharr(n, l=None, mod=True, device="cpu"):
     if l is None: 
         l = n
@@ -38,6 +40,8 @@ def blackharr(n, l=None, mod=True, device="cpu"):
     bh = torch.hstack((bh[-n//2:],bh[:-n//2]))
     return bh
 
+
+@torch.no_grad()
 def blackharrcw(bandwidth,corr_shift):
     flip = -1 if corr_shift < 0 else 1
     corr_shift *= flip
@@ -49,6 +53,7 @@ def blackharrcw(bandwidth,corr_shift):
     return win[::flip],M
 
 
+@torch.no_grad()
 def cont_tukey_win(n, sl_len, tr_area):
     g = np.arange(n)*(sl_len/float(n))
     g[np.logical_or(g < sl_len/4.-tr_area/2., g > 3*sl_len/4.+tr_area/2.)] = 0.
@@ -68,6 +73,8 @@ def cont_tukey_win(n, sl_len, tr_area):
     #
     return g
 
+
+@torch.no_grad()
 def tgauss(ess_ln, ln=0):
     if ln < ess_ln: 
         ln = ess_ln
@@ -83,6 +90,8 @@ def tgauss(ess_ln, ln=0):
     g[:sl2] = r[-sl2:]
     return g
 
+
+@torch.no_grad()
 def _isseq(x):
     try:
         len(x)
@@ -90,6 +99,8 @@ def _isseq(x):
         return False
     return True        
 
+
+@torch.no_grad()
 def chkM(M, g):
     if M is None:
         M = np.array(list(map(len, g)))
@@ -98,6 +109,7 @@ def chkM(M, g):
     return M
 
 
+@torch.no_grad()
 def calcwinrange(g, rfbas, Ls, device="cpu"):
     shift = np.concatenate(((np.mod(-rfbas[-1],Ls),), rfbas[1:]-rfbas[:-1]))
     
@@ -114,4 +126,3 @@ def calcwinrange(g, rfbas, Ls, device="cpu"):
         wins.append(win_range)
         
     return wins,nn
-
