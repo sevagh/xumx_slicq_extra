@@ -5,15 +5,27 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from torch.nn import Parameter, ReLU, Tanh, BatchNorm2d, ConvTranspose2d, Conv2d, Sequential, Sigmoid
-from torch.nn import LSTM, BatchNorm1d, Linear, Parameter
+from torch.nn import (
+    Parameter,
+    ReLU,
+    BatchNorm2d,
+    ConvTranspose2d,
+    Conv2d,
+    Sequential,
+    Sigmoid,
+)
 from .filtering import atan2, wiener
-from .transforms import make_filterbanks, ComplexNorm, phasemix_sep, NSGTBase, overlap_add_slicq
-from collections import defaultdict
+from .transforms import (
+    make_filterbanks,
+    ComplexNorm,
+    phasemix_sep,
+    NSGTBase,
+    overlap_add_slicq,
+)
 import numpy as np
 import copy
 
-eps = 1.e-10
+eps = 1.0e-10
 
 
 class OpenUnmixTimeBucketCDAE(nn.Module):
@@ -25,10 +37,16 @@ class OpenUnmixTimeBucketCDAE(nn.Module):
     ):
         super(OpenUnmixTimeBucketCDAE, self).__init__()
 
-        nb_samples, nb_channels, nb_f_bins, nb_slices, nb_t_bins = slicq_sample_input.shape
+        (
+            nb_samples,
+            nb_channels,
+            nb_f_bins,
+            nb_slices,
+            nb_t_bins,
+        ) = slicq_sample_input.shape
 
         channels = [nb_channels, 25, 55]
-        layers = len(channels)-1
+        layers = len(channels) - 1
 
         if nb_f_bins < 10:
             freq_filter = 1
@@ -42,7 +60,7 @@ class OpenUnmixTimeBucketCDAE(nn.Module):
         else:
             time_filter = 13
 
-        filters = [(freq_filter, time_filter)]*layers
+        filters = [(freq_filter, time_filter)] * layers
 
         encoder = []
         decoder = []
@@ -51,28 +69,38 @@ class OpenUnmixTimeBucketCDAE(nn.Module):
 
         for i in range(layers):
             encoder.append(
-                Conv2d(channels[i], channels[i+1], filters[i], dilation=(1,2), bias=False)
+                Conv2d(
+                    channels[i],
+                    channels[i + 1],
+                    filters[i],
+                    dilation=(1, 2),
+                    bias=False,
+                )
             )
             encoder.append(
-                BatchNorm2d(channels[i+1]),
+                BatchNorm2d(channels[i + 1]),
             )
             encoder.append(
                 ReLU(),
             )
 
-        for i in range(layers,0,-1):
+        for i in range(layers, 0, -1):
             decoder.append(
-                ConvTranspose2d(channels[i], channels[i-1], filters[i-1], dilation=(1,2), bias=False)
+                ConvTranspose2d(
+                    channels[i],
+                    channels[i - 1],
+                    filters[i - 1],
+                    dilation=(1, 2),
+                    bias=False,
+                )
             )
-            decoder.append(
-                BatchNorm2d(channels[i-1])
-            )
-            decoder.append(
-                ReLU()
-            )
+            decoder.append(BatchNorm2d(channels[i - 1]))
+            decoder.append(ReLU())
 
         # grow the overlap-added half dimension to its full size
-        decoder.append(ConvTranspose2d(nb_channels, nb_channels, (1, 3), stride=(1, 2), bias=True))
+        decoder.append(
+            ConvTranspose2d(nb_channels, nb_channels, (1, 3), stride=(1, 2), bias=True)
+        )
         decoder.append(Sigmoid())
 
         self.cdae = Sequential(*encoder, *decoder)
@@ -95,7 +123,7 @@ class OpenUnmixTimeBucketCDAE(nn.Module):
         # set all parameters as not requiring gradient, more RAM-efficient
         # at test time
         for p in self.parameters():
-            #p.requires_grad = False
+            # p.requires_grad = False
             p.grad = None
         self.eval()
 
@@ -114,11 +142,10 @@ class OpenUnmixTimeBucketCDAE(nn.Module):
         x = x.permute(0, 1, 3, 2)
 
         for i, layer in enumerate(self.cdae):
-            sh1 = x.shape
             x = layer(x)
-        
+
         # crop
-        x = x[:, :, :, : nb_t_bins*nb_slices]
+        x = x[:, :, :, : nb_t_bins * nb_slices]
 
         x = x.reshape(x_shape)
 
@@ -136,10 +163,10 @@ class OpenUnmix(nn.Module):
         nb_bins, M (int): Number of sliCQ-NSGT tf bins
         nb_channels (int): Number of input audio channels (Default: `2`).
     """
+
     def __init__(
         self,
         jagged_slicq_sample_input,
-        umx_bilstm=False,
         input_means=None,
         input_scales=None,
     ):
@@ -174,24 +201,42 @@ class OpenUnmix(nn.Module):
         # set all parameters as not requiring gradient, more RAM-efficient
         # at test time
         for p in self.parameters():
-            #p.requires_grad = False
+            # p.requires_grad = False
             p.grad = None
         self.eval()
 
     def forward(self, x, vocals=True, bass=True, drums=True, other=True) -> Tensor:
         if vocals:
-            futures_vocals = [torch.jit.fork(self.bucketed_unmixes_vocals[i], Xmag_block) for i, Xmag_block in enumerate(x)]
+            futures_vocals = [
+                torch.jit.fork(self.bucketed_unmixes_vocals[i], Xmag_block)
+                for i, Xmag_block in enumerate(x)
+            ]
         if bass:
-            futures_bass = [torch.jit.fork(self.bucketed_unmixes_bass[i], Xmag_block) for i, Xmag_block in enumerate(x)]
+            futures_bass = [
+                torch.jit.fork(self.bucketed_unmixes_bass[i], Xmag_block)
+                for i, Xmag_block in enumerate(x)
+            ]
         if drums:
-            futures_drums = [torch.jit.fork(self.bucketed_unmixes_drums[i], Xmag_block) for i, Xmag_block in enumerate(x)]
+            futures_drums = [
+                torch.jit.fork(self.bucketed_unmixes_drums[i], Xmag_block)
+                for i, Xmag_block in enumerate(x)
+            ]
         if other:
-            futures_other = [torch.jit.fork(self.bucketed_unmixes_other[i], Xmag_block) for i, Xmag_block in enumerate(x)]
+            futures_other = [
+                torch.jit.fork(self.bucketed_unmixes_other[i], Xmag_block)
+                for i, Xmag_block in enumerate(x)
+            ]
 
-        y_vocals = [torch.jit.wait(future) for future in futures_vocals] if vocals else None
+        y_vocals = (
+            [torch.jit.wait(future) for future in futures_vocals] if vocals else None
+        )
         y_bass = [torch.jit.wait(future) for future in futures_bass] if bass else None
-        y_drums = [torch.jit.wait(future) for future in futures_drums] if drums else None
-        y_other = [torch.jit.wait(future) for future in futures_other] if other else None
+        y_drums = (
+            [torch.jit.wait(future) for future in futures_drums] if drums else None
+        )
+        y_other = (
+            [torch.jit.wait(future) for future in futures_other] if other else None
+        )
 
         return y_bass, y_vocals, y_other, y_drums
 
@@ -222,9 +267,7 @@ class Separator(nn.Module):
 
         self.device = device
 
-        self.nsgt, self.insgt = make_filterbanks(
-            xumx_nsgt, sample_rate=sample_rate
-        )
+        self.nsgt, self.insgt = make_filterbanks(xumx_nsgt, sample_rate=sample_rate)
 
         self.complexnorm = ComplexNorm()
         self.nb_channels = 2
@@ -255,7 +298,7 @@ class Separator(nn.Module):
         # set all parameters as not requiring gradient, more RAM-efficient
         # at test time
         for p in self.parameters():
-            #p.requires_grad = False
+            # p.requires_grad = False
             p.grad = None
         self.xumx_model.freeze()
         self.eval()
@@ -276,17 +319,20 @@ class Separator(nn.Module):
         nb_samples = audio_big.shape[0]
         N = audio_big.shape[-1]
 
-        nchunks = (N // self.chunk_size)
+        nchunks = N // self.chunk_size
         if (N % self.chunk_size) != 0:
             nchunks += 1
 
-        print(f'n chunks: {nchunks}')
+        print(f"n chunks: {nchunks}")
 
         final_estimates = []
 
         for chunk_idx in trange(nchunks):
-            audio = audio_big[..., chunk_idx * self.chunk_size: min((chunk_idx + 1) * self.chunk_size, N)]
-            print(f'audio.shape: {audio.shape}')
+            audio = audio_big[
+                ...,
+                chunk_idx * self.chunk_size : min((chunk_idx + 1) * self.chunk_size, N),
+            ]
+            print(f"audio.shape: {audio.shape}")
 
             X = self.nsgt(audio)
             Xmag = self.complexnorm(X)
@@ -295,7 +341,7 @@ class Separator(nn.Module):
             Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = self.xumx_model(Xmag)
 
             if self.stft_wiener:
-                print('STFT WIENER')
+                print("STFT WIENER")
 
                 # initial mix phase + magnitude estimate
                 Ycomplex_bass = phasemix_sep(X, Ymag_bass)
@@ -312,24 +358,37 @@ class Separator(nn.Module):
                 # now we switch to the STFT domain for the wiener step
 
                 audio = torch.squeeze(audio, dim=0)
-                
-                mix_stft = torch.view_as_real(torch.stft(audio, self.n_fft, hop_length=self.n_hop, return_complex=True))
+
+                mix_stft = torch.view_as_real(
+                    torch.stft(
+                        audio, self.n_fft, hop_length=self.n_hop, return_complex=True
+                    )
+                )
                 X = torch.abs(torch.view_as_complex(mix_stft))
-                
+
                 # initializing spectrograms variable
-                spectrograms = torch.zeros(X.shape + (nb_sources,), dtype=audio.dtype, device=X.device)
+                spectrograms = torch.zeros(
+                    X.shape + (nb_sources,), dtype=audio.dtype, device=X.device
+                )
 
                 for j, target_name in enumerate(self.ordered_targets):
                     # apply current model to get the source spectrogram
-                    if target_name == 'bass':
+                    if target_name == "bass":
                         target_est = torch.squeeze(y_bass, dim=0)
-                    elif target_name == 'vocals':
+                    elif target_name == "vocals":
                         target_est = torch.squeeze(y_vocals, dim=0)
-                    elif target_name == 'drums':
+                    elif target_name == "drums":
                         target_est = torch.squeeze(y_drums, dim=0)
-                    elif target_name == 'other':
+                    elif target_name == "other":
                         target_est = torch.squeeze(y_other, dim=0)
-                    spectrograms[..., j] = torch.abs(torch.stft(target_est, self.n_fft, hop_length=self.n_hop, return_complex=True))
+                    spectrograms[..., j] = torch.abs(
+                        torch.stft(
+                            target_est,
+                            self.n_fft,
+                            hop_length=self.n_hop,
+                            return_complex=True,
+                        )
+                    )
 
                 # transposing it as
                 # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
@@ -343,7 +402,9 @@ class Separator(nn.Module):
 
                 nb_frames = spectrograms.shape[0]
                 targets_stft = torch.zeros(
-                    mix_stft.shape + (nb_sources,), dtype=audio.dtype, device=mix_stft.device
+                    mix_stft.shape + (nb_sources,),
+                    dtype=audio.dtype,
+                    device=mix_stft.device,
                 )
 
                 pos = 0
@@ -360,21 +421,32 @@ class Separator(nn.Module):
                         mix_stft[cur_frame],
                         self.niter,
                         softmask=self.softmask,
-                        slicq=False, # stft wiener
+                        slicq=False,  # stft wiener
                     )
 
                 # getting to (nb_samples, nb_targets, channel, fft_size, n_frames, 2)
-                targets_stft = torch.view_as_complex(targets_stft.permute(4, 2, 1, 0, 3).contiguous())
+                targets_stft = torch.view_as_complex(
+                    targets_stft.permute(4, 2, 1, 0, 3).contiguous()
+                )
 
                 # inverse STFT
-                estimates = torch.empty(audio.shape + (nb_sources,), dtype=audio.dtype, device=audio.device)
+                estimates = torch.empty(
+                    audio.shape + (nb_sources,), dtype=audio.dtype, device=audio.device
+                )
 
                 for j, target_name in enumerate(self.ordered_targets):
-                    estimates[..., j] = torch.istft(targets_stft[j, ...], self.n_fft, hop_length=self.n_hop, length=audio.shape[-1])
+                    estimates[..., j] = torch.istft(
+                        targets_stft[j, ...],
+                        self.n_fft,
+                        hop_length=self.n_hop,
+                        length=audio.shape[-1],
+                    )
 
-                estimates = torch.unsqueeze(estimates, dim=0).permute(0, 3, 1, 2).contiguous()
+                estimates = (
+                    torch.unsqueeze(estimates, dim=0).permute(0, 3, 1, 2).contiguous()
+                )
             else:
-                print('sliCQT WIENER')
+                print("sliCQT WIENER")
 
                 # block-wise wiener
                 # assemble it all into a zero-padded matrix
@@ -382,20 +454,52 @@ class Separator(nn.Module):
                 nb_slices = X[0].shape[3]
                 last_dim = 2
 
-                X_matrix = torch.zeros((nb_samples, self.nb_channels, self.total_f_bins, nb_slices, self.max_t_bins, last_dim), dtype=X[0].dtype, device=X[0].device)
-                spectrograms = torch.zeros(X_matrix.shape[:-1] + (nb_sources,), dtype=audio.dtype, device=X_matrix.device)
+                X_matrix = torch.zeros(
+                    (
+                        nb_samples,
+                        self.nb_channels,
+                        self.total_f_bins,
+                        nb_slices,
+                        self.max_t_bins,
+                        last_dim,
+                    ),
+                    dtype=X[0].dtype,
+                    device=X[0].device,
+                )
+                spectrograms = torch.zeros(
+                    X_matrix.shape[:-1] + (nb_sources,),
+                    dtype=audio.dtype,
+                    device=X_matrix.device,
+                )
 
                 freq_start = 0
                 for i, X_block in enumerate(X):
-                    nb_samples, self.nb_channels, nb_f_bins, nb_slices, nb_t_bins, last_dim = X_block.shape
+                    (
+                        nb_samples,
+                        self.nb_channels,
+                        nb_f_bins,
+                        nb_slices,
+                        nb_t_bins,
+                        last_dim,
+                    ) = X_block.shape
 
                     # assign up to the defined time bins - to the right will be zeros
-                    X_matrix[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, :] = X_block
+                    X_matrix[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, :
+                    ] = X_block
 
-                    spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, 0] = Ymag_vocals[i]
-                    spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, 1] = Ymag_drums[i]
-                    spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, 2] = Ymag_bass[i]
-                    spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, 3] = Ymag_other[i]
+                    spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, 0
+                    ] = Ymag_vocals[i]
+                    spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, 1
+                    ] = Ymag_drums[i]
+                    spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, 2
+                    ] = Ymag_bass[i]
+                    spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, 3
+                    ] = Ymag_other[i]
 
                     freq_start += nb_f_bins
 
@@ -408,27 +512,59 @@ class Separator(nn.Module):
                 )
 
                 # reverse the wiener/EM permutes etc.
-                spectrograms = torch.unsqueeze(spectrograms.permute(2, 1, 0, 3, 4), dim=0)
-                spectrograms = spectrograms.reshape(nb_samples, self.nb_channels, self.total_f_bins, nb_slices, self.max_t_bins, *spectrograms.shape[-2:])
+                spectrograms = torch.unsqueeze(
+                    spectrograms.permute(2, 1, 0, 3, 4), dim=0
+                )
+                spectrograms = spectrograms.reshape(
+                    nb_samples,
+                    self.nb_channels,
+                    self.total_f_bins,
+                    nb_slices,
+                    self.max_t_bins,
+                    *spectrograms.shape[-2:],
+                )
 
-                slicq_vocals = [None]*len(X)
-                slicq_bass = [None]*len(X)
-                slicq_drums = [None]*len(X)
-                slicq_other = [None]*len(X)
+                slicq_vocals = [None] * len(X)
+                slicq_bass = [None] * len(X)
+                slicq_drums = [None] * len(X)
+                slicq_other = [None] * len(X)
 
-                estimates = torch.empty(audio.shape + (nb_sources,), dtype=audio.dtype, device=audio.device)
+                estimates = torch.empty(
+                    audio.shape + (nb_sources,), dtype=audio.dtype, device=audio.device
+                )
 
-                nb_samples, self.nb_channels, nb_f_bins, nb_slices, nb_t_bins = X_matrix.shape[:-1]
+                (
+                    nb_samples,
+                    self.nb_channels,
+                    nb_f_bins,
+                    nb_slices,
+                    nb_t_bins,
+                ) = X_matrix.shape[:-1]
 
                 # matrix back to list form for insgt
                 freq_start = 0
                 for i, X_block in enumerate(X):
-                    nb_samples, self.nb_channels, nb_f_bins, nb_slices, nb_t_bins, _ = X_block.shape
+                    (
+                        nb_samples,
+                        self.nb_channels,
+                        nb_f_bins,
+                        nb_slices,
+                        nb_t_bins,
+                        _,
+                    ) = X_block.shape
 
-                    slicq_vocals[i] = spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, :, 0].contiguous()
-                    slicq_drums[i] = spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, :, 1].contiguous()
-                    slicq_bass[i] = spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, :, 2].contiguous()
-                    slicq_other[i] = spectrograms[:, :, freq_start:freq_start+nb_f_bins, :, : nb_t_bins, :, 3].contiguous()
+                    slicq_vocals[i] = spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, :, 0
+                    ].contiguous()
+                    slicq_drums[i] = spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, :, 1
+                    ].contiguous()
+                    slicq_bass[i] = spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, :, 2
+                    ].contiguous()
+                    slicq_other[i] = spectrograms[
+                        :, :, freq_start : freq_start + nb_f_bins, :, :nb_t_bins, :, 3
+                    ].contiguous()
 
                     freq_start += nb_f_bins
 
@@ -441,7 +577,7 @@ class Separator(nn.Module):
             final_estimates.append(estimates)
 
         ests_concat = torch.cat(final_estimates, axis=-1)
-        print(f'ests concat: {ests_concat.shape}')
+        print(f"ests concat: {ests_concat.shape}")
         return ests_concat
 
     def to_dict(self, estimates: Tensor, aggregate_dict: Optional[dict] = None) -> dict:

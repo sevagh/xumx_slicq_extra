@@ -6,12 +6,9 @@ import numpy as np
 import torchaudio
 import warnings
 from pathlib import Path
-from contextlib import redirect_stderr
-import io
 import json
 import sys
 
-import xumx_slicq_v2
 from xumx_slicq_v2 import model
 from xumx_slicq_v2 import transforms
 
@@ -93,7 +90,9 @@ class EarlyStopping(object):
             self.is_better = lambda a, best: a > best + min_delta
 
 
-def load_target_models(model_str_or_path="umxhq", device="cpu", pretrained=True, sample_rate=44100):
+def load_target_models(
+    model_str_or_path="umxhq", device="cpu", pretrained=True, sample_rate=44100
+):
     """Core model loader
 
     target model path can be either <target>.pth, or <target>-sha256.pth
@@ -115,7 +114,7 @@ def load_target_models(model_str_or_path="umxhq", device="cpu", pretrained=True,
         results["args"]["fbins"],
         results["args"]["fmin"],
         fs=sample_rate,
-        device=device
+        device=device,
     )
 
     nb_channels = 2
@@ -171,7 +170,10 @@ def load_separator(
             enc_conf = json.load(stream)
 
         xumx_model, model_nsgt, jagged_slicq_sample = load_target_models(
-            model_str_or_path=model_path, pretrained=pretrained, sample_rate=enc_conf["sample_rate"], device=device
+            model_str_or_path=model_path,
+            pretrained=pretrained,
+            sample_rate=enc_conf["sample_rate"],
+            device=device,
         )
 
         separator = model.Separator(
@@ -227,7 +229,9 @@ def preprocess(
         # swapping channel and time
         audio = audio.transpose(1, 2)
     if audio.shape[1] > 2:
-        warnings.warn("Channel count > 2!. Only the first two channels " "will be processed!")
+        warnings.warn(
+            "Channel count > 2!. Only the first two channels " "will be processed!"
+        )
         audio = audio[..., :2]
 
     if audio.shape[1] == 1:

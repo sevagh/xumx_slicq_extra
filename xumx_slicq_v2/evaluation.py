@@ -24,7 +24,7 @@ def separate_and_evaluate(
     aggregate_dict: dict = None,
     device: Union[str, torch.device] = "cpu",
 ) -> str:
-    print('loading separator')
+    print("loading separator")
     separator = utils.load_separator(
         model_str_or_path=model_str_or_path,
         niter=niter,
@@ -37,11 +37,11 @@ def separate_and_evaluate(
     separator.freeze()
     separator.to(device)
 
-    print('getting audio')
+    print("getting audio")
     audio = torch.as_tensor(track.audio, dtype=torch.float32, device=device)
     audio = utils.preprocess(audio, track.rate, separator.sample_rate)
 
-    print('applying separation')
+    print("applying separation")
     estimates = separator(audio)
     estimates = separator.to_dict(estimates, aggregate_dict=aggregate_dict)
 
@@ -50,7 +50,7 @@ def separate_and_evaluate(
     if output_dir:
         mus.save_estimates(estimates, track, output_dir)
 
-    print('performing bss evaluation')
+    print("performing bss evaluation")
     scores = museval.eval_mus_track(track, estimates, output_dir=eval_dir)
     return scores
 
@@ -72,13 +72,24 @@ if __name__ == "__main__":
         help="Results path where audio evaluation results are stored",
     )
 
-    parser.add_argument("--evaldir", type=str, default="/evaluations", help="Results path for museval estimates")
+    parser.add_argument(
+        "--evaldir",
+        type=str,
+        default="/evaluations",
+        help="Results path for museval estimates",
+    )
 
-    parser.add_argument("--root", type=str, default="/MUSDB18-HQ", help="Path to MUSDB18")
+    parser.add_argument(
+        "--root", type=str, default="/MUSDB18-HQ", help="Path to MUSDB18"
+    )
 
-    parser.add_argument("--track", type=str, default=None, help="evaluate only this track name")
+    parser.add_argument(
+        "--track", type=str, default=None, help="evaluate only this track name"
+    )
 
-    parser.add_argument("--subset", type=str, default="test", help="MUSDB subset (`train`/`test`)")
+    parser.add_argument(
+        "--subset", type=str, default="test", help="MUSDB subset (`train`/`test`)"
+    )
 
     parser.add_argument("--cores", type=int, default=1)
 
@@ -101,7 +112,10 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--slicq-wiener", action="store_true", default=False, help="Apply iterative Wiener-EM on the sliCQT directly, not passing through the STFT domain (slower runtime)"
+        "--slicq-wiener",
+        action="store_true",
+        default=False,
+        help="Apply iterative Wiener-EM on the sliCQT directly, not passing through the STFT domain (slower runtime)",
     )
 
     parser.add_argument(
@@ -168,9 +182,9 @@ if __name__ == "__main__":
     else:
         results = museval.EvalStore()
         for track in tqdm.tqdm(mus.tracks):
-            print('track: {0}'.format(track.name))
+            print("track: {0}".format(track.name))
             if args.track is not None and track.name != args.track:
-                print('not same as specified track, skipping...')
+                print("not same as specified track, skipping...")
                 continue
             scores = separate_and_evaluate(
                 track,

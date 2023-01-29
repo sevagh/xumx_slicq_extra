@@ -13,22 +13,6 @@ from xumx_slicq_v2 import filtering
 from xumx_slicq_v2 import model
 
 
-def custom_collate(batch):
-    # sort to group similar-size tracks together for better padding behavior
-    batch.sort(key=lambda x: x.shape[-1], reverse=True)
-    batch_max_samples = batch[-1].shape[-1]
-    batch_len = len(batch)
-
-    ret = torch.cat([
-        torch.unsqueeze(
-            # zero-pad each track to the maximum length
-            pad(batch_item, (0, batch_max_samples-batch_item.shape[-1]), mode='constant', value=0.),
-            dim=0) for batch_item in batch
-    ], dim=0)
-
-    return ret
-
-
 def load_info(path: str) -> dict:
     """Load audio metadata
 
@@ -82,7 +66,9 @@ def load_audio(
             info = load_info(path)
         num_frames = int(dur * info["samplerate"])
         frame_offset = int(start * info["samplerate"])
-        sig, rate = torchaudio.load(path, num_frames=num_frames, frame_offset=frame_offset)
+        sig, rate = torchaudio.load(
+            path, num_frames=num_frames, frame_offset=frame_offset
+        )
         return sig, rate
 
 
@@ -108,7 +94,9 @@ class Compose(object):
         return audio
 
 
-def _augment_gain(audio: torch.Tensor, low: float = 0.25, high: float = 1.25) -> torch.Tensor:
+def _augment_gain(
+    audio: torch.Tensor, low: float = 0.25, high: float = 1.25
+) -> torch.Tensor:
     """Applies a random gain between `low` and `high`"""
     g = low + torch.rand(1) * (high - low)
     return audio * g
@@ -187,7 +175,9 @@ def load_datasets(
         help="supply fixed start (in s) of song (<0.0 = random start)",
     )
     parser.add_argument("--samples-per-track", type=int, default=64)
-    parser.add_argument("--source-augmentations", type=str, default=["gain", "channelswap"], nargs="+")
+    parser.add_argument(
+        "--source-augmentations", type=str, default=["gain", "channelswap"], nargs="+"
+    )
 
     args = parser.parse_args()
     dataset_kwargs = {
@@ -210,7 +200,10 @@ def load_datasets(
     )
 
     valid_dataset = MUSDBDataset(
-        split="valid", samples_per_track=1, seq_duration=None, **dataset_kwargs, 
+        split="valid",
+        samples_per_track=1,
+        seq_duration=None,
+        **dataset_kwargs,
     )
 
     return train_dataset, valid_dataset, args
@@ -318,17 +311,19 @@ class MUSDBDataset(UnmixDataset):
                     track.chunk_start = self.fixed_start
                 # load source audio and apply time domain source_augmentations
 
-                audio = torch.as_tensor(track.sources[source].audio.T, dtype=torch.float32)
+                audio = torch.as_tensor(
+                    track.sources[source].audio.T, dtype=torch.float32
+                )
                 audio = self.source_augmentations(audio)
                 audio_sources.append(audio)
 
-                if source == 'vocals':
+                if source == "vocals":
                     y_vocals = audio
-                elif source == 'bass':
+                elif source == "bass":
                     y_bass = audio
-                elif source == 'other':
+                elif source == "other":
                     y_other = audio
-                elif source == 'drums':
+                elif source == "drums":
                     y_drums = audio
 
             # create stem tensor of shape (source, channel, samples)
@@ -341,9 +336,15 @@ class MUSDBDataset(UnmixDataset):
         else:
             x = torch.as_tensor(track.audio.T, dtype=torch.float32)
             y_bass = torch.as_tensor(track.targets["bass"].audio.T, dtype=torch.float32)
-            y_vocals = torch.as_tensor(track.targets["vocals"].audio.T, dtype=torch.float32)
-            y_other = torch.as_tensor(track.targets["other"].audio.T, dtype=torch.float32)
-            y_drums = torch.as_tensor(track.targets["drums"].audio.T, dtype=torch.float32)
+            y_vocals = torch.as_tensor(
+                track.targets["vocals"].audio.T, dtype=torch.float32
+            )
+            y_other = torch.as_tensor(
+                track.targets["other"].audio.T, dtype=torch.float32
+            )
+            y_drums = torch.as_tensor(
+                track.targets["drums"].audio.T, dtype=torch.float32
+            )
 
         return torch.cat(
             [
@@ -351,8 +352,9 @@ class MUSDBDataset(UnmixDataset):
                 torch.unsqueeze(y_bass, dim=0),
                 torch.unsqueeze(y_vocals, dim=0),
                 torch.unsqueeze(y_other, dim=0),
-                torch.unsqueeze(y_drums, dim=0)
-            ], dim=0
+                torch.unsqueeze(y_drums, dim=0),
+            ],
+            dim=0,
         )
 
     def __len__(self):

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 # try some durations
-@pytest.fixture(params=[4096, 44100, int(44100*3.5)])
+@pytest.fixture(params=[4096, 44100, int(44100 * 3.5)])
 def nb_timesteps(request):
     return int(request.param)
 
@@ -21,13 +21,16 @@ def nb_channels(request):
 def nb_samples(request):
     return request.param
 
+
 @pytest.fixture
 def audio(request, nb_samples, nb_channels, nb_timesteps):
     return torch.rand((nb_samples, nb_channels, nb_timesteps))
 
 
 def test_nsgt_fwd_cuda_inv_cpu(audio):
-    nsgt, _ = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, 22050, device="cuda"))
+    nsgt, _ = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, 22050, device="cuda")
+    )
 
     X = nsgt(audio)
 
@@ -36,17 +39,24 @@ def test_nsgt_fwd_cuda_inv_cpu(audio):
 
     shape = X.shape
 
-    _, insgt = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, 22050, device="cpu"))
+    _, insgt = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, 22050, device="cpu")
+    )
 
     out = insgt(X, length=audio.shape[-1])
 
-    assert np.sqrt(np.mean((audio.detach().cpu().numpy() - out.detach().numpy()) ** 2)) < 1e-6
+    assert (
+        np.sqrt(np.mean((audio.detach().cpu().numpy() - out.detach().numpy()) ** 2))
+        < 1e-6
+    )
 
 
 def test_nsgt_fwd_cpu_inv_cuda(audio):
     audio = audio.detach().cpu()
 
-    nsgt, _ = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, 22050, device="cpu"))
+    nsgt, _ = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, 22050, device="cpu")
+    )
 
     X = nsgt(audio)
 
@@ -58,20 +68,27 @@ def test_nsgt_fwd_cpu_inv_cuda(audio):
     # add fake target of size 1
     X = X.reshape(shape[0], 1, *shape[1:])
 
-    _, insgt = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, 22050, device="cuda"))
+    _, insgt = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, 22050, device="cuda")
+    )
 
     out = insgt(X, length=audio.shape[-1])
 
     # remove fake target of size 1
     out = torch.squeeze(out, dim=1)
 
-    assert np.sqrt(np.mean((audio.detach().numpy() - out.detach().cpu().numpy()) ** 2)) < 1e-6
+    assert (
+        np.sqrt(np.mean((audio.detach().numpy() - out.detach().cpu().numpy()) ** 2))
+        < 1e-6
+    )
 
 
 def test_nsgt_fwd_inv_cpu(audio):
     audio = audio.detach().cpu()
 
-    nsgt, insgt = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, 22050, device="cpu"))
+    nsgt, insgt = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, 22050, device="cpu")
+    )
 
     X = nsgt(audio)
 
@@ -89,12 +106,14 @@ def test_nsgt_fwd_inv_cpu(audio):
 
 
 def test_nsgt_fwd_inv_cuda(audio):
-    nsgt, insgt = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, 22050, device="cuda"))
+    nsgt, insgt = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, 22050, device="cuda")
+    )
 
     X = nsgt(audio)
 
     # forward with cuda, backward with cpu
-    #X = X.detach().cpu()
+    # X = X.detach().cpu()
 
     shape = X.shape
 
@@ -106,11 +125,18 @@ def test_nsgt_fwd_inv_cuda(audio):
     # remove fake target of size 1
     out = torch.squeeze(out, dim=1)
 
-    assert np.sqrt(np.mean((audio.detach().cpu().numpy() - out.detach().cpu().numpy()) ** 2)) < 1e-6
+    assert (
+        np.sqrt(
+            np.mean((audio.detach().cpu().numpy() - out.detach().cpu().numpy()) ** 2)
+        )
+        < 1e-6
+    )
 
 
 def test_nsgt_fwd_inv_cuda_no_fake_targets(audio):
-    nsgt, insgt = transforms.make_filterbanks(transforms.NSGTBase('cqlog', 80, 20, device="cuda"))
+    nsgt, insgt = transforms.make_filterbanks(
+        transforms.NSGTBase("cqlog", 80, 20, device="cuda")
+    )
 
     X = nsgt(audio)
 
@@ -121,8 +147,14 @@ def test_nsgt_fwd_inv_cuda_no_fake_targets(audio):
 
     out = insgt(X, length=audio.shape[-1])
 
-    assert np.sqrt(np.mean((audio.detach().cpu().numpy() - out.detach().cpu().numpy()) ** 2)) < 1e-6
+    assert (
+        np.sqrt(
+            np.mean((audio.detach().cpu().numpy() - out.detach().cpu().numpy()) ** 2)
+        )
+        < 1e-6
+    )
 
 
 import pytest
+
 pytest.main(["-s", "tests/test_transforms.py::test_nsgt_fwd_inv_cuda"])

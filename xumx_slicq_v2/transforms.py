@@ -14,22 +14,26 @@ def overlap_add_slicq(slicq):
     nb_samples, nb_channels, nb_f_bins, nb_slices, nb_m_bins = slicq.shape
 
     window = nb_m_bins
-    hop = window//2 # 50% overlap window
+    hop = window // 2  # 50% overlap window
 
-    ncoefs = nb_slices*nb_m_bins//2 + hop
-    out = torch.zeros((nb_samples, nb_channels, nb_f_bins, ncoefs), dtype=slicq.dtype, device=slicq.device)
+    ncoefs = nb_slices * nb_m_bins // 2 + hop
+    out = torch.zeros(
+        (nb_samples, nb_channels, nb_f_bins, ncoefs),
+        dtype=slicq.dtype,
+        device=slicq.device,
+    )
 
     ptr = 0
 
     for i in range(nb_slices):
-        out[:, :, :, ptr:ptr+window] += slicq[:, :, :, i, :]
+        out[:, :, :, ptr : ptr + window] += slicq[:, :, :, i, :]
         ptr += hop
 
     return out
 
 
 def phasemix_sep(X, Ymag):
-    Ycomplex = [None]*len(X)
+    Ycomplex = [None] * len(X)
     for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag)):
         Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
         Ycomplex_block = torch.empty_like(X_block)
@@ -41,7 +45,7 @@ def phasemix_sep(X, Ymag):
 
 def make_filterbanks(nsgt_base, sample_rate=44100.0):
     if sample_rate != 44100.0:
-        raise ValueError('i was lazy and harcoded a lot of 44100.0, forgive me')
+        raise ValueError("i was lazy and harcoded a lot of 44100.0, forgive me")
 
     encoder = NSGT_SL(nsgt_base)
     decoder = INSGT_SL(nsgt_base)
@@ -55,26 +59,34 @@ class NSGTBase(nn.Module):
         self.fbins = fbins
         self.fmin = fmin
         self.gamma = gamma
-        self.fmax = fs/2
+        self.fmax = fs / 2
 
         self.scl = None
-        if scale == 'bark':
+        if scale == "bark":
             self.scl = BarkScale(self.fmin, self.fmax, self.fbins)
-        elif scale == 'mel':
+        elif scale == "mel":
             self.scl = MelScale(self.fmin, self.fmax, self.fbins)
-        elif scale == 'cqlog':
+        elif scale == "cqlog":
             self.scl = LogScale(self.fmin, self.fmax, self.fbins)
-        elif scale == 'vqlog':
+        elif scale == "vqlog":
             self.scl = VQLogScale(self.fmin, self.fmax, self.fbins, self.gamma)
-        elif scale == 'oct':
+        elif scale == "oct":
             self.scl = OctScale(self.fmin, self.fmax, self.fbins)
         else:
-            raise ValueError(f'unsupported frequency scale {scale}')
+            raise ValueError(f"unsupported frequency scale {scale}")
 
         self.sllen, self.trlen = self.scl.suggested_sllen_trlen(fs)
-        print(f'sllen, trlen: {self.sllen}, {self.trlen}')
+        print(f"sllen, trlen: {self.sllen}, {self.trlen}")
 
-        self.nsgt = NSGT_sliced(self.scl, self.sllen, self.trlen, fs, real=True, multichannel=True, device=device)
+        self.nsgt = NSGT_sliced(
+            self.scl,
+            self.sllen,
+            self.trlen,
+            fs,
+            real=True,
+            multichannel=True,
+            device=device,
+        )
         self.M = self.nsgt.ncoefs
         self.fs = fs
         self.fbins_actual = self.nsgt.fbins_actual
@@ -82,7 +94,9 @@ class NSGTBase(nn.Module):
     def predict_input_size(self, batch_size, nb_channels, seq_dur_s):
         fwd = NSGT_SL(self)
 
-        x = torch.rand((batch_size, nb_channels, int(seq_dur_s*self.fs)), dtype=torch.float32)
+        x = torch.rand(
+            (batch_size, nb_channels, int(seq_dur_s * self.fs)), dtype=torch.float32
+        )
         shape = x.size()
         nb_samples, nb_channels, nb_timesteps = shape
 
@@ -132,7 +146,7 @@ class NSGT_SL(nn.Module):
 
 
 class INSGT_SL(nn.Module):
-    '''
+    """
     wrapper for torch.istft to support batches
     Args:
          NSGT (Tensor): complex stft of
@@ -141,7 +155,8 @@ class INSGT_SL(nn.Module):
         OR
              shape (nb_samples, nb_targets, nb_channels, nb_bins, nb_frames, complex=2)
              last axis is stacked real and imaginary
-     '''
+    """
+
     def __init__(self, nsgt):
         super(INSGT_SL, self).__init__()
         self.nsgt = nsgt
@@ -151,7 +166,7 @@ class INSGT_SL(nn.Module):
         return self
 
     def forward(self, X_list, length: int) -> Tensor:
-        X_complex = [None]*len(X_list)
+        X_complex = [None] * len(X_list)
         for i, X in enumerate(X_list):
             Xshape = len(X.shape)
 
@@ -160,9 +175,9 @@ class INSGT_SL(nn.Module):
             shape = X.shape
 
             if Xshape == 6:
-                X = X.view(X.shape[0]*X.shape[1], *X.shape[2:])
+                X = X.view(X.shape[0] * X.shape[1], *X.shape[2:])
             else:
-                X = X.view(X.shape[0]*X.shape[1]*X.shape[2], *X.shape[3:])
+                X = X.view(X.shape[0] * X.shape[1] * X.shape[2], *X.shape[3:])
 
             # moveaxis back into into T x [packed-channels] x F1 x F2
             X = torch.moveaxis(X, -2, 0)
@@ -193,7 +208,7 @@ class ComplexNorm(nn.Module):
 
     def forward(self, spec):
         # take the magnitude of the ragged slicqt list
-        ret = [None]*len(spec)
+        ret = [None] * len(spec)
 
         for i, C_block in enumerate(spec):
             C_block = torch.pow(torch.abs(torch.view_as_complex(C_block)), 1.0)

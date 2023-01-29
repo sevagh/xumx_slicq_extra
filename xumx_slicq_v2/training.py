@@ -12,42 +12,48 @@ import os
 import signal
 import atexit
 import gc
-import io
 import copy
 import sys
 import torchaudio
 import torchinfo
 from contextlib import nullcontext
 import sklearn.preprocessing
-from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
-#from torch.cuda.amp import autocast
 
 from xumx_slicq_v2 import data
 from xumx_slicq_v2 import model
 from xumx_slicq_v2 import utils
 from xumx_slicq_v2 import transforms
-from xumx_slicq_v2 import filtering
 from xumx_slicq_v2.loss import LossCriterion
 
 tqdm.monitor_interval = 0
 
 
-#@profile
-def loop(args, unmix, encoder, device, sampler, criterion, optimizer, amp_cm_cuda, amp_cm_cpu, train=True):
+def loop(
+    args,
+    unmix,
+    encoder,
+    device,
+    sampler,
+    criterion,
+    optimizer,
+    amp_cm_cuda,
+    amp_cm_cpu,
+    train=True,
+):
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
 
     losses = utils.AverageMeter()
 
     grad_cm = nullcontext
-    name = ''
+    name = ""
     if train:
         unmix.train()
-        name = 'Train'
+        name = "Train"
     else:
         unmix.eval()
-        name = 'Validation'
+        name = "Validation"
         grad_cm = torch.no_grad
 
     pbar = tqdm.tqdm(sampler, disable=args.quiet)
@@ -71,21 +77,51 @@ def loop(args, unmix, encoder, device, sampler, criterion, optimizer, amp_cm_cud
                 if train:
                     optimizer.zero_grad()
 
-                X, Y_bass, Y_vocals, Y_other, Y_drums = nsgt(x), nsgt(y_bass), nsgt(y_vocals), nsgt(y_other), nsgt(y_drums)
+                X, Y_bass, Y_vocals, Y_other, Y_drums = (
+                    nsgt(x),
+                    nsgt(y_bass),
+                    nsgt(y_vocals),
+                    nsgt(y_other),
+                    nsgt(y_drums),
+                )
 
-                Xmag, Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = cnorm(X), cnorm(Y_bass), cnorm(Y_vocals), cnorm(Y_other), cnorm(Y_drums)
+                Xmag, Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = (
+                    cnorm(X),
+                    cnorm(Y_bass),
+                    cnorm(Y_vocals),
+                    cnorm(Y_other),
+                    cnorm(Y_drums),
+                )
 
                 # forward call to unmix returns bass, vocals, other, drums
-                Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred = unmix(Xmag)
+                (
+                    Ymag_bass_pred,
+                    Ymag_vocals_pred,
+                    Ymag_other_pred,
+                    Ymag_drums_pred,
+                ) = unmix(Xmag)
 
-                y_bass_pred = insgt(transforms.phasemix_sep(X, Ymag_bass_pred), n_samples)
-                y_vocals_pred = insgt(transforms.phasemix_sep(X, Ymag_vocals_pred), n_samples)
-                y_other_pred = insgt(transforms.phasemix_sep(X, Ymag_other_pred), n_samples)
-                y_drums_pred = insgt(transforms.phasemix_sep(X, Ymag_drums_pred), n_samples)
+                y_bass_pred = insgt(
+                    transforms.phasemix_sep(X, Ymag_bass_pred), n_samples
+                )
+                y_vocals_pred = insgt(
+                    transforms.phasemix_sep(X, Ymag_vocals_pred), n_samples
+                )
+                y_other_pred = insgt(
+                    transforms.phasemix_sep(X, Ymag_other_pred), n_samples
+                )
+                y_drums_pred = insgt(
+                    transforms.phasemix_sep(X, Ymag_drums_pred), n_samples
+                )
 
                 loss = criterion(
                     *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
-                    *(Ymag_bass_pred, Ymag_vocals_pred, Ymag_other_pred, Ymag_drums_pred),
+                    *(
+                        Ymag_bass_pred,
+                        Ymag_vocals_pred,
+                        Ymag_other_pred,
+                        Ymag_drums_pred,
+                    ),
                     *(y_bass, y_vocals, y_other, y_drums),
                     *(y_bass_pred, y_vocals_pred, y_other_pred, y_drums_pred),
                 )
@@ -126,11 +162,18 @@ def get_statistics(args, encoder, dataset, time_blocks):
         X = cnorm(nsgt(x[None, ...]))
 
         for i, X_block in enumerate(X):
-            X_block_ola = np.squeeze(transforms.overlap_add_slicq(X_block).mean(1, keepdim=False).permute(0, 2, 1), axis=0)
+            X_block_ola = np.squeeze(
+                transforms.overlap_add_slicq(X_block)
+                .mean(1, keepdim=False)
+                .permute(0, 2, 1),
+                axis=0,
+            )
             scalers[i].partial_fit(X_block_ola)
 
     # set inital input scaler values
-    std = [np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers]
+    std = [
+        np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers
+    ]
     return [scaler.mean_ for scaler in scalers], std
 
 
@@ -151,7 +194,9 @@ def main():
         ],
         help="Name of the dataset.",
     )
-    parser.add_argument("--root", type=str, help="root path of dataset", default="/MUSDB18-HQ")
+    parser.add_argument(
+        "--root", type=str, help="root path of dataset", default="/MUSDB18-HQ"
+    )
     parser.add_argument(
         "--output",
         type=str,
@@ -163,8 +208,9 @@ def main():
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--batch-size-valid", type=int, default=3)
-    parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
+    parser.add_argument(
+        "--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3"
+    )
     parser.add_argument(
         "--patience",
         type=int,
@@ -183,12 +229,18 @@ def main():
         default=0.3,
         help="gamma of learning rate scheduler decay",
     )
-    parser.add_argument("--weight-decay", type=float, default=0.00001, help="weight decay")
+    parser.add_argument(
+        "--weight-decay", type=float, default=0.00001, help="weight decay"
+    )
     parser.add_argument(
         "--seed", type=int, default=42, metavar="S", help="random seed (default: 42)"
     )
-    parser.add_argument('--mcoef', type=float, default=0.1,
-                        help='coefficient for mixing: mcoef*SDR_Loss + MSE_Loss')
+    parser.add_argument(
+        "--mcoef",
+        type=float,
+        default=0.1,
+        help="coefficient for mixing: mcoef*SDR_Loss + MSE_Loss",
+    )
 
     # Model Parameters
     parser.add_argument(
@@ -207,12 +259,13 @@ def main():
         "--seq-dur",
         type=float,
         default=1.0,
-        help="Sequence duration in seconds" "value of <=0.0 will use full/variable length",
+        help="Sequence duration in seconds"
+        "value of <=0.0 will use full/variable length",
     )
     parser.add_argument(
         "--fscale",
-        choices=('bark','mel', 'cqlog', 'vqlog', 'oct'),
-        default='bark',
+        choices=("bark", "mel", "cqlog", "vqlog", "oct"),
+        default="bark",
         help="frequency scale for sliCQ-NSGT",
     )
     parser.add_argument(
@@ -239,7 +292,10 @@ def main():
         help="less verbose during training",
     )
     parser.add_argument(
-        "--cuda-device", type=int, default=-1, help="choose which gpu to train on (-1 = 'cuda' in pytorch)"
+        "--cuda-device",
+        type=int,
+        default=-1,
+        help="choose which gpu to train on (-1 = 'cuda' in pytorch)",
     )
 
     args, _ = parser.parse_known_args()
@@ -251,14 +307,16 @@ def main():
     if use_cuda:
         print("Configuring NSGT to use GPU")
 
-    dataloader_kwargs = {"num_workers": args.nb_workers, "pin_memory": True} if use_cuda else {}
+    dataloader_kwargs = (
+        {"num_workers": args.nb_workers, "pin_memory": True} if use_cuda else {}
+    )
 
     try:
         repo_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         repo = Repo(repo_dir)
         commit = repo.head.commit.hexsha[:7]
     except:
-        commit = 'n/a'
+        commit = "n/a"
 
     # use jpg or npy
     torch.manual_seed(args.seed)
@@ -289,7 +347,11 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=True, **dataloader_kwargs
     )
 
-    valid_sampler = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size_valid, collate_fn=data.custom_collate, **dataloader_kwargs)
+    valid_sampler = torch.utils.data.DataLoader(
+        valid_dataset,
+        batch_size=1,
+        **dataloader_kwargs,
+    )
 
     # need to globally configure an NSGT object to peek at its params to set up the neural network
     # e.g. M depends on the sllen which depends on fscale+fmin+fmax
@@ -309,14 +371,14 @@ def main():
     nsgt = nsgt.to(device)
     insgt = insgt.to(device)
     cnorm = cnorm.to(device)
-    
+
     # pack the 3 pieces of the encoder/decoder
     encoder = (nsgt, insgt, cnorm)
 
     separator_conf = {
         "sample_rate": train_dataset.sample_rate,
         "nb_channels": 2,
-        "seq_dur": args.seq_dur, # have to do inference in chunks of seq_dur in CNN architecture
+        "seq_dur": args.seq_dur,  # have to do inference in chunks of seq_dur in CNN architecture
     }
 
     with open(Path(target_path, "separator.json"), "w") as outfile:
@@ -343,7 +405,9 @@ def main():
     if not args.quiet:
         torchinfo.summary(unmix, input_data=(jagged_slicq,))
 
-    optimizer = torch.optim.Adam(unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = torch.optim.Adam(
+        unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay
+    )
 
     criterion = LossCriterion(args.mcoef)
 
@@ -371,7 +435,7 @@ def main():
         # train for another epochs_trained
         t = tqdm.trange(
             results["epochs_trained"],
-            args.epochs+1,
+            args.epochs + 1,
             initial=results["epochs_trained"],
             disable=args.quiet,
         )
@@ -389,14 +453,14 @@ def main():
         train_times = []
         best_epoch = 0
 
-    print('Starting Tensorboard')
+    print("Starting Tensorboard")
     tboard_proc = subprocess.Popen(["tensorboard", "--logdir", tboard_path])
     tboard_pid = tboard_proc.pid
 
     def kill_tboard():
         if tboard_pid is None:
             pass
-        print('Killing backgrounded Tensorboard process...')
+        print("Killing backgrounded Tensorboard process...")
         os.kill(tboard_pid, signal.SIGTERM)
 
     atexit.register(kill_tboard)
@@ -410,21 +474,35 @@ def main():
 
     print("Enabling FP32 (ampere) optimizations for matmul and cudnn")
     torch.backends.cudnn.allow_tf32 = True
-    torch.set_float32_matmul_precision = 'medium'
+    torch.set_float32_matmul_precision = "medium"
 
-    print("Enabling CUDA Automatic Mixed Precision with bfloat16 for forward pass + loss")
+    print(
+        "Enabling CUDA Automatic Mixed Precision with bfloat16 for forward pass + loss"
+    )
     amp_cm_cuda = lambda: torch.autocast("cuda", dtype=torch.bfloat16)
 
-    print("Enabling CPU Automatic Mixed Precision with bfloat16 for forward pass + loss")
+    print(
+        "Enabling CPU Automatic Mixed Precision with bfloat16 for forward pass + loss"
+    )
     amp_cm_cpu = lambda: torch.autocast("cpu", dtype=torch.bfloat16)
 
     if args.dlprof:
         import nvidia_dlprof_pytorch_nvtx as nvtx
-        print('Profiling with nvtx and dlprof...')
+
+        print("Profiling with nvtx and dlprof...")
         nvtx.init(enable_function_stack=True)
         with torch.autograd.profiler.emit_nvtx():
-            print('Running one epoch for profiling')
-            train_loss = loop(args, unmix, encoder, device, train_sampler, criterion, optimizer, train=True)
+            print("Running one epoch for profiling")
+            train_loss = loop(
+                args,
+                unmix,
+                encoder,
+                device,
+                train_sampler,
+                criterion,
+                optimizer,
+                train=True,
+            )
 
         # wait to browse with tensorboard
         sys.exit(0)
@@ -432,8 +510,30 @@ def main():
     for epoch in t:
         t.set_description("Training Epoch")
         end = time.time()
-        train_loss = loop(args, unmix, encoder, device, train_sampler, criterion, optimizer, amp_cm_cuda, amp_cm_cpu, train=True)
-        valid_loss = loop(args, unmix, encoder, device, valid_sampler, criterion, None, amp_cm_cuda, amp_cm_cpu, train=False)
+        train_loss = loop(
+            args,
+            unmix,
+            encoder,
+            device,
+            train_sampler,
+            criterion,
+            optimizer,
+            amp_cm_cuda,
+            amp_cm_cpu,
+            train=True,
+        )
+        valid_loss = loop(
+            args,
+            unmix,
+            encoder,
+            device,
+            valid_sampler,
+            criterion,
+            None,
+            amp_cm_cuda,
+            amp_cm_cpu,
+            train=False,
+        )
 
         scheduler.step(valid_loss)
         train_losses.append(train_loss)
@@ -477,8 +577,8 @@ def main():
         train_times.append(time.time() - end)
 
         if tboard_writer is not None:
-            tboard_writer.add_scalar('Loss/train', train_loss, epoch)
-            tboard_writer.add_scalar('Loss/valid', valid_loss, epoch)
+            tboard_writer.add_scalar("Loss/train", train_loss, epoch)
+            tboard_writer.add_scalar("Loss/valid", valid_loss, epoch)
 
         if stop:
             print("Apply Early Stopping")
@@ -487,5 +587,5 @@ def main():
         gc.collect()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,26 +1,28 @@
 import numpy as np
 import torch
 from itertools import chain
-    
+
 
 def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, device="cpu"):
     dtype = gd[0].dtype
 
     ifft = torch.fft.irfft if real else torch.fft.ifft
 
-    if real:
-        ln = len(gd)//2+1-reducedform*2
-        if reducedform:
-            sl = lambda x: chain(x[reducedform:len(gd)//2+1-reducedform],x[len(gd)//2+reducedform:len(gd)+1-reducedform])
-        else:
-            sl = lambda x: x
-    else:
-        ln = len(gd)
-        sl = lambda x: x
-        
+    sl = lambda x: x
+    if real and reducedform:
+        sl = lambda x: chain(
+            x[reducedform : len(gd) // 2 + 1 - reducedform],
+            x[len(gd) // 2 + reducedform : len(gd) + 1 - reducedform],
+        )
+
     maxLg = max(len(gdii) for gdii in sl(gd))
 
-    ragged_gdiis = [torch.nn.functional.pad(torch.unsqueeze(gdii, dim=0), (0, maxLg-gdii.shape[0])) for gdii in sl(gd)]
+    ragged_gdiis = [
+        torch.nn.functional.pad(
+            torch.unsqueeze(gdii, dim=0), (0, maxLg - gdii.shape[0])
+        )
+        for gdii in sl(gd)
+    ]
     gdiis = torch.conj(torch.cat(ragged_gdiis))
 
     assert type(cseq) == list
@@ -31,17 +33,21 @@ def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, device="cp
         nfreqs += cseq_tsor.shape[2]
     cseq_shape = (*cseq_tsor.shape[:2], nfreqs)
 
-    fr = torch.zeros(*cseq_shape[:2], nn, dtype=cseq_dtype, device=torch.device(device))  # Allocate output
-    temp0 = torch.empty(*cseq_shape[:2], maxLg, dtype=fr.dtype, device=torch.device(device))  # pre-allocation
+    fr = torch.zeros(
+        *cseq_shape[:2], nn, dtype=cseq_dtype, device=torch.device(device)
+    )  # Allocate output
+    temp0 = torch.empty(
+        *cseq_shape[:2], maxLg, dtype=fr.dtype, device=torch.device(device)
+    )  # pre-allocation
 
     fbins = cseq_shape[2]
 
     loopparams = []
-    for gdii,win_range in zip(sl(gd), sl(wins)):
+    for gdii, win_range in zip(sl(gd), sl(wins)):
         Lg = len(gdii)
-        wr1 = win_range[:(Lg)//2]
-        wr2 = win_range[-((Lg+1)//2):]
-        p = (wr1,wr2,Lg)
+        wr1 = win_range[: (Lg) // 2]
+        wr2 = win_range[-((Lg + 1) // 2) :]
+        p = (wr1, wr2, Lg)
         loopparams.append(p)
 
     # frequencies are bucketed by same time resolution
@@ -50,30 +56,32 @@ def nsigtf_sl(cseq, gd, wins, nn, Ls=None, real=False, reducedform=0, device="cp
         Lg_outer = fc.shape[-1]
 
         nb_fbins = fc.shape[2]
-        for i,(wr1,wr2,Lg) in enumerate(loopparams[fbin_ptr:fbin_ptr+nb_fbins][:fbins]):
-            freq_idx = fbin_ptr+i
+        for i, (wr1, wr2, Lg) in enumerate(
+            loopparams[fbin_ptr : fbin_ptr + nb_fbins][:fbins]
+        ):
+            freq_idx = fbin_ptr + i
 
             assert Lg == Lg_outer
 
             t = fc[:, :, i]
 
-            r = (Lg+1)//2
-            l = (Lg//2)
+            r = (Lg + 1) // 2
+            l = Lg // 2
 
             t1 = temp0[:, :, :r]
-            t2 = temp0[:, :, Lg-l:Lg]
+            t2 = temp0[:, :, Lg - l : Lg]
 
             t1[:, :, :] = t[:, :, :r]
-            t2[:, :, :] = t[:, :, Lg-l:Lg]
+            t2[:, :, :] = t[:, :, Lg - l : Lg]
 
-            temp0[:, :, :Lg] *= gdiis[freq_idx, :Lg] 
+            temp0[:, :, :Lg] *= gdiis[freq_idx, :Lg]
             temp0[:, :, :Lg] *= Lg
 
             fr[:, :, wr1] += t2
             fr[:, :, wr2] += t1
         fbin_ptr += nb_fbins
 
-    ftr = fr[:, :, :nn//2+1] if real else fr
+    ftr = fr[:, :, : nn // 2 + 1] if real else fr
     sig = ifft(ftr, n=nn)
-    sig = sig[:, :, :Ls] # Truncate the signal to original length (if given)
+    sig = sig[:, :, :Ls]  # Truncate the signal to original length (if given)
     return sig
