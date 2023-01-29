@@ -51,8 +51,7 @@ def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True
 
     pbar = tqdm.tqdm(sampler, disable=args.quiet)
 
-    #torch.autocast(device_type="cuda", dtype=torch.bfloat16), 
-    with cm():
+    with torch.autocast(device_type="cuda", dtype=torch.bfloat16), cm():
         for track_tensor in pbar:
             pbar.set_description(f"{name} batch")
 
@@ -399,8 +398,8 @@ def main():
 
     atexit.register(kill_tboard)
 
-    #print("Enabling cuDNN tuning...")
-    #torch.backends.cudnn.benchmark = True
+    print("Enabling cuDNN tuning...")
+    torch.backends.cudnn.benchmark = True
 
     if args.dlprof:
         import nvidia_dlprof_pytorch_nvtx as nvtx

@@ -33,3 +33,15 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
     1. use string representation of slicq parameters
         `--fscales <dbov>` etc.
     1. Optuna?
+
+## Dlprof guide
+
+Run:
+```
+# dlprof --mode=pytorch --output_path /dlprof_out  --reports=summary --formats=json python -m xumx_slicq_v2.training --debug --dlprof --samples-per-track=16
+```
+
+View:
+```
+# dlprofviewer /dlprof_out/dlprof_dldb.sqlite -b 0.0.0.0
+```
