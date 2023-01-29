@@ -20,11 +20,13 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 
 ## Code roadmap
 
-1. At this point, delete all unused code paths (zeropadding, rasterization, etc.)
-1. Optimize more code
+1. Delete all unused code paths (zeropadding, rasterization, etc.)
+1. Optimize more
+    1. dlprof/nvtx, tf32, bfloat16/amp, etc.
 1. Train fully with iNSGT gradients
 1. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
+        * with cuSignal
     * replace SISDR with HAAQI (with a flag?) or mix both
 1. Apply NVIDIA NGC container tools/tooling (DALI data loading, TensorRT inference) wherever it can speed things up
 1. Apply different sliCQ per-target for even more gains

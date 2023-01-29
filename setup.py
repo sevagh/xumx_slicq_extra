@@ -23,6 +23,7 @@ setup(
         "numpy",
         "numba",
         "scikit-learn",
+        "cusignal",
         "tensorboard",
         "torchinfo",
         "matplotlib",
@@ -31,6 +32,8 @@ setup(
         "gitpython",
         "tqdm",
         "auraloss",
+        "nvidia-dlprof[pytorch]",
+        "nvidia-dlprof-viewer"
     ],
     extra_requires={
         "test": [

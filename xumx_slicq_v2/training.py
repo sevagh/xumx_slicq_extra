@@ -17,7 +17,7 @@ import copy
 import sys
 import torchaudio
 import torchinfo
-from contextlib import nullcontext, contextmanager, ExitStack
+from contextlib import nullcontext
 import sklearn.preprocessing
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
@@ -51,7 +51,8 @@ def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True
 
     pbar = tqdm.tqdm(sampler, disable=args.quiet)
 
-    with torch.autocast(device_type="cuda", dtype=torch.bfloat16), cm():
+    #torch.autocast(device_type="cuda", dtype=torch.bfloat16), 
+    with cm():
         for track_tensor in pbar:
             pbar.set_description(f"{name} batch")
 
@@ -160,7 +161,7 @@ def main():
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--batch-size-valid", type=int, default=4)
+    parser.add_argument("--batch-size-valid", type=int, default=2)
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
     parser.add_argument(
         "--patience",
@@ -193,6 +194,12 @@ def main():
         action="store_true",
         default=False,
         help="skip dataset statistics calculation",
+    )
+    parser.add_argument(
+        "--dlprof",
+        action="store_true",
+        default=False,
+        help="dlprof profiling",
     )
     parser.add_argument(
         "--seq-dur",
@@ -392,8 +399,19 @@ def main():
 
     atexit.register(kill_tboard)
 
-    print("Enabling cuDNN tuning...")
-    torch.backends.cudnn.benchmark = True
+    #print("Enabling cuDNN tuning...")
+    #torch.backends.cudnn.benchmark = True
+
+    if args.dlprof:
+        import nvidia_dlprof_pytorch_nvtx as nvtx
+        print('Profiling with nvtx and dlprof...')
+        nvtx.init(enable_function_stack=True)
+        with torch.autograd.profiler.emit_nvtx():
+            print('Running one epoch for profiling')
+            train_loss = loop(args, unmix, encoder, device, train_sampler, criterion, optimizer, train=True)
+
+        # wait to browse with tensorboard
+        sys.exit(0)
 
     for epoch in t:
         t.set_description("Training Epoch")
