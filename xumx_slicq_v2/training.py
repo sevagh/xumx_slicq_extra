@@ -21,6 +21,7 @@ from contextlib import nullcontext
 import sklearn.preprocessing
 from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
+from torch.cuda.amp import autocast
 
 from xumx_slicq_v2 import data
 from xumx_slicq_v2 import model
@@ -32,26 +33,34 @@ from xumx_slicq_v2.loss import LossCriterion
 tqdm.monitor_interval = 0
 
 
+@profile
 def loop(args, unmix, encoder, device, sampler, criterion, optimizer, train=True):
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
 
     losses = utils.AverageMeter()
 
-    cm = None
+    cm1 = nullcontext
     name = ''
     if train:
         unmix.train()
-        cm = nullcontext
         name = 'Train'
     else:
         unmix.eval()
-        cm = torch.no_grad
         name = 'Validation'
+        cm1 = torch.no_grad
+
+    cm2 = nullcontext
+    if args.cuda_mixed_precision_bfloat16:
+        print("Enabling Automatic Mixed Precision with bfloat16")
+        cm2 = lambda: autocast(dtype=torch.bfloat16)
+    elif args.cuda_mixed_precision_float16:
+        print("Enabling Automatic Mixed Precision with float16")
+        cm2 = lambda: autocast(dtype=torch.float16)
 
     pbar = tqdm.tqdm(sampler, disable=args.quiet)
 
-    with torch.autocast(device_type="cuda", dtype=torch.bfloat16), cm():
+    with cm1(), cm2():
         for track_tensor in pbar:
             pbar.set_description(f"{name} batch")
 
@@ -160,7 +169,7 @@ def main():
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--batch-size-valid", type=int, default=2)
+    parser.add_argument("--batch-size-valid", type=int, default=1)
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3")
     parser.add_argument(
         "--patience",
@@ -193,6 +202,24 @@ def main():
         action="store_true",
         default=False,
         help="skip dataset statistics calculation",
+    )
+    parser.add_argument(
+        "--cuda-cudnn-tuning",
+        action="store_true",
+        default=False,
+        help="enable cudnn tuning",
+    )
+    parser.add_argument(
+        "--cuda-mixed-precision-bfloat16",
+        action="store_true",
+        default=False,
+        help="enable AMP with bfloat16",
+    )
+    parser.add_argument(
+        "--cuda-mixed-precision-float16",
+        action="store_true",
+        default=False,
+        help="enable AMP with float16",
     )
     parser.add_argument(
         "--dlprof",
@@ -240,6 +267,10 @@ def main():
     )
 
     args, _ = parser.parse_known_args()
+
+
+    if args.cuda_mixed_precision_bfloat16 and args.cuda_mixed_precision_float16:
+        raise ValueError("choose one of bfloat16, float16 mixed precision, not both")
 
     torchaudio.set_audio_backend("soundfile")
     use_cuda = torch.cuda.is_available()
@@ -398,8 +429,9 @@ def main():
 
     atexit.register(kill_tboard)
 
-    print("Enabling cuDNN tuning...")
-    torch.backends.cudnn.benchmark = True
+    if args.cuda_cudnn_tuning:
+        print("Enabling cuDNN tuning...")
+        torch.backends.cudnn.benchmark = True
 
     if args.dlprof:
         import nvidia_dlprof_pytorch_nvtx as nvtx

@@ -4,15 +4,10 @@ import auraloss
 
 eps = 1.e-10
 
-
-@torch.jit.script
-def _custom_mse_loss_block(pred_magnitude_block, target_magnitude_block):
-    return torch.mean((pred_magnitude_block - target_magnitude_block)**2)
-
-
 def _custom_mse_loss(pred_magnitude, target_magnitude):
-    loss_futures = [torch.jit.fork(_custom_mse_loss_block, *tup) for tup in zip(pred_magnitude, target_magnitude)]
-    loss = sum([torch.jit.wait(future) for future in loss_futures])
+    loss = 0
+    for i in range(len(target_magnitude)):
+        loss += torch.mean((pred_magnitude[i] - target_magnitude[i])**2)
     return loss/len(target_magnitude)
 
 

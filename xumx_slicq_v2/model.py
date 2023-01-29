@@ -226,8 +226,8 @@ class Separator(nn.Module):
             xumx_nsgt, sample_rate=sample_rate
         )
 
-        self.complexnorm = ComplexNorm(mono=nb_channels == 1)
-        self.nb_channels = nb_channels
+        self.complexnorm = ComplexNorm()
+        self.nb_channels = 2
 
         self.xumx_model = xumx_model
         self.register_buffer("sample_rate", torch.as_tensor(sample_rate))

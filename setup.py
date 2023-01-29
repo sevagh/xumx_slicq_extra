@@ -26,14 +26,16 @@ setup(
         "cusignal",
         "tensorboard",
         "torchinfo",
-        "matplotlib",
         "musdb==0.3.1",
         "museval==0.3.1",
         "gitpython",
         "tqdm",
         "auraloss",
         "nvidia-dlprof[pytorch]",
-        "nvidia-dlprof-viewer"
+        "nvidia-pyindex",
+        "nvidia-dlprofviewer",
+        "line_profiler",
+        "memory_profiler"
     ],
     extra_requires={
         "test": [

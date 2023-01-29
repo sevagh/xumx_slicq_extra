@@ -118,7 +118,7 @@ def load_target_models(model_str_or_path="umxhq", device="cpu", pretrained=True,
         device=device
     )
 
-    nb_channels = results["args"]["nb_channels"]
+    nb_channels = 2
 
     seq_dur = results["args"]["seq_dur"]
 
@@ -132,7 +132,6 @@ def load_target_models(model_str_or_path="umxhq", device="cpu", pretrained=True,
     if pretrained:
         xumx_model = model.OpenUnmix(
             jagged_slicq,
-            max_bin=nsgt_base.max_bins(results["args"]["bandwidth"]),
         )
 
         xumx_model.load_state_dict(state, strict=False)

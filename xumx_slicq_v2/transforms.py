@@ -29,19 +29,15 @@ def overlap_add_slicq(slicq):
     return out
 
 
-@torch.jit.script
-def _phasemix_block_sep(X_block, Ymag_block):
-    Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
-    Ycomplex_block = torch.empty_like(X_block)
-    Ycomplex_block[..., 0] = Ymag_block * torch.cos(Xphase_block)
-    Ycomplex_block[..., 1] = Ymag_block * torch.sin(Xphase_block)
-    return Ycomplex_block
-
-
 def phasemix_sep(X, Ymag):
-    phasemix_futures = [torch.jit.fork(_phasemix_block_sep, X_block, Ymag_block) for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag))]
-    ret = [torch.jit.wait(future) for future in phasemix_futures]
-    return ret
+    Ycomplex = [None]*len(X)
+    for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag)):
+        Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
+        Ycomplex_block = torch.empty_like(X_block)
+        Ycomplex_block[..., 0] = Ymag_block * torch.cos(Xphase_block)
+        Ycomplex_block[..., 1] = Ymag_block * torch.sin(Xphase_block)
+        Ycomplex[i] = Ycomplex_block
+    return Ycomplex
 
 
 def make_filterbanks(nsgt_base, sample_rate=44100.0):
@@ -182,11 +178,6 @@ class INSGT_SL(nn.Module):
         return y
 
 
-@torch.jit.script
-def _single_block_spec(C_block):
-    return torch.pow(torch.abs(torch.view_as_complex(C_block)), 1.0)
-
-
 class ComplexNorm(nn.Module):
     r"""Compute the norm of complex tensor input.
 
@@ -203,6 +194,10 @@ class ComplexNorm(nn.Module):
 
     def forward(self, spec):
         # take the magnitude of the ragged slicqt list
-        spec_futures = [torch.jit.fork(_single_block_spec, C_block) for i, C_block in enumerate(spec)]
-        ret = [torch.jit.wait(future) for future in spec_futures]
+        ret = [None]*len(spec)
+
+        for i, C_block in enumerate(spec):
+            C_block = torch.pow(torch.abs(torch.view_as_complex(C_block)), 1.0)
+            ret[i] = C_block
+
         return ret
