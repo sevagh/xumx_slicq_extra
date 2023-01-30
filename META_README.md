@@ -24,16 +24,17 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 1. Optimize more
     1. `code_quality.sh`: delete unused code with `vulture`, format with `black`, `perflint`, `pylint`
     1. dlprof/nvtx, tf32, bfloat16/amp, no_grad, etc.
-1. If good at this point, delete dlprof stuff
+1. If good at this point, delete dlprof stuff, snapshot it as pretrained sdr model
+
+1. Multiple different sliCQT + Danna-Sep (differentiable MWF before SISDR loss)
+    1. Complex MSE (for a single sliCQT)
+    2. iNSGT + MWF/Norbert
+    3. multi-sliCQT
 1. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
         * with cuSignal
-    * replace SISDR with HAAQI (with a flag?) or mix both
+    * replace SISDR with HAAQI with a flag
 1. Apply NVIDIA NGC container tools/tooling (DALI + TensorRT) wherever it can speed things up
-1. Apply different sliCQ per-target for even more gains
-    1. use string representation of slicq parameters
-        `--fscales <dbov>` etc.
-    1. Optuna?
 
 ## Dlprof guide
 

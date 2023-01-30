@@ -14,7 +14,7 @@ from torch.nn import (
     Sequential,
     Sigmoid,
 )
-from .filtering import atan2, wiener
+from .filtering import wiener
 from .transforms import (
     make_filterbanks,
     ComplexNorm,
