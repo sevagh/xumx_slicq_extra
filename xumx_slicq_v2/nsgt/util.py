@@ -1,22 +1,8 @@
-# -*- coding: utf-8
-
-"""
-Python implementation of Non-Stationary Gabor Transform (NSGT)
-derived from MATLAB code by NUHAG, University of Vienna, Austria
-
-Thomas Grill, 2011-2015
-http://grrrr.org/nsgt
-
-Austrian Research Institute for Artificial Intelligence (OFAI)
-AudioMiner project, supported by Vienna Science and Technology Fund (WWTF)
-"""
-
 import numpy as np
 import torch
 from math import pi
 
 
-@torch.no_grad()
 def hannwin(l, device="cpu"):
     r = torch.arange(l, dtype=float, device=torch.device(device))
     r *= np.pi * 2.0 / l
@@ -26,7 +12,6 @@ def hannwin(l, device="cpu"):
     return r
 
 
-@torch.no_grad()
 def blackharr(n, l=None, mod=True, device="cpu"):
     if l is None:
         l = n
@@ -53,7 +38,6 @@ def blackharr(n, l=None, mod=True, device="cpu"):
     return bh
 
 
-@torch.no_grad()
 def _isseq(x):
     try:
         len(x)
@@ -62,7 +46,6 @@ def _isseq(x):
     return True
 
 
-@torch.no_grad()
 def chkM(M, g):
     if M is None:
         M = np.array(list(map(len, g)))
@@ -71,7 +54,6 @@ def chkM(M, g):
     return M
 
 
-@torch.no_grad()
 def calcwinrange(g, rfbas, Ls, device="cpu"):
     shift = np.concatenate(((np.mod(-rfbas[-1], Ls),), rfbas[1:] - rfbas[:-1]))
 
@@ -93,3 +75,17 @@ def calcwinrange(g, rfbas, Ls, device="cpu"):
         wins.append(win_range)
 
     return wins, nn
+
+
+def nsdual(g, wins, nn, M=None, device="cpu"):
+    M = chkM(M, g)
+
+    # Construct the diagonal of the frame operator matrix explicitly
+    x = torch.zeros((nn,), dtype=float, device=torch.device(device))
+    for gi, mii, sl in zip(g, M, wins):
+        xa = torch.square(torch.fft.fftshift(gi))
+        xa *= mii
+        x[sl] += xa
+
+    gd = [gi / torch.fft.ifftshift(x[wi]) for gi, wi in zip(g, wins)]
+    return gd

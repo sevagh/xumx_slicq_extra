@@ -1,16 +1,3 @@
-# -*- coding: utf-8
-
-"""
-Python implementation of Non-Stationary Gabor Transform (NSGT)
-derived from MATLAB code by NUHAG, University of Vienna, Austria
-
-Thomas Grill, 2011-2015
-http://grrrr.org/nsgt
-
-Austrian Research Institute for Artificial Intelligence (OFAI)
-AudioMiner project, supported by Vienna Science and Technology Fund (WWTF)
-"""
-
 import numpy as np
 from itertools import cycle, chain
 from .util import hannwin
@@ -46,10 +33,7 @@ def slicequads(frec_sliced, hhop):
     return ret2
 
 
-@torch.no_grad()
 def unslicing(frec_sliced, sl_len, tr_area, dtype=float, usewindow=True, device="cpu"):
-    # print("unslicing: {0}".format(frec_sliced.shape))
-
     hhop = sl_len // 4
     islices = slicequads(frec_sliced, hhop)
 
@@ -68,10 +52,7 @@ def unslicing(frec_sliced, sl_len, tr_area, dtype=float, usewindow=True, device=
 
     # get first slice to deduce channels
     firstquad = islices[0]
-
     chns = len(firstquad[0])  # number of channels in first quad
-
-    # islices = list(chain((firstquad,), islices))
 
     output = [
         torch.zeros((chns, hhop), dtype=dtype, device=torch.device(device))
@@ -79,20 +60,13 @@ def unslicing(frec_sliced, sl_len, tr_area, dtype=float, usewindow=True, device=
     ]
 
     for quad in islices:
-        # print('quad.shape: {0}'.format(len(quad)))
-        # print('quad[0].shape: {0}'.format(len(quad[0])))
         for osl, isl, w in zip(output, quad, tw):
-            # in a piecewise manner add slices to output stream
             osl[:] += torch.cat([torch.unsqueeze(isl_, dim=0) for isl_ in isl]) * w
         for _ in range(2):
-            # absolutely first two should be padding (and discarded by the receiver)
             yield output.pop(0)
             output.append(
                 torch.zeros((chns, hhop), dtype=dtype, device=torch.device(device))
             )
 
     for _ in range(2):
-        # absolutely last two should be padding (and discarded by the receiver)
         yield output.pop(0)
-
-    # two more buffers remaining (and zero)

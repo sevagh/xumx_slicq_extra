@@ -4,19 +4,17 @@ from itertools import cycle, chain, tee
 from math import ceil
 from .slicing import slicing
 from .unslicing import unslicing
-from .nsdual import nsdual
 from .nsgfwin_sl import nsgfwin
 from .nsgtf import nsgtf_sl
 from .nsigtf import nsigtf_sl
-from .util import calcwinrange
+from .util import calcwinrange, nsdual
 from .fscale import OctScale
 from .reblock import reblock
 
 
-@torch.no_grad()
 def arrange(cseq, fwd, device="cpu"):
-    if type(cseq) == torch.Tensor:
-        M = cseq.shape[-1]
+    for i in range(len(cseq)):
+        M = cseq[i].shape[-1]
 
         if fwd:
             odd_mid = M // 4
@@ -25,27 +23,18 @@ def arrange(cseq, fwd, device="cpu"):
             odd_mid = 3 * M // 4
             even_mid = M // 4
 
-        cseq_copy = torch.zeros_like(cseq)
         # odd indices
-        cseq_copy[1::2, :, :, :] = torch.cat(
-            (cseq[1::2, :, :, odd_mid:], cseq[1::2, :, :, :odd_mid]), dim=-1
+        cseq[i][1::2, :, :, :] = torch.cat(
+            (cseq[i][1::2, :, :, odd_mid:], cseq[i][1::2, :, :, :odd_mid]), dim=-1
         )
 
         # even indices
-        cseq_copy[::2, :, :, :] = torch.cat(
-            (cseq[::2, :, :, even_mid:], cseq[::2, :, :, :even_mid]), dim=-1
+        cseq[i][::2, :, :, :] = torch.cat(
+            (cseq[i][::2, :, :, even_mid:], cseq[i][::2, :, :, :even_mid]), dim=-1
         )
-        cseq = cseq_copy
-    elif type(cseq) == list:
-        for i, cseq_tsor in enumerate(cseq):
-            cseq[i] = arrange(cseq_tsor, fwd, device)
-    else:
-        raise ValueError(f"unsupported type {type(cseq)}")
-
     return cseq
 
 
-@torch.no_grad()
 def starzip(iterables):
     def inner(itr, i):
         for t in itr:
@@ -57,7 +46,6 @@ def starzip(iterables):
     return [inner(itr, i) for i, itr in enumerate(tee(iterables, len(it)))]
 
 
-@torch.no_grad()
 def chnmap_forward(gen, seq, device="cpu"):
     chns = starzip(seq)  # returns a list of generators (one for each channel)
 

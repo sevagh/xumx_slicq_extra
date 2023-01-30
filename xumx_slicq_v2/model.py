@@ -408,9 +408,7 @@ class Separator(nn.Module):
                     self.niter,
                     use_softmask=self.softmask,
                 ) # remove batch dimension of 1
-                print(f"POST-NORBERT: {targets_stft[cur_frame].shape}")
 
-            print(f"POST-POST-NORBERT: {targets_stft.shape}")
             # getting to (nb_targets, channel, fft_size, n_frames)
             targets_stft = targets_stft.permute(3, 2, 1, 0).contiguous()
 

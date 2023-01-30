@@ -6,7 +6,6 @@ from itertools import chain
 import torch
 
 
-@torch.no_grad()
 def nsgfwin(
     f,
     q,
