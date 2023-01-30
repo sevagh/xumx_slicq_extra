@@ -6,31 +6,30 @@ import torch
 
 @torch.no_grad()
 def slicequads(frec_sliced, hhop):
-    slices = [
-        [
-            slice(hhop * ((i + 3 - k * 2) % 4), hhop * ((i + 3 - k * 2) % 4 + 1))
-            for i in range(4)
-        ]
-        for k in range(2)
-    ]
-    slices = cycle(slices)
-
-    ret2 = torch.empty(
+    ret = torch.zeros(
         frec_sliced.shape[0],
-        4,
         frec_sliced.shape[1],
+        4,
         hhop,
         dtype=frec_sliced.dtype,
         device=frec_sliced.device,
     )
 
-    for j, (fsl, sl) in enumerate(zip(frec_sliced, slices)):
-        for k, sli in enumerate(sl):
-            ret2[j, k, :] = torch.cat(
-                [torch.unsqueeze(fslc[sli], dim=0) for fslc in fsl]
-            )
+    frec_sliced = frec_sliced.view(frec_sliced.shape[0], frec_sliced.shape[1], -1, hhop)
 
-    return ret2
+    # assign even indices
+    ret[::2, :, 0] = frec_sliced[::2, :, 3]
+    ret[::2, :, 1] = frec_sliced[::2, :, 0]
+    ret[::2, :, 2] = frec_sliced[::2, :, 1]
+    ret[::2, :, 3] = frec_sliced[::2, :, 2]
+
+    # assign odd indices
+    ret[1::2, :, 0] = frec_sliced[1::2, :, 1]
+    ret[1::2, :, 1] = frec_sliced[1::2, :, 2]
+    ret[1::2, :, 2] = frec_sliced[1::2, :, 3]
+    ret[1::2, :, 3] = frec_sliced[1::2, :, 0]
+
+    return ret.permute(0, 2, 1, 3)
 
 
 def unslicing(frec_sliced, sl_len, tr_area, dtype=float, usewindow=True, device="cpu"):

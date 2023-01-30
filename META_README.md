@@ -20,6 +20,8 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 
 ## Code roadmap
 
+1. Put back full gradients with iNSGT training
+    1. continue deconstruction of slicequads function
 1. Improve: Danna-Sep (differentiable MWF before SISDR loss + complex MSE loss)
     1. Improve: multi-sliCQT
     1. MWF/Norbert after waveforms

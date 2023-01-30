@@ -32,7 +32,8 @@ setup(
         "gitpython",
         "tqdm",
         "auraloss",
-        "norbert @ git+https://github.com/yoyololicon/norbert#egg=norbert"
+        "norbert @ git+https://github.com/yoyololicon/norbert#egg=norbert",
+        "line_profiler"
     ],
     extra_requires={
         "test": [
