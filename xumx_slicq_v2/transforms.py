@@ -4,7 +4,6 @@ import numpy as np
 import torch
 from torch import Tensor
 import torch.nn as nn
-from .filtering import atan2
 import warnings
 
 from .nsgt import NSGT_sliced, BarkScale, MelScale, LogScale, VQLogScale, OctScale
@@ -29,6 +28,30 @@ def overlap_add_slicq(slicq):
         out[:, :, :, ptr : ptr + window] += slicq[:, :, :, i, :]
         ptr += hop
 
+    return out
+
+
+def atan2(y, x):
+    r"""Element-wise arctangent function of y/x.
+    Returns a new tensor with signed angles in radians.
+    It is an alternative implementation of torch.atan2
+
+    Args:
+        y (Tensor): First input tensor
+        x (Tensor): Second input tensor [shape=y.shape]
+
+    Returns:
+        Tensor: [shape=y.shape].
+    """
+    pi = 2 * torch.asin(torch.tensor(1.0))
+    x += ((x == 0) & (y == 0)) * 1.0
+    out = torch.atan(y / x)
+    out += ((y >= 0) & (x < 0)) * pi
+    out -= ((y < 0) & (x < 0)) * pi
+    out *= 1 - ((y > 0) & (x == 0)) * 1.0
+    out += ((y > 0) & (x == 0)) * (pi / 2)
+    out *= 1 - ((y < 0) & (x == 0)) * 1.0
+    out += ((y < 0) & (x == 0)) * (-pi / 2)
     return out
 
 

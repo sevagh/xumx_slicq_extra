@@ -9,7 +9,6 @@ from torch.nn.functional import pad
 import torchaudio
 import tqdm
 from xumx_slicq_v2 import transforms
-from xumx_slicq_v2 import filtering
 from xumx_slicq_v2 import model
 
 

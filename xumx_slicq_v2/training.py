@@ -250,12 +250,6 @@ def main():
         help="skip dataset statistics calculation",
     )
     parser.add_argument(
-        "--dlprof",
-        action="store_true",
-        default=False,
-        help="dlprof profiling",
-    )
-    parser.add_argument(
         "--seq-dur",
         type=float,
         default=1.0,
@@ -485,27 +479,6 @@ def main():
         "Enabling CPU Automatic Mixed Precision with bfloat16 for forward pass + loss"
     )
     amp_cm_cpu = lambda: torch.autocast("cpu", dtype=torch.bfloat16)
-
-    if args.dlprof:
-        import nvidia_dlprof_pytorch_nvtx as nvtx
-
-        print("Profiling with nvtx and dlprof...")
-        nvtx.init(enable_function_stack=True)
-        with torch.autograd.profiler.emit_nvtx():
-            print("Running one epoch for profiling")
-            train_loss = loop(
-                args,
-                unmix,
-                encoder,
-                device,
-                train_sampler,
-                criterion,
-                optimizer,
-                train=True,
-            )
-
-        # wait to browse with tensorboard
-        sys.exit(0)
 
     for epoch in t:
         t.set_description("Training Epoch")

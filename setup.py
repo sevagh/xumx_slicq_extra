@@ -22,6 +22,7 @@ setup(
         "cupy-cuda118",
         "numpy",
         "numba",
+        "scipy",
         "scikit-learn",
         "cusignal",
         "tensorboard",
@@ -31,11 +32,7 @@ setup(
         "gitpython",
         "tqdm",
         "auraloss",
-        "nvidia-dlprof[pytorch]",
-        "nvidia-pyindex",
-        "nvidia-dlprofviewer",
-        "line_profiler",
-        "memory_profiler"
+        "norbert @ git+https://github.com/yoyololicon/norbert#egg=norbert"
     ],
     extra_requires={
         "test": [
