@@ -20,12 +20,11 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 
 ## Code roadmap
 
-1. Put back full gradients with iNSGT training
-    1. continue deconstruction of slicequads function
-1. Improve: Danna-Sep (differentiable MWF before SISDR loss + complex MSE loss)
-    1. Improve: multi-sliCQT
+1. Improve: different models (+ files) + kernel parameters/conv params
+1. Improve w/ Danna-Sep ideas (differentiable MWF before SISDR loss + complex MSE loss)
     1. MWF/Norbert after waveforms
-    1. Complex MSE loss
+    1. no more MSE loss?
+    1. put back validation batches?
 1. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
         * with cuSignal
