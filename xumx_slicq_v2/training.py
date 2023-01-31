@@ -67,63 +67,13 @@ def loop(
                 track_tensor_gpu = track_tensor.to(device)
 
                 x = track_tensor_gpu[:, 0, ...]
-                n_samples = x.shape[-1]
-
-                y_bass = track_tensor_gpu[:, 1, ...]
-                y_vocals = track_tensor_gpu[:, 2, ...]
-                y_other = track_tensor_gpu[:, 3, ...]
-                y_drums = track_tensor_gpu[:, 4, ...]
-
-                if train:
-                    optimizer.zero_grad()
-
-                X, Y_bass, Y_vocals, Y_other, Y_drums = (
-                    nsgt(x),
-                    nsgt(y_bass),
-                    nsgt(y_vocals),
-                    nsgt(y_other),
-                    nsgt(y_drums),
-                )
-
-                Xmag, Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums = (
-                    cnorm(X),
-                    cnorm(Y_bass),
-                    cnorm(Y_vocals),
-                    cnorm(Y_other),
-                    cnorm(Y_drums),
-                )
 
                 # forward call to unmix returns bass, vocals, other, drums
-                (
-                    Ymag_bass_pred,
-                    Ymag_vocals_pred,
-                    Ymag_other_pred,
-                    Ymag_drums_pred,
-                ) = unmix(Xmag)
-
-                y_bass_pred = insgt(
-                    transforms.phasemix_sep(X, Ymag_bass_pred), n_samples
-                )
-                y_vocals_pred = insgt(
-                    transforms.phasemix_sep(X, Ymag_vocals_pred), n_samples
-                )
-                y_other_pred = insgt(
-                    transforms.phasemix_sep(X, Ymag_other_pred), n_samples
-                )
-                y_drums_pred = insgt(
-                    transforms.phasemix_sep(X, Ymag_drums_pred), n_samples
-                )
+                estimates = unmix(x)
 
                 loss = criterion(
-                    *(Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums),
-                    *(
-                        Ymag_bass_pred,
-                        Ymag_vocals_pred,
-                        Ymag_other_pred,
-                        Ymag_drums_pred,
-                    ),
-                    *(y_bass, y_vocals, y_other, y_drums),
-                    *(y_bass_pred, y_vocals_pred, y_other_pred, y_drums_pred),
+                    estimates,
+                    track_tensor_gpu[:, 1:, ...],
                 )
 
             if train:
@@ -234,12 +184,6 @@ def main():
     )
     parser.add_argument(
         "--seed", type=int, default=42, metavar="S", help="random seed (default: 42)"
-    )
-    parser.add_argument(
-        "--mcoef",
-        type=float,
-        default=0.1,
-        help="coefficient for mixing: mcoef*SDR_Loss + MSE_Loss",
     )
 
     # Model Parameters
@@ -378,7 +322,7 @@ def main():
     with open(Path(target_path, "separator.json"), "w") as outfile:
         outfile.write(json.dumps(separator_conf, indent=4, sort_keys=True))
 
-    jagged_slicq = nsgt_base.predict_input_size(args.batch_size, 2, args.seq_dur)
+    jagged_slicq, sample_waveform = nsgt_base.predict_input_size(args.batch_size, 2, args.seq_dur)
 
     jagged_slicq = cnorm(jagged_slicq)
     n_blocks = len(jagged_slicq)
@@ -390,20 +334,21 @@ def main():
     else:
         scaler_mean, scaler_std = get_statistics(args, encoder, train_dataset, n_blocks)
 
-    unmix = model.OpenUnmix(
+    unmix = model.Unmix(
         jagged_slicq,
+        encoder,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)
 
     if not args.quiet:
-        torchinfo.summary(unmix, input_data=(jagged_slicq,))
+        torchinfo.summary(unmix, input_data=(sample_waveform,))
 
     optimizer = torch.optim.Adam(
         unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay
     )
 
-    criterion = LossCriterion(args.mcoef)
+    criterion = LossCriterion()
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,

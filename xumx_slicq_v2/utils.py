@@ -129,7 +129,7 @@ def load_target_models(
     jagged_slicq = cnorm(jagged_slicq)
 
     if pretrained:
-        xumx_model = model.OpenUnmix(
+        xumx_model = model.Unmix(
             jagged_slicq,
         )
 

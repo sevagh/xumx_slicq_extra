@@ -4,7 +4,6 @@ from .util import hannwin
 import torch
 
 
-@torch.no_grad()
 def slicequads(frec_sliced, hhop):
     ret = torch.zeros(
         frec_sliced.shape[0],
