@@ -1,5 +1,4 @@
 from typing import Optional
-
 from tqdm import trange
 import torch
 import torch.nn as nn
@@ -24,16 +23,10 @@ from .transforms import (
     TorchISTFT,
     overlap_add_slicq,
 )
-
-from .targets.vocals import UnmixVocals
-from .targets.bass import UnmixBass
-from .targets.drums import UnmixDrums
-from .targets.other import UnmixOther
-
+from .target_model import UnmixTarget
 import numpy as np
 import copy
 
-eps = 1.0e-10
 _ORDERED_TARGETS = ["vocals", "drums", "bass", "other"]
 
 
@@ -52,10 +45,10 @@ class Unmix(nn.Module):
     ):
         super(Unmix, self).__init__()
 
-        self.umx_vocals = UnmixVocals(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_drums = UnmixDrums(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_bass = UnmixBass(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_other = UnmixOther(jagged_slicq_sample_input, input_means, input_scales)
+        self.umx_vocals = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
+        self.umx_drums = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
+        self.umx_bass = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
+        self.umx_other = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
 
         self.nsgt, self.insgt, self.cnorm = encoder
 
@@ -154,7 +147,7 @@ class Unmix(nn.Module):
             x.shape + (4,), dtype=x.dtype, device=x.device
         )
 
-        for j, target_name in enumerate(_ORDERED_TARGETS):
+        for j in range(len(_ORDERED_TARGETS)):
             estimates[..., j] = self.istft(
                 targets_stft[j, ...],
                 length=n_samples,
@@ -167,8 +160,6 @@ class Separator(nn.Module):
     def __init__(
         self,
         xumx_model,
-        xumx_nsgt,
-        jagged_slicq_sample_input,
         sample_rate: float = 44100.0,
         device: str = "cpu",
         chunk_size: Optional[int] = 2621440,
@@ -180,7 +171,6 @@ class Separator(nn.Module):
 
         self.device = device
 
-        self.complexnorm = ComplexNorm()
         self.nb_channels = 2
 
         self.xumx_model = xumx_model

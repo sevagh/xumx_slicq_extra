@@ -1,7 +1,7 @@
 import argparse
 import random
 from pathlib import Path
-from typing import Optional, Union, Tuple, List, Any, Callable
+from typing import Optional, Union, Tuple, Any, Callable
 
 import torch
 import torch.utils.data

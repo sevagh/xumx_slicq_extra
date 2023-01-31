@@ -15,7 +15,7 @@ from torch.nn import (
     Sigmoid,
 )
 import norbert
-from ..transforms import (
+from .transforms import (
     make_filterbanks,
     ComplexNorm,
     phasemix_sep,
@@ -28,14 +28,14 @@ import copy
 eps = 1.0e-10
 
 
-class SlicedUnmixDrums(nn.Module):
+class SlicedUnmix(nn.Module):
     def __init__(
         self,
         slicq_sample_input,
         input_mean=None,
         input_scale=None,
     ):
-        super(SlicedUnmixDrums, self).__init__()
+        super(SlicedUnmix, self).__init__()
 
         (
             nb_samples,
@@ -156,34 +156,28 @@ class SlicedUnmixDrums(nn.Module):
         return x
 
 
-class UnmixDrums(nn.Module):
+class UnmixTarget(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
         input_means=None,
         input_scales=None,
     ):
-        super(UnmixDrums, self).__init__()
+        super(UnmixTarget, self).__init__()
 
-        self.sliced_umx_drums = nn.ModuleList()
+        self.sliced_umx = nn.ModuleList()
 
-        freq_idx = 0
         for i, C_block in enumerate(jagged_slicq_sample_input):
             input_mean = input_means[i] if input_means else None
             input_scale = input_scales[i] if input_scales else None
 
-            freq_start = freq_idx
-
-            self.sliced_umx_drums.append(
-                SlicedUnmixDrums(
+            self.sliced_umx.append(
+                SlicedUnmix(
                     C_block,
                     input_mean=input_mean,
                     input_scale=input_scale,
                 )
             )
-
-            # advance global frequency pointer
-            freq_idx += C_block.shape[2]
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -193,10 +187,10 @@ class UnmixDrums(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, x) -> Tensor:
-        futures_drums = [
-            torch.jit.fork(self.sliced_umx_drums[i], Xmag_block)
-            for i, Xmag_block in enumerate(x)
+    def forward(self, Xmag) -> Tensor:
+        futures = [
+            torch.jit.fork(self.sliced_umx[i], Xmag_block)
+            for i, Xmag_block in enumerate(Xmag)
         ]
-        y_drums = [torch.jit.wait(future) for future in futures_drums]
-        return y_drums
+        Ymag = [torch.jit.wait(future) for future in futures]
+        return Ymag

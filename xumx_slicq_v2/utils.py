@@ -169,7 +169,7 @@ def load_separator(
         with open(Path(model_path, "separator.json"), "r") as stream:
             enc_conf = json.load(stream)
 
-        xumx_model, model_nsgt, jagged_slicq_sample = load_target_models(
+        xumx_model, _, _ = load_target_models(
             model_str_or_path=model_path,
             pretrained=pretrained,
             sample_rate=enc_conf["sample_rate"],
@@ -178,11 +178,7 @@ def load_separator(
 
         separator = model.Separator(
             xumx_model,
-            model_nsgt,
-            jagged_slicq_sample,
-            stft_wiener=not slicq_wiener,
             sample_rate=enc_conf["sample_rate"],
-            nb_channels=enc_conf["nb_channels"],
         ).to(device)
 
     return separator

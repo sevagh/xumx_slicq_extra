@@ -18,8 +18,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "torch>=0.13.1",
-        "torchaudio",
-        "cupy-cuda118",
+        "torchaudio>=0.13.1",
         "numpy",
         "numba",
         "scipy",
@@ -33,7 +32,6 @@ setup(
         "tqdm",
         "auraloss",
         "norbert @ git+https://github.com/yoyololicon/norbert#egg=norbert",
-        "line_profiler"
     ],
     extra_requires={
         "test": [
