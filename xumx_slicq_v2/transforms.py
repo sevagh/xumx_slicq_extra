@@ -242,7 +242,7 @@ class ComplexNorm(nn.Module):
         elif isinstance(spec, Tensor):
             return self.forward([spec])[0]
         else:
-            raise ValueError("unsupported type for 'spec': {type(spec)}")
+            raise ValueError(f"unsupported type for 'spec': {type(spec)}")
 
 
 class TorchSTFT(nn.Module):

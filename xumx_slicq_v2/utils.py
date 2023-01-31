@@ -124,13 +124,21 @@ def load_target_models(
     target_model_path = Path(model_path, "xumx_slicq_v2.pth")
     state = torch.load(target_model_path, map_location=device)
 
-    jagged_slicq = nsgt_base.predict_input_size(1, nb_channels, seq_dur)
+    jagged_slicq, _ = nsgt_base.predict_input_size(1, nb_channels, seq_dur)
     cnorm = model.ComplexNorm().to(device)
+
+    nsgt, insgt = transforms.make_filterbanks(
+        nsgt_base, sample_rate
+    )
+    nsgt = nsgt.to(device)
+    insgt = insgt.to(device)
+
     jagged_slicq = cnorm(jagged_slicq)
 
     if pretrained:
         xumx_model = model.Unmix(
             jagged_slicq,
+            (nsgt, insgt, cnorm)
         )
 
         xumx_model.load_state_dict(state, strict=False)

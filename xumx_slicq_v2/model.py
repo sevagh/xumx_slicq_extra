@@ -27,8 +27,6 @@ from .target_model import UnmixTarget
 import numpy as np
 import copy
 
-_ORDERED_TARGETS = ["vocals", "drums", "bass", "other"]
-
 
 class Unmix(nn.Module):
     def __init__(
@@ -147,7 +145,7 @@ class Unmix(nn.Module):
             x.shape + (4,), dtype=x.dtype, device=x.device
         )
 
-        for j in range(len(_ORDERED_TARGETS)):
+        for j in range(4):
             estimates[..., j] = self.istft(
                 targets_stft[j, ...],
                 length=n_samples,
@@ -166,16 +164,11 @@ class Separator(nn.Module):
     ):
         super(Separator, self).__init__()
         # saving parameters
-        self.niter = niter
-        self.softmask = softmask
 
         self.device = device
-
         self.nb_channels = 2
-
         self.xumx_model = xumx_model
         self.register_buffer("sample_rate", torch.as_tensor(sample_rate))
-
         self.chunk_size = chunk_size if chunk_size is not None else sys.maxsize
 
     def freeze(self):
@@ -238,7 +231,9 @@ class Separator(nn.Module):
             (dict of str: Tensor):
         """
         estimates_dict = {}
-        for k, target in enumerate(_ORDERED_TARGETS):
+
+        # follow the ordering in data.py
+        for k, target in enumerate(["bass", "vocals", "other", "drums"]):
             estimates_dict[target] = estimates[:, k, ...]
 
         if aggregate_dict is not None:
