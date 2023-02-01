@@ -183,7 +183,7 @@ class NSGT_sliced(torch.nn.Module):
     def forward(self, sig):
         "transform - s: iterable sequence of sequences"
 
-        sig = self.channelize(sig)
+        #sig = self.channelize(sig)
 
         # Compute the slices (zero-padded Tukey window version)
         f_sliced = slicing(sig, self.sl_len, self.tr_area, device=self.device)
@@ -192,13 +192,13 @@ class NSGT_sliced(torch.nn.Module):
 
         cseq = arrange(cseq, True, device=self.device)
 
-        cseq = self.unchannelize(cseq)
+        #cseq = self.unchannelize(cseq)
 
         return cseq
 
     def backward(self, cseq, length):
         "inverse transform - c: iterable sequence of coefficients"
-        cseq = self.channelize(cseq)
+        #cseq = self.channelize(cseq)
 
         cseq = arrange(cseq, False, device=self.device)
 
@@ -215,7 +215,8 @@ class NSGT_sliced(torch.nn.Module):
             device=self.device,
         )
 
-        sig = list(self.unchannelize(sig))[2:]
+        #sig = list(self.unchannelize(sig))[2:]
+        sig = list(sig)[2:]
 
         # convert to tensor
         ret = next(

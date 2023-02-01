@@ -69,11 +69,11 @@ def loop(
                 x = track_tensor_gpu[:, 0, ...]
 
                 # forward call to unmix returns bass, vocals, other, drums
-                estimates = unmix(x)
+                estimates_waveforms = unmix(x)#, return_nsgts=True)
 
                 loss = criterion(
-                    estimates,
-                    track_tensor_gpu[:, 1:, ...],
+                    estimates_waveforms, # estimated by umx
+                    track_tensor_gpu[:, 1:, ...], # target
                 )
 
             if train:
@@ -348,6 +348,7 @@ def main():
         unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay
     )
 
+    # borrow UMX's forward stft object
     criterion = LossCriterion()
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

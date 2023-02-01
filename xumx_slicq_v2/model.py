@@ -68,7 +68,7 @@ class Unmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, x) -> Tensor:
+    def forward(self, x, return_nsgts: bool =False) -> Tensor:
         n_samples = x.shape[-1]
 
         X = self.nsgt(x)
@@ -151,7 +151,10 @@ class Unmix(nn.Module):
                 length=n_samples,
             )
 
-        return estimates.permute(0, 3, 1, 2).contiguous()
+        estimates = estimates.permute(0, 3, 1, 2).contiguous()
+        if return_nsgts:
+            return estimates, (Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums)
+        return estimates
 
 
 class Separator(nn.Module):

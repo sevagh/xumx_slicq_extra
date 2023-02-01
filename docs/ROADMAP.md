@@ -9,6 +9,9 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 ## Goals
 
 1. Improve SDR of xumx-sliCQ
+    1. use smaller nsgt: `('bark', 147, 17.99999999999997, 3.0)`
+        1. _even smaller_?
+    1. Unique network architecture and/or parameters per target?
 1. Adapt for HAAQI: http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
     1. with cuSignal
 

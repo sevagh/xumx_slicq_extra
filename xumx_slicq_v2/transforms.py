@@ -43,7 +43,7 @@ def atan2(y, x):
     Returns:
         Tensor: [shape=y.shape].
     """
-    pi = 2 * torch.asin(torch.tensor(1.0))
+    pi = 2 * torch.asin(torch.as_tensor(1.0))
     x += ((x == 0) & (y == 0)) * 1.0
     out = torch.atan(y / x)
     out += ((y >= 0) & (x < 0)) * pi
@@ -77,12 +77,12 @@ def make_filterbanks(nsgt_base, sample_rate=44100.0):
 
 
 class NSGTBase(nn.Module):
-    def __init__(self, scale, fbins, fmin, fs=44100, device="cuda", gamma=25):
+    def __init__(self, scale, fbins, fmin, fmax=22050, fs=44100, device="cuda", gamma=25):
         super(NSGTBase, self).__init__()
         self.fbins = fbins
         self.fmin = fmin
         self.gamma = gamma
-        self.fmax = fs / 2
+        self.fmax = fmax
 
         self.scl = None
         if scale == "bark":
@@ -276,7 +276,7 @@ class TorchSTFT(nn.Module):
         self.n_hop = n_hop
         self.center = center
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, return_complex=False) -> Tensor:
         """STFT forward path
         Args:
             x (Tensor): audio waveform of
@@ -304,6 +304,12 @@ class TorchSTFT(nn.Module):
             pad_mode="reflect",
             return_complex=True,
         )
+
+        if return_complex:
+            # unpack batch
+            complex_ret = complex_stft.view(shape[:-1] + complex_stft.shape[-2:])
+            return complex_ret
+
         stft_f = torch.view_as_real(complex_stft)
         # unpack batch
         stft_f = stft_f.view(shape[:-1] + stft_f.shape[-3:])
