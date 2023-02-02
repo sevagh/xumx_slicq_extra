@@ -1,4 +1,5 @@
 from typing import Optional
+from math import pi
 import torch
 from torch import Tensor
 import torch.nn as nn
@@ -41,7 +42,6 @@ def atan2(y, x):
     Returns:
         Tensor: [shape=y.shape].
     """
-    pi = 2 * torch.asin(torch.as_tensor(1.0))
     x += ((x == 0) & (y == 0)) * 1.0
     out = torch.atan(y / x)
     out += ((y >= 0) & (x < 0)) * pi
@@ -82,19 +82,7 @@ class NSGTBase(nn.Module):
         self.gamma = gamma
         self.fmax = fmax
 
-        self.scl = None
-        if scale == "bark":
-            self.scl = BarkScale(self.fmin, self.fmax, self.fbins)
-        elif scale == "mel":
-            self.scl = MelScale(self.fmin, self.fmax, self.fbins)
-        elif scale == "cqlog":
-            self.scl = LogScale(self.fmin, self.fmax, self.fbins)
-        elif scale == "vqlog":
-            self.scl = VQLogScale(self.fmin, self.fmax, self.fbins, self.gamma)
-        elif scale == "oct":
-            self.scl = OctScale(self.fmin, self.fmax, self.fbins)
-        else:
-            raise ValueError(f"unsupported frequency scale {scale}")
+        self.scl = BarkScale(self.fmin, self.fmax, self.fbins, device=device)
 
         self.sllen, self.trlen = self.scl.suggested_sllen_trlen(fs)
         print(f"sllen, trlen: {self.sllen}, {self.trlen}")

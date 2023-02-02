@@ -29,6 +29,29 @@ from xumx_slicq_v2.loss import LossCriterion
 tqdm.monitor_interval = 0
 
 
+def check_tensors_devices(suffix):
+    count_cpu_tensors = 0
+    count_gpu_tensors = 0
+    count_cpu_tensors_with_grad = 0
+    count_gpu_tensors_with_grad = 0
+    for obj in gc.get_objects():
+        try:
+            if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+                if obj.device == torch.device("cpu"):
+                    count_cpu_tensors += 1
+                    if obj.requires_grad:
+                        count_cpu_tensors_with_grad += 1
+                elif obj.device == torch.device("cuda:0"):
+                    count_gpu_tensors += 1
+                    if obj.requires_grad:
+                        count_gpu_tensors_with_grad += 1
+        except:
+            pass
+    print(f"{suffix} CPU TENSORS: {count_cpu_tensors}, WITH GRAD: {count_cpu_tensors_with_grad}")
+    print(f"{suffix} GPU TENSORS: {count_gpu_tensors}, WITH GRAD: {count_gpu_tensors_with_grad}")
+    print()
+
+
 def loop(
     args,
     unmix,
@@ -63,23 +86,35 @@ def loop(
             pbar.set_description(f"{name} batch")
 
             # autocast/AMP on forward pass + loss only, _not_ backward pass
-            with amp_cm_cuda(), amp_cm_cpu():
+            with amp_cm_cuda():#, amp_cm_cpu():
                 track_tensor_gpu = track_tensor.to(device)
+                check_tensors_devices("A")
 
                 x = track_tensor_gpu[:, 0, ...]
 
+                check_tensors_devices("B")
+
                 # forward call to unmix returns bass, vocals, other, drums
                 estimates_waveforms = unmix(x)#, return_nsgts=True)
+
+                check_tensors_devices("C")
 
                 loss = criterion(
                     estimates_waveforms, # estimated by umx
                     track_tensor_gpu[:, 1:, ...], # target
                 )
+                check_tensors_devices("D")
 
             if train:
+                check_tensors_devices("E")
+                optimizer.zero_grad()
+                check_tensors_devices("F")
                 loss.backward()
+                check_tensors_devices("G")
                 optimizer.step()
+                check_tensors_devices("H")
 
+            check_tensors_devices("I")
             losses.update(loss.item(), x.size(1))
 
     return losses.avg
