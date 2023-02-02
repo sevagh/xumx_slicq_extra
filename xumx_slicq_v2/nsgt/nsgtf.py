@@ -6,7 +6,7 @@ from .util import chkM
 
 
 def nsgtf_sl(f_slices, g, wins, nn, M=None, real=False, reducedform=0, device="cpu"):
-    M = chkM(M, g)
+    M = chkM(M, g, device)
     dtype = g[0].dtype
 
     if real:
@@ -31,7 +31,7 @@ def nsgtf_sl(f_slices, g, wins, nn, M=None, real=False, reducedform=0, device="c
         loopparams.append(p)
 
     ragged_giis = [
-        torch.nn.functional.pad(torch.unsqueeze(gii, dim=0), (0, maxLg - gii.shape[0]))
+        torch.nn.functional.pad(torch.unsqueeze(gii, dim=0), (0, maxLg.int().item() - gii.shape[0]))
         for gii in g[sl]
     ]
     giis = torch.conj(torch.cat(ragged_giis))

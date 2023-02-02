@@ -31,10 +31,11 @@ def blackharr(n, l=None, mod=True, device="cpu"):
             + 0.14128 * torch.cos(k * (4 * pi / nn))
             - 0.01168 * torch.cos(k * (6 * pi / nn))
         )
+    zeros_size = int((l-n).item())
     bh = torch.hstack(
-        (bh, torch.zeros(l - n, dtype=bh.dtype, device=torch.device(device)))
+        (bh, torch.zeros((zeros_size,), dtype=bh.dtype, device=torch.device(device)))
     )
-    bh = torch.hstack((bh[-n // 2 :], bh[: -n // 2]))
+    bh = torch.hstack((bh[-n.int() // 2 :], bh[: -n.int() // 2]))
     return bh
 
 
@@ -46,19 +47,24 @@ def _isseq(x):
     return True
 
 
-def chkM(M, g):
+def chkM(M, g, device="cpu"):
     if M is None:
-        M = np.array(list(map(len, g)))
+        M = torch.as_tensor(list(map(len, g)), device=torch.device(device))
     elif not _isseq(M):
-        M = np.ones(len(g), dtype=int) * M
+        M = torch.ones(len(g), dtype=int, device=torch.device(device)) * M
     return M
 
 
 def calcwinrange(g, rfbas, Ls, device="cpu"):
-    shift = np.concatenate(((np.mod(-rfbas[-1], Ls),), rfbas[1:] - rfbas[:-1]))
+    shift = rfbas[1:] - rfbas[:-1]
+    shift2 = torch.zeros(shift.shape[0]+1, dtype=shift.dtype, device=shift.device)
+    to_append = -rfbas[-1] % Ls
+    shift2[1:] = shift
+    shift2[0] = to_append
+    shift = shift2
 
-    timepos = np.cumsum(shift)
-    nn = timepos[-1]
+    timepos = torch.cumsum(shift, 0)
+    nn = timepos[-1].clone().item()
     timepos -= shift[0]  # Calculate positions from shift vector
 
     wins = []
@@ -78,7 +84,7 @@ def calcwinrange(g, rfbas, Ls, device="cpu"):
 
 
 def nsdual(g, wins, nn, M=None, device="cpu"):
-    M = chkM(M, g)
+    M = chkM(M, g, device)
 
     # Construct the diagonal of the frame operator matrix explicitly
     x = torch.zeros((nn,), dtype=float, device=torch.device(device))

@@ -6,7 +6,6 @@ import itertools
 import torch
 import museval
 from functools import partial
-import numpy as np
 import random
 import argparse
 from xumx_slicq_v2.transforms import make_filterbanks, NSGTBase, phasemix_sep, ComplexNorm

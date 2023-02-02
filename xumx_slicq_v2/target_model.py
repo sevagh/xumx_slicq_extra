@@ -22,7 +22,6 @@ from .transforms import (
     NSGTBase,
     overlap_add_slicq,
 )
-import numpy as np
 import copy
 
 eps = 1.0e-10

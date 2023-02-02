@@ -8,7 +8,6 @@ from .nsgfwin_sl import nsgfwin
 from .nsgtf import nsgtf_sl
 from .nsigtf import nsigtf_sl
 from .util import calcwinrange, nsdual
-from .fscale import OctScale
 from .reblock import reblock
 
 
@@ -122,7 +121,6 @@ class NSGT_sliced(torch.nn.Module):
             device=self.device,
         )
 
-        #        print "rfbas",self.rfbas/float(self.sl_len)*self.fs
         if real:
             assert 0 <= reducedform <= 2
             sl = slice(reducedform, len(self.g) // 2 + 1 - reducedform)
