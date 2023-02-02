@@ -1,5 +1,5 @@
 import torch
-import numpy
+import math
 
 
 class Scale:
@@ -46,14 +46,14 @@ class Scale:
 def hz2bark(f):
     #       HZ2BARK         Converts frequencies Hertz (Hz) to Bark
     #
-    b = 6 * numpy.arcsinh(f / 600)
+    b = 6 * math.asinh(f / 600)
     return b
 
 
 def bark2hz(b):
     #       BARK2HZ         Converts frequencies Bark to Hertz (HZ)
     #
-    f = 600 * numpy.sinh(b / 6)
+    f = 600 * math.sinh(b / 6)
     return f
 
 

@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 from itertools import cycle, chain, tee
 from math import ceil
 from .slicing import slicing

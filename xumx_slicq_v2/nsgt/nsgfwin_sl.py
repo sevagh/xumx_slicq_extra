@@ -1,4 +1,3 @@
-import numpy as np
 from .util import hannwin, blackharr
 from math import ceil
 from warnings import warn
@@ -20,12 +19,12 @@ def nsgfwin(
 ):
     nf = sr / 2.0
 
-    lim = np.argmax(f > 0)
+    lim = torch.argmax((f > 0).long())
     if lim != 0:
         f = f[lim:]
         q = q[lim:]
 
-    lim = np.argmax(f >= nf)
+    lim = torch.argmax((f >= nf).long())
     if lim != 0:
         f = f[:lim]
         q = q[:lim]
@@ -44,7 +43,11 @@ def nsgfwin(
     fbas = f
     lbas = len(fbas)
 
-    frqs = torch.as_tensor(np.concatenate(((0.0,), fbas, (nf,))), device=torch.device(device))
+    frqs = torch.zeros((fbas.shape[0]+2,), dtype=fbas.dtype, device=fbas.device)
+    frqs[0] = 0.0
+    frqs[1:-1] = fbas
+    frqs[-1] = nf
+
     fbas = torch.cat((frqs, sr - torch.flip(frqs, (0,))[1:-1])).to(torch.device(device))
 
     fbas *= float(Ls) / sr
@@ -62,12 +65,12 @@ def nsgfwin(
         M *= 4
     else:
         M = torch.zeros(fbas.shape, dtype=int, device=torch.device(device))
-        M[0] = np.round(2 * fbas[1])
+        M[0] = torch.round(2 * fbas[1])
         for k in range(1, 2 * lbas + 1):
-            M[k] = np.round(fbas[k + 1] - fbas[k - 1])
-        M[-1] = np.round(Ls - fbas[-2])
+            M[k] = torch.round(fbas[k + 1] - fbas[k - 1])
+        M[-1] = torch.round(Ls - fbas[-2])
 
-    M = torch.clip(M, min_win, np.inf)
+    M = torch.clip(M, min_win, torch.inf)
 
     if sliced:
         g = [blackharr(m, device=device).to(dtype) for m in M]

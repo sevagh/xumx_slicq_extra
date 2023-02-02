@@ -1,4 +1,3 @@
-import numpy as np
 from itertools import cycle, chain
 from .util import hannwin
 import torch

@@ -1,11 +1,10 @@
-import numpy as np
 import torch
 from math import pi
 
 
 def hannwin(l, device="cpu"):
     r = torch.arange(l, dtype=float, device=torch.device(device))
-    r *= np.pi * 2.0 / l
+    r *= pi * 2.0 / l
     r = torch.cos(r)
     r += 1.0
     r *= 0.5

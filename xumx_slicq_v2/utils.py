@@ -2,7 +2,6 @@ from typing import Optional, Union
 
 import torch
 import os
-import numpy as np
 import torchaudio
 import warnings
 from pathlib import Path
@@ -67,7 +66,7 @@ class EarlyStopping(object):
             self.best = metrics
             return False
 
-        if np.isnan(metrics):
+        if torch.isnan(metrics):
             return True
 
         if self.is_better(metrics, self.best):

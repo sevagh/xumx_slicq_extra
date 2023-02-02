@@ -24,7 +24,6 @@ from .transforms import (
     overlap_add_slicq,
 )
 from .target_model import UnmixTarget
-import numpy as np
 import copy
 
 
