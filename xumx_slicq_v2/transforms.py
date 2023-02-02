@@ -57,9 +57,9 @@ def phasemix_sep(X, Ymag):
     Ycomplex = [None] * len(X)
     for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag)):
         Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
-        Ycomplex_block = torch.empty_like(X_block)
-        Ycomplex_block[..., 0] = Ymag_block * torch.cos(Xphase_block)
-        Ycomplex_block[..., 1] = Ymag_block * torch.sin(Xphase_block)
+        Ycomplex_block = torch.empty((4, *X_block.shape,), device=X_block.device, dtype=X_block.dtype)
+        Ycomplex_block[:, ..., 0] = Ymag_block[:, ...] * torch.cos(Xphase_block)
+        Ycomplex_block[:, ..., 1] = Ymag_block[:, ...] * torch.sin(Xphase_block)
         Ycomplex[i] = Ycomplex_block
     return Ycomplex
 
@@ -137,7 +137,10 @@ class NSGT_SL(nn.Module):
                 last axis is stacked real and imaginary
         """
         shape = x.size()
-        nb_samples, nb_channels, nb_timesteps = shape
+        if len(shape) == 3:
+            nb_samples, nb_channels, nb_timesteps = shape
+        elif len(shape) == 4:
+            nb_samples, nb_targets, nb_channels, nb_timesteps = shape
 
         # pack batch
         x = x.contiguous().view(-1, shape[-1])

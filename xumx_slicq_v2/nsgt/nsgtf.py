@@ -62,6 +62,11 @@ def nsgtf_sl(f_slices, g, wins, nn, M=None, real=False, reducedform=0, device="c
 
         # start a new block
         if block_ptr == -1 or bucketed_tensors[block_ptr][0].shape[-1] != Lg:
+            # run ifft on the previous block
+            if block_ptr != -1:
+                bucketed_tensors[block_ptr] = torch.fft.ifft(bucketed_tensors[block_ptr])
+
+            # start the new block
             bucketed_tensors.append(c)
             block_ptr += 1
         else:
@@ -70,5 +75,4 @@ def nsgtf_sl(f_slices, g, wins, nn, M=None, real=False, reducedform=0, device="c
                 [bucketed_tensors[block_ptr], c], dim=2
             )
 
-    # bucket-wise ifft
-    return [torch.fft.ifft(bucketed_tensor) for bucketed_tensor in bucketed_tensors]
+    return bucketed_tensors

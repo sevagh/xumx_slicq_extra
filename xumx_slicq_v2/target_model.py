@@ -44,7 +44,7 @@ class SlicedUnmix(nn.Module):
             nb_t_bins,
         ) = slicq_sample_input.shape
 
-        channels = [nb_channels, 25, 55]
+        channels = [nb_channels, 25, 55, 75]
         layers = len(channels) - 1
 
         if nb_f_bins < 10:
@@ -52,12 +52,12 @@ class SlicedUnmix(nn.Module):
         elif nb_f_bins < 20:
             freq_filter = 3
         else:
-            freq_filter = 5
+            freq_filter = 7
 
         if nb_t_bins <= 100:
-            time_filter = 7
+            time_filter = 9
         else:
-            time_filter = 13
+            time_filter = 15
 
         filters = [(freq_filter, time_filter)] * layers
 
@@ -72,7 +72,6 @@ class SlicedUnmix(nn.Module):
                     channels[i],
                     channels[i + 1],
                     filters[i],
-                    dilation=(1, 2),
                     bias=False,
                 )
             )
@@ -89,7 +88,6 @@ class SlicedUnmix(nn.Module):
                     channels[i],
                     channels[i - 1],
                     filters[i - 1],
-                    dilation=(1, 2),
                     bias=False,
                 )
             )
@@ -98,12 +96,14 @@ class SlicedUnmix(nn.Module):
 
         # grow the overlap-added half dimension to its full size
         decoder.append(
-            ConvTranspose2d(nb_channels, nb_channels, (1, 3), stride=(1, 2), bias=True)
+            ConvTranspose2d(nb_channels, nb_channels, (2, 7), stride=(1, 2), bias=True)
         )
         decoder.append(Sigmoid())
 
-        self.cdae = Sequential(*encoder, *decoder)
-        self.mask = True
+        self.cdae_1 = Sequential(*encoder, *decoder)
+        self.cdae_2 = copy.deepcopy(self.cdae_1)
+        self.cdae_3 = copy.deepcopy(self.cdae_1)
+        self.cdae_4 = copy.deepcopy(self.cdae_1)
 
         if input_mean is not None:
             input_mean = torch.from_numpy(-input_mean).float()
@@ -130,6 +130,8 @@ class SlicedUnmix(nn.Module):
         mix = x.detach().clone()
 
         x_shape = x.shape
+        x_masked = torch.zeros((4, *x_shape,), device=x.device, dtype=x.dtype)
+
         nb_samples, nb_channels, nb_f_bins, nb_slices, nb_t_bins = x_shape
 
         x = overlap_add_slicq(x)
@@ -140,29 +142,48 @@ class SlicedUnmix(nn.Module):
         x *= self.input_scale
         x = x.permute(0, 1, 3, 2)
 
-        for i, layer in enumerate(self.cdae):
-            x = layer(x)
+        x1 = x
+        x2 = x.clone()
+        x3 = x.clone()
+        x4 = x.clone()
+
+        for i, layer in enumerate(self.cdae_1):
+            x1 = layer(x1)
+        for i, layer in enumerate(self.cdae_2):
+            x2 = layer(x2)
+        for i, layer in enumerate(self.cdae_3):
+            x3 = layer(x3)
+        for i, layer in enumerate(self.cdae_4):
+            x4 = layer(x4)
 
         # crop
-        x = x[:, :, :, : nb_t_bins * nb_slices]
+        x1 = x1[:, :, : nb_f_bins, : nb_t_bins * nb_slices]
+        x2 = x2[:, :, : nb_f_bins, : nb_t_bins * nb_slices]
+        x3 = x3[:, :, : nb_f_bins, : nb_t_bins * nb_slices]
+        x4 = x4[:, :, : nb_f_bins, : nb_t_bins * nb_slices]
 
-        x = x.reshape(x_shape)
+        x1 = x1.reshape(x_shape)
+        x2 = x2.reshape(x_shape)
+        x3 = x3.reshape(x_shape)
+        x4 = x4.reshape(x_shape)
 
         # multiplicative skip connection
-        if self.mask:
-            x = x * mix
+        x_masked[0, ...] = x1 * mix
+        x_masked[1, ...] = x2 * mix
+        x_masked[2, ...] = x3 * mix
+        x_masked[3, ...] = x4 * mix
 
-        return x
+        return x_masked
 
 
-class UnmixTarget(nn.Module):
+class UnmixAllTargets(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
         input_means=None,
         input_scales=None,
     ):
-        super(UnmixTarget, self).__init__()
+        super(UnmixAllTargets, self).__init__()
 
         self.sliced_umx = nn.ModuleList()
 

@@ -23,7 +23,7 @@ from .transforms import (
     TorchISTFT,
     overlap_add_slicq,
 )
-from .target_model import UnmixTarget
+from .target_model import UnmixAllTargets
 import copy
 
 
@@ -42,11 +42,7 @@ class Unmix(nn.Module):
     ):
         super(Unmix, self).__init__()
 
-        self.umx_vocals = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_drums = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_bass = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_other = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-
+        self.umx = UnmixAllTargets(jagged_slicq_sample_input, input_means, input_scales)
         self.nsgt, self.insgt, self.cnorm = encoder
 
         # Norbert MWF + iSTFT/STFT will be done here
@@ -73,22 +69,10 @@ class Unmix(nn.Module):
         X = self.nsgt(x)
         Xmag = self.cnorm(X)
 
-        Ymag_vocals = self.umx_vocals(Xmag)
-        Ymag_bass = self.umx_bass(Xmag)
-        Ymag_other = self.umx_other(Xmag)
-        Ymag_drums = self.umx_drums(Xmag)
+        Ymag_targets = self.umx(Xmag)
 
-        y_bass = self.insgt(
-            phasemix_sep(X, Ymag_bass), n_samples
-        )
-        y_vocals = self.insgt(
-            phasemix_sep(X, Ymag_vocals), n_samples
-        )
-        y_other = self.insgt(
-            phasemix_sep(X, Ymag_other), n_samples
-        )
-        y_drums = self.insgt(
-            phasemix_sep(X, Ymag_drums), n_samples
+        y_ests = self.insgt(
+            phasemix_sep(X, Ymag_targets), n_samples
         )
 
         mix_stft = self.stft(x)
@@ -99,14 +83,17 @@ class Unmix(nn.Module):
             Xmag_stft.shape + (4,), dtype=Xmag_stft.dtype, device=Xmag_stft.device
         )
 
-        spectrograms[..., 0] = self.cnorm(self.stft(y_vocals))
-        spectrograms[..., 1] = self.cnorm(self.stft(y_drums))
-        spectrograms[..., 2] = self.cnorm(self.stft(y_bass))
-        spectrograms[..., 3] = self.cnorm(self.stft(y_other))
+        # pack targets on channels
+        y_ests = y_ests.view(y_ests.shape[1], -1, y_ests.shape[-1])
+        spectrograms = self.stft(y_ests)
+
+        # unpack targets and channels
+        mag_spectrograms = self.cnorm(spectrograms)
+        mag_spectrograms = mag_spectrograms.reshape(spectrograms.shape[0], 2, spectrograms.shape[2], spectrograms.shape[3], 4)
 
         # transposing it as
         # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
-        spectrograms = spectrograms.permute(0, 3, 2, 1, 4)
+        mag_spectrograms = mag_spectrograms.permute(0, 3, 2, 1, 4)
 
         # rearranging it into:
         # (nb_samples, nb_frames, nb_bins, nb_channels, 2) to feed
@@ -130,7 +117,7 @@ class Unmix(nn.Module):
             pos = int(cur_frame[-1]) + 1
 
             targets_stft[:, cur_frame, ...] = torch.view_as_real(norbert.wiener(
-                spectrograms[:, cur_frame, ...],
+                mag_spectrograms[:, cur_frame, ...],
                 torch.view_as_complex(mix_stft[:, cur_frame, ...]),
                 self.niter,
                 use_softmask=self.softmask,
@@ -152,7 +139,7 @@ class Unmix(nn.Module):
 
         estimates = estimates.permute(0, 3, 1, 2).contiguous()
         if return_nsgts:
-            return estimates, (Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums)
+            return estimates, Ymag_targets
         return estimates
 
 
