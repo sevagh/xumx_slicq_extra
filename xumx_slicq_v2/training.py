@@ -38,7 +38,6 @@ def loop(
     criterion,
     optimizer,
     amp_cm_cuda,
-    amp_cm_cpu,
     train=True,
 ):
     # unpack encoder object
@@ -63,7 +62,7 @@ def loop(
             pbar.set_description(f"{name} batch")
 
             # autocast/AMP on forward pass + loss only, _not_ backward pass
-            with amp_cm_cuda(), amp_cm_cpu():
+            with amp_cm_cuda():
                 track_tensor_gpu = track_tensor.to(device)
 
                 x = track_tensor_gpu[:, 0, ...]
@@ -421,11 +420,6 @@ def main():
     )
     amp_cm_cuda = lambda: torch.autocast("cuda", dtype=torch.bfloat16)
 
-    print(
-        "Enabling CPU Automatic Mixed Precision with bfloat16 for forward pass + loss"
-    )
-    amp_cm_cpu = lambda: torch.autocast("cpu", dtype=torch.bfloat16)
-
     for epoch in t:
         t.set_description("Training Epoch")
         end = time.time()
@@ -438,7 +432,6 @@ def main():
             criterion,
             optimizer,
             amp_cm_cuda,
-            amp_cm_cpu,
             train=True,
         )
         valid_loss = loop(
@@ -450,7 +443,6 @@ def main():
             criterion,
             None,
             amp_cm_cuda,
-            amp_cm_cpu,
             train=False,
         )
 
