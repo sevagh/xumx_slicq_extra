@@ -76,21 +76,17 @@ class Unmix(nn.Module):
         y_all = self.insgt(Ycomplex_all, n_samples)
 
         mix_stft = self.stft(x)
-        Xmag_stft = self.cnorm(mix_stft)
 
         # initializing spectrograms variable
         spectrograms = torch.zeros(
-            Xmag_stft.shape + (4,), dtype=Xmag_stft.dtype, device=Xmag_stft.device
+            (4,) + mix_stft.shape[:-1], dtype=mix_stft.dtype, device=mix_stft.device
         )
 
-        spectrograms[..., 0] = self.cnorm(self.stft(y_all[0]))
-        spectrograms[..., 1] = self.cnorm(self.stft(y_all[1]))
-        spectrograms[..., 2] = self.cnorm(self.stft(y_all[2]))
-        spectrograms[..., 3] = self.cnorm(self.stft(y_all[3]))
+        spectrograms = self.cnorm(self.stft(y_all))
 
         # transposing it as
         # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
-        spectrograms = spectrograms.permute(0, 3, 2, 1, 4)
+        spectrograms = spectrograms.permute(1, 4, 3, 2, 0)
 
         # rearranging it into:
         # (nb_samples, nb_frames, nb_bins, nb_channels, 2) to feed
@@ -125,16 +121,12 @@ class Unmix(nn.Module):
 
         # inverse STFT
         estimates = torch.empty(
-            x.shape + (4,), dtype=x.dtype, device=x.device
+            (4,) + x.shape, dtype=x.dtype, device=x.device
         )
 
-        for j in range(4):
-            estimates[..., j] = self.istft(
-                targets_stft[j, ...],
-                length=n_samples,
-            )
+        estimates = self.istft(targets_stft, length=n_samples)
 
-        estimates = estimates.permute(0, 3, 1, 2).contiguous()
+        estimates = estimates.permute(1, 0, 2, 3).contiguous()
         if return_nsgts:
             return estimates, (Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums)
         return estimates

@@ -290,7 +290,7 @@ class TorchSTFT(nn.Module):
         """
 
         shape = x.size()
-        nb_samples, nb_channels, nb_timesteps = shape
+        #nb_targets, nb_samples, nb_channels, nb_timesteps = shape
 
         # pack batch
         x = x.reshape(-1, shape[-1])

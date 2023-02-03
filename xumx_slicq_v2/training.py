@@ -157,7 +157,7 @@ def main():
 
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
-    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument(
         "--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3"
     )
