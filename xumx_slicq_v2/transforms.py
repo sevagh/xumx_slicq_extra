@@ -141,7 +141,7 @@ class NSGT_SL(nn.Module):
                 last axis is stacked real and imaginary
         """
         shape = x.size()
-        nb_samples, nb_channels, nb_timesteps = shape
+        #nb_samples, nb_channels, nb_timesteps = shape
 
         # pack batch
         x = x.contiguous().view(-1, shape[-1])

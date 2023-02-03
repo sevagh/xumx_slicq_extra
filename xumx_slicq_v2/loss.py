@@ -3,43 +3,60 @@ import torch
 import auraloss
 
 
-def _custom_mse_loss(pred_magnitude, target_magnitude):
-    loss = 0
-    for i in range(len(target_magnitude)):
-        loss += torch.mean((pred_magnitude[i] - target_magnitude[i]) ** 2)
-    return loss / len(target_magnitude)
+def _inner_mse_loss(pred_block, target_block):
+    return torch.mean((pred_block - target_block) ** 2)
+
+
+def _total_mse_loss(pred_complex, target_complex):
+    loss = 0.
+    for i, (pred_block, target_block) in enumerate(zip(pred_complex, target_complex)):
+        mse_loss = 0.
+
+        # 4C1 Combination Losses
+        for j in [0, 1, 2, 3]:
+            mse_loss += _inner_mse_loss(pred_block[j], target_block[j])
+
+        # 4C2 Combination Losses
+        for (j, k) in [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]:
+            mse_loss += _inner_mse_loss(
+                pred_block[j] + pred_block[k],
+                target_block[j] + target_block[k],
+            )
+
+        # 4C3 Combination Losses
+        for (j, k, l) in [(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)]:
+            mse_loss += _inner_mse_loss(
+                pred_block[j] + pred_block[k] + pred_block[l],
+                target_block[j] + target_block[k] + target_block[l],
+            )
+
+        loss += mse_loss/14.0
+    return loss / len(pred_complex)
 
 
 class LossCriterion:
     def __init__(self, mcoef=0.1):
-        self.sdr_loss_criterion = auraloss.time.SISDRLoss()
-        #self.mse_loss_criterion = _custom_mse_loss
-        #self.mcoef = mcoef
+        self.sdr_loss_criterion = auraloss.time.SDSDRLoss()
+        self.mcoef = mcoef
 
     def __call__(
         self,
         pred_waveforms,
         target_waveforms,
-        #pred_nsgt_1,
-        #pred_nsgt_2,
-        #pred_nsgt_3,
-        #pred_nsgt_4,
-        #target_nsgt_1,
-        #target_nsgt_2,
-        #target_nsgt_3,
-        #target_nsgt_4,
+        pred_nsgts,
+        target_nsgts,
     ):
         sdr_loss = 0
 
-        pred_waveform_1 = pred_waveforms[:, 0, ...]
-        pred_waveform_2 = pred_waveforms[:, 1, ...]
-        pred_waveform_3 = pred_waveforms[:, 2, ...]
-        pred_waveform_4 = pred_waveforms[:, 3, ...]
+        pred_waveform_1 = pred_waveforms[0]
+        pred_waveform_2 = pred_waveforms[1]
+        pred_waveform_3 = pred_waveforms[2]
+        pred_waveform_4 = pred_waveforms[3]
 
-        target_waveform_1 = target_waveforms[:, 0, ...]
-        target_waveform_2 = target_waveforms[:, 1, ...]
-        target_waveform_3 = target_waveforms[:, 2, ...]
-        target_waveform_4 = target_waveforms[:, 3, ...]
+        target_waveform_1 = target_waveforms[0]
+        target_waveform_2 = target_waveforms[1]
+        target_waveform_3 = target_waveforms[2]
+        target_waveform_4 = target_waveforms[3]
 
         # 4C1 Combination Losses
         sdr_loss_1 = self.sdr_loss_criterion(pred_waveform_1, target_waveform_1)
@@ -103,70 +120,5 @@ class LossCriterion:
             + sdr_loss_14
         ) / 14.0
 
-        return sdr_loss
-
-        #mse_loss = 0.0
-
-        ## 4C1 Combination Losses
-        #mse_loss_1 = self.mse_loss_criterion(pred_waveform_1, target_waveform_1)
-        #mse_loss_2 = self.mse_loss_criterion(pred_waveform_2, target_waveform_2)
-        #mse_loss_3 = self.mse_loss_criterion(pred_waveform_3, target_waveform_3)
-        #mse_loss_4 = self.mse_loss_criterion(pred_waveform_4, target_waveform_4)
-
-        ## 4C2 Combination Losses
-        #mse_loss_5 = self.mse_loss_criterion(
-        #    pred_waveform_1 + pred_waveform_2, target_waveform_1 + target_waveform_2
-        #)
-        #mse_loss_6 = self.mse_loss_criterion(
-        #    pred_waveform_1 + pred_waveform_3, target_waveform_1 + target_waveform_3
-        #)
-        #mse_loss_7 = self.mse_loss_criterion(
-        #    pred_waveform_1 + pred_waveform_4, target_waveform_1 + target_waveform_4
-        #)
-        #mse_loss_8 = self.mse_loss_criterion(
-        #    pred_waveform_2 + pred_waveform_3, target_waveform_2 + target_waveform_3
-        #)
-        #mse_loss_9 = self.mse_loss_criterion(
-        #    pred_waveform_2 + pred_waveform_4, target_waveform_2 + target_waveform_4
-        #)
-        #mse_loss_10 = self.mse_loss_criterion(
-        #    pred_waveform_3 + pred_waveform_4, target_waveform_3 + target_waveform_4
-        #)
-
-        ## 4C3 Combination Losses
-        #mse_loss_11 = self.mse_loss_criterion(
-        #    pred_waveform_1 + pred_waveform_2 + pred_waveform_3,
-        #    target_waveform_1 + target_waveform_2 + target_waveform_3,
-        #)
-        #mse_loss_12 = self.mse_loss_criterion(
-        #    pred_waveform_1 + pred_waveform_2 + pred_waveform_4,
-        #    target_waveform_1 + target_waveform_2 + target_waveform_4,
-        #)
-        #mse_loss_13 = self.mse_loss_criterion(
-        #    pred_waveform_1 + pred_waveform_3 + pred_waveform_4,
-        #    target_waveform_1 + target_waveform_3 + target_waveform_4,
-        #)
-        #mse_loss_14 = self.mse_loss_criterion(
-        #    pred_waveform_2 + pred_waveform_3 + pred_waveform_4,
-        #    target_waveform_2 + target_waveform_3 + target_waveform_4,
-        #)
-
-        ## All 14 Combination Losses (4C1 + 4C2 + 4C3)
-        #mse_loss = (
-        #    mse_loss_1
-        #    + mse_loss_2
-        #    + mse_loss_3
-        #    + mse_loss_4
-        #    + mse_loss_5
-        #    + mse_loss_6
-        #    + mse_loss_7
-        #    + mse_loss_8
-        #    + mse_loss_9
-        #    + mse_loss_10
-        #    + mse_loss_11
-        #    + mse_loss_12
-        #    + mse_loss_13
-        #    + mse_loss_14
-        #) / 14.0
-
-        #return self.mcoef*sdr_loss + mse_loss
+        mse_loss = _total_mse_loss(pred_nsgts, target_nsgts)
+        return self.mcoef*sdr_loss + mse_loss

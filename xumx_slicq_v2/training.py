@@ -64,16 +64,20 @@ def loop(
 
             # autocast/AMP on forward pass + loss only, _not_ backward pass
             with amp_cm_cuda(), amp_cm_cpu():
-                track_tensor_gpu = track_tensor.to(device)
+                track_tensor_gpu = track_tensor.to(device).swapaxes(0, 1)
 
-                x = track_tensor_gpu[:, 0, ...]
+                x = track_tensor_gpu[0]
+                y_targets = track_tensor_gpu[1:]
 
                 # forward call to unmix returns bass, vocals, other, drums
-                estimates_waveforms = unmix(x)#, return_nsgts=True)
+                estimates_waveforms, estimates_nsgts = unmix(x, return_nsgts=True)
+                target_nsgts = nsgt(y_targets)
 
                 loss = criterion(
                     estimates_waveforms, # estimated by umx
-                    track_tensor_gpu[:, 1:, ...], # target
+                    y_targets, # target
+                    estimates_nsgts,
+                    target_nsgts,
                 )
 
             if train:
@@ -345,7 +349,7 @@ def main():
     if not args.quiet:
         torchinfo.summary(unmix, input_data=(sample_waveform,))
 
-    optimizer = torch.optim.Adam(
+    optimizer = torch.optim.AdamW(
         unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay
     )
 

@@ -33,27 +33,12 @@ class Unmix(nn.Module):
         encoder,
         input_means=None,
         input_scales=None,
-        wiener_win_len: Optional[int] = 300,
-        niter: int = 1,
-        softmask: bool = False,
-        n_fft: Optional[int] = 4096,
-        n_hop: Optional[int] = 1024,
     ):
         super(Unmix, self).__init__()
 
         self.umx = UnmixAllTargets(jagged_slicq_sample_input, input_means, input_scales)
 
         self.nsgt, self.insgt, self.cnorm = encoder
-
-        # Norbert MWF + iSTFT/STFT will be done here
-        self.n_fft = n_fft
-        self.n_hop = n_hop
-        self.wiener_win_len = wiener_win_len
-        self.niter = niter
-        self.softmask = softmask
-
-        self.stft = TorchSTFT(self.n_fft, self.n_hop, center=True)
-        self.istft = TorchISTFT(self.n_fft, self.n_hop, center=True)
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -74,7 +59,56 @@ class Unmix(nn.Module):
         Ycomplex_all = phasemix_sep(X, Ymag_all)
 
         y_all = self.insgt(Ycomplex_all, n_samples)
+        #print(f"y_all: {y_all.shape}")
+        if return_nsgts:
+            return y_all, Ycomplex_all
+        return y_all
 
+
+class Separator(nn.Module):
+    def __init__(
+        self,
+        xumx_model,
+        sample_rate: float = 44100.0,
+        device: str = "cpu",
+        chunk_size: Optional[int] = 2621440,
+        wiener_win_len: Optional[int] = 300,
+        niter: int = 1,
+        softmask: bool = False,
+        n_fft: Optional[int] = 4096,
+        n_hop: Optional[int] = 1024,
+    ):
+        super(Separator, self).__init__()
+        # saving parameters
+
+        self.device = device
+        self.nb_channels = 2
+        self.xumx_model = xumx_model
+        self.register_buffer("sample_rate", torch.as_tensor(sample_rate))
+        self.chunk_size = chunk_size if chunk_size is not None else sys.maxsize
+
+        # Norbert MWF + iSTFT/STFT will be done here
+        self.n_fft = n_fft
+        self.n_hop = n_hop
+        self.wiener_win_len = wiener_win_len
+        self.niter = niter
+        self.softmask = softmask
+
+        self.stft = TorchSTFT(self.n_fft, self.n_hop, center=True)
+        self.istft = TorchISTFT(self.n_fft, self.n_hop, center=True)
+        self.cnorm = ComplexNorm()
+
+    def freeze(self):
+        # set all parameters as not requiring gradient, more RAM-efficient
+        # at test time
+        for p in self.parameters():
+            # p.requires_grad = False
+            p.grad = None
+        self.xumx_model.freeze()
+        self.eval()
+
+    @torch.no_grad()
+    def post_wiener(self, x, y_all):
         mix_stft = self.stft(x)
 
         # initializing spectrograms variable
@@ -125,38 +159,9 @@ class Unmix(nn.Module):
         )
 
         estimates = self.istft(targets_stft, length=n_samples)
+        #print(f"ests: {estimates.shape}")
 
-        estimates = estimates.permute(1, 0, 2, 3).contiguous()
-        if return_nsgts:
-            return estimates, (Ymag_bass, Ymag_vocals, Ymag_other, Ymag_drums)
         return estimates
-
-
-class Separator(nn.Module):
-    def __init__(
-        self,
-        xumx_model,
-        sample_rate: float = 44100.0,
-        device: str = "cpu",
-        chunk_size: Optional[int] = 2621440,
-    ):
-        super(Separator, self).__init__()
-        # saving parameters
-
-        self.device = device
-        self.nb_channels = 2
-        self.xumx_model = xumx_model
-        self.register_buffer("sample_rate", torch.as_tensor(sample_rate))
-        self.chunk_size = chunk_size if chunk_size is not None else sys.maxsize
-
-    def freeze(self):
-        # set all parameters as not requiring gradient, more RAM-efficient
-        # at test time
-        for p in self.parameters():
-            # p.requires_grad = False
-            p.grad = None
-        self.xumx_model.freeze()
-        self.eval()
 
     @torch.no_grad()
     def forward(self, audio_big: Tensor) -> Tensor:
@@ -188,8 +193,11 @@ class Separator(nn.Module):
             ]
             print(f"audio.shape: {audio.shape}")
 
-            # xumx inference: waveform after MWF
+            # xumx inference
             estimates = self.xumx_model(audio)
+
+            # wiener MWF
+            estimates = self.post_wiener(estimates)
 
             final_estimates.append(estimates)
 
@@ -212,7 +220,7 @@ class Separator(nn.Module):
 
         # follow the ordering in data.py
         for k, target in enumerate(["bass", "vocals", "other", "drums"]):
-            estimates_dict[target] = estimates[:, k, ...]
+            estimates_dict[target] = estimates[k]
 
         if aggregate_dict is not None:
             new_estimates = {}
