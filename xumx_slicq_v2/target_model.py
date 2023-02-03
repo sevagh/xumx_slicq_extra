@@ -71,6 +71,7 @@ class SlicedUnmix(nn.Module):
                     channels[i],
                     channels[i + 1],
                     filters[i],
+                    dilation=(1, 2),
                     bias=False,
                 )
             )
@@ -87,6 +88,7 @@ class SlicedUnmix(nn.Module):
                     channels[i],
                     channels[i - 1],
                     filters[i - 1],
+                    dilation=(1, 2),
                     bias=False,
                 )
             )
