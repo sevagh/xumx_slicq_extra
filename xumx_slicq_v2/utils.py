@@ -1,5 +1,5 @@
 from typing import Optional, Union
-
+import numpy
 import torch
 import os
 import torchaudio
@@ -66,7 +66,7 @@ class EarlyStopping(object):
             self.best = metrics
             return False
 
-        if torch.isnan(metrics):
+        if numpy.isnan(metrics):
             return True
 
         if self.is_better(metrics, self.best):
