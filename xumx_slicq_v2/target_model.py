@@ -43,7 +43,7 @@ class SlicedUnmix(nn.Module):
             nb_t_bins,
         ) = slicq_sample_input.shape
 
-        channels = [nb_channels, 25, 55, 75]
+        channels = [nb_channels, 20, 40, 60]
         layers = len(channels) - 1
 
         if nb_f_bins < 10:
@@ -54,9 +54,9 @@ class SlicedUnmix(nn.Module):
             freq_filter = 7
 
         if nb_t_bins <= 100:
-            time_filter = 9
+            time_filter = 7
         else:
-            time_filter = 15
+            time_filter = 11
 
         filters = [(freq_filter, time_filter)] * layers
 
