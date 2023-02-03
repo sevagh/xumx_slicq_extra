@@ -80,6 +80,8 @@ class BarkScale(Scale):
             bnd = torch.arange(self.bnds, device=self.device)
         return bark2hz(bnd * self.bbnd + self.bmin)
 
+
+# hacky stuff since i didn't want to delete downstream code
 OctScale = BarkScale
 MelScale = BarkScale
 LogScale = BarkScale

@@ -4,7 +4,7 @@ from torch import Tensor
 import torch.nn as nn
 import warnings
 
-from .nsgt import NSGT_sliced, BarkScale, MelScale, LogScale, VQLogScale, OctScale
+from .nsgt import NSGT_sliced, BarkScale
 
 
 def overlap_add_slicq(slicq):
@@ -86,19 +86,7 @@ class NSGTBase(nn.Module):
         self.gamma = gamma
         self.fmax = fmax
 
-        self.scl = None
-        if scale == "bark":
-            self.scl = BarkScale(self.fmin, self.fmax, self.fbins)
-        elif scale == "mel":
-            self.scl = MelScale(self.fmin, self.fmax, self.fbins)
-        elif scale == "cqlog":
-            self.scl = LogScale(self.fmin, self.fmax, self.fbins)
-        elif scale == "vqlog":
-            self.scl = VQLogScale(self.fmin, self.fmax, self.fbins, self.gamma)
-        elif scale == "oct":
-            self.scl = OctScale(self.fmin, self.fmax, self.fbins)
-        else:
-            raise ValueError(f"unsupported frequency scale {scale}")
+        self.scl = BarkScale(self.fmin, self.fmax, self.fbins, device=device)
 
         self.sllen, self.trlen = self.scl.suggested_sllen_trlen(fs)
         print(f"sllen, trlen: {self.sllen}, {self.trlen}")
