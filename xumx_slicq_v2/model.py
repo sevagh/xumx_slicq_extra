@@ -21,7 +21,6 @@ from .transforms import (
     NSGTBase,
     TorchSTFT,
     TorchISTFT,
-    overlap_add_slicq,
 )
 from .target_model import UnmixAllTargets
 import copy
@@ -72,18 +71,9 @@ class Unmix(nn.Module):
 
         Ymag_all = self.umx(Xmag)
 
-        y_bass = self.insgt(
-            phasemix_sep(X, [Ymag_[0] for Ymag_ in Ymag_all]), n_samples
-        )
-        y_vocals = self.insgt(
-            phasemix_sep(X, [Ymag_[1] for Ymag_ in Ymag_all]), n_samples
-        )
-        y_other = self.insgt(
-            phasemix_sep(X, [Ymag_[2] for Ymag_ in Ymag_all]), n_samples
-        )
-        y_drums = self.insgt(
-            phasemix_sep(X, [Ymag_[3] for Ymag_ in Ymag_all]), n_samples
-        )
+        Ycomplex_all = phasemix_sep(X, Ymag_all)
+
+        y_all = self.insgt(Ycomplex_all, n_samples)
 
         mix_stft = self.stft(x)
         Xmag_stft = self.cnorm(mix_stft)
@@ -93,10 +83,10 @@ class Unmix(nn.Module):
             Xmag_stft.shape + (4,), dtype=Xmag_stft.dtype, device=Xmag_stft.device
         )
 
-        spectrograms[..., 0] = self.cnorm(self.stft(y_vocals))
-        spectrograms[..., 1] = self.cnorm(self.stft(y_drums))
-        spectrograms[..., 2] = self.cnorm(self.stft(y_bass))
-        spectrograms[..., 3] = self.cnorm(self.stft(y_other))
+        spectrograms[..., 0] = self.cnorm(self.stft(y_all[0]))
+        spectrograms[..., 1] = self.cnorm(self.stft(y_all[1]))
+        spectrograms[..., 2] = self.cnorm(self.stft(y_all[2]))
+        spectrograms[..., 3] = self.cnorm(self.stft(y_all[3]))
 
         # transposing it as
         # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)

@@ -57,9 +57,13 @@ def phasemix_sep(X, Ymag):
     Ycomplex = [None] * len(X)
     for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag)):
         Xphase_block = atan2(X_block[..., 1], X_block[..., 0])
-        Ycomplex_block = torch.empty_like(X_block)
-        Ycomplex_block[..., 0] = Ymag_block * torch.cos(Xphase_block)
-        Ycomplex_block[..., 1] = Ymag_block * torch.sin(Xphase_block)
+
+        # phasemix-sep all targets at once
+        Ycomplex_block = torch.empty((4, *X_block.shape,), dtype=X_block.dtype, device=X_block.device)
+
+        Ycomplex_block[:, ..., 0] = Ymag_block[:, ...] * torch.cos(Xphase_block)
+        Ycomplex_block[:, ..., 1] = Ymag_block[:, ...] * torch.sin(Xphase_block)
+
         Ycomplex[i] = Ycomplex_block
     return Ycomplex
 
