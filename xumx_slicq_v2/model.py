@@ -23,7 +23,7 @@ from .transforms import (
     TorchISTFT,
     overlap_add_slicq,
 )
-from .target_model import UnmixTarget
+from .target_model import UnmixAllTargets
 import copy
 
 
@@ -42,10 +42,7 @@ class Unmix(nn.Module):
     ):
         super(Unmix, self).__init__()
 
-        self.umx_vocals = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_drums = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_bass = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
-        self.umx_other = UnmixTarget(jagged_slicq_sample_input, input_means, input_scales)
+        self.umx = UnmixAllTargets(jagged_slicq_sample_input, input_means, input_scales)
 
         self.nsgt, self.insgt, self.cnorm = encoder
 
@@ -73,22 +70,19 @@ class Unmix(nn.Module):
         X = self.nsgt(x)
         Xmag = self.cnorm(X)
 
-        Ymag_vocals = self.umx_vocals(Xmag)
-        Ymag_bass = self.umx_bass(Xmag)
-        Ymag_other = self.umx_other(Xmag)
-        Ymag_drums = self.umx_drums(Xmag)
+        Ymag_all = self.umx(Xmag)
 
         y_bass = self.insgt(
-            phasemix_sep(X, Ymag_bass), n_samples
+            phasemix_sep(X, [Ymag_[0] for Ymag_ in Ymag_all]), n_samples
         )
         y_vocals = self.insgt(
-            phasemix_sep(X, Ymag_vocals), n_samples
+            phasemix_sep(X, [Ymag_[1] for Ymag_ in Ymag_all]), n_samples
         )
         y_other = self.insgt(
-            phasemix_sep(X, Ymag_other), n_samples
+            phasemix_sep(X, [Ymag_[2] for Ymag_ in Ymag_all]), n_samples
         )
         y_drums = self.insgt(
-            phasemix_sep(X, Ymag_drums), n_samples
+            phasemix_sep(X, [Ymag_[3] for Ymag_ in Ymag_all]), n_samples
         )
 
         mix_stft = self.stft(x)

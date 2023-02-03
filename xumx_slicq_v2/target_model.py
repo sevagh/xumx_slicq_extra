@@ -100,7 +100,12 @@ class SlicedUnmix(nn.Module):
         )
         decoder.append(Sigmoid())
 
-        self.cdae = Sequential(*encoder, *decoder)
+        cdae_1 = Sequential(*encoder, *decoder)
+        cdae_2 = copy.deepcopy(cdae_1)
+        cdae_3 = copy.deepcopy(cdae_1)
+        cdae_4 = copy.deepcopy(cdae_1)
+
+        self.cdaes = nn.ModuleList([cdae_1, cdae_2, cdae_3, cdae_4])
         self.mask = True
 
         if input_mean is not None:
@@ -130,6 +135,8 @@ class SlicedUnmix(nn.Module):
         x_shape = x.shape
         nb_samples, nb_channels, nb_f_bins, nb_slices, nb_t_bins = x_shape
 
+        ret = torch.zeros((4, *x_shape,), device=x.device, dtype=x.dtype)
+
         x = overlap_add_slicq(x)
 
         # shift and scale input to mean=0 std=1 (across all bins)
@@ -138,29 +145,33 @@ class SlicedUnmix(nn.Module):
         x *= self.input_scale
         x = x.permute(0, 1, 3, 2)
 
-        for i, layer in enumerate(self.cdae):
-            x = layer(x)
+        for i, cdae in enumerate(self.cdaes):
+            x_tmp = x.clone()
+            for j, layer in enumerate(cdae):
+                x_tmp = layer(x_tmp)
 
-        # crop
-        x = x[:, :, : nb_f_bins, : nb_t_bins * nb_slices]
+            # crop
+            x_tmp = x_tmp[:, :, : nb_f_bins, : nb_t_bins * nb_slices]
 
-        x = x.reshape(x_shape)
+            x_tmp = x_tmp.reshape(x_shape)
 
-        # multiplicative skip connection
-        if self.mask:
-            x = x * mix
+            # multiplicative skip connection
+            if self.mask:
+                x_tmp = x_tmp * mix
 
-        return x
+            ret[i, ...] = x_tmp
+
+        return ret
 
 
-class UnmixTarget(nn.Module):
+class UnmixAllTargets(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
         input_means=None,
         input_scales=None,
     ):
-        super(UnmixTarget, self).__init__()
+        super(UnmixAllTargets, self).__init__()
 
         self.sliced_umx = nn.ModuleList()
 
