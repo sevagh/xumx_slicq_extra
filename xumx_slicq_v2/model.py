@@ -109,6 +109,7 @@ class Separator(nn.Module):
 
     @torch.no_grad()
     def post_wiener(self, x, y_all):
+        n_samples = x.shape[-1]
         mix_stft = self.stft(x)
 
         # initializing spectrograms variable
@@ -197,7 +198,7 @@ class Separator(nn.Module):
             estimates = self.xumx_model(audio)
 
             # wiener MWF
-            estimates = self.post_wiener(estimates)
+            estimates = self.post_wiener(audio, estimates)
 
             final_estimates.append(estimates)
 
