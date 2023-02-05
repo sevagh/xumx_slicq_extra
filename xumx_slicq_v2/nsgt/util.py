@@ -3,7 +3,7 @@ from math import pi
 
 
 def hannwin(l, device="cpu"):
-    r = torch.arange(l, dtype=float, device=torch.device(device))
+    r = torch.arange(l, dtype=float, device=torch.device(device), requires_grad=False)
     r *= pi * 2.0 / l
     r = torch.cos(r)
     r += 1.0
@@ -15,7 +15,7 @@ def blackharr(n, l=None, mod=True, device="cpu"):
     if l is None:
         l = n
     nn = (n // 2) * 2
-    k = torch.arange(n, device=torch.device(device))
+    k = torch.arange(n, device=torch.device(device), requires_grad=False)
     if not mod:
         bh = (
             0.35875
@@ -32,7 +32,7 @@ def blackharr(n, l=None, mod=True, device="cpu"):
         )
     zeros_size = int((l-n).item())
     bh = torch.hstack(
-        (bh, torch.zeros((zeros_size,), dtype=bh.dtype, device=torch.device(device)))
+        (bh, torch.zeros((zeros_size,), dtype=bh.dtype, device=torch.device(device), requires_grad=False))
     )
     bh = torch.hstack((bh[-n.int() // 2 :], bh[: -n.int() // 2]))
     return bh
@@ -48,15 +48,15 @@ def _isseq(x):
 
 def chkM(M, g, device="cpu"):
     if M is None:
-        M = torch.as_tensor(list(map(len, g)), device=torch.device(device))
+        M = torch.as_tensor(list(map(len, g)), device=torch.device(device), requires_grad=False)
     elif not _isseq(M):
-        M = torch.ones(len(g), dtype=int, device=torch.device(device)) * M
+        M = torch.ones(len(g), dtype=int, device=torch.device(device), requires_grad=False) * M
     return M
 
 
 def calcwinrange(g, rfbas, Ls, device="cpu"):
     shift = rfbas[1:] - rfbas[:-1]
-    shift2 = torch.zeros(shift.shape[0]+1, dtype=shift.dtype, device=shift.device)
+    shift2 = torch.zeros(shift.shape[0]+1, dtype=shift.dtype, device=shift.device, requires_grad=False)
     to_append = -rfbas[-1] % Ls
     shift2[1:] = shift
     shift2[0] = to_append
@@ -74,6 +74,7 @@ def calcwinrange(g, rfbas, Ls, device="cpu"):
             Lg - (Lg // 2) + tpii,
             dtype=int,
             device=torch.device(device),
+            requires_grad=False
         )
         win_range %= nn
 
@@ -86,7 +87,7 @@ def nsdual(g, wins, nn, M=None, device="cpu"):
     M = chkM(M, g, device)
 
     # Construct the diagonal of the frame operator matrix explicitly
-    x = torch.zeros((nn,), dtype=float, device=torch.device(device))
+    x = torch.zeros((nn,), dtype=float, device=torch.device(device), requires_grad=False)
     for gi, mii, sl in zip(g, M, wins):
         xa = torch.square(torch.fft.fftshift(gi))
         xa *= mii

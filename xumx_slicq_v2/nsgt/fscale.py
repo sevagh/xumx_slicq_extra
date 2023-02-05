@@ -15,7 +15,7 @@ class Scale:
     def Q(self, bnd=None):
         # numerical differentiation (if self.Q not defined by sub-class)
         if bnd is None:
-            bnd = torch.arange(self.bnds, device=self.device)
+            bnd = torch.arange(self.bnds, device=self.device, requires_grad=False)
         return (
             self.F(bnd)
             * self.dbnd
@@ -24,7 +24,9 @@ class Scale:
 
     def __call__(self):
         f = torch.as_tensor([self.F(b) for b in range(self.bnds)], dtype=torch.float32, device=self.device)
+        f.requires_grad = False
         q = torch.as_tensor([self.Q(b) for b in range(self.bnds)], dtype=torch.float32, device=self.device)
+        q.requires_grad = False
         return f, q
 
     def suggested_sllen_trlen(self, sr):
@@ -77,7 +79,7 @@ class BarkScale(Scale):
 
     def F(self, bnd=None):
         if bnd is None:
-            bnd = torch.arange(self.bnds, device=self.device)
+            bnd = torch.arange(self.bnds, device=self.device, requires_grad=False)
         return bark2hz(bnd * self.bbnd + self.bmin)
 
 
