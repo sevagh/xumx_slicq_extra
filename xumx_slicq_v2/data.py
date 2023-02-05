@@ -12,6 +12,22 @@ from xumx_slicq_v2 import transforms
 from xumx_slicq_v2 import model
 
 
+def custom_collate(batch):
+    # sort to group similar-size tracks together for better padding behavior
+    batch.sort(key=lambda x: x.shape[-1], reverse=True)
+    batch_max_samples = batch[-1].shape[-1]
+    batch_len = len(batch)
+
+    ret = torch.cat([
+        torch.unsqueeze(
+            # zero-pad each track to the maximum length
+            pad(batch_item, (0, batch_max_samples-batch_item.shape[-1]), mode='constant', value=0.),
+            dim=0) for batch_item in batch
+    ], dim=0)
+
+    return ret
+
+
 def load_info(path: str) -> dict:
     """Load audio metadata
 

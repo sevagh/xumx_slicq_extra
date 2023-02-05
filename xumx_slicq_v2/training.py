@@ -163,6 +163,7 @@ def main():
     # Training Parameters
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--batch-size-valid", type=int, default=1)
     parser.add_argument(
         "--lr", type=float, default=0.001, help="learning rate, defaults to 1e-3"
     )
@@ -298,7 +299,8 @@ def main():
 
     valid_sampler = torch.utils.data.DataLoader(
         valid_dataset,
-        batch_size=1,
+        batch_size=args.batch_size_valid,
+        collate_fn=data.custom_collate,
         **dataloader_kwargs,
     )
 
