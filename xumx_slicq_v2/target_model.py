@@ -26,6 +26,26 @@ import copy
 eps = 1.0e-10
 
 
+# just pass input through directly
+class DummyTimeBucket(nn.Module):
+    def __init__(
+        self,
+        slicq_sample_input,
+    ):
+        super(DummyTimeBucket, self).__init__()
+
+    def freeze(self):
+        # set all parameters as not requiring gradient, more RAM-efficient
+        # at test time
+        for p in self.parameters():
+            #p.requires_grad = False
+            p.grad = None
+        self.eval()
+
+    def forward(self, x: Tensor) -> Tensor:
+        return x
+
+
 class SlicedUnmix(nn.Module):
     def __init__(
         self,
@@ -169,6 +189,7 @@ class UnmixAllTargets(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
+        max_bin=None,
         input_means=None,
         input_scales=None,
     ):
@@ -176,17 +197,28 @@ class UnmixAllTargets(nn.Module):
 
         self.sliced_umx = nn.ModuleList()
 
+        freq_idx = 0
         for i, C_block in enumerate(jagged_slicq_sample_input):
             input_mean = input_means[i] if input_means else None
             input_scale = input_scales[i] if input_scales else None
 
-            self.sliced_umx.append(
-                SlicedUnmix(
-                    C_block,
-                    input_mean=input_mean,
-                    input_scale=input_scale,
+            freq_start = freq_idx
+
+            if max_bin is not None and freq_start >= max_bin:
+                self.sliced_umx.append(
+                    DummyTimeBucket(C_block)
                 )
-            )
+            else:
+                self.sliced_umx.append(
+                    SlicedUnmix(
+                        C_block,
+                        input_mean=input_mean,
+                        input_scale=input_scale,
+                    )
+                )
+
+            # advance frequency pointer
+            freq_idx += C_block.shape[2]
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient

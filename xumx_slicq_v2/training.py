@@ -206,6 +206,12 @@ def main():
         "value of <=0.0 will use full/variable length",
     )
     parser.add_argument(
+        "--bandwidth",
+        type=float,
+        default=16000.,
+        help="network won't consider frequencies above this",
+    )
+    parser.add_argument(
         "--fscale",
         choices=("bark", "mel", "cqlog", "vqlog", "oct"),
         default="bark",
@@ -342,6 +348,7 @@ def main():
     unmix = model.Unmix(
         jagged_slicq,
         encoder,
+        max_bin=nsgt_base.max_bins(args.bandwidth),
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)

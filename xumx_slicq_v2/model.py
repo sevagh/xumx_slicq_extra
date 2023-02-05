@@ -31,12 +31,13 @@ class Unmix(nn.Module):
         self,
         jagged_slicq_sample_input,
         encoder,
+        max_bin=None,
         input_means=None,
         input_scales=None,
     ):
         super(Unmix, self).__init__()
 
-        self.umx = UnmixAllTargets(jagged_slicq_sample_input, input_means, input_scales)
+        self.umx = UnmixAllTargets(jagged_slicq_sample_input, max_bin, input_means, input_scales)
 
         self.nsgt, self.insgt, self.cnorm = encoder
 

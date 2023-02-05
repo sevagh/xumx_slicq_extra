@@ -137,7 +137,8 @@ def load_target_models(
     if pretrained:
         xumx_model = model.Unmix(
             jagged_slicq,
-            (nsgt, insgt, cnorm)
+            (nsgt, insgt, cnorm),
+            max_bin=nsgt_base.max_bins(results["args"]["bandwidth"]),
         )
 
         xumx_model.load_state_dict(state, strict=False)

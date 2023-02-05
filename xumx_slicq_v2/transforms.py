@@ -104,6 +104,13 @@ class NSGTBase(nn.Module):
         self.fs = fs
         self.fbins_actual = self.nsgt.fbins_actual
 
+    def max_bins(self, bandwidth): # convert hz bandwidth into bins
+        if bandwidth is None:
+            return None
+        freqs, _ = self.scl()
+        max_bin = min(torch.argwhere(freqs > bandwidth))[0]
+        return max_bin+1
+
     def predict_input_size(self, batch_size, nb_channels, seq_dur_s):
         fwd = NSGT_SL(self)
 
