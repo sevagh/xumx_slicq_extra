@@ -43,7 +43,7 @@ class SlicedUnmix(nn.Module):
             nb_t_bins,
         ) = slicq_sample_input.shape
 
-        channels = [nb_channels, 20, 40, 60]
+        channels = [nb_channels, 25, 55]
         layers = len(channels) - 1
 
         if nb_f_bins < 10:
@@ -51,12 +51,12 @@ class SlicedUnmix(nn.Module):
         elif nb_f_bins < 20:
             freq_filter = 3
         else:
-            freq_filter = 7
+            freq_filter = 5
 
         if nb_t_bins <= 100:
             time_filter = 7
         else:
-            time_filter = 11
+            time_filter = 13
 
         filters = [(freq_filter, time_filter)] * layers
 
@@ -97,7 +97,7 @@ class SlicedUnmix(nn.Module):
 
         # grow the overlap-added half dimension to its full size
         decoder.append(
-            ConvTranspose2d(nb_channels, nb_channels, (2, 7), stride=(1, 2), bias=True)
+            ConvTranspose2d(nb_channels, nb_channels, (1, 3), stride=(1, 2), bias=True)
         )
         decoder.append(Sigmoid())
 
