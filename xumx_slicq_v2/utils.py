@@ -150,7 +150,6 @@ def load_separator(
     model_str_or_path: str = "umxhq",
     niter: int = 1,
     residual: bool = False,
-    slicq_wiener: bool = False,
     wiener_win_len: Optional[int] = 300,
     device: Union[str, torch.device] = "cpu",
     pretrained: bool = True,

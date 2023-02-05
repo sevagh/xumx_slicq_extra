@@ -31,7 +31,6 @@ def separate_and_evaluate(
         residual=residual,
         device=device,
         pretrained=True,
-        slicq_wiener=args.slicq_wiener,
     )
 
     separator.freeze()
@@ -94,10 +93,6 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, default=1)
 
     parser.add_argument(
-        "--no-cuda", action="store_true", default=True, help="disables CUDA inference"
-    )
-
-    parser.add_argument(
         "--niter",
         type=int,
         default=1,
@@ -109,13 +104,6 @@ if __name__ == "__main__":
         type=int,
         default=300,
         help="Number of frames on which to apply filtering independently",
-    )
-
-    parser.add_argument(
-        "--slicq-wiener",
-        action="store_true",
-        default=False,
-        help="Apply iterative Wiener-EM on the sliCQT directly, not passing through the STFT domain (slower runtime)",
     )
 
     parser.add_argument(

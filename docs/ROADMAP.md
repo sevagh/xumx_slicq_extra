@@ -24,7 +24,10 @@ sevagh:xumx-sliCQ-V2 $ docker run -it --gpus=all --ipc=host --ulimit memlock=-1 
 ## Code roadmap
 
 1. Full iNSGT gradient training (~200 hours, >1 week)
+1. Add pandas boxplot and/or median score script to xumx_slicq_v2
+1. Real full README with impressive SDR
+1. Apply for permission from HR with Ray
 1. Apply HAAQI metrics calculations for time-domain
     * implement [HAAQI](https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py)
         * with cuSignal
-    * replace SISDR with HAAQI with a flag
+    * replace SISDR with HAAQI with a flag during training
