@@ -83,7 +83,7 @@ class NSGTBase(nn.Module):
         self.fbins_actual = self.nsgt.fbins_actual
 
     def max_bins(self, bandwidth): # convert hz bandwidth into bins
-        if bandwidth is None:
+        if bandwidth is None or bandwidth < 0:
             return None
         freqs, _ = self.scl()
         max_bin = min(torch.argwhere(freqs > bandwidth))[0]
