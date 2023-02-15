@@ -15,33 +15,8 @@ docker run --rm -it \
 
 ## Goals
 
-start cleanups, deal with Git-LFS warnings
-    - dont need janky failure pretrained models
-
-looks like nb-workers, lower is better?
-
-* ensemble xumx-sliCQ model! create methods `def vocals/bass/drums/other` and mix and match them
-    * combine weights from different models! and mix and match wiener methods
-    * first test both in conjunction, _then_ create a frankenloader to save blended weights
-
-blended: bass from mse-sdr, vocals/drums/other from mse
-try config 2 anyway
-then, blend + 0/1/2
-then, blend + save
-
-blending was an accident; mixed up median scores with Zeno - Signs
-    - try again
-
-evaluation: better tqdm/less print statements now that i know things are working
-
-xumx-sliCQ-V2-private
-then xumx-sliCQ-V2-training
-then xumx-sliCQ-V2 clean inference
-    create clean inference repo with divide described below
-
-1. Ownership, license, etc.
-    1. xumx-sliCQ-V2-private: private, later public archive (and add README and point to from xumx-sliCQ-V2)
-    1. xumx-sliCQ-V2: public release repo, don't publish this one, for clean commit
+* xumx-sliCQ-V2-scrapyard: current (can always make it public again)
+* then xumx-sliCQ-V2 (public) with inference/extra split
     1. create xumx_slicq_v2_extra module for code i won't be using (but don't want to delete?)
         1. xumx_slicq_v2_extra (or devel) (w/ matplotlib)
             1. put back other frequency scales??
@@ -57,18 +32,12 @@ then xumx-sliCQ-V2 clean inference
 
 * best MSE loss to beat: "best_loss": 0.07773791626095772" (epoch 334)
     * SDR with STFT-wiener-EM = 4.1 dB ('mse' variant, config 1)
-* next MSE-SDR model: 
-    * SDR with STFT-wiener-EM = 
+* MSE-SDR, blending: insignificant gains (4.16 vs. 4.1 dB? not worth the complexity)
 
-1. Current: NN
-    1. Train next variant (MSE-SDSDR with --sdsdr-mcoef=0.01)
-    1. store: pretrained_model/{mse, mse-sdsdr}
-    1. test all of them:
-        mse: config 0, 1, 2
-        mse-sdr: config 0, 1, 2
-        move worse code (slicqt-wiener-EM) to xumx_slicq_v2_extra
-    1. Ensure `inference.py` works; CPU or GPU inference with outputting files (for demos etc.) is fine
-
+1. Next NN design: concatenate _some_ tf blocks with zero-padding where appropriate
+1. Next NN design: bias=False+BatchNorm+ReLU (for symmetry) vs. Sigmoid
+1. evaluation: better tqdm/less print statements now that i know things are working
+1. Ensure `inference.py` works; CPU or GPU inference with outputting files (for demos etc.) is fine
 1. Next: competition; MSE+HAAQI (new mcoef)
     1. Start working on README, paper materials
     1. Cadenza challenge registration issues
