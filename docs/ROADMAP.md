@@ -33,9 +33,9 @@ docker run --rm -it \
 * best MSE loss to beat: "best_loss": 0.07773791626095772" (epoch 334)
     * SDR with STFT-wiener-EM = 4.1 dB ('mse' variant, config 1)
 * MSE-SDR, blending: insignificant gains (4.16 vs. 4.1 dB? not worth the complexity)
+* MSE full bandwidth: +0.1 dB, "best_loss": "best_loss": 0.07634352669119834,
+* best: MSE + bandwidth + STFT Wiener = 4.1 dB
 
-1. Next NN design: concatenate _some_ tf blocks with zero-padding where appropriate
-1. Next NN design: bias=False+BatchNorm+ReLU (for symmetry) vs. Sigmoid
 1. evaluation: better tqdm/less print statements now that i know things are working
 1. Ensure `inference.py` works; CPU or GPU inference with outputting files (for demos etc.) is fine
 1. Next: competition; MSE+HAAQI (new mcoef)
