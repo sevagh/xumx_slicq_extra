@@ -15,39 +15,24 @@ docker run --rm -it \
 
 ## Goals
 
-* xumx-sliCQ-V2-scrapyard: current (can always make it public again)
-* then xumx-sliCQ-V2 (public) with inference/extra split
-    1. create xumx_slicq_v2_extra module for code i won't be using (but don't want to delete?)
-        1. xumx_slicq_v2_extra (or devel) (w/ matplotlib)
-            1. put back other frequency scales??
-            1. remove unused configs e.g. slicqt-wiener? keep highest performing models, prune other code
-            1. add some plot-spectrograms option with `_overlap-add-slicq` (private function), for visualizations
-            1. evaluation goes in extra?? benchmark?? training??
-                1. evaluation, loss, training, data, nsgt_extra (frequency scales + plotting + slicqt-wiener)
-                1. HAAQI + cuSignal goes here too, + auraloss + sevagh/sigsep-mus-eval + scikit-learn + tensorboard + torchinfo + gitpython + musdb
-                    1. get rid of gitpython
-        1. create dockerfile-slim for pytorch runtime inference
-            1. with only xumx_slicq_v2
-            1. only cp best pretrained model into it (3x70 = 210MB total storage)
+*training repo*
+* xumx-sliCQ-V2-training: this repo
+    * keep training code, blendmodels, single Dockerfile, etc.
+    * add some plot-spectrograms option with `_overlap-add-slicq` (private function), for visualizations
+    * add latex files etc. for future papers
+    * HAAQI stuff happens here
+1. Neural network: add bottleneck layer + skip connections to CDAE
+1. Add MSE+HAAQI (new pretrained_model/mse-haaqi) with new mcoef
+    1. train new variant
+    1. use cuSignal for HAAQI
+        * http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
+        * https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py
+* Cadenza challenge registration issues
+* README to describe all the cool things (and not so cool things)
+    nvcr, training, blending, <https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html>
 
-* best MSE loss to beat: "best_loss": 0.07773791626095772" (epoch 334)
-    * SDR with STFT-wiener-EM = 4.1 dB ('mse' variant, config 1)
-* MSE-SDR, blending: insignificant gains (4.16 vs. 4.1 dB? not worth the complexity)
-* MSE full bandwidth: +0.1 dB, "best_loss": "best_loss": 0.07634352669119834,
-* best: MSE + bandwidth + STFT Wiener = 4.1 dB
-
-1. evaluation: better tqdm/less print statements now that i know things are working
-1. Ensure `inference.py` works; CPU or GPU inference with outputting files (for demos etc.) is fine
-1. Next: competition; MSE+HAAQI (new mcoef)
+*public repo*
+* xumx-sliCQ-V2 (for public) with cut down code, 1 pretrained MSE model, xumx-config=1
+    1. Inference = '__main__.py'; ensure it works; CPU or GPU inference with outputting files (for demos etc.) is fine
     1. Start working on README, paper materials
-    1. Cadenza challenge registration issues
-    1. Add MSE+HAAQI (new pretrained_model/mse-haaqi)
-        1. train new variant
-        1. use cuSignal for HAAQI
-            * http://cadenzachallenge.org/docs/cadenza1/Software/cc1_baseline
-            * https://github.com/claritychallenge/clarity/blob/main/clarity/evaluator/haaqi/haaqi.py
-        1. submit all 3
-
-## Guides
-
-* <https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html>
+    1. create slim Dockerfile for pytorch runtime inference

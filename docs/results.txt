@@ -1,4 +1,4 @@
-model: MSE-full-bw, 1: 4.216 dB
+model: MSE-full-bw, 1: 4.216 dB (loss: 0.07634352669119834)
         Aggregated Scores (median over frames, median over tracks)
         vocals          ==> SDR:   4.724  SIR:   8.010  ISR:   9.741  SAR:   3.161
         drums           ==> SDR:   4.888  SIR:   8.803  ISR:  10.099  SAR:   4.669
@@ -12,8 +12,7 @@ Aggregated Scores (median over frames, median over tracks)
         bass            ==> SDR:   4.220  SIR:   9.353  ISR:   5.971  SAR:   3.252
         other           ==> SDR:   3.075  SIR:   2.031  ISR:   8.503  SAR:   3.129
 
-
-model: MSE, 1; 4.09825 dB SDRtot
+model: MSE, 1; 4.09825 dB SDRtot (loss: 0.07773791626095772)
         vocals          ==> SDR:   4.376  SIR:   7.965  ISR:   9.191  SAR:   3.218
         drums           ==> SDR:   4.827  SIR:   8.836  ISR:  10.144  SAR:   4.527
         bass            ==> SDR:   4.082  SIR:   8.673  ISR:   4.873  SAR:   3.262
