@@ -25,7 +25,7 @@ from .data import MUSDBDataset, custom_collate
 from xumx_slicq_v2 import data
 from xumx_slicq_v2 import models
 from xumx_slicq_v2 import transforms
-from xumx_slicq_v2.loss import MSELossCriterion, SDRLossCriterion
+from xumx_slicq_v2.loss import MSELossCriterion, SDRLossCriterion, HAAQILossCriterion
 
 tqdm.monitor_interval = 0
 
@@ -43,7 +43,7 @@ def loop(
     train=True,
 ):
     # unpack loss object
-    mse_criterion, sdr_criterion, sdr_mcoef = criterion
+    mse_criterion, waveform_criterion, waveform_mcoef = criterion
 
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
@@ -85,13 +85,13 @@ def loop(
                     Ymag_targets,
                 )
 
-                if sdr_criterion is not None:
+                if waveform_criterion is not None:
                     nb_samples = x.shape[-1]
                     Ycomplex_all = transforms.phasemix_sep(Xcomplex, Ymag_targets)
                     y_ests = insgt(Ycomplex_all, nb_samples)
 
-                    sdr_loss = sdr_criterion(y_ests, y_targets)
-                    loss += sdr_mcoef*sdr_loss
+                    waveform_loss = waveform_criterion(y_ests, y_targets)
+                    loss += waveform_mcoef*waveform_loss
 
             if train:
                 optimizer.zero_grad()
@@ -201,6 +201,12 @@ def main():
         type=float,
         default=0.01,
         help="mixing coefficient between MSE and SDR loss (default: 0.01)",
+    )
+    parser.add_argument(
+        "--haaqi-mcoef",
+        type=float,
+        default=0.01,
+        help="mixing coefficient between MSE and HAAQI loss (default: 0.01)",
     )
     parser.add_argument(
         "--seq-dur",
@@ -369,13 +375,15 @@ def main():
     )
 
     mse_criterion = MSELossCriterion()
-    sdr_criterion = None
-    haaqi_criterion = None
+    waveform_criterion = None
+    waveform_mcoef = None
 
     if args.loss_strategy == 'mse-sdr':
-        sdr_criterion = SDRLossCriterion()
+        waveform_criterion = SDRLossCriterion()
+        waveform_mcoef = args.sdr_mcoef
     elif args.loss_strategy == 'mse-haaqi':
-        raise NotImplementedError("HAAQI is not yet supported")
+        waveform_criterion = HAAQILossCriterion()
+        waveform_mcoef = args.haaqi_mcoef
     elif args.loss_strategy != 'mse':
         raise ValueError("unsupported loss strategy; choose from 'mse', 'mse-sdr', 'mse-haaqi'")
 
@@ -460,7 +468,7 @@ def main():
             encoder,
             device,
             train_sampler,
-            (mse_criterion, sdr_criterion, args.sdr_mcoef),
+            (mse_criterion, waveform_criterion, waveform_mcoef),
             optimizer,
             amp_cm_cuda,
             amp_cm_cpu,
@@ -472,7 +480,7 @@ def main():
             encoder,
             device,
             valid_sampler,
-            (mse_criterion, sdr_criterion, args.sdr_mcoef),
+            (mse_criterion, waveform_criterion, waveform_mcoef),
             None,
             amp_cm_cuda,
             amp_cm_cpu,

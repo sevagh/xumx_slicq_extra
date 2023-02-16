@@ -1,5 +1,6 @@
 import torch
 import auraloss
+from .haaqi import haaqi_v1
 
 
 class MSELossCriterion:
@@ -44,6 +45,38 @@ class MSELossCriterion:
 class SDRLossCriterion:
     def __init__(self):
         self.sdsdr = auraloss.time.SDSDRLoss()
+
+    def __call__(
+        self,
+        pred_waveforms,
+        target_waveforms,
+    ):
+        loss = 0.
+
+        # 4C1 Combination Losses
+        for i in [0, 1, 2, 3]:
+            loss += self.sdsdr(pred_waveforms[i], target_waveforms[i])
+
+        # 4C2 Combination Losses
+        for (i, j) in [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]:
+            loss += self.sdsdr(
+                pred_waveforms[i] + pred_waveforms[j],
+                target_waveforms[i] + target_waveforms[j],
+            )
+
+        # 4C3 Combination Losses
+        for (i, j, k) in [(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)]:
+            loss += self.sdsdr(
+                pred_waveforms[i] + pred_waveforms[j] + pred_waveforms[k],
+                target_waveforms[i] + target_waveforms[j] + target_waveforms[k],
+            )
+
+        return loss/14.0
+
+
+class HAAQILossCriterion:
+    def __init__(self):
+        self.haaqi_loss = lambda x, y: return haaqi_v1(x, 44100., y, 44100., np.asarray([50, 50, 50, 50, 50, 50]))
 
     def __call__(
         self,
