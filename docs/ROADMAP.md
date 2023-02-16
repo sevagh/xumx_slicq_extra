@@ -21,7 +21,6 @@ docker run --rm -it \
     * add some plot-spectrograms option with `_overlap-add-slicq` (private function), for visualizations
     * add latex files etc. for future papers
     * HAAQI stuff happens here
-1. Neural network: add bottleneck layer + skip connections to CDAE
 1. Add MSE+HAAQI (new pretrained_model/mse-haaqi) with new mcoef
     1. train new variant
     1. use cuSignal for HAAQI
