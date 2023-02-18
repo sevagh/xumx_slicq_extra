@@ -2,7 +2,6 @@ import argparse
 import functools
 import json
 import gc
-import multiprocessing
 from typing import Optional, Union
 import numpy as np
 import museval
@@ -19,7 +18,6 @@ from .data import preprocess_audio
 def separate_and_evaluate(
     separator: Separator,
     track: musdb.MultiTrack,
-    mus,
     device: Union[str, torch.device] = "cpu",
 ) -> str:
 
@@ -85,28 +83,25 @@ if __name__ == "__main__":
         device=device,
     )
 
-    if len(mus.tracks) == 0:
+    tracks = mus.tracks
+    if args.track is not None:
+        tracks = [t for t in tracks if t.name == args.track]
+
+    if len(tracks) == 0:
         raise ValueError("dataset is empty")
 
     total_scores = []
 
     results = museval.EvalStore()
 
-    for track in tqdm.tqdm(mus.tracks):
+    for track in tqdm.tqdm(tracks):
         print("track: {0}".format(track.name))
-        if args.track is not None and track.name != args.track:
-            print("not same as specified track, skipping...")
-            continue
         track_scores = separate_and_evaluate(
             separator,
             track,
-            mus,
             device=device,
         )
         print(track, "\n", track_scores)
         results.add_track(track_scores)
-        if args.track is not None:
-            # we're done here
-            break
 
     print(results)
