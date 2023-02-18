@@ -24,10 +24,15 @@ class Separator(nn.Module):
         cls,
         xumx_config: int,
         pretrained_model: str = "mse",
+        model_path: str = None,
+        chunk_size: int = 2621440,
         device: Union[str, torch.device] = "cpu",
     ):
-        model_path = f"/xumx-sliCQ-V2/pretrained_model/{pretrained_model}"
-        model_path = Path(model_path)
+        if model_path is None:
+            model_path = f"/xumx-sliCQ-V2/pretrained_model/{pretrained_model}"
+            model_path = Path(model_path)
+        else:
+            model_path = Path(model_path)
 
         # when path exists, we assume its a custom model saved locally
         assert model_path.exists()
@@ -46,6 +51,7 @@ class Separator(nn.Module):
             xumx_config=xumx_config,
             encoder=encoder,
             sample_rate=enc_conf["sample_rate"],
+            chunk_size=chunk_size,
         ).to(device)
 
         separator.freeze()
@@ -333,7 +339,6 @@ def load_target_models(
 
     xumx_model = Unmix(
         jagged_slicq_cnorm,
-        use_v1_config=results["args"]["v1"],
         max_bin=nsgt_base.max_bins(results["args"]["bandwidth"]),
     )
 

@@ -7,7 +7,6 @@ import tqdm
 import json
 import numpy as np
 import random
-from git import Repo
 import os
 import signal
 import atexit
@@ -275,13 +274,6 @@ def main():
         {"num_workers": args.nb_workers, "pin_memory": True} if use_cuda else {}
     )
 
-    try:
-        repo_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        repo = Repo(repo_dir)
-        commit = repo.head.commit.hexsha[:7]
-    except:
-        commit = "n/a"
-
     # use jpg or npy
     torch.manual_seed(args.seed)
     random.seed(args.seed)
@@ -527,7 +519,6 @@ def main():
             "valid_loss_history": valid_losses,
             "train_time_history": train_times,
             "num_bad_epochs": es.num_bad_epochs,
-            "commit": commit,
         }
 
         with open(Path(target_path, "xumx_slicq_v2.json"), "w") as outfile:

@@ -39,11 +39,6 @@ def separate_and_evaluate(
         estimates,
     )
 
-    # some memory-saving options, cause nothing is worse than crashing
-    gc.collect()
-    clear_cupy_cache()
-    torch.cuda.empty_cache()
-
     return bss_scores
 
 
@@ -62,12 +57,25 @@ if __name__ == "__main__":
         "--xumx-config", type=int, default=1, help="xumx post config (0, 1, 2)"
     )
     parser.add_argument(
+        "--chunk-size", type=int, default=2621440, help="inference chunk size"
+    )
+    parser.add_argument(
         "--pretrained-model", type=str, default="mse", help="which pretrained model to use"
+    )
+    parser.add_argument(
+        "--model-path", type=str, default=None, help="alternative path to model"
+    )
+    parser.add_argument(
+        "--cuda", action="store_true", default=False, help="use cuda for evaluation"
     )
 
     args = parser.parse_args()
 
-    device = torch.device("cuda")
+    if args.cuda:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+        disable_cupy
 
     mus = musdb.DB(
         root="/MUSDB18-HQ",
@@ -80,6 +88,8 @@ if __name__ == "__main__":
     separator = Separator.load(
         xumx_config=args.xumx_config,
         pretrained_model=args.pretrained_model,
+        model_path=args.model_path,
+        chunk_size=args.chunk_size,
         device=device,
     )
 
@@ -101,6 +111,13 @@ if __name__ == "__main__":
             track,
             device=device,
         )
+
+        # some memory-saving options, cause nothing is worse than crashing
+        gc.collect()
+        if args.cuda:
+            clear_cupy_cache()
+            torch.cuda.empty_cache()
+
         print(track, "\n", track_scores)
         results.add_track(track_scores)
 

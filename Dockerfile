@@ -28,17 +28,11 @@ RUN python -m pip install --upgrade pip
 
 COPY --from=devel /wheelhouse /wheelhouse
 
-# my janky requirements break pip's back solver for torch
+# install my cupy fork of museval for faster bss
+RUN python -m pip install simplejson pandas numpy scipy simplejson jsonschema cupy-cuda118 
 RUN git clone https://github.com/sevagh/sigsep-mus-eval -b feat/cupy-accel /sigsep-mus-eval
 WORKDIR /sigsep-mus-eval
 RUN python -m pip install --no-deps -e .
-# install a few of its deps by hand
-RUN python -m pip install simplejson pandas numpy scipy simplejson jsonschema
-
-# build and install a wheel for cusignal from source
-RUN git clone https://github.com/rapidsai/cusignal /cusignal
-WORKDIR /cusignal
-RUN ./build.sh --allgpuarch
 
 # install xumx-slicq-v2 from source to get its dependencies
 COPY . /xumx-sliCQ-V2
