@@ -20,7 +20,11 @@ docker run --rm -it \
     * keep training code, blendmodels, single Dockerfile, etc.
     * add some plot-spectrograms option with `_overlap-add-slicq` (private function), for visualizations
     * add latex files etc. for future papers
-    * no HAAQI
+* Added v1 ablation study
+* Multiprocess evaluation
+* Back to overlap-add, apply sliding mask! or Linear layer to double mask??
+
+*training housekeeping*
 * Cadenza challenge registration issues
 * README to describe all the cool things (and not so cool things)
     nvcr, training, blending, <https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html>

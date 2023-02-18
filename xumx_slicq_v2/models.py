@@ -28,6 +28,7 @@ class Unmix(nn.Module):
         self,
         jagged_slicq_sample_input,
         max_bin=None,
+        use_v1_config=False,
         input_means=None,
         input_scales=None,
     ):
@@ -50,6 +51,7 @@ class Unmix(nn.Module):
                 self.sliced_umx.append(
                     _SlicedUnmix(
                         C_block,
+                        use_v1_config=use_v1_config,
                         input_mean=input_mean,
                         input_scale=input_scale,
                     )
@@ -80,11 +82,18 @@ class _SlicedUnmix(nn.Module):
     def __init__(
         self,
         slicq_sample_input,
-        hidden_size_1: int = 64,
-        hidden_size_2: int = 128,
+        use_v1_config: bool = False,
         input_mean=None,
         input_scale=None,
     ):
+        hidden_size_1 = 64
+        hidden_size_2 = 128
+        dilation_2 = (1, 1)
+        if use_v1_config:
+            hidden_size_1 = 25
+            hidden_size_2 = 55
+            dilation_2 = (1, 2)
+
         super(_SlicedUnmix, self).__init__()
 
         (
@@ -126,6 +135,7 @@ class _SlicedUnmix(nn.Module):
                 hidden_size_1,
                 hidden_size_2,
                 (freq_filter, 3),
+                dilation=dilation_2,
                 bias=False,
             ),
             BatchNorm2d(hidden_size_2),
@@ -137,6 +147,7 @@ class _SlicedUnmix(nn.Module):
                 hidden_size_2,
                 hidden_size_1,
                 (freq_filter, 3),
+                dilation=dilation_2,
                 bias=False,
             ),
             BatchNorm2d(hidden_size_1),
@@ -202,6 +213,7 @@ class _SlicedUnmix(nn.Module):
         for i, cdae in enumerate(self.cdaes):
             x_tmp = x.clone()
             for j, layer in enumerate(cdae):
+                #print(f"{x_tmp.shape=}")
                 x_tmp = layer(x_tmp)
 
             x_tmp = x_tmp.reshape(x_shape)

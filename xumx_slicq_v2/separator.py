@@ -356,6 +356,7 @@ def load_target_models(
 
     xumx_model = Unmix(
         jagged_slicq_cnorm,
+        use_v1_config=results["args"]["v1"],
         max_bin=nsgt_base.max_bins(results["args"]["bandwidth"]),
     )
 

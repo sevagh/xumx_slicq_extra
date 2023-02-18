@@ -203,6 +203,12 @@ def main():
         help="mixing coefficient between MSE and SDR loss (default: 0.01)",
     )
     parser.add_argument(
+        "--v1",
+        action="store_true",
+        default=False,
+        help="use xumx-slicq-v1 config (25,55+dilation)",
+    )
+    parser.add_argument(
         "--seq-dur",
         type=float,
         default=2.0,
@@ -357,6 +363,7 @@ def main():
     unmix = models.Unmix(
         jagged_slicq_cnorm,
         max_bin=nsgt_base.max_bins(args.bandwidth),
+        use_v1_config=args.v1,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)
