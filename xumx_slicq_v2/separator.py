@@ -60,8 +60,6 @@ class Separator(nn.Module):
         chunk_size: Optional[int] = 2621440,
         wiener_win_len_stft: Optional[int] = 300,
         wiener_win_len_slicqt: Optional[int] = 5000,
-        niter: int = 1,
-        softmask: bool = False,
         n_fft: Optional[int] = 4096,
         n_hop: Optional[int] = 1024,
         device: str = "cpu",
@@ -83,8 +81,6 @@ class Separator(nn.Module):
         self.n_hop = n_hop
         self.wiener_win_len_stft = wiener_win_len_stft
         self.wiener_win_len_slicqt = wiener_win_len_slicqt
-        self.niter = niter
-        self.softmask = softmask
 
         self.stft = TorchSTFT(self.n_fft, self.n_hop, center=True)
         self.istft = TorchISTFT(self.n_fft, self.n_hop, center=True)
@@ -99,7 +95,6 @@ class Separator(nn.Module):
         self.xumx_model.freeze()
         self.eval()
 
-    @torch.no_grad()
     def forward(self, audio_big: Tensor) -> Tensor:
         """Performing the separation on audio input
 
@@ -138,38 +133,21 @@ class Separator(nn.Module):
             estimates = None
             Ycomplex_all = None
 
-            if self.xumx_config in [0, 1, 2]:
-                # 0: phasemix-sep
-                # 1: phasemix-sep + STFT wiener-EM
-                # 2: slicqt-wiener-EM
-                if self.xumx_config in [0, 1]:
-                    print(f"Getting first estimate from slicqt phase-mix")
-                    Ycomplex_all = phasemix_sep(X, Ymag_all)
-                elif self.xumx_config == 2:
-                    print(f"Getting first estimate from slicqt Wiener-EM")
-                    Ycomplex_all = self.post_wiener_slicqt(X, Ymag_all)
-
-                estimates = self.insgt(Ycomplex_all, n_samples)
-
-                if self.xumx_config == 1:
-                    print(f"Refining estimate with STFT Wiener-EM")
-                    estimates = self.post_wiener_stft(audio, estimates)
-            elif self.xumx_config == 3:
+            # 0: phasemix-sep
+            # 1: phasemix-sep + STFT wiener-EM
+            # 2: slicqt-wiener-EM
+            if self.xumx_config in [0, 1]:
+                print(f"Getting first estimate from slicqt phase-mix")
+                Ycomplex_all = phasemix_sep(X, Ymag_all)
+            elif self.xumx_config == 2:
                 print(f"Getting first estimate from slicqt Wiener-EM")
-                Ycomplex_all = self.post_wiener_slicqt(X, Ymag_all)
-                estimates = self.insgt(Ycomplex_all, n_samples)
+                Ycomplex_all = self.post_wiener_slicqt(X, Ymag_all, self.wiener_win_len_slicqt)
+
+            estimates = self.insgt(Ycomplex_all, n_samples)
+
+            if self.xumx_config == 1:
                 print(f"Refining estimate with STFT Wiener-EM")
                 estimates = self.post_wiener_stft(audio, estimates)
-            elif self.xumx_config == 4:
-                Ycomplex_all_1 = phasemix_sep(X, Ymag_all)
-                estimates_1 = self.insgt(Ycomplex_all_1, n_samples)
-                estimates_1 = self.post_wiener_stft(audio, estimates_1)
-
-                Ycomplex_all_2 = self.post_wiener_slicqt(X, Ymag_all)
-                estimates_2 = self.insgt(Ycomplex_all_2, n_samples)
-
-                estimates = estimates_1.clone()
-                estimates[0] = estimates_2[0]
 
             final_estimates.append(estimates)
 
@@ -177,7 +155,6 @@ class Separator(nn.Module):
         print(f"ests concat: {ests_concat.shape}")
         return ests_concat
 
-    @torch.no_grad()
     def post_wiener_stft(self, x, y_all):
         n_samples = x.shape[-1]
         mix_stft = self.stft(x)
@@ -217,8 +194,8 @@ class Separator(nn.Module):
             targets_stft[:, cur_frame, ...] = torch.view_as_real(norbert.wiener(
                 spectrograms[:, cur_frame, ...],
                 torch.view_as_complex(mix_stft[:, cur_frame, ...]),
-                self.niter,
-                use_softmask=self.softmask,
+                1,
+                False,
             ))
 
         # getting to (nb_samples, nb_targets, channel, fft_size, n_frames)
@@ -233,8 +210,8 @@ class Separator(nn.Module):
 
         return estimates
 
-    @torch.no_grad()
-    def post_wiener_slicqt(self, X, Ymag_all):
+    @staticmethod
+    def post_wiener_slicqt(X, Ymag_all, wiener_win_len):
         ret = [None]*len(X)
         for i, (X_block, Ymag_block) in enumerate(zip(X, Ymag_all)):
             X_block_flat = torch.flatten(X_block, start_dim=-3, end_dim=-2)
@@ -242,14 +219,14 @@ class Separator(nn.Module):
             desired_shape = (*Ymag_block.shape, 2)
             Ymag_block_flat = torch.flatten(Ymag_block, start_dim=-2, end_dim=-1)
 
-            result_flat = self._post_wiener_slicqt_block(X_block_flat, Ymag_block_flat)
+            result_flat = Separator._post_wiener_slicqt_block(X_block_flat, Ymag_block_flat, wiener_win_len)
 
             ret[i] = result_flat.reshape(desired_shape)
 
         return ret
 
-    @torch.no_grad()
-    def _post_wiener_slicqt_block(self, mix_slicqt, slicqtgrams):
+    @staticmethod
+    def _post_wiener_slicqt_block(mix_slicqt, slicqtgrams, wiener_win_len_param):
         # transposing it as
         # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
         slicqtgrams = slicqtgrams.permute(1, 4, 3, 2, 0)
@@ -267,8 +244,8 @@ class Separator(nn.Module):
         )
 
         pos = 0
-        if self.wiener_win_len_slicqt:
-            wiener_win_len = self.wiener_win_len_slicqt
+        if wiener_win_len_param:
+            wiener_win_len = wiener_win_len_param
         else:
             wiener_win_len = nb_frames
         while pos < nb_frames:
@@ -278,8 +255,8 @@ class Separator(nn.Module):
             targets_slicqt[:, cur_frame, ...] = torch.view_as_real(norbert.wiener(
                 slicqtgrams[:, cur_frame, ...],
                 torch.view_as_complex(mix_slicqt[:, cur_frame, ...]),
-                self.niter,
-                use_softmask=self.softmask,
+                1,
+                False,
             ))
 
         # getting to (nb_samples, nb_targets, channel, fft_size, n_frames)

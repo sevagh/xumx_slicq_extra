@@ -20,7 +20,8 @@ docker run --rm -it \
     * keep training code, blendmodels, single Dockerfile, etc.
     * add some plot-spectrograms option with `_overlap-add-slicq` (private function), for visualizations
     * add latex files etc. for future papers
-* Back to overlap-add, apply sliding mask! or Linear layer to double mask??
+* Differentiable sliCQT-Wiener for SDR, squeeze more juice from network
+    * 28MB model would be killer
 
 *training housekeeping*
 * Cadenza challenge registration issues

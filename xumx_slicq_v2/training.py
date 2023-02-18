@@ -26,6 +26,7 @@ from xumx_slicq_v2 import data
 from xumx_slicq_v2 import models
 from xumx_slicq_v2 import transforms
 from xumx_slicq_v2.loss import MSELossCriterion, SDRLossCriterion
+from xumx_slicq_v2.separator import Separator
 
 tqdm.monitor_interval = 0
 
@@ -43,7 +44,7 @@ def loop(
     train=True,
 ):
     # unpack loss object
-    mse_criterion, waveform_criterion, waveform_mcoef = criterion
+    mse_criterion, waveform_criterion, waveform_mcoef, waveform_est = criterion
 
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
@@ -87,7 +88,11 @@ def loop(
 
                 if waveform_criterion is not None:
                     nb_samples = x.shape[-1]
-                    Ycomplex_all = transforms.phasemix_sep(Xcomplex, Ymag_targets)
+                    if waveform_est == 'phasemix':
+                        Ycomplex_all = transforms.phasemix_sep(Xcomplex, Ymag_targets)
+                    elif waveform_est == 'wiener':
+                        Ycomplex_all = Separator.post_wiener_slicqt(Xcomplex, Ymag_targets, 5000)
+
                     y_ests = insgt(Ycomplex_all, nb_samples)
 
                     waveform_loss = waveform_criterion(y_ests, y_targets)
@@ -378,14 +383,16 @@ def main():
     mse_criterion = MSELossCriterion()
     waveform_criterion = None
     waveform_mcoef = None
+    waveform_est = 'phasemix'
 
-    if args.loss_strategy == 'mse-sdr':
+    if args.loss_strategy not in ['mse', 'mse-sdr', 'mse-sdr-wem']:
+        raise ValueError("unsupported loss strategy; choose from 'mse', 'mse-sdr', 'mse-sdr-wem'")
+
+    if args.loss_strategy.startswith('mse-sdr'):
         waveform_criterion = SDRLossCriterion()
         waveform_mcoef = args.sdr_mcoef
-    elif args.loss_strategy == 'mse-haaqi':
-        raise NotImplementedError("for now, haaqi in loss function is poorly supported") 
-    elif args.loss_strategy != 'mse':
-        raise ValueError("unsupported loss strategy; choose from 'mse', 'mse-sdr', 'mse-haaqi'")
+    if args.loss_strategy == 'mse-sdr-wem':
+        waveform_est = 'wiener'
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
@@ -468,7 +475,7 @@ def main():
             encoder,
             device,
             train_sampler,
-            (mse_criterion, waveform_criterion, waveform_mcoef),
+            (mse_criterion, waveform_criterion, waveform_mcoef, waveform_est),
             optimizer,
             amp_cm_cuda,
             amp_cm_cpu,
@@ -480,7 +487,7 @@ def main():
             encoder,
             device,
             valid_sampler,
-            (mse_criterion, waveform_criterion, waveform_mcoef),
+            (mse_criterion, waveform_criterion, waveform_mcoef, waveform_est),
             None,
             amp_cm_cuda,
             amp_cm_cpu,
