@@ -54,10 +54,6 @@ class Separator(nn.Module):
         encoder: Tuple = None,
         sample_rate: float = 44100.0,
         chunk_size: Optional[int] = 2621440,
-        wiener_win_len_stft: Optional[int] = 300,
-        wiener_win_len_slicqt: Optional[int] = 5000,
-        n_fft: Optional[int] = 4096,
-        n_hop: Optional[int] = 1024,
         device: str = "cpu",
     ):
         super(Separator, self).__init__()

@@ -1,3 +1,11 @@
+model: complex-MSE-wiener-full-bw-v1: 4.242 dB!!
+	loss: 0.0395!
+	28MB of weights, built-in wiener-EM... please be good
+	vocals          ==> SDR:   4.737  SIR:   6.868  ISR:   8.105  SAR:   4.379
+	drums           ==> SDR:   4.644  SIR:   7.501  ISR:   8.965  SAR:   4.831
+	bass            ==> SDR:   4.341  SIR:   8.689  ISR:   5.032  SAR:   4.867
+	other           ==> SDR:   3.246  SIR:   1.037  ISR:   7.898  SAR:   4.297
+
 model: MSE-full-bw, 1: 4.216 dB (loss: 0.07634352669119834)
         vocals          ==> SDR:   4.724  SIR:   8.010  ISR:   9.741  SAR:   3.161
         drums           ==> SDR:   4.888  SIR:   8.803  ISR:  10.099  SAR:   4.669
