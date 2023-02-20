@@ -24,7 +24,7 @@ from .data import MUSDBDataset, custom_collate
 from xumx_slicq_v2 import data
 from xumx_slicq_v2 import models
 from xumx_slicq_v2 import transforms
-from xumx_slicq_v2.loss import MSELossCriterion, SDRLossCriterion
+from xumx_slicq_v2.loss import MSELossCriterion, ComplexMSELossCriterion, SDRLossCriterion
 from xumx_slicq_v2.separator import Separator
 
 tqdm.monitor_interval = 0
@@ -42,9 +42,6 @@ def loop(
     amp_cm_cpu,
     train=True,
 ):
-    # unpack loss object
-    mse_criterion, waveform_criterion, waveform_mcoef, waveform_est = criterion
-
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
 
@@ -77,25 +74,14 @@ def loop(
                 Xcomplex = nsgt(x)
                 Xmag = cnorm(Xcomplex)
 
-                Ymag_ests = unmix(Xmag)
-                Ymag_targets = cnorm(nsgt(y_targets))
+                Ycomplex_ests = unmix(Xcomplex)
 
-                loss = mse_loss = mse_criterion(
-                    Ymag_ests,
-                    Ymag_targets,
+                Ycomplex_targets = nsgt(y_targets)
+
+                loss = criterion(
+                    Ycomplex_ests,
+                    Ycomplex_targets,
                 )
-
-                if waveform_criterion is not None:
-                    nb_samples = x.shape[-1]
-                    if waveform_est == 'phasemix':
-                        Ycomplex_all = transforms.phasemix_sep(Xcomplex, Ymag_targets)
-                    elif waveform_est == 'wiener':
-                        Ycomplex_all = Separator.post_wiener_slicqt(Xcomplex, Ymag_targets, 5000)
-
-                    y_ests = insgt(Ycomplex_all, nb_samples)
-
-                    waveform_loss = waveform_criterion(y_ests, y_targets)
-                    loss += waveform_mcoef*waveform_loss
 
             if train:
                 optimizer.zero_grad()
@@ -195,35 +181,11 @@ def main():
         help="skip dataset statistics calculation",
     )
     parser.add_argument(
-        "--loss-strategy",
-        type=str,
-        default='mse',
-        help="loss to use (default: 'mse', choices: 'mse', 'mse-sdr', 'mse-haaqi')",
-    )
-    parser.add_argument(
-        "--sdr-mcoef",
-        type=float,
-        default=0.01,
-        help="mixing coefficient between MSE and SDR loss (default: 0.01)",
-    )
-    parser.add_argument(
-        "--v1",
-        action="store_true",
-        default=False,
-        help="use xumx-slicq-v1 config (25,55+dilation)",
-    )
-    parser.add_argument(
         "--seq-dur",
         type=float,
         default=2.0,
         help="Sequence duration in seconds"
         "value of <=0.0 will use full/variable length",
-    )
-    parser.add_argument(
-        "--bandwidth",
-        type=float,
-        default=16000.,
-        help="network won't consider frequencies above this",
     )
     parser.add_argument(
         "--fscale",
@@ -261,7 +223,7 @@ def main():
         help="choose which gpu to train on (-1 = 'cuda' in pytorch)",
     )
 
-    args, _ = parser.parse_known_args()
+    args = parser.parse_args()
 
     torchaudio.set_audio_backend("soundfile")
     use_cuda = torch.cuda.is_available()
@@ -359,32 +321,18 @@ def main():
 
     unmix = models.Unmix(
         jagged_slicq_cnorm,
-        max_bin=nsgt_base.max_bins(args.bandwidth),
-        use_v1_config=args.v1,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)
 
     if not args.quiet:
-        torchinfo.summary(unmix, input_data=(jagged_slicq_cnorm,))
+        torchinfo.summary(unmix, input_data=(jagged_slicq,))
 
     optimizer = torch.optim.AdamW(
         unmix.parameters(), lr=args.lr, weight_decay=args.weight_decay
     )
 
-    mse_criterion = MSELossCriterion()
-    waveform_criterion = None
-    waveform_mcoef = None
-    waveform_est = 'phasemix'
-
-    if args.loss_strategy not in ['mse', 'mse-sdr', 'mse-sdr-wem']:
-        raise ValueError("unsupported loss strategy; choose from 'mse', 'mse-sdr', 'mse-sdr-wem'")
-
-    if args.loss_strategy.startswith('mse-sdr'):
-        waveform_criterion = SDRLossCriterion()
-        waveform_mcoef = args.sdr_mcoef
-    if args.loss_strategy == 'mse-sdr-wem':
-        waveform_est = 'wiener'
+    mse_criterion = ComplexMSELossCriterion()
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
@@ -467,7 +415,7 @@ def main():
             encoder,
             device,
             train_sampler,
-            (mse_criterion, waveform_criterion, waveform_mcoef, waveform_est),
+            mse_criterion,
             optimizer,
             amp_cm_cuda,
             amp_cm_cpu,
@@ -479,7 +427,7 @@ def main():
             encoder,
             device,
             valid_sampler,
-            (mse_criterion, waveform_criterion, waveform_mcoef, waveform_est),
+            mse_criterion,
             None,
             amp_cm_cuda,
             amp_cm_cpu,
@@ -527,8 +475,8 @@ def main():
         train_times.append(time.time() - end)
 
         if tboard_writer is not None:
-            tboard_writer.add_scalar(f"Loss/train ({args.loss_strategy})", train_loss, epoch)
-            tboard_writer.add_scalar(f"Loss/valid ({args.loss_strategy})", valid_loss, epoch)
+            tboard_writer.add_scalar(f"Loss/train (complex MSE)", train_loss, epoch)
+            tboard_writer.add_scalar(f"Loss/valid (complex MSE)", valid_loss, epoch)
 
         if stop:
             print("Apply Early Stopping")

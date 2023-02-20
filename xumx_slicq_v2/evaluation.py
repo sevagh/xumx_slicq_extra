@@ -54,16 +54,10 @@ if __name__ == "__main__":
         "--subset", type=str, default="test", help="MUSDB subset (`train`/`test`)"
     )
     parser.add_argument(
-        "--xumx-config", type=int, default=1, help="xumx post config (0, 1, 2)"
-    )
-    parser.add_argument(
         "--chunk-size", type=int, default=2621440, help="inference chunk size"
     )
     parser.add_argument(
         "--pretrained-model", type=str, default="mse", help="which pretrained model to use"
-    )
-    parser.add_argument(
-        "--model-path", type=str, default=None, help="alternative path to model"
     )
     parser.add_argument(
         "--cuda", action="store_true", default=False, help="use cuda for evaluation"
@@ -86,9 +80,7 @@ if __name__ == "__main__":
 
     print("loading separator")
     separator = Separator.load(
-        xumx_config=args.xumx_config,
         pretrained_model=args.pretrained_model,
-        model_path=args.model_path,
         chunk_size=args.chunk_size,
         device=device,
     )

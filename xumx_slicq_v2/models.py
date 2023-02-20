@@ -2,6 +2,7 @@ from typing import Optional
 from tqdm import trange
 import torch
 import torch.nn as nn
+import norbert
 import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import (
@@ -15,8 +16,6 @@ from torch.nn import (
 )
 from .transforms import (
     make_filterbanks,
-    phasemix_sep,
-    ComplexNorm,
     NSGTBase,
 )
 import copy
@@ -27,8 +26,6 @@ class Unmix(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
-        max_bin=None,
-        use_v1_config=False,
         input_means=None,
         input_scales=None,
     ):
@@ -43,19 +40,13 @@ class Unmix(nn.Module):
 
             freq_start = freq_idx
 
-            if max_bin is not None and freq_start >= max_bin:
-                self.sliced_umx.append(
-                    _DummyTimeBucket(C_block)
+            self.sliced_umx.append(
+                _SlicedUnmix(
+                    C_block,
+                    input_mean=input_mean,
+                    input_scale=input_scale,
                 )
-            else:
-                self.sliced_umx.append(
-                    _SlicedUnmix(
-                        C_block,
-                        use_v1_config=use_v1_config,
-                        input_mean=input_mean,
-                        input_scale=input_scale,
-                    )
-                )
+            )
 
             # advance frequency pointer
             freq_idx += C_block.shape[2]
@@ -68,13 +59,13 @@ class Unmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, Xmag) -> Tensor:
+    def forward(self, Xcomplex) -> Tensor:
         futures = [
-            torch.jit.fork(self.sliced_umx[i], Xmag_block)
-            for i, Xmag_block in enumerate(Xmag)
+            torch.jit.fork(self.sliced_umx[i], Xblock, torch.abs(torch.view_as_complex(Xblock)))
+            for i, Xblock in enumerate(Xcomplex)
         ]
-        Ymag = [torch.jit.wait(future) for future in futures]
-        return Ymag
+        Ycomplex = [torch.jit.wait(future) for future in futures]
+        return Ycomplex
 
 
 # inner class for doing umx for all targets per slicqt block
@@ -82,17 +73,11 @@ class _SlicedUnmix(nn.Module):
     def __init__(
         self,
         slicq_sample_input,
-        use_v1_config: bool = False,
         input_mean=None,
         input_scale=None,
     ):
-        hidden_size_1 = 64
-        hidden_size_2 = 128
-        dilation_2 = (1, 1)
-        if use_v1_config:
-            hidden_size_1 = 25
-            hidden_size_2 = 55
-            dilation_2 = (1, 2)
+        hidden_size_1 = 25
+        hidden_size_2 = 55
 
         super(_SlicedUnmix, self).__init__()
 
@@ -135,7 +120,6 @@ class _SlicedUnmix(nn.Module):
                 hidden_size_1,
                 hidden_size_2,
                 (freq_filter, 3),
-                dilation=dilation_2,
                 bias=False,
             ),
             BatchNorm2d(hidden_size_2),
@@ -147,7 +131,6 @@ class _SlicedUnmix(nn.Module):
                 hidden_size_2,
                 hidden_size_1,
                 (freq_filter, 3),
-                dilation=dilation_2,
                 bias=False,
             ),
             BatchNorm2d(hidden_size_1),
@@ -194,7 +177,7 @@ class _SlicedUnmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, xcomplex: Tensor, x: Tensor) -> Tensor:
         mix = x.detach().clone()
 
         x_shape = x.shape
@@ -216,6 +199,8 @@ class _SlicedUnmix(nn.Module):
                 #print(f"{x_tmp.shape=}")
                 x_tmp = layer(x_tmp)
 
+            # wiener before reshaping to 3d??
+
             x_tmp = x_tmp.reshape(x_shape)
 
             # multiplicative skip connection
@@ -224,24 +209,52 @@ class _SlicedUnmix(nn.Module):
 
             ret[i, ...] = x_tmp
 
+        # embedded blockwise wiener-EM (flattened in function then unflattened)
+        ret = _wiener_fn(xcomplex, ret)
         return ret
 
 
-# just pass input through directly for frequency bins above bandwidth
-class _DummyTimeBucket(nn.Module):
-    def __init__(
-        self,
-        slicq_sample_input,
-    ):
-        super(_DummyTimeBucket, self).__init__()
+def _wiener_fn(mix_slicqt, slicqtgrams, wiener_win_len_param: int = 5000):
+    mix_slicqt = torch.flatten(mix_slicqt, start_dim=-3, end_dim=-2)
+    orig_shape = slicqtgrams.shape
+    slicqtgrams = torch.flatten(slicqtgrams, start_dim=-2, end_dim=-1)
 
-    def freeze(self):
-        # set all parameters as not requiring gradient, more RAM-efficient
-        # at test time
-        for p in self.parameters():
-            #p.requires_grad = False
-            p.grad = None
-        self.eval()
+    # transposing it as
+    # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
+    slicqtgrams = slicqtgrams.permute(1, 4, 3, 2, 0)
 
-    def forward(self, x: Tensor) -> Tensor:
-        return torch.unsqueeze(x, dim=0).repeat(4, 1, 1, 1, 1, 1)
+    # rearranging it into:
+    # (nb_samples, nb_frames, nb_bins, nb_channels, 2) to feed
+    # into filtering methods
+    mix_slicqt = mix_slicqt.permute(0, 3, 2, 1, 4)
+
+    nb_frames = slicqtgrams.shape[1]
+    targets_slicqt = torch.zeros(
+        *mix_slicqt.shape[:-1] + (4,2,),
+        dtype=mix_slicqt.dtype,
+        device=mix_slicqt.device,
+    )
+
+    pos = 0
+    if wiener_win_len_param:
+        wiener_win_len = wiener_win_len_param
+    else:
+        wiener_win_len = nb_frames
+    while pos < nb_frames:
+        cur_frame = torch.arange(pos, min(nb_frames, pos + wiener_win_len))
+        pos = int(cur_frame[-1]) + 1
+
+        targets_slicqt[:, cur_frame, ...] = torch.view_as_real(norbert.wiener(
+            slicqtgrams[:, cur_frame, ...],
+            torch.view_as_complex(mix_slicqt[:, cur_frame, ...]),
+            1,
+            False,
+        ))
+
+    # getting to (nb_samples, nb_targets, channel, fft_size, n_frames)
+    targets_slicqt = targets_slicqt.permute(4, 0, 3, 2, 1, 5).contiguous()
+    #print(f"targets_slicqt: {targets_slicqt.shape}")
+    #print(f"orig shape: {orig_shape}")
+    targets_slicqt = targets_slicqt.reshape((*orig_shape, 2,))
+    #print(f"targets_slicqt: {targets_slicqt.shape}")
+    return targets_slicqt
