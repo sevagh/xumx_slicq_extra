@@ -78,9 +78,14 @@ class ComplexMSELossCriterion:
 
     @staticmethod
     def _inner_mse_loss(pred_block, target_block):
-        assert pred_block.shape[-1] == target_block.shape[-1] == 2
-        return torch.mean((pred_block - target_block) ** 2)
+        #assert pred_block.shape[-1] == target_block.shape[-1] == 2
 
+        diff = pred_block - target_block
+
+        real = diff.real.reshape(-1)
+        imag = diff.imag.reshape(-1)
+        mse = real @ real + imag @ imag
+        return mse / real.numel()
 
 
 class SDRLossCriterion:

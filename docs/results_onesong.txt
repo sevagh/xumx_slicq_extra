@@ -32,3 +32,11 @@ bass            ==> SDR:   1.993  SIR:   3.225  ISR:   5.367  SAR:   3.436
 other           ==> SDR:   4.343  SIR:   5.556  ISR:   8.958  SAR:   7.267
 
 5 hours for 100 epochs; 400 epochs in 15 hours, so by tomorrow morning peak performance
+
+big drop @ 143 epochs, hit 0.0395
+
+Aggregated Scores (median over frames, median over tracks)
+vocals          ==> SDR:   4.096  SIR:   9.855  ISR:   6.742  SAR:   5.134
+drums           ==> SDR:   6.519  SIR:  10.862  ISR:  11.446  SAR:   8.522
+bass            ==> SDR:   2.043  SIR:   3.360  ISR:   5.289  SAR:   3.706
+other           ==> SDR:   4.386  SIR:   5.313  ISR:   9.279  SAR:   7.423

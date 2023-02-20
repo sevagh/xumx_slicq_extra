@@ -43,7 +43,7 @@ def loop(
     train=True,
 ):
     # unpack encoder object
-    nsgt, insgt, cnorm = encoder
+    nsgt, insgt = encoder
 
     losses = _AverageMeter()
 
@@ -71,14 +71,15 @@ def loop(
 
                 y_targets = track_tensor_gpu[1:]
 
+                # TODO: get rid of these later
                 Xcomplex = nsgt(x)
-                Xmag = cnorm(Xcomplex)
 
                 Ycomplex_ests = unmix(Xcomplex)
 
                 Ycomplex_targets = nsgt(y_targets)
 
                 loss = criterion(
+                    # TODO: get rid of these later
                     Ycomplex_ests,
                     Ycomplex_targets,
                 )
@@ -94,13 +95,13 @@ def loop(
 
 
 def get_statistics(args, encoder, dataset, time_blocks):
-    nsgt, _, cnorm = encoder
+    nsgt, _ = encoder
 
     nsgt = copy.deepcopy(nsgt).to("cpu")
-    cnorm = copy.deepcopy(cnorm).to("cpu")
 
     # slicq is a list of tensors so we need a list of scalers
-    scalers = [sklearn.preprocessing.StandardScaler() for i in range(time_blocks)]
+    scalers_mag = [sklearn.preprocessing.StandardScaler() for i in range(time_blocks)]
+    scalers_phase = [sklearn.preprocessing.StandardScaler() for i in range(time_blocks)]
 
     dataset_scaler = copy.deepcopy(dataset)
     dataset_scaler.random_chunks = False
@@ -116,23 +117,40 @@ def get_statistics(args, encoder, dataset, time_blocks):
         x = dataset_scaler[ind][0]
 
         pbar.set_description("Compute dataset statistics")
-        # downmix to mono channel
-        X = cnorm(nsgt(x[None, ...]))
 
-        for i, X_block in enumerate(X):
-            X_block_flat = np.squeeze(
-                torch.flatten(X_block, start_dim=-2, end_dim=-1)
+        Xcomplex = nsgt(x[None, ...])
+
+        for i in range(time_blocks):
+            Xmag_block = torch.abs(Xcomplex[i])
+            Xphase_block = torch.angle(Xcomplex[i])
+
+            Xmag_block_flat = np.squeeze(
+                torch.flatten(Xmag_block, start_dim=-2, end_dim=-1)
+                # downmix to mono channel
                 .mean(1, keepdim=False)
                 .permute(0, 2, 1),
                 axis=0,
             )
-            scalers[i].partial_fit(X_block_flat)
+            scalers_mag[i].partial_fit(Xmag_block_flat)
+
+            Xphase_block_flat = np.squeeze(
+                torch.flatten(Xphase_block, start_dim=-2, end_dim=-1)
+                # downmix to mono channel
+                .mean(1, keepdim=False)
+                .permute(0, 2, 1),
+                axis=0,
+            )
+            scalers_phase[i].partial_fit(Xphase_block_flat)
 
     # set inital input scaler values
-    std = [
-        np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers
+    std_mag = [
+        np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers_mag
     ]
-    return [scaler.mean_ for scaler in scalers], std
+    std_phase = [
+        np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers_phase
+    ]
+
+    return [scaler.mean_ for scaler in scalers_mag], std_mag, [scaler.mean_ for scaler in scalers_phase], std_phase
 
 
 def main():
@@ -289,14 +307,12 @@ def main():
     nsgt, insgt = transforms.make_filterbanks(
         nsgt_base, sample_rate=train_dataset.sample_rate
     )
-    cnorm = transforms.ComplexNorm()
 
     nsgt = nsgt.to(device)
     insgt = insgt.to(device)
-    cnorm = cnorm.to(device)
 
     # pack the 3 pieces of the encoder/decoder
-    encoder = (nsgt, insgt, cnorm)
+    encoder = (nsgt, insgt)
 
     separator_conf = {
         "sample_rate": train_dataset.sample_rate,
@@ -308,21 +324,23 @@ def main():
         outfile.write(json.dumps(separator_conf, indent=4, sort_keys=True))
 
     jagged_slicq, sample_waveform = nsgt_base.predict_input_size(args.batch_size, 2, args.seq_dur)
-
-    jagged_slicq_cnorm = cnorm(jagged_slicq)
     n_blocks = len(jagged_slicq)
 
     # data whitening
     if model_exists or args.debug:
-        scaler_mean = None
-        scaler_std = None
+        scaler_mean_mag = None
+        scaler_std_mag = None
+        scaler_mean_phase = None
+        scaler_std_phase = None
     else:
-        scaler_mean, scaler_std = get_statistics(args, encoder, train_dataset, n_blocks)
+        scaler_mean_mag, scaler_std_mag, scaler_mean_phase, scaler_std_phase = get_statistics(args, encoder, train_dataset, n_blocks)
 
     unmix = models.Unmix(
-        jagged_slicq_cnorm,
-        input_means=scaler_mean,
-        input_scales=scaler_std,
+        jagged_slicq,
+        input_means_mag=scaler_mean_mag,
+        input_scales_mag=scaler_std_mag,
+        input_means_phase=scaler_mean_phase,
+        input_scales_phase=scaler_std_phase,
     ).to(device)
 
     if not args.quiet:

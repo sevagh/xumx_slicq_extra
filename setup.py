@@ -26,7 +26,6 @@ setup(
         "musdb==0.3.1",
         "tqdm",
         "auraloss",
-        "norbert @ git+https://github.com/yoyololicon/norbert#egg=norbert",
     ],
     extra_requires={
         "test": [

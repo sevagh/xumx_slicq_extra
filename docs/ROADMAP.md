@@ -27,19 +27,14 @@ docker run --rm -it \
 * 28MB v1 model would be killer
     * New training
         * Differentiable sliCQT-Wiener w/ complex-MSE, squeeze more juice from network, v1 28MB
-        * looking good and we have a complex-valued loss baseline...
-        * tag as "v1.0.0a"
-    * remove STFT/iSTFT, remove new 70MB weights, full bw, go for broke
-         Complex-Valued Convolutional Autoencoder and Spatial Pixel-Squares Refinement for Polarimetric SAR Image Classification 
-            - use complex relu + complex sigmoid like this describes
-            - crelu + csigmoid , supports same (crelu = crelu(real) + j crelu(i))
-            https://github.com/wavefrontshaping/complexPyTorch#batchnorm
-            * double the channels; 50, 110 :shrug:
-        * support both real and complex umx
-        * tag as "v1.0.0"
+        * looking meh but we have a complex-valued loss baseline: 0.0395
+        * now mag-phase umx
+            - dataset statistics: mag + phase
+            * double the channels; 50, 110 :shrug:? or 32/64 if you must
         * details: add back ComplexSDR (for both real and complex)
+            * dont forget loss error revelation: unmix->mse-loss->waveform->sdr loss = mse loss missing gradients
         * leakyrelu??
-    * remove blendmodels, SDRLossCriterion, auraloss, etc.
+    * clean up unused shit
 * TensorRT save script (ala blendmodels)
 * README to describe all the cool things (and not so cool things)
     nvcr, training, blending, <https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html>

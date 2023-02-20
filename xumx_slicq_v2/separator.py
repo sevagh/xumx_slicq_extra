@@ -7,9 +7,7 @@ import json
 from torch import Tensor
 import torch.nn as nn
 from .models import Unmix
-import norbert
 from .transforms import (
-    ComplexNorm,
     NSGTBase,
     make_filterbanks,
 )
@@ -54,10 +52,6 @@ class Separator(nn.Module):
         encoder: Tuple = None,
         sample_rate: float = 44100.0,
         chunk_size: Optional[int] = 2621440,
-        wiener_win_len_stft: Optional[int] = 300,
-        wiener_win_len_slicqt: Optional[int] = 5000,
-        n_fft: Optional[int] = 4096,
-        n_hop: Optional[int] = 1024,
         device: str = "cpu",
     ):
         super(Separator, self).__init__()
@@ -69,7 +63,7 @@ class Separator(nn.Module):
         self.chunk_size = chunk_size if chunk_size is not None else sys.maxsize
 
         self.xumx_model = xumx_model
-        self.nsgt, self.insgt, self.cnorm = encoder
+        self.nsgt, self.insgt = encoder
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -112,7 +106,6 @@ class Separator(nn.Module):
             n_samples = audio.shape[-1]
 
             X = self.nsgt(audio)
-            Xmag = self.cnorm(X)
 
             # embedded wiener
             Ycomplex_all = self.xumx_model(X)
@@ -180,20 +173,17 @@ def load_target_models(
     state = torch.load(target_model_path, map_location=device)
 
     jagged_slicq, _ = nsgt_base.predict_input_size(1, nb_channels, seq_dur)
-    cnorm = ComplexNorm().to(device)
 
     nsgt, insgt = make_filterbanks(
         nsgt_base, sample_rate
     )
-    encoder = (nsgt, insgt, cnorm)
+    encoder = (nsgt, insgt)
 
     nsgt = nsgt.to(device)
     insgt = insgt.to(device)
 
-    jagged_slicq_cnorm = cnorm(jagged_slicq)
-
     xumx_model = Unmix(
-        jagged_slicq_cnorm,
+        jagged_slicq,
     )
 
     xumx_model.load_state_dict(state, strict=False)

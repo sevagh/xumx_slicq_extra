@@ -96,9 +96,9 @@ class NSGT_SL(nn.Module):
 
         for i, nsgt_f in enumerate(C):
             nsgt_f = torch.moveaxis(nsgt_f, 0, -2)
-            nsgt_f = torch.view_as_real(nsgt_f)
+            #nsgt_f = torch.view_as_real(nsgt_f)
             # unpack batch
-            nsgt_f = nsgt_f.view(shape[:-1] + nsgt_f.shape[-4:])
+            nsgt_f = nsgt_f.view(shape[:-1] + nsgt_f.shape[-3:])
             C[i] = nsgt_f
 
         return C
@@ -129,11 +129,11 @@ class INSGT_SL(nn.Module):
         for i, X in enumerate(X_list):
             Xshape = len(X.shape)
 
-            X = torch.view_as_complex(X)
+            #X = torch.view_as_complex(X)
 
             shape = X.shape
 
-            if Xshape == 6:
+            if Xshape == 5:
                 X = X.view(X.shape[0] * X.shape[1], *X.shape[2:])
             else:
                 X = X.view(X.shape[0] * X.shape[1] * X.shape[2], *X.shape[3:])
@@ -149,33 +149,3 @@ class INSGT_SL(nn.Module):
         y = y.view(*shape[:-3], -1)
 
         return y
-
-
-class ComplexNorm(nn.Module):
-    r"""Compute the norm of complex tensor input.
-
-    Extension of `torchaudio.functional.complex_norm` with mono
-
-    Args:
-        power (float): Power of the norm. (Default: `1.0`).
-        mono (bool): Downmix to single channel after applying power norm
-            to maximize
-    """
-
-    def __init__(self):
-        super(ComplexNorm, self).__init__()
-
-    def forward(self, spec):
-        if isinstance(spec, list):
-            # take the magnitude of the ragged slicqt list
-            ret = [None] * len(spec)
-
-            for i, C_block in enumerate(spec):
-                C_block = torch.pow(torch.abs(torch.view_as_complex(C_block)), 1.0)
-                ret[i] = C_block
-
-            return ret
-        elif isinstance(spec, Tensor):
-            return self.forward([spec])[0]
-        else:
-            raise ValueError(f"unsupported type for 'spec': {type(spec)}")

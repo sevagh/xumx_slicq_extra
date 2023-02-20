@@ -2,7 +2,6 @@ from typing import Optional
 from tqdm import trange
 import torch
 import torch.nn as nn
-import norbert
 import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import (
@@ -26,25 +25,38 @@ class Unmix(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
-        input_means=None,
-        input_scales=None,
+        input_means_mag=None,
+        input_scales_mag=None,
+        input_means_phase=None,
+        input_scales_phase=None,
     ):
         super(Unmix, self).__init__()
 
-        self.sliced_umx = nn.ModuleList()
+        self.sliced_umx_mag = nn.ModuleList()
+        self.sliced_umx_phase = nn.ModuleList()
 
         freq_idx = 0
         for i, C_block in enumerate(jagged_slicq_sample_input):
-            input_mean = input_means[i] if input_means else None
-            input_scale = input_scales[i] if input_scales else None
+            input_mean_mag = input_means_mag[i] if input_means_mag else None
+            input_scale_mag = input_scales_mag[i] if input_scales_mag else None
+
+            input_mean_phase = input_means_phase[i] if input_means_phase else None
+            input_scale_phase = input_scales_phase[i] if input_scales_phase else None
 
             freq_start = freq_idx
 
-            self.sliced_umx.append(
+            self.sliced_umx_mag.append(
                 _SlicedUnmix(
                     C_block,
-                    input_mean=input_mean,
-                    input_scale=input_scale,
+                    input_mean=input_mean_mag,
+                    input_scale=input_scale_mag,
+                )
+            )
+            self.sliced_umx_phase.append(
+                _SlicedUnmix(
+                    C_block,
+                    input_mean=input_mean_phase,
+                    input_scale=input_scale_phase,
                 )
             )
 
@@ -60,11 +72,19 @@ class Unmix(nn.Module):
         self.eval()
 
     def forward(self, Xcomplex) -> Tensor:
-        futures = [
-            torch.jit.fork(self.sliced_umx[i], Xblock, torch.abs(torch.view_as_complex(Xblock)))
+        # magnitude with torch.abs
+        futures_mag = [
+            torch.jit.fork(self.sliced_umx_mag[i], torch.abs(Xblock))
             for i, Xblock in enumerate(Xcomplex)
         ]
-        Ycomplex = [torch.jit.wait(future) for future in futures]
+        # phase with torch.angle
+        futures_phase = [
+            torch.jit.fork(self.sliced_umx_phase[i], torch.angle(Xblock))
+            for i, Xblock in enumerate(Xcomplex)
+        ]
+        Ymag = [torch.jit.wait(future) for future in futures_mag]
+        Yphase = [torch.jit.wait(future) for future in futures_phase]
+        Ycomplex = [torch.polar(Ymag_block, Yphase_block) for (Ymag_block, Yphase_block) in zip(Ymag, Yphase)]
         return Ycomplex
 
 
@@ -177,7 +197,8 @@ class _SlicedUnmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, xcomplex: Tensor, x: Tensor) -> Tensor:
+    # x is either a magnitude or phase
+    def forward(self, x: Tensor) -> Tensor:
         mix = x.detach().clone()
 
         x_shape = x.shape
@@ -199,8 +220,6 @@ class _SlicedUnmix(nn.Module):
                 #print(f"{x_tmp.shape=}")
                 x_tmp = layer(x_tmp)
 
-            # wiener before reshaping to 3d??
-
             x_tmp = x_tmp.reshape(x_shape)
 
             # multiplicative skip connection
@@ -209,52 +228,4 @@ class _SlicedUnmix(nn.Module):
 
             ret[i, ...] = x_tmp
 
-        # embedded blockwise wiener-EM (flattened in function then unflattened)
-        ret = _wiener_fn(xcomplex, ret)
         return ret
-
-
-def _wiener_fn(mix_slicqt, slicqtgrams, wiener_win_len_param: int = 5000):
-    mix_slicqt = torch.flatten(mix_slicqt, start_dim=-3, end_dim=-2)
-    orig_shape = slicqtgrams.shape
-    slicqtgrams = torch.flatten(slicqtgrams, start_dim=-2, end_dim=-1)
-
-    # transposing it as
-    # (nb_samples, nb_frames, nb_bins,{1,nb_channels}, nb_sources)
-    slicqtgrams = slicqtgrams.permute(1, 4, 3, 2, 0)
-
-    # rearranging it into:
-    # (nb_samples, nb_frames, nb_bins, nb_channels, 2) to feed
-    # into filtering methods
-    mix_slicqt = mix_slicqt.permute(0, 3, 2, 1, 4)
-
-    nb_frames = slicqtgrams.shape[1]
-    targets_slicqt = torch.zeros(
-        *mix_slicqt.shape[:-1] + (4,2,),
-        dtype=mix_slicqt.dtype,
-        device=mix_slicqt.device,
-    )
-
-    pos = 0
-    if wiener_win_len_param:
-        wiener_win_len = wiener_win_len_param
-    else:
-        wiener_win_len = nb_frames
-    while pos < nb_frames:
-        cur_frame = torch.arange(pos, min(nb_frames, pos + wiener_win_len))
-        pos = int(cur_frame[-1]) + 1
-
-        targets_slicqt[:, cur_frame, ...] = torch.view_as_real(norbert.wiener(
-            slicqtgrams[:, cur_frame, ...],
-            torch.view_as_complex(mix_slicqt[:, cur_frame, ...]),
-            1,
-            False,
-        ))
-
-    # getting to (nb_samples, nb_targets, channel, fft_size, n_frames)
-    targets_slicqt = targets_slicqt.permute(4, 0, 3, 2, 1, 5).contiguous()
-    #print(f"targets_slicqt: {targets_slicqt.shape}")
-    #print(f"orig shape: {orig_shape}")
-    targets_slicqt = targets_slicqt.reshape((*orig_shape, 2,))
-    #print(f"targets_slicqt: {targets_slicqt.shape}")
-    return targets_slicqt
