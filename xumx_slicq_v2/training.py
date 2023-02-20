@@ -120,6 +120,11 @@ def get_statistics(args, encoder, dataset, time_blocks):
 
         Xcomplex = nsgt(x[None, ...])
 
+        max_phase = float('-inf')
+        min_phase = float('inf')
+        max_mag = float('-inf')
+        min_mag = float('inf')
+
         for i in range(time_blocks):
             Xmag_block = torch.abs(Xcomplex[i])
             Xphase_block = torch.angle(Xcomplex[i])
@@ -142,6 +147,11 @@ def get_statistics(args, encoder, dataset, time_blocks):
             )
             scalers_phase[i].partial_fit(Xphase_block_flat)
 
+            max_mag = max(torch.max(Xmag_block_flat), max_mag)
+            min_mag = min(torch.min(Xmag_block_flat), min_mag)
+            max_phase = max(torch.max(Xphase_block_flat), max_phase)
+            min_phase = min(torch.min(Xphase_block_flat), min_phase)
+
     # set inital input scaler values
     std_mag = [
         np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers_mag
@@ -149,6 +159,12 @@ def get_statistics(args, encoder, dataset, time_blocks):
     std_phase = [
         np.maximum(scaler.scale_, 1e-4 * np.max(scaler.scale_)) for scaler in scalers_phase
     ]
+
+    print(f"max mag: {max_mag}")
+    print(f"min mag: {min_mag}")
+
+    print(f"max phase: {max_phase}")
+    print(f"min phase: {min_phase}")
 
     return [scaler.mean_ for scaler in scalers_mag], std_mag, [scaler.mean_ for scaler in scalers_phase], std_phase
 

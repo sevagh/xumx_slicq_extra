@@ -28,9 +28,8 @@ docker run --rm -it \
     * New training
         * Differentiable sliCQT-Wiener w/ complex-MSE, squeeze more juice from network, v1 28MB
         * looking meh but we have a complex-valued loss baseline: 0.0395
-        * now mag-phase umx
-            - dataset statistics: mag + phase
-            * double the channels; 50, 110 :shrug:? or 32/64 if you must
+        * now mag-phase umx; Tanh activation for phase??
+        * double the channels; 50, 110 :shrug:? or 32/64 if you must
         * details: add back ComplexSDR (for both real and complex)
             * dont forget loss error revelation: unmix->mse-loss->waveform->sdr loss = mse loss missing gradients
         * leakyrelu??

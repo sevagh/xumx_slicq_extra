@@ -6,12 +6,13 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import (
     Parameter,
-    ReLU,
     BatchNorm2d,
     ConvTranspose2d,
     Conv2d,
     Sequential,
     Sigmoid,
+    ReLU,
+    Identity,
 )
 from .transforms import (
     make_filterbanks,
@@ -57,6 +58,7 @@ class Unmix(nn.Module):
                     C_block,
                     input_mean=input_mean_phase,
                     input_scale=input_scale_phase,
+                    is_phase=True,
                 )
             )
 
@@ -95,6 +97,7 @@ class _SlicedUnmix(nn.Module):
         slicq_sample_input,
         input_mean=None,
         input_scale=None,
+        is_phase: bool = False,
     ):
         hidden_size_1 = 25
         hidden_size_2 = 55
@@ -165,7 +168,9 @@ class _SlicedUnmix(nn.Module):
                 stride=(1, hop),
                 bias=True,
             ),
-            Sigmoid(),
+            # for magnitudes, we apply a nonnegative relu mask to the input
+            # for phase, output value can be between [-pi, pi], so choose a real-valued mask
+            Identity() if is_phase else ReLU(),
         ])
 
         cdae_1 = Sequential(*encoder, *decoder)
@@ -174,7 +179,6 @@ class _SlicedUnmix(nn.Module):
         cdae_4 = copy.deepcopy(cdae_1)
 
         self.cdaes = nn.ModuleList([cdae_1, cdae_2, cdae_3, cdae_4])
-        self.mask = True
 
         if input_mean is not None:
             input_mean = torch.from_numpy(-input_mean).float()
@@ -223,9 +227,8 @@ class _SlicedUnmix(nn.Module):
             x_tmp = x_tmp.reshape(x_shape)
 
             # multiplicative skip connection
-            if self.mask:
-                x_tmp = x_tmp * mix
+            x_tmp = x_tmp * mix
 
-            ret[i, ...] = x_tmp
+            ret[i] = x_tmp
 
         return ret
