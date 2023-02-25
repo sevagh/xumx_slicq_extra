@@ -1,3 +1,10 @@
+model: cross-target skip conn: 4.1845 dB
+	loss: 0.0418
+	vocals          ==> SDR:   4.217  SIR:   6.554  ISR:   8.526  SAR:   4.740
+	drums           ==> SDR:   4.943  SIR:   7.038  ISR:   9.054  SAR:   4.765
+	bass            ==> SDR:   4.289  SIR:   8.197  ISR:   5.664  SAR:   4.323
+	other           ==> SDR:   3.289  SIR:   2.101  ISR:   7.251  SAR:   4.155
+
 model: mask sum: 4.4 dB
 	loss: 0.0405 (leapfrog 0.0407)
 	vocals          ==> SDR:   4.791  SIR:   7.794  ISR:   8.579  SAR:   4.500
