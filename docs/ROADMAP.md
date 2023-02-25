@@ -20,26 +20,12 @@ docker run --rm -it \
 1. Starting point: 28MB, 4.24 dB (full bw, block wiener, complex MSE loss = 0.0395)
 1. Optuna hyperparams (50,51,4): 60MB, 4.35 dB (0.0390)
 1. Mask sum loss: 0.0405, 4.4 dB
-1. Cross-target skip connection: *TBD*; not looking good; ditch skip connections because you don't understand them!
-<https://file.techscience.com/ueditor/files/csse/TSP_CSSE-44-3/TSP_CSSE_29732/TSP_CSSE_29732.pdf>
-<https://arxiv.org/pdf/1606.08921.pdf>
-1. Mixing frequency bins: global bottleneck layer (with or without skip conn)
-    ```
-    # list
-    encoded, skip_conn = sliced_umx.encoder()
-
-    # global bottleneck
-    encoded_concat = concat or whatever
-    # try this: https://stats.stackexchange.com/a/552170
-    encoded_concat = self.bottleneck(encoded_concat)
-    encoded = deconcat
-        
-    decoded, masks = sliced_umx.decoder(encoded, skip_conn)
-    ```
+1. **in-progress!** Mixing frequency bins: global bottleneck layer (still 60MB!)
 1. New slicqt with 10.17 wiener oracle (vs. 10.14): 'bark', 288, 43.39999999999988
-1. try smaller wiener window than 5000 for effect on memory/swap
+    1. try smaller wiener window than 5000 for effect on memory/swap?
 1. Lighter model weights: bandwidth + dummy time bucket
 1. Option to train/infer without wiener (but don't actually use it)
+1. LeakyReLU
 
 ## Training/internal details housekeeping
 
