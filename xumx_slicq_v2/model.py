@@ -29,6 +29,9 @@ class Unmix(nn.Module):
         jagged_slicq_sample_input,
         hidden_size_1: int = 50,
         hidden_size_2: int = 51,
+        bottleneck_hidden_size: int = 13,
+        bottleneck_freq_filter: int = 7,
+        bottleneck_time_filter: int = 3,
         freq_filter_small: int = 1,
         freq_filter_medium: int = 3,
         freq_filter_large: int = 5,
@@ -68,6 +71,56 @@ class Unmix(nn.Module):
             # advance frequency pointer
             freq_idx += C_block.shape[2]
 
+        bottleneck = []
+
+        # ResNet-like bottleneck layer
+
+        # first, 1x1 conv to reduce channels
+        bottleneck.extend([
+            Conv2d(
+                hidden_size_2,
+                bottleneck_hidden_size,
+                (1, 1),
+                bias=False,
+            ),
+            BatchNorm2d(bottleneck_hidden_size),
+            ReLU(),
+        ])
+
+        # next: actual bottleneck layer
+        bottleneck.extend([
+            Conv2d(
+                bottleneck_hidden_size,
+                bottleneck_hidden_size,
+                (bottleneck_freq_filter, bottleneck_time_filter),
+                bias=False,
+            ),
+            BatchNorm2d(bottleneck_hidden_size),
+            ReLU(),
+        ])
+
+        # finally, 1x1 to increase channels, end of bottleneck
+        bottleneck.extend([
+            Conv2d(
+                bottleneck_hidden_size,
+                hidden_size_2,
+                (1, 1),
+                bias=False,
+            ),
+            BatchNorm2d(hidden_size_2),
+            ReLU(),
+        ])
+
+        bottleneck_1 = Sequential(*bottleneck)
+        bottleneck_2 = copy.deepcopy(bottleneck_1)
+        bottleneck_3 = copy.deepcopy(bottleneck_1)
+        bottleneck_4 = copy.deepcopy(bottleneck_1)
+
+        self.bottlenecks = nn.ModuleList([bottleneck_1, bottleneck_2, bottleneck_3, bottleneck_4])
+
+        self.bottleneck_freq_pad = bottleneck_freq_filter-1
+        self.bottleneck_time_pad = bottleneck_time_filter-1
+
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
         # at test time
@@ -77,15 +130,57 @@ class Unmix(nn.Module):
         self.eval()
 
     def forward(self, Xcomplex, return_masks=False, wiener=True) -> Tensor:
-        Ycomplex = [None]*len(Xcomplex)
-        Ymasks = [None]*len(Xcomplex)
+        n_blocks = len(Xcomplex)
 
-        for i, Xblock in enumerate(Xcomplex):
-            Ycomplex_block, Ymask_block = self.sliced_umx[i](
-                Xblock, torch.abs(torch.view_as_complex(Xblock)), wiener=wiener
-            )
-            Ycomplex[i] = Ycomplex_block
-            Ymasks[i] = Ymask_block
+        # store mixed magnitude slicqt
+        mixes = [torch.abs(torch.view_as_complex(Xblock)) for Xblock in Xcomplex]
+
+        encoded = [None]*n_blocks
+        Ycomplex = [None]*n_blocks
+        Ymasks = [None]*n_blocks
+
+        # flatten and apply encoder per-block
+        for i, mix in enumerate(mixes):
+            x = mix.clone()
+            x = torch.flatten(x, start_dim=-2, end_dim=-1)
+            x = self.sliced_umx[i].encode(x)
+            encoded[i] = x
+
+        # concatenate by frequency dimension, store frequency bins for deconcatenation later
+        deconcat_indexes = [encoded_elem.shape[-2] for encoded_elem in encoded]
+        global_encoded = torch.cat(encoded, dim=-2)
+
+        # apply bottleneck per-target
+        # pad before bottleneck
+        global_encoded = F.pad(global_encoded, (0, self.bottleneck_time_pad, 0, self.bottleneck_freq_pad), "constant", 0)
+
+        bottlenecked_global_encoded = [None]*4
+        for i in range(4):
+            bottlenecked_global_encoded[i] = torch.unsqueeze(self.bottlenecks[i](global_encoded[i]), dim=0)
+
+        global_encoded = torch.cat(bottlenecked_global_encoded, dim=0)
+
+        # deconcatenate after global bottleneck layer
+        frequency_ptr = 0
+        for i, deconcat_index in enumerate(deconcat_indexes):
+            encoded[i] = global_encoded[..., frequency_ptr : frequency_ptr + deconcat_index, :]
+            frequency_ptr += deconcat_index
+
+        # apply decoder per-block
+        for i, mix in enumerate(mixes):
+            decoded_mask = self.sliced_umx[i].decode(encoded[i])
+
+            # unflatten by reshaping
+            Ymasks[i] = decoded_mask.reshape((4, *mix.shape,))
+
+            # multiplicative skip connection i.e. soft mask per-block
+            masked_slicqt = mix*Ymasks[i]
+
+            # blockwise wiener-EM
+            if wiener:
+                Ycomplex[i] = blockwise_wiener(Xcomplex[i], masked_slicqt)
+            else:
+                Ycomplex[i] = blockwise_phasemix_sep(Xcomplex[i], masked_slicqt)
 
         if return_masks:
             return Ycomplex, Ymasks
@@ -205,16 +300,8 @@ class _SlicedUnmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, xcomplex: Tensor, x: Tensor, wiener: bool = True) -> Tensor:
-        mix = x.detach().clone()
-
-        x_shape = x.shape
-        nb_samples, nb_channels, nb_f_bins, nb_slices, nb_t_bins = x_shape
-
-        ret = torch.zeros((4, *x_shape,), device=x.device, dtype=x.dtype)
-        ret_masks = torch.zeros((4, *x_shape,), device=x.device, dtype=x.dtype)
-
-        x = torch.flatten(x, start_dim=-2, end_dim=-1)
+    def encode(self, x: Tensor) -> Tensor:
+        ret = [None]*4
 
         # shift and scale input to mean=0 std=1 (across all bins)
         x = x.permute(0, 1, 3, 2)
@@ -222,101 +309,38 @@ class _SlicedUnmix(nn.Module):
         x *= self.input_scale
         x = x.permute(0, 1, 3, 2)
 
-        x_tmp_1 = x.clone()
-        x_tmp_2 = x.clone()
-        x_tmp_3 = x.clone()
-        x_tmp_4 = x.clone()
+        for i, cdae in enumerate(self.cdaes):
+            # apply first 6 layers i.e. encoder (conv->batchnorm->relu x 2)
+            x_tmp = x.clone()
+            x_tmp = cdae[0](x_tmp)
+            x_tmp = cdae[1](x_tmp)
+            x_tmp = cdae[2](x_tmp)
+            x_tmp = cdae[3](x_tmp)
+            x_tmp = cdae[4](x_tmp)
+            x_tmp = cdae[5](x_tmp)
 
-        # 4 targets, encoder 1
-        x_tmp_1 = self.cdaes[0][0](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][1](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][2](x_tmp_1)
+            ret[i] = torch.unsqueeze(x_tmp, dim=0)
 
-        x_tmp_2 = self.cdaes[1][0](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][1](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][2](x_tmp_2)
+        return torch.cat(ret, dim=0)
 
-        x_tmp_3 = self.cdaes[2][0](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][1](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][2](x_tmp_3)
+    def decode(self, x: Tensor) -> Tensor:
+        ret = [None]*4
 
-        x_tmp_4 = self.cdaes[3][0](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][1](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][2](x_tmp_4)
+        for i, cdae in enumerate(self.cdaes):
+            # apply last 5 layers i.e. decoder (convT->batchnormn->relu, convT->sigmoid)
+            x_tmp = x[i].clone()
 
-        # cross-target skip connection
-        x_skip = (x_tmp_1+x_tmp_2+x_tmp_3+x_tmp_4).clone()
+            x_tmp = cdae[6](x_tmp)
+            x_tmp = cdae[7](x_tmp)
+            x_tmp = cdae[8](x_tmp)
+            x_tmp = cdae[9](x_tmp)
+            x_tmp = cdae[10](x_tmp)
 
-        # encoder 2, decoder 1
-        x_tmp_1 = self.cdaes[0][3](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][4](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][5](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][6](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][7](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][8](x_tmp_1)
+            ret[i] = torch.unsqueeze(x_tmp, dim=0)
 
-        x_tmp_2 = self.cdaes[1][3](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][4](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][5](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][6](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][7](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][8](x_tmp_2)
+        return torch.cat(ret, dim=0)
 
-        x_tmp_3 = self.cdaes[2][3](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][4](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][5](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][6](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][7](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][8](x_tmp_3)
-
-        x_tmp_4 = self.cdaes[3][3](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][4](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][5](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][6](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][7](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][8](x_tmp_4)
-
-        # cross-target skip conn before decoder 2
-        x_tmp_1 = x_tmp_1 + x_skip
-        x_tmp_2 = x_tmp_2 + x_skip
-        x_tmp_3 = x_tmp_3 + x_skip
-        x_tmp_4 = x_tmp_4 + x_skip
-
-        # decoder 2 + mask (i.e. multiplicative skip conn)
-        x_tmp_1 = self.cdaes[0][9](x_tmp_1)
-        x_tmp_1 = self.cdaes[0][10](x_tmp_1)
-
-        x_tmp_2 = self.cdaes[1][9](x_tmp_2)
-        x_tmp_2 = self.cdaes[1][10](x_tmp_2)
-
-        x_tmp_3 = self.cdaes[2][9](x_tmp_3)
-        x_tmp_3 = self.cdaes[2][10](x_tmp_3)
-
-        x_tmp_4 = self.cdaes[3][9](x_tmp_4)
-        x_tmp_4 = self.cdaes[3][10](x_tmp_4)
-
-        x_tmp_1 = x_tmp_1.reshape(x_shape)
-        x_tmp_2 = x_tmp_2.reshape(x_shape)
-        x_tmp_3 = x_tmp_3.reshape(x_shape)
-        x_tmp_4 = x_tmp_4.reshape(x_shape)
-
-        # store the sigmoid/soft mask before multiplying with mix
-        ret_masks[0] = x_tmp_1.clone()
-        ret_masks[1] = x_tmp_2.clone()
-        ret_masks[2] = x_tmp_3.clone()
-        ret_masks[3] = x_tmp_4.clone()
-
-        # multiplicative skip connection i.e. soft mask
-        ret[0] = x_tmp_1 * mix
-        ret[1] = x_tmp_2 * mix
-        ret[2] = x_tmp_3 * mix
-        ret[3] = x_tmp_4 * mix
-
-        # embedded blockwise wiener-EM (flattened in function then unflattened)
-        if wiener:
-            ret = blockwise_wiener(xcomplex, ret)
-        else:
-            ret = blockwise_phasemix_sep(xcomplex, ret)
-
-        # also return the mask
-        return ret, ret_masks
+    def forward(self, x: Tensor) -> Tensor:
+        x = self.encode(x)
+        x = self.decode(x)
+        return x
