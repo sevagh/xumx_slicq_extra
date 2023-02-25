@@ -33,14 +33,13 @@ xumx-slicq-v2-slim = dockerhub inference only
     * Mask sum loss: 4.4 dB
     * nn stuff
         * **medium** _Cross-target Skip Connection_ sum all targets between mirror encoder/decoders
-            * implement with simple code:  x_encoded1_target1, x_encoded2_target2, etc.
-            * skip conn citations:
+            *working on this now*
 <https://file.techscience.com/ueditor/files/csse/TSP_CSSE-44-3/TSP_CSSE_29732/TSP_CSSE_29732.pdf>
 <https://arxiv.org/pdf/1606.08921.pdf>
         * **optional** new slicqt: ('bark', 288, 43.39999999999988); try it?
             10.17 wiener oracle vs. 10.14,  see what it does to model size + results
         * lightweight variants: `-lite`: no wiener + capped bandwidth
-            * try no-wiener in runtime
+        * put bandwidth back, disable wiener in training script
     * TensorRT save script (ala blendmodels)
     * tag as "v1.0.0a"
     * visualization.py: spectrogram plotting code (+ overlap-add, flatten, + per-block vs. unified spectrogram)

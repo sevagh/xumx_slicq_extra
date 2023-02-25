@@ -18,7 +18,7 @@ from .transforms import (
     make_filterbanks,
     NSGTBase,
 )
-from .phase import blockwise_wiener
+from .phase import blockwise_wiener, blockwise_phasemix_sep
 import copy
 
 
@@ -222,28 +222,101 @@ class _SlicedUnmix(nn.Module):
         x *= self.input_scale
         x = x.permute(0, 1, 3, 2)
 
-        for i, cdae in enumerate(self.cdaes):
-            x_tmp = x.clone()
-            for j, layer in enumerate(cdae):
-                #print(f"{x_tmp.shape=}")
-                x_tmp = layer(x_tmp)
+        x_tmp_1 = x.clone()
+        x_tmp_2 = x.clone()
+        x_tmp_3 = x.clone()
+        x_tmp_4 = x.clone()
 
-            x_tmp = x_tmp.reshape(x_shape)
+        # 4 targets, encoder 1
+        x_tmp_1 = self.cdaes[0][0](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][1](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][2](x_tmp_1)
 
-            # store the sigmoid/soft mask before multiplying with mix
-            ret_masks[i] = x_tmp.clone()
+        x_tmp_2 = self.cdaes[1][0](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][1](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][2](x_tmp_2)
 
-            # multiplicative skip connection
-            if self.mask:
-                x_tmp = x_tmp * mix
+        x_tmp_3 = self.cdaes[2][0](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][1](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][2](x_tmp_3)
 
-            ret[i] = x_tmp
+        x_tmp_4 = self.cdaes[3][0](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][1](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][2](x_tmp_4)
+
+        # cross-target skip connection
+        x_skip = (x_tmp_1+x_tmp_2+x_tmp_3+x_tmp_4).clone()
+
+        # encoder 2, decoder 1
+        x_tmp_1 = self.cdaes[0][3](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][4](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][5](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][6](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][7](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][8](x_tmp_1)
+
+        x_tmp_2 = self.cdaes[1][3](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][4](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][5](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][6](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][7](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][8](x_tmp_2)
+
+        x_tmp_3 = self.cdaes[2][3](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][4](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][5](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][6](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][7](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][8](x_tmp_3)
+
+        x_tmp_4 = self.cdaes[3][3](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][4](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][5](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][6](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][7](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][8](x_tmp_4)
+
+        # cross-target skip conn before decoder 2
+        x_tmp_1 = x_tmp_1 + x_skip
+        x_tmp_2 = x_tmp_2 + x_skip
+        x_tmp_3 = x_tmp_3 + x_skip
+        x_tmp_4 = x_tmp_4 + x_skip
+
+        # decoder 2 + mask (i.e. multiplicative skip conn)
+        x_tmp_1 = self.cdaes[0][9](x_tmp_1)
+        x_tmp_1 = self.cdaes[0][10](x_tmp_1)
+
+        x_tmp_2 = self.cdaes[1][9](x_tmp_2)
+        x_tmp_2 = self.cdaes[1][10](x_tmp_2)
+
+        x_tmp_3 = self.cdaes[2][9](x_tmp_3)
+        x_tmp_3 = self.cdaes[2][10](x_tmp_3)
+
+        x_tmp_4 = self.cdaes[3][9](x_tmp_4)
+        x_tmp_4 = self.cdaes[3][10](x_tmp_4)
+
+        x_tmp_1 = x_tmp_1.reshape(x_shape)
+        x_tmp_2 = x_tmp_2.reshape(x_shape)
+        x_tmp_3 = x_tmp_3.reshape(x_shape)
+        x_tmp_4 = x_tmp_4.reshape(x_shape)
+
+        # store the sigmoid/soft mask before multiplying with mix
+        ret_masks[0] = x_tmp_1.clone()
+        ret_masks[1] = x_tmp_2.clone()
+        ret_masks[2] = x_tmp_3.clone()
+        ret_masks[3] = x_tmp_4.clone()
+
+        # multiplicative skip connection i.e. soft mask
+        ret[0] = x_tmp_1 * mix
+        ret[1] = x_tmp_2 * mix
+        ret[2] = x_tmp_3 * mix
+        ret[3] = x_tmp_4 * mix
 
         # embedded blockwise wiener-EM (flattened in function then unflattened)
         if wiener:
             ret = blockwise_wiener(xcomplex, ret)
         else:
-            ret = phasemix_sep(xcomplex, ret)
+            ret = blockwise_phasemix_sep(xcomplex, ret)
 
         # also return the mask
         return ret, ret_masks
