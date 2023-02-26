@@ -6,3 +6,7 @@
 logdir
 !pretrained_model/*.pth
 !pretrained_model/*.json
+!pretrained_model_bottleneck/*.json
+!pretrained_model_bottleneck/*.pth
+!pretrained_model_blended/*.json
+!pretrained_model_blended/*.pth

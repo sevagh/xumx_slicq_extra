@@ -1,5 +1,9 @@
-model: global bottleneck layer:
+model: global bottleneck layer: 4.37475 ?!?! lower dB SDR, much better MSE loss
 	loss: 0.0387 (w/ mask sum loss)
+	vocals          ==> SDR:   4.711  SIR:   7.280  ISR:   8.988  SAR:   4.096
+	drums           ==> SDR:   5.092  SIR:   7.770  ISR:   9.343  SAR:   4.539
+	bass            ==> SDR:   4.482  SIR:   9.744  ISR:   5.252  SAR:   3.672
+	other           ==> SDR:   3.214  SIR:   2.656  ISR:   8.095  SAR:   4.090
 
 model: cross-target skip conn: 4.1845 dB
 	loss: 0.0418

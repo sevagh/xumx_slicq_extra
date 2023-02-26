@@ -199,6 +199,12 @@ def training_main():
         help="use phasemix instead of wiener EM in UMX",
     )
     parser.add_argument(
+        "--disable-bottleneck",
+        action="store_true",
+        default=False,
+        help="disable global bottleneck layer",
+    )
+    parser.add_argument(
         "--seq-dur",
         type=float,
         default=2.0,
@@ -347,6 +353,7 @@ def training_main():
     unmix = model.Unmix(
         jagged_slicq_cnorm,
         phasemix=args.phasemix,
+        bottleneck=not args.disable_bottleneck,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)

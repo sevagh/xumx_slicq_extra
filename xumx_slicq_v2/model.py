@@ -30,6 +30,7 @@ class Unmix(nn.Module):
         phasemix: bool = False,
         hidden_size_1: int = 50,
         hidden_size_2: int = 51,
+        bottleneck: bool = True,
         bottleneck_hidden_size: int = 13,
         bottleneck_freq_filter: int = 7,
         bottleneck_time_filter: int = 3,
@@ -72,57 +73,59 @@ class Unmix(nn.Module):
             # advance frequency pointer
             freq_idx += C_block.shape[2]
 
-        bottleneck = []
-
-        # ResNet-like bottleneck layer
-
-        # first, 1x1 conv to reduce channels
-        bottleneck.extend([
-            Conv2d(
-                hidden_size_2,
-                bottleneck_hidden_size,
-                (1, 1),
-                bias=False,
-            ),
-            BatchNorm2d(bottleneck_hidden_size),
-            ReLU(),
-        ])
-
-        # next: actual bottleneck layer
-        bottleneck.extend([
-            Conv2d(
-                bottleneck_hidden_size,
-                bottleneck_hidden_size,
-                (bottleneck_freq_filter, bottleneck_time_filter),
-                bias=False,
-            ),
-            BatchNorm2d(bottleneck_hidden_size),
-            ReLU(),
-        ])
-
-        # finally, 1x1 to increase channels, end of bottleneck
-        bottleneck.extend([
-            Conv2d(
-                bottleneck_hidden_size,
-                hidden_size_2,
-                (1, 1),
-                bias=False,
-            ),
-            BatchNorm2d(hidden_size_2),
-            ReLU(),
-        ])
-
-        bottleneck_1 = Sequential(*bottleneck)
-        bottleneck_2 = copy.deepcopy(bottleneck_1)
-        bottleneck_3 = copy.deepcopy(bottleneck_1)
-        bottleneck_4 = copy.deepcopy(bottleneck_1)
-
-        self.bottlenecks = nn.ModuleList([bottleneck_1, bottleneck_2, bottleneck_3, bottleneck_4])
-
-        self.bottleneck_freq_pad = bottleneck_freq_filter-1
-        self.bottleneck_time_pad = bottleneck_time_filter-1
-
         self.phasemix = phasemix
+        self.do_bottleneck = bottleneck
+
+        if bottleneck:
+            bottleneck = []
+
+            # ResNet-like bottleneck layer
+
+            # first, 1x1 conv to reduce channels
+            bottleneck.extend([
+                Conv2d(
+                    hidden_size_2,
+                    bottleneck_hidden_size,
+                    (1, 1),
+                    bias=False,
+                ),
+                BatchNorm2d(bottleneck_hidden_size),
+                ReLU(),
+            ])
+
+            # next: actual bottleneck layer
+            bottleneck.extend([
+                Conv2d(
+                    bottleneck_hidden_size,
+                    bottleneck_hidden_size,
+                    (bottleneck_freq_filter, bottleneck_time_filter),
+                    bias=False,
+                ),
+                BatchNorm2d(bottleneck_hidden_size),
+                ReLU(),
+            ])
+
+            # finally, 1x1 to increase channels, end of bottleneck
+            bottleneck.extend([
+                Conv2d(
+                    bottleneck_hidden_size,
+                    hidden_size_2,
+                    (1, 1),
+                    bias=False,
+                ),
+                BatchNorm2d(hidden_size_2),
+                ReLU(),
+            ])
+
+            bottleneck_1 = Sequential(*bottleneck)
+            bottleneck_2 = copy.deepcopy(bottleneck_1)
+            bottleneck_3 = copy.deepcopy(bottleneck_1)
+            bottleneck_4 = copy.deepcopy(bottleneck_1)
+
+            self.bottlenecks = nn.ModuleList([bottleneck_1, bottleneck_2, bottleneck_3, bottleneck_4])
+
+            self.bottleneck_freq_pad = bottleneck_freq_filter-1
+            self.bottleneck_time_pad = bottleneck_time_filter-1
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -149,25 +152,26 @@ class Unmix(nn.Module):
             x = self.sliced_umx[i].encode(x)
             encoded[i] = x
 
-        # concatenate by frequency dimension, store frequency bins for deconcatenation later
-        deconcat_indexes = [encoded_elem.shape[-2] for encoded_elem in encoded]
-        global_encoded = torch.cat(encoded, dim=-2)
+        if self.do_bottleneck:
+            # concatenate by frequency dimension, store frequency bins for deconcatenation later
+            deconcat_indexes = [encoded_elem.shape[-2] for encoded_elem in encoded]
+            global_encoded = torch.cat(encoded, dim=-2)
 
-        # apply bottleneck per-target
-        # pad before bottleneck
-        global_encoded = F.pad(global_encoded, (0, self.bottleneck_time_pad, 0, self.bottleneck_freq_pad), "constant", 0)
+            # apply bottleneck per-target
+            # pad before bottleneck
+            global_encoded = F.pad(global_encoded, (0, self.bottleneck_time_pad, 0, self.bottleneck_freq_pad), "constant", 0)
 
-        bottlenecked_global_encoded = [None]*4
-        for i in range(4):
-            bottlenecked_global_encoded[i] = torch.unsqueeze(self.bottlenecks[i](global_encoded[i]), dim=0)
+            bottlenecked_global_encoded = [None]*4
+            for i in range(4):
+                bottlenecked_global_encoded[i] = torch.unsqueeze(self.bottlenecks[i](global_encoded[i]), dim=0)
 
-        global_encoded = torch.cat(bottlenecked_global_encoded, dim=0)
+            global_encoded = torch.cat(bottlenecked_global_encoded, dim=0)
 
-        # deconcatenate after global bottleneck layer
-        frequency_ptr = 0
-        for i, deconcat_index in enumerate(deconcat_indexes):
-            encoded[i] = global_encoded[..., frequency_ptr : frequency_ptr + deconcat_index, :]
-            frequency_ptr += deconcat_index
+            # deconcatenate after global bottleneck layer
+            frequency_ptr = 0
+            for i, deconcat_index in enumerate(deconcat_indexes):
+                encoded[i] = global_encoded[..., frequency_ptr : frequency_ptr + deconcat_index, :]
+                frequency_ptr += deconcat_index
 
         # apply decoder per-block
         for i, mix in enumerate(mixes):

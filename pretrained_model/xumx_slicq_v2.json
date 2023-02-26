@@ -4,6 +4,7 @@
         "batch_size_valid": 1,
         "cuda_device": -1,
         "debug": false,
+        "disable_bottleneck": true,
         "epochs": 1000,
         "fbins": 262,
         "fgamma": 15.0,
