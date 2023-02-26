@@ -9,7 +9,7 @@ import numpy as np
 import random
 import argparse
 from xumx_slicq_v2.transforms import make_filterbanks, NSGTBase, ComplexNorm
-from xumx_slicq_v2.phase import phasemix_sep, blockwise_wiener
+from xumx_slicq_v2.phase import blockwise_wiener
 from tqdm import tqdm
 import json
 from types import SimpleNamespace
@@ -28,7 +28,7 @@ def _fast_sdr(track, estimates_dct, target, device):
     return sdr_target
 
 
-def ideal_slicqt(track, fwd, bwd, cnorm, device, strategy='wiener'):
+def ideal_slicqt_wiener(track, fwd, bwd, cnorm, device):
     """
     ideal performance of magnitude from estimated source + phase of mix
     which is the default umx strategy for separation
@@ -59,46 +59,32 @@ def ideal_slicqt(track, fwd, bwd, cnorm, device, strategy='wiener'):
     # now performs separation
     estimates = {}
 
-    if strategy == 'wiener':
-        # store 4 targets per block
-        all_ests = [None]*len(model)
-        for i in range(len(all_ests)):
-            all_ests[i] = [None]*4
+    # store 4 targets per block
+    all_ests = [None]*len(model)
+    for i in range(len(all_ests)):
+        all_ests[i] = [None]*4
 
-        for i, (name, source) in enumerate(track.sources.items()):
-            source_mag = P[name]
+    for i, (name, source) in enumerate(track.sources.items()):
+        source_mag = P[name]
 
-            for j, source_mag_block in enumerate(source_mag):
-                all_ests[j][i] = torch.unsqueeze(source_mag_block, dim=0)
+        for j, source_mag_block in enumerate(source_mag):
+            all_ests[j][i] = torch.unsqueeze(source_mag_block, dim=0)
 
-        # now concatenate all 4 targets per block
-        all_ests = [torch.cat(all_ests_block, dim=0) for all_ests_block in all_ests]
+    # now concatenate all 4 targets per block
+    all_ests = [torch.cat(all_ests_block, dim=0) for all_ests_block in all_ests]
 
-        Yj = [None]*len(model)
-        print("Applying block-wise Wiener-EM to get complex sliCQT estimate")
-        for i, (model_block, all_ests_block) in enumerate(zip(model, all_ests)):
-            # apply block-wise Wiener-EM to get complex sliCQT
-            Yj[i] = blockwise_wiener(model_block, all_ests_block)
+    Yj = [None]*len(model)
+    print("Applying block-wise Wiener-EM to get complex sliCQT estimate")
+    for i, (model_block, all_ests_block) in enumerate(zip(model, all_ests)):
+        # apply block-wise Wiener-EM to get complex sliCQT
+        Yj[i] = blockwise_wiener(model_block, all_ests_block)
 
-        # invert to time domain
-        target_estimate = bwd(Yj, N)
+    # invert to time domain
+    target_estimate = bwd(Yj, N)
 
-        for i, name in enumerate(track.sources.keys()):
-            # set this as the source estimate
-            estimates[name] = torch.squeeze(target_estimate[i], dim=0)
-    elif strategy == 'phasemix':
-        for name, source in track.sources.items():
-            source_mag = P[name]
-
-            #Yj = [None]*len(model)
-            #for i, model_block in enumerate(model):
-            Yj = phasemix_sep(model, source_mag)
-
-            # invert to time domain
-            target_estimate = bwd(Yj, N)
-
-            # set this as the source estimate
-            estimates[name] = torch.squeeze(target_estimate, dim=0)
+    for i, name in enumerate(track.sources.keys()):
+        # set this as the source estimate
+        estimates[name] = torch.squeeze(target_estimate[i], dim=0)
 
     return estimates
 
@@ -136,7 +122,7 @@ class TrackEvaluator:
             #print(f'track:\n\t{track.name}\n\t{track.chunk_duration}\n\t{track.chunk_start}')
 
             N = track.audio.shape[0]
-            ests = ideal_slicqt(track, nsgt.forward, insgt.forward, cnorm.forward, device=self.device, strategy='wiener')
+            ests = ideal_slicqt_wiener(track, nsgt.forward, insgt.forward, cnorm.forward, device=self.device)
 
             med_sdrs_bass.append(_fast_sdr(track, ests, target='bass', device=self.device))
             med_sdrs_drums.append(_fast_sdr(track, ests, target='drums', device=self.device))
@@ -282,12 +268,6 @@ if __name__ == '__main__':
         type=str,
         default='bark,mel,cqlog',
         help='nsgt frequency scales, csv (choices: cqlog, mel, bark)'
-    )
-    parser.add_argument(
-        '--oracle-strategy',
-        type=str,
-        default='wiener',
-        help='wiener vs. phasemix'
     )
     parser.add_argument(
         '--device',
