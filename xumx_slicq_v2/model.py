@@ -27,6 +27,7 @@ class Unmix(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
+        phasemix: bool = False,
         hidden_size_1: int = 50,
         hidden_size_2: int = 51,
         bottleneck_hidden_size: int = 13,
@@ -121,6 +122,8 @@ class Unmix(nn.Module):
         self.bottleneck_freq_pad = bottleneck_freq_filter-1
         self.bottleneck_time_pad = bottleneck_time_filter-1
 
+        self.phasemix = phasemix
+
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
         # at test time
@@ -129,7 +132,7 @@ class Unmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, Xcomplex, return_masks=False, wiener=True) -> Tensor:
+    def forward(self, Xcomplex, return_masks=False) -> Tensor:
         n_blocks = len(Xcomplex)
 
         # store mixed magnitude slicqt
@@ -176,11 +179,11 @@ class Unmix(nn.Module):
             # multiplicative skip connection i.e. soft mask per-block
             masked_slicqt = mix*Ymasks[i]
 
-            # blockwise wiener-EM
-            if wiener:
-                Ycomplex[i] = blockwise_wiener(Xcomplex[i], masked_slicqt)
-            else:
+            if self.phasemix:
                 Ycomplex[i] = blockwise_phasemix_sep(Xcomplex[i], masked_slicqt)
+            else:
+                # blockwise wiener-EM
+                Ycomplex[i] = blockwise_wiener(Xcomplex[i], masked_slicqt)
 
         if return_masks:
             return Ycomplex, Ymasks

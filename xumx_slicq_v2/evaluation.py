@@ -52,10 +52,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--no-wiener", action='store_true', default=False, help="use mix phase"
-    )
-
-    parser.add_argument(
         "--model-path", type=str, default=None, help="custom model path"
     )
 
@@ -81,7 +77,6 @@ if __name__ == "__main__":
     separator = Separator.load(
         chunk_size=args.chunk_size,
         model_path=args.model_path,
-        wiener=not args.no_wiener,
         device=device,
     )
 

@@ -193,6 +193,12 @@ def training_main():
         help="skip dataset statistics calculation",
     )
     parser.add_argument(
+        "--phasemix",
+        action="store_true",
+        default=False,
+        help="use phasemix instead of wiener EM in UMX",
+    )
+    parser.add_argument(
         "--seq-dur",
         type=float,
         default=2.0,
@@ -340,6 +346,7 @@ def training_main():
 
     unmix = model.Unmix(
         jagged_slicq_cnorm,
+        phasemix=args.phasemix,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)
