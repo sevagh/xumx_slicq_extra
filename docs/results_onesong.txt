@@ -1,3 +1,12 @@
+blended (bottleneck + vocals/bass/other from no-bottleneck):
+	blended with bottleneck DISABLED (blend w/ bottleneck enabled = bad)
+
+global bottleneck (0.0387 WITH mask sum!):
+	vocals          ==> SDR:   4.394  SIR:  10.664  ISR:   7.785  SAR:   4.492
+	drums           ==> SDR:   6.910  SIR:  11.761  ISR:  12.185  SAR:   8.701
+	bass            ==> SDR:   2.357  SIR:   4.722  ISR:   5.251  SAR:   3.212
+	other           ==> SDR:   4.272  SIR:   6.040  ISR:   9.550  SAR:   6.648
+
 mask sum loss (0.0405):
 	vocals          ==> SDR:   4.517  SIR:  10.179  ISR:   8.212  SAR:   5.615
 	drums           ==> SDR:   6.854  SIR:  11.894  ISR:  11.313  SAR:   8.481

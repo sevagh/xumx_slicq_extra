@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import (
     Parameter,
-    ReLU,
+    LeakyReLU,
     BatchNorm2d,
     ConvTranspose2d,
     Conv2d,
@@ -18,7 +18,7 @@ from .transforms import (
     make_filterbanks,
     NSGTBase,
 )
-from .phase import blockwise_wiener, blockwise_phasemix_sep
+from .phase import blockwise_wiener
 import copy
 
 
@@ -84,7 +84,7 @@ class Unmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(bottleneck_hidden_size),
-            ReLU(),
+            LeakyReLU(),
         ])
 
         # next: actual bottleneck layer
@@ -96,7 +96,7 @@ class Unmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(bottleneck_hidden_size),
-            ReLU(),
+            LeakyReLU(),
         ])
 
         # finally, 1x1 to increase channels, end of bottleneck
@@ -108,7 +108,7 @@ class Unmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_2),
-            ReLU(),
+            LeakyReLU(),
         ])
 
         bottleneck_1 = Sequential(*bottleneck)
@@ -129,7 +129,7 @@ class Unmix(nn.Module):
             p.grad = None
         self.eval()
 
-    def forward(self, Xcomplex, return_masks=False, wiener=True) -> Tensor:
+    def forward(self, Xcomplex, return_masks=False) -> Tensor:
         n_blocks = len(Xcomplex)
 
         # store mixed magnitude slicqt
@@ -177,10 +177,7 @@ class Unmix(nn.Module):
             masked_slicqt = mix*Ymasks[i]
 
             # blockwise wiener-EM
-            if wiener:
-                Ycomplex[i] = blockwise_wiener(Xcomplex[i], masked_slicqt)
-            else:
-                Ycomplex[i] = blockwise_phasemix_sep(Xcomplex[i], masked_slicqt)
+            Ycomplex[i] = blockwise_wiener(Xcomplex[i], masked_slicqt)
 
         if return_masks:
             return Ycomplex, Ymasks
@@ -235,7 +232,7 @@ class _SlicedUnmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_1),
-            ReLU(),
+            LeakyReLU(),
         ])
 
         encoder.extend([
@@ -246,7 +243,7 @@ class _SlicedUnmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_2),
-            ReLU(),
+            LeakyReLU(),
         ])
 
         decoder.extend([
@@ -257,7 +254,7 @@ class _SlicedUnmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_1),
-            ReLU(),
+            LeakyReLU(),
         ])
 
         decoder.extend([

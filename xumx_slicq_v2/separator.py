@@ -20,7 +20,6 @@ class Separator(nn.Module):
         cls,
         chunk_size: int = 2621440,
         model_path: str = Optional[str],
-        wiener: bool = True,
         device: Union[str, torch.device] = "cpu",
     ):
         # load the pretrained model unless a different one is specified
@@ -43,7 +42,6 @@ class Separator(nn.Module):
         separator = Separator(
             xumx_model=xumx_model,
             encoder=encoder,
-            wiener=wiener,
             sample_rate=enc_conf["sample_rate"],
             chunk_size=chunk_size,
         ).to(device)
@@ -57,7 +55,6 @@ class Separator(nn.Module):
         encoder: Tuple = None,
         sample_rate: float = 44100.0,
         chunk_size: Optional[int] = 2621440,
-        wiener: bool = True,
         device: str = "cpu",
     ):
         super(Separator, self).__init__()
@@ -70,7 +67,6 @@ class Separator(nn.Module):
 
         self.xumx_model = xumx_model
         self.nsgt, self.insgt, self.cnorm = encoder
-        self.wiener = wiener
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -115,8 +111,8 @@ class Separator(nn.Module):
             X = self.nsgt(audio)
             Xmag = self.cnorm(X)
 
-            # embedded wiener
-            Ycomplex_all = self.xumx_model(X, wiener=self.wiener)
+            # UMX model decides to do wiener or phasemix separation
+            Ycomplex_all = self.xumx_model(X)
 
             estimates = self.insgt(Ycomplex_all, n_samples)
             final_estimates.append(estimates)
