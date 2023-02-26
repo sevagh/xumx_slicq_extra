@@ -1,6 +1,7 @@
 import argparse
 import torch
 import subprocess
+import auraloss
 import time
 from pathlib import Path
 import tqdm
@@ -43,6 +44,8 @@ def loop(
     # unpack encoder object
     nsgt, insgt, cnorm = encoder
 
+    mse_criterion, sdr_criterion = criterion
+
     losses = _AverageMeter()
 
     grad_cm = nullcontext
@@ -75,7 +78,7 @@ def loop(
 
                 Ycomplex_targets = nsgt(y_targets)
 
-                mse_loss = criterion(
+                mse_loss = mse_criterion(
                     Ycomplex_ests,
                     Ycomplex_targets,
                 )
@@ -93,7 +96,16 @@ def loop(
 
                 mask_mse_loss /= len(Ymasks)
 
-                loss = mse_loss + mask_mse_loss
+                with torch.no_grad():
+                    nb_samples = x.shape[-1]
+                    y_ests = insgt(Ycomplex_ests, nb_samples)
+
+                sdr_loss = sdr_criterion(
+                    y_ests,
+                    y_targets
+                )
+
+                loss = mse_loss + mask_mse_loss + args.mcoef*sdr_loss
 
             if train:
                 optimizer.zero_grad()
@@ -193,23 +205,17 @@ def training_main():
         help="skip dataset statistics calculation",
     )
     parser.add_argument(
-        "--phasemix",
-        action="store_true",
-        default=False,
-        help="use phasemix instead of wiener EM in UMX",
-    )
-    parser.add_argument(
-        "--disable-bottleneck",
-        action="store_true",
-        default=False,
-        help="disable global bottleneck layer",
-    )
-    parser.add_argument(
         "--seq-dur",
         type=float,
         default=2.0,
         help="Sequence duration in seconds"
         "value of <=0.0 will use full/variable length",
+    )
+    parser.add_argument(
+        "--mcoef",
+        type=float,
+        default=0.01,
+        help="mixing coef between MSE and time-domain (SDR) loss",
     )
     parser.add_argument(
         "--fscale",
@@ -220,20 +226,14 @@ def training_main():
     parser.add_argument(
         "--fbins",
         type=int,
-        default=262,
+        default=288,
         help="number of frequency bins for NSGT scale",
     )
     parser.add_argument(
         "--fmin",
         type=float,
-        default=32.9,
+        default=43.4,
         help="min frequency for NSGT scale",
-    )
-    parser.add_argument(
-        "--fgamma",
-        type=float,
-        default=15.,
-        help="gamma for variable-Q offset",
     )
     parser.add_argument(
         "--nb-workers", type=int, default=4, help="Number of workers for dataloader."
@@ -312,7 +312,6 @@ def training_main():
         args.fscale,
         args.fbins,
         args.fmin,
-        fgamma=args.fgamma,
         fs=train_dataset.sample_rate,
         device=device,
     )
@@ -352,8 +351,6 @@ def training_main():
 
     unmix = model.Unmix(
         jagged_slicq_cnorm,
-        phasemix=args.phasemix,
-        bottleneck=not args.disable_bottleneck,
         input_means=scaler_mean,
         input_scales=scaler_std,
     ).to(device)
@@ -366,6 +363,7 @@ def training_main():
     )
 
     mse_criterion = _ComplexMSELossCriterion()
+    sdr_criterion = _SDRLossCriterion()
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
@@ -448,7 +446,7 @@ def training_main():
             encoder,
             device,
             train_sampler,
-            mse_criterion,
+            (mse_criterion, sdr_criterion),
             optimizer,
             amp_cm_cuda,
             amp_cm_cpu,
@@ -460,7 +458,7 @@ def training_main():
             encoder,
             device,
             valid_sampler,
-            mse_criterion,
+            (mse_criterion, sdr_criterion),
             None,
             amp_cm_cuda,
             amp_cm_cpu,
@@ -626,6 +624,38 @@ class _ComplexMSELossCriterion:
     def _inner_mse_loss(pred_block, target_block):
         assert pred_block.shape[-1] == target_block.shape[-1] == 2
         return torch.mean((pred_block - target_block) ** 2)
+
+
+class _SDRLossCriterion:
+    def __init__(self):
+        self.sdsdr = auraloss.time.SDSDRLoss()
+
+    def __call__(
+        self,
+        pred_waveforms,
+        target_waveforms,
+    ):
+        loss = 0.
+
+        # 4C1 Combination Losses
+        for i in [0, 1, 2, 3]:
+            loss += self.sdsdr(pred_waveforms[i], target_waveforms[i])
+
+        # 4C2 Combination Losses
+        for (i, j) in [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]:
+            loss += self.sdsdr(
+                pred_waveforms[i] + pred_waveforms[j],
+                target_waveforms[i] + target_waveforms[j],
+            )
+
+        # 4C3 Combination Losses
+        for (i, j, k) in [(0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3)]:
+            loss += self.sdsdr(
+                pred_waveforms[i] + pred_waveforms[j] + pred_waveforms[k],
+                target_waveforms[i] + target_waveforms[j] + target_waveforms[k],
+            )
+
+        return loss/14.0
 
 
 if __name__ == "__main__":

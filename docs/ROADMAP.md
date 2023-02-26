@@ -20,12 +20,12 @@ docker run --rm -it \
 1. Starting point: 28MB, 4.24 dB (full bw, block wiener, complex MSE loss = 0.0395)
 1. Optuna hyperparams (50,51,4): 60MB, 4.35 dB (0.0390)
 1. Mask sum loss: 0.0405, 4.4 dB
-1. **in-progress!** Mixing frequency bins: global bottleneck layer (still 60MB!)
+1. Mixing frequency bins: global bottleneck layer (still 60MB!)
     1. 0.0387 loss, 4.37475 dB (lower SDR performance??)
-    1. blend vocals/bass/other from no-bottleneck model
-    1. test blended w/ bottleneck
-1. new wiener oracle: 10.17 (vs. 10.14): 'bark', 288, 43.39999999999988
-1. Use PReLU (parametric ReLU), better than ReLU/leaky ReLU
+1. next training **in-progress!** 
+    1. add back training SD-SDR loss (without big gradient)
+    1. new wiener oracle: 10.17 (vs. 10.14): 'bark', 288, 43.39999999999988
+    1. Use leaky ReLU
 
 ## Post-trained model code/tasks
 

@@ -30,9 +30,9 @@ setup(
             "tensorboard",
             "torchinfo",
             "scikit-learn",
+            "auraloss",
         ],
         "tuning": [
-            "auraloss",
             "optuna",
             "optuna-dashboard",
         ],
