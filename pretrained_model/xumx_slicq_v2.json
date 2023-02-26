@@ -15,6 +15,7 @@
         "lr_decay_patience": 80,
         "nb_workers": 8,
         "patience": 1000,
+        "phasemix": false,
         "quiet": false,
         "samples_per_track": 64,
         "seed": 42,

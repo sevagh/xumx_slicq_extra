@@ -22,7 +22,8 @@ docker run --rm -it \
 1. Mask sum loss: 0.0405, 4.4 dB
 1. **in-progress!** Mixing frequency bins: global bottleneck layer (still 60MB!)
     1. 0.0387 loss, 4.37475 dB (lower SDR performance??)
-    1. blend?
+    1. blend vocals/bass/other from no-bottleneck model
+    1. test blended w/ bottleneck
 1. new wiener oracle: 10.17 (vs. 10.14): 'bark', 288, 43.39999999999988
 1. Use PReLU (parametric ReLU), better than ReLU/leaky ReLU
 

@@ -7,15 +7,12 @@ import json
 import copy
 from torch import Tensor
 import torch.nn as nn
-from .models import Unmix, _SlicedUnmix
+from .model import Unmix, _SlicedUnmix
 import norbert
 from .transforms import (
-    TorchSTFT,
-    TorchISTFT,
     ComplexNorm,
     NSGTBase,
     make_filterbanks,
-    phasemix_sep,
 )
 from .separator import load_target_models
 
@@ -38,7 +35,7 @@ if __name__ == '__main__':
         device=device,
     )
 
-    model_path_2 = "/xumx-sliCQ-V2/pretrained_bottleneck/"
+    model_path_2 = "/xumx-sliCQ-V2/pretrained_model_bottleneck/"
     model_path_2 = Path(model_path_2)
 
     # when path exists, we assume its a custom model saved locally
@@ -54,12 +51,9 @@ if __name__ == '__main__':
     print("Deep-copying cdaes from model 1 to model 2")
 
     for i in range(len(xumx_model_1.sliced_umx)):
-        sliced_obj = mse_xumx_model.sliced_umx[i]
-
-        if type(sliced_obj) == _SlicedUnmix:
-            xumx_model_2.sliced_umx[i].cdaes[0] = copy.deepcopy(xumx_model_1.sliced_umx[i].cdaes[0])
-            xumx_model_2.sliced_umx[i].cdaes[1] = copy.deepcopy(xumx_model_1.sliced_umx[i].cdaes[1])
-            xumx_model_2.sliced_umx[i].cdaes[2] = copy.deepcopy(xumx_model_1.sliced_umx[i].cdaes[2])
+        xumx_model_2.sliced_umx[i].cdaes[0] = copy.deepcopy(xumx_model_1.sliced_umx[i].cdaes[0])
+        xumx_model_2.sliced_umx[i].cdaes[1] = copy.deepcopy(xumx_model_1.sliced_umx[i].cdaes[1])
+        xumx_model_2.sliced_umx[i].cdaes[2] = copy.deepcopy(xumx_model_1.sliced_umx[i].cdaes[2])
 
     blend_model_path = "/xumx-sliCQ-V2/pretrained_model_blended/"
     blend_model_path = Path(blend_model_path)
