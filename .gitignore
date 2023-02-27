@@ -4,5 +4,5 @@
 *.pth
 *.json
 logdir
-!pretrained_model/*.pth
-!pretrained_model/*.json
+!pretrained_model*/*.pth
+!pretrained_model*/*.json

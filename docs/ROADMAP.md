@@ -22,20 +22,31 @@ docker run --rm -it \
 1. Mask sum loss: 0.0405, 4.4 dB
 1. Mixing frequency bins: global bottleneck layer (still 60MB!)
     1. 0.0387 loss, 4.37475 dB (lower SDR performance??)
-1. next training **in-progress!** 
+1. next training **in-progress!** (62MB!)
     1. add back training SD-SDR loss (without big gradient)
     1. new wiener oracle: 10.17 (vs. 10.14): 'bark', 288, 43.39999999999988
     1. Use leaky ReLU
+    1. hope that it combines best of mask-sum + global bottleneck (>4.4dB!!!)
+    * take a break at 500 epochs, then continue if necessary
+1. how about the big gradient insgt? lower seq-dur + batch size?
 
 ## Post-trained model code/tasks
 
-1. Model pruning to save space? iterative + finetuning (like Optuna)
-    1. SDR-based pruning? <https://github.com/EIDOSlab/simplify>?
+1. Model pruning to save space? iterative + finetuning (like Optuna); "fine-pruning"
+    1. do 500 more epochs of "fine-pruning"...
+    1. resources
         <https://github.com/spellml/resnext50-panda/blob/master/notebooks/pruning.ipynb>
-1. TensorRT export script
+        <https://jacobgil.github.io/deeplearning/pruning-deep-learning>
+        <https://blog.paperspace.com/neural-network-pruning-explained/>
+    1. do structured pruning
+    1. do prune + fine-tune, save with gzip
+        1. save disk space with gzip: <https://github.com/pytorch/pytorch/issues/6002#issuecomment-376950576>
+1. TensorRT export script + save in pretrained_model
+    <https://pytorch.org/TensorRT/getting_started/getting_started_with_python_api.html#getting-started-with-python-api>
 1. Inference.py (and by association `__main__.py` work); CPU, GPU, TensorRT
     1. Lighter computation: try smaller wiener window than 5000 for effect on memory/swap?
     1. realtime inference script? measure time/latency w/ causal inputs
+    1. create realtime demo
 
 ## Housekeeping
 
