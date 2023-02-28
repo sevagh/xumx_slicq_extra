@@ -3,6 +3,8 @@
 *.chkpnt
 *.pth
 *.json
+*.pth.gz
 logdir
 !pretrained_model/*.pth
 !pretrained_model/*.json
+!pretrained_model/*.pth.gz

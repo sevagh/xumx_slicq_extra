@@ -4,6 +4,8 @@ from tqdm import trange
 from pathlib import Path
 import torch
 import json
+import io
+import gzip
 from torch import Tensor
 import torch.nn as nn
 from .model import Unmix
@@ -173,8 +175,19 @@ def load_target_models(
 
     seq_dur = results["args"]["seq_dur"]
 
-    target_model_path = Path(model_path, f"{model_name}.pth")
-    state = torch.load(target_model_path, map_location=device)
+    pruned_gz_model_path = Path(model_path, f"{model_name}_pruned.pth.gz")
+    state = None
+
+    if pruned_gz_model_path.exists():
+        print(f"Pruned gzipped model exists, loading it...")
+        with gzip.open(pruned_gz_model_path, 'rb') as f:
+            # Use an intermediate buffer
+            x = io.BytesIO(f.read())
+            state = torch.load(x, map_location=device)
+    else:
+        print("Loading model from pth file")
+        target_model_path = Path(model_path, f"{model_name}.pth")
+        state = torch.load(target_model_path, map_location=device)
 
     jagged_slicq, _ = nsgt_base.predict_input_size(1, nb_channels, seq_dur)
     cnorm = ComplexNorm().to(device)

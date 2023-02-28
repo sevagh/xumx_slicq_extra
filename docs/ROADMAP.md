@@ -24,15 +24,8 @@ docker run --rm -it \
 
 ## Post-trained model code/tasks
 
-1. Model pruning to save space? iterative + finetuning (like Optuna); "fine-pruning"
-    1. do more epochs of "fine-pruning"...
-    1. resources
-        <https://github.com/spellml/resnext50-panda/blob/master/notebooks/pruning.ipynb>
-        <https://jacobgil.github.io/deeplearning/pruning-deep-learning>
-        <https://blog.paperspace.com/neural-network-pruning-explained/>
-    1. do structured pruning
-    1. do prune + fine-tune, save with gzip
-        1. save disk space with gzip: <https://github.com/pytorch/pytorch/issues/6002#issuecomment-376950576>
+1. Model pruning to save space? finetuning not doing much, just delete + evaluate
+    1. move from SDR back to complex MSE for pruning
 1. TensorRT export script + save in pretrained_model
     <https://pytorch.org/TensorRT/getting_started/getting_started_with_python_api.html#getting-started-with-python-api>
 1. Inference.py (and by association `__main__.py` work); CPU, GPU, TensorRT
