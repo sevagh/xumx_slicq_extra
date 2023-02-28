@@ -20,12 +20,12 @@ docker run --rm -it \
 1. Starting point: 28MB, 4.24 dB (full bw, block wiener, complex MSE loss = 0.0395)
 1. Optuna hyperparams (50,51,4): 60MB, 4.35 dB (0.0390)
 1. Mask sum loss: 0.0405, 4.4 dB
-1. Final
+1. Try pruning WHILE training
+    1. prune L1 at the end of each epoch, 1%; should stack up over time
+    <https://arxiv.org/pdf/2003.02800.pdf>
 
 ## Post-trained model code/tasks
 
-1. Model pruning to save space? finetuning not doing much, just delete + evaluate
-    1. move from SDR back to complex MSE for pruning
 1. TensorRT export script + save in pretrained_model
     <https://pytorch.org/TensorRT/getting_started/getting_started_with_python_api.html#getting-started-with-python-api>
 1. Inference.py (and by association `__main__.py` work); CPU, GPU, TensorRT

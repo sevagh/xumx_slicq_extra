@@ -17,10 +17,10 @@ import torchaudio
 import torchinfo
 from contextlib import nullcontext
 import sklearn.preprocessing
+import torch.nn.utils.prune as prune
+import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
-
 from .data import MUSDBDataset, custom_collate
-
 from xumx_slicq_v2 import model
 from xumx_slicq_v2 import transforms
 from xumx_slicq_v2.separator import Separator
@@ -191,6 +191,17 @@ def training_main():
         action="store_true",
         default=False,
         help="skip dataset statistics calculation",
+    )
+    parser.add_argument(
+        "--prune",
+        action="store_true",
+        default=False,
+        help="prune while training",
+    )
+    parser.add_argument(
+        "--prune-per-epoch",
+        default=0.001,
+        help="amount to prune per epoch",
     )
     parser.add_argument(
         "--seq-dur",
@@ -497,6 +508,9 @@ def training_main():
             tboard_writer.add_scalar(f"Loss/train (MSE)", train_loss, epoch)
             tboard_writer.add_scalar(f"Loss/valid (MSE)", valid_loss, epoch)
 
+        if args.prune:
+            _l1_prune_unmix(unmix, args.prune_per_epoch, n_blocks)
+
         if stop:
             print("Apply Early Stopping")
             break
@@ -612,6 +626,39 @@ class _ComplexMSELossCriterion:
     def _inner_mse_loss(pred_block, target_block):
         assert pred_block.shape[-1] == target_block.shape[-1] == 2
         return torch.mean((pred_block - target_block) ** 2)
+
+
+def _l1_prune_unmix(unmix, prune_proportion, n_blocks):
+    # target upper frequency blocks to have less impact
+    prune_list = []
+    for target in range(4):
+        for frequency_bin in range(n_blocks):
+            base = f"sliced_umx.{frequency_bin}.cdaes.{target}"
+            print(f"pruning {100*prune_proportion:.1f}% from submodule: {base}")
+
+            # prune each layer
+            prune_list.extend([
+                f"{base}.0", # encoder 1 conv
+                f"{base}.1", # encoder 1 batch norm
+                # 2 is the relu
+                f"{base}.3", # encoder 2 conv
+                f"{base}.4", # encoder 2 batch norm
+                # 5 is the relu
+                f"{base}.6", # decoder 1 conv transpose
+                f"{base}.7", # decoder 1 batch norm
+                # 8 is the relu
+                f"{base}.9", # decoder 2 conv transpose
+                # 10 is the sigmoid
+            ])
+
+    for prune_name in prune_list:
+        module = unmix.get_submodule(prune_name)
+        if isinstance(module, nn.BatchNorm2d):
+            prune.l1_unstructured(module, name="weight", amount=prune_proportion)
+            prune.remove(module, 'weight')
+        elif isinstance(module, (nn.Conv2d, nn.ConvTranspose2d)):
+            prune.ln_structured(module, name="weight", amount=prune_proportion, n=1, dim=0)
+            prune.remove(module, 'weight')
 
 
 if __name__ == "__main__":
