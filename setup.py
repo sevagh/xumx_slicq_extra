@@ -30,11 +30,11 @@ setup(
             "tensorboard",
             "torchinfo",
             "scikit-learn",
-            "auraloss",
         ],
         "tuning": [
             "optuna",
             "optuna-dashboard",
+            "auraloss",
         ],
         "plotting": [
             "matplotlib",

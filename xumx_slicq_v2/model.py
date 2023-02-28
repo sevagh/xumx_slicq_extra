@@ -7,12 +7,16 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import (
     Parameter,
-    LeakyReLU,
+    ReLU,
     BatchNorm2d,
     ConvTranspose2d,
     Conv2d,
+    Linear,
+    BatchNorm1d,
+    GRU,
     Sequential,
     Sigmoid,
+    Tanh,
 )
 from .transforms import (
     make_filterbanks,
@@ -27,16 +31,12 @@ class Unmix(nn.Module):
     def __init__(
         self,
         jagged_slicq_sample_input,
+        pre_gru_hidden_size: int = 10,
+        gru_hidden_size: int = 256,
+        gru_layers: int = 3,
+        gru_unidirectional: bool = False,
         hidden_size_1: int = 50,
         hidden_size_2: int = 51,
-        bottleneck_hidden_size: int = 13,
-        bottleneck_freq_filter: int = 7,
-        bottleneck_time_filter: int = 3,
-        freq_filter_small: int = 1,
-        freq_filter_medium: int = 3,
-        freq_filter_large: int = 5,
-        freq_thresh_small: int = 10,
-        freq_thresh_medium: int = 20,
         time_filter_2: int = 4,
         input_means=None,
         input_scales=None,
@@ -44,6 +44,7 @@ class Unmix(nn.Module):
         super(Unmix, self).__init__()
 
         self.sliced_umx = nn.ModuleList()
+        self.gru_hidden_size = gru_hidden_size
 
         freq_idx = 0
         for i, C_block in enumerate(jagged_slicq_sample_input):
@@ -57,11 +58,6 @@ class Unmix(nn.Module):
                     C_block,
                     hidden_size_1=hidden_size_1,
                     hidden_size_2=hidden_size_2,
-                    freq_filter_small=freq_filter_small,
-                    freq_thresh_small=freq_thresh_small,
-                    freq_filter_medium=freq_filter_medium,
-                    freq_thresh_medium=freq_thresh_medium,
-                    freq_filter_large=freq_filter_large,
                     time_filter_2=time_filter_2,
                     input_mean=input_mean,
                     input_scale=input_scale,
@@ -71,55 +67,79 @@ class Unmix(nn.Module):
             # advance frequency pointer
             freq_idx += C_block.shape[2]
 
-        bottleneck = []
+        pre_gru = []
 
-        # ResNet-like bottleneck layer
+        # pre-GRU bottleneck layer
 
         # first, 1x1 conv to reduce channels
-        bottleneck.extend([
+        pre_gru = [
             Conv2d(
                 hidden_size_2,
-                bottleneck_hidden_size,
+                pre_gru_hidden_size,
                 (1, 1),
                 bias=False,
             ),
-            BatchNorm2d(bottleneck_hidden_size),
-            LeakyReLU(),
-        ])
+            BatchNorm2d(pre_gru_hidden_size),
+            ReLU(),
+        ]
 
-        # next: actual bottleneck layer
-        bottleneck.extend([
-            Conv2d(
-                bottleneck_hidden_size,
-                bottleneck_hidden_size,
-                (bottleneck_freq_filter, bottleneck_time_filter),
+        # GRU for recurrent part of network
+        gru = [
+            Linear(
+                in_features=247*pre_gru_hidden_size,
+                out_features=gru_hidden_size,
+                bias=False
+            ),
+            # tanh activation before GRU
+            BatchNorm1d(gru_hidden_size),
+            Tanh(),
+            GRU(
+                input_size=gru_hidden_size,
+                hidden_size=gru_hidden_size if gru_unidirectional else gru_hidden_size//2,
+                num_layers=gru_layers,
+                bidirectional=not gru_unidirectional,
+                dropout=0.4 if gru_layers > 1 else 0,
+                batch_first=False,
+            ),
+            Linear(
+                in_features=gru_hidden_size*2,
+                out_features=247*pre_gru_hidden_size,
                 bias=False,
             ),
-            BatchNorm2d(bottleneck_hidden_size),
-            LeakyReLU(),
-        ])
+            BatchNorm1d(247*pre_gru_hidden_size),
+            ReLU(),
+        ]
 
-        # finally, 1x1 to increase channels, end of bottleneck
-        bottleneck.extend([
+        # post-GRU 1x1 to increase channels, end of bottleneck
+        post_gru = [
             Conv2d(
-                bottleneck_hidden_size,
+                pre_gru_hidden_size,
                 hidden_size_2,
                 (1, 1),
                 bias=False,
             ),
             BatchNorm2d(hidden_size_2),
-            LeakyReLU(),
-        ])
+            ReLU(),
+        ]
 
-        bottleneck_1 = Sequential(*bottleneck)
-        bottleneck_2 = copy.deepcopy(bottleneck_1)
-        bottleneck_3 = copy.deepcopy(bottleneck_1)
-        bottleneck_4 = copy.deepcopy(bottleneck_1)
+        pre_gru_1 = Sequential(*pre_gru)
+        pre_gru_2 = copy.deepcopy(pre_gru_1)
+        pre_gru_3 = copy.deepcopy(pre_gru_1)
+        pre_gru_4 = copy.deepcopy(pre_gru_1)
 
-        self.bottlenecks = nn.ModuleList([bottleneck_1, bottleneck_2, bottleneck_3, bottleneck_4])
+        gru_1 = Sequential(*gru)
+        gru_2 = copy.deepcopy(gru_1)
+        gru_3 = copy.deepcopy(gru_1)
+        gru_4 = copy.deepcopy(gru_1)
 
-        self.bottleneck_freq_pad = bottleneck_freq_filter-1
-        self.bottleneck_time_pad = bottleneck_time_filter-1
+        post_gru_1 = Sequential(*post_gru)
+        post_gru_2 = copy.deepcopy(post_gru_1)
+        post_gru_3 = copy.deepcopy(post_gru_1)
+        post_gru_4 = copy.deepcopy(post_gru_1)
+
+        self.pre_grus = nn.ModuleList([pre_gru_1, pre_gru_2, pre_gru_3, pre_gru_4])
+        self.grus = nn.ModuleList([gru_1, gru_2, gru_3, gru_4])
+        self.post_grus = nn.ModuleList([post_gru_1, post_gru_2, post_gru_3, post_gru_4])
 
     def freeze(self):
         # set all parameters as not requiring gradient, more RAM-efficient
@@ -152,11 +172,46 @@ class Unmix(nn.Module):
 
         # apply bottleneck per-target
         # pad before bottleneck
-        global_encoded = F.pad(global_encoded, (0, self.bottleneck_time_pad, 0, self.bottleneck_freq_pad), "constant", 0)
 
         bottlenecked_global_encoded = [None]*4
         for i in range(4):
-            bottlenecked_global_encoded[i] = torch.unsqueeze(self.bottlenecks[i](global_encoded[i]), dim=0)
+            x_tmp = global_encoded[i]
+
+            # apply pre-gru compression/bottleneck
+            x_tmp = self.pre_grus[i](x_tmp)
+
+            nb_samples, nb_channels, nb_bins, nb_frames = x_tmp.shape
+
+            x_tmp = x_tmp.reshape(-1, nb_channels * nb_bins)
+
+            # first fc layer + tanh activation
+            x_tmp = self.grus[i][0](x_tmp)
+            x_tmp = self.grus[i][1](x_tmp)
+            x_tmp = self.grus[i][2](x_tmp)
+
+            # pre-GRU
+            x_tmp = x_tmp.reshape(nb_frames, nb_samples, self.gru_hidden_size)
+
+            # apply GRU
+            gru_out = self.grus[i][3](x_tmp)
+
+            # skip connection
+            x_tmp = torch.cat([x_tmp, gru_out[0]], -1)
+
+            x_tmp = x_tmp.reshape(-1, x_tmp.shape[-1])
+
+            # post fc layer
+            x_tmp = self.grus[i][4](x_tmp)
+            x_tmp = self.grus[i][5](x_tmp)
+            x_tmp = self.grus[i][6](x_tmp)
+
+            # back to decoder part of cdae
+            x_tmp = x_tmp.reshape(nb_samples, nb_channels, nb_bins, nb_frames)
+
+            # grow back to original channels
+            x_tmp = self.post_grus[i](x_tmp)
+
+            bottlenecked_global_encoded[i] = torch.unsqueeze(x_tmp, dim=0)
 
         global_encoded = torch.cat(bottlenecked_global_encoded, dim=0)
 
@@ -191,11 +246,6 @@ class _SlicedUnmix(nn.Module):
         slicq_sample_input,
         hidden_size_1: int = 25,
         hidden_size_2: int = 55,
-        freq_filter_small: int = 1,
-        freq_thresh_small: int = 10,
-        freq_filter_medium: int = 3,
-        freq_thresh_medium: int = 20,
-        freq_filter_large: int = 5,
         time_filter_2: int = 3,
         input_mean=None,
         input_scale=None,
@@ -210,12 +260,12 @@ class _SlicedUnmix(nn.Module):
             nb_t_bins,
         ) = slicq_sample_input.shape
 
-        if nb_f_bins < freq_thresh_small:
-            freq_filter = freq_filter_small
-        elif nb_f_bins < freq_thresh_medium:
-            freq_filter = freq_filter_medium
+        if nb_f_bins < 10:
+            freq_filter = 1
+        elif nb_f_bins < 20:
+            freq_filter = 3
         else:
-            freq_filter = freq_filter_large
+            freq_filter = 5
 
         encoder = []
         decoder = []
@@ -232,7 +282,7 @@ class _SlicedUnmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_1),
-            LeakyReLU(),
+            ReLU(),
         ])
 
         encoder.extend([
@@ -243,7 +293,7 @@ class _SlicedUnmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_2),
-            LeakyReLU(),
+            ReLU(),
         ])
 
         decoder.extend([
@@ -254,7 +304,7 @@ class _SlicedUnmix(nn.Module):
                 bias=False,
             ),
             BatchNorm2d(hidden_size_1),
-            LeakyReLU(),
+            ReLU(),
         ])
 
         decoder.extend([

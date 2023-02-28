@@ -20,15 +20,7 @@ docker run --rm -it \
 1. Starting point: 28MB, 4.24 dB (full bw, block wiener, complex MSE loss = 0.0395)
 1. Optuna hyperparams (50,51,4): 60MB, 4.35 dB (0.0390)
 1. Mask sum loss: 0.0405, 4.4 dB
-1. Mixing frequency bins: global bottleneck layer (still 60MB!)
-    1. 0.0387 loss, 4.37475 dB (lower SDR performance??)
-1. next training **in-progress!** (62MB!)
-    1. add back training SD-SDR loss (without big gradient)
-    1. new wiener oracle: 10.17 (vs. 10.14): 'bark', 288, 43.39999999999988
-    1. Use leaky ReLU
-    1. hope that it combines best of mask-sum + global bottleneck (>4.4dB!!!)
-    * take a break at 500 epochs, then continue if necessary
-1. how about the big gradient insgt? lower seq-dur + batch size?
+1. back to 4.4 starting point: try linear->GRU->skip-conn->linear instead of bottleneck
 
 ## Post-trained model code/tasks
 

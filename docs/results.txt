@@ -1,6 +1,11 @@
 model: mix of all (global bottleneck, mask sum, new wiener-oracle slicqt, leaky relu, sdr loss):
 	loss: -0.007984
 	62 MB of weights, to be pruned+fine-tuned later...
+	4.38 dB; bad, go backwards
+	vocals          ==> SDR:   4.870  SIR:   7.626  ISR:   9.053  SAR:   4.067
+	drums           ==> SDR:   4.998  SIR:   7.756  ISR:  10.039  SAR:   4.624
+	bass            ==> SDR:   4.402  SIR:   9.601  ISR:   5.296  SAR:   4.194
+	other           ==> SDR:   3.249  SIR:   1.969  ISR:   7.973  SAR:   3.892
 
 model: global bottleneck layer: 4.37475 ?!?! lower dB SDR, much better MSE loss
 	loss: 0.0387 (w/ mask sum loss)
