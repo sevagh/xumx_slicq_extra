@@ -21,11 +21,13 @@ docker run --rm -it \
 1. Optuna hyperparams (50,51,4): 60MB, 4.35 dB (0.0390)
 1. Mask sum loss: 0.0405, 4.4 dB
 1. back to 4.4 starting point: try linear->GRU->skip-conn->linear instead of bottleneck
+    1. see what happens overnight, then just stick with 4.4
+    1. reset to good state in git (keep other good changes)
 
 ## Post-trained model code/tasks
 
 1. Model pruning to save space? iterative + finetuning (like Optuna); "fine-pruning"
-    1. do 500 more epochs of "fine-pruning"...
+    1. do more epochs of "fine-pruning"...
     1. resources
         <https://github.com/spellml/resnext50-panda/blob/master/notebooks/pruning.ipynb>
         <https://jacobgil.github.io/deeplearning/pruning-deep-learning>

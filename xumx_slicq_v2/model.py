@@ -36,8 +36,7 @@ class Unmix(nn.Module):
         gru_layers: int = 3,
         gru_unidirectional: bool = False,
         hidden_size_1: int = 50,
-        hidden_size_2: int = 51,
-        time_filter_2: int = 4,
+        hidden_size_2: int = 50,
         input_means=None,
         input_scales=None,
     ):
@@ -57,8 +56,6 @@ class Unmix(nn.Module):
                 _SlicedUnmix(
                     C_block,
                     hidden_size_1=hidden_size_1,
-                    hidden_size_2=hidden_size_2,
-                    time_filter_2=time_filter_2,
                     input_mean=input_mean,
                     input_scale=input_scale,
                 )
@@ -86,7 +83,7 @@ class Unmix(nn.Module):
         # GRU for recurrent part of network
         gru = [
             Linear(
-                in_features=247*pre_gru_hidden_size,
+                in_features=255*pre_gru_hidden_size,
                 out_features=gru_hidden_size,
                 bias=False
             ),
@@ -103,10 +100,10 @@ class Unmix(nn.Module):
             ),
             Linear(
                 in_features=gru_hidden_size*2,
-                out_features=247*pre_gru_hidden_size,
+                out_features=255*pre_gru_hidden_size,
                 bias=False,
             ),
-            BatchNorm1d(247*pre_gru_hidden_size),
+            BatchNorm1d(255*pre_gru_hidden_size),
             ReLU(),
         ]
 
@@ -176,13 +173,16 @@ class Unmix(nn.Module):
         bottlenecked_global_encoded = [None]*4
         for i in range(4):
             x_tmp = global_encoded[i]
+            #print(f"x_tmp: {x_tmp.shape}")
 
             # apply pre-gru compression/bottleneck
             x_tmp = self.pre_grus[i](x_tmp)
+            #print(f"x_tmp: {x_tmp.shape}")
 
             nb_samples, nb_channels, nb_bins, nb_frames = x_tmp.shape
 
             x_tmp = x_tmp.reshape(-1, nb_channels * nb_bins)
+            #print(f"x_tmp: {x_tmp.shape}")
 
             # first fc layer + tanh activation
             x_tmp = self.grus[i][0](x_tmp)
@@ -244,9 +244,7 @@ class _SlicedUnmix(nn.Module):
     def __init__(
         self,
         slicq_sample_input,
-        hidden_size_1: int = 25,
-        hidden_size_2: int = 55,
-        time_filter_2: int = 3,
+        hidden_size_1: int,
         input_mean=None,
         input_scale=None,
     ):
@@ -267,13 +265,10 @@ class _SlicedUnmix(nn.Module):
         else:
             freq_filter = 5
 
-        encoder = []
-        decoder = []
-
         window = nb_t_bins
         hop = window // 2
 
-        encoder.extend([
+        encoder = [
             Conv2d(
                 nb_channels,
                 hidden_size_1,
@@ -283,31 +278,9 @@ class _SlicedUnmix(nn.Module):
             ),
             BatchNorm2d(hidden_size_1),
             ReLU(),
-        ])
+        ]
 
-        encoder.extend([
-            Conv2d(
-                hidden_size_1,
-                hidden_size_2,
-                (freq_filter, time_filter_2),
-                bias=False,
-            ),
-            BatchNorm2d(hidden_size_2),
-            ReLU(),
-        ])
-
-        decoder.extend([
-            ConvTranspose2d(
-                hidden_size_2,
-                hidden_size_1,
-                (freq_filter, time_filter_2),
-                bias=False,
-            ),
-            BatchNorm2d(hidden_size_1),
-            ReLU(),
-        ])
-
-        decoder.extend([
+        decoder = [
             ConvTranspose2d(
                 hidden_size_1,
                 nb_channels,
@@ -316,7 +289,7 @@ class _SlicedUnmix(nn.Module):
                 bias=True,
             ),
             Sigmoid(),
-        ])
+        ]
 
         cdae_1 = Sequential(*encoder, *decoder)
         cdae_2 = copy.deepcopy(cdae_1)
@@ -362,9 +335,6 @@ class _SlicedUnmix(nn.Module):
             x_tmp = cdae[0](x_tmp)
             x_tmp = cdae[1](x_tmp)
             x_tmp = cdae[2](x_tmp)
-            x_tmp = cdae[3](x_tmp)
-            x_tmp = cdae[4](x_tmp)
-            x_tmp = cdae[5](x_tmp)
 
             ret[i] = torch.unsqueeze(x_tmp, dim=0)
 
@@ -377,11 +347,8 @@ class _SlicedUnmix(nn.Module):
             # apply last 5 layers i.e. decoder (convT->batchnormn->relu, convT->sigmoid)
             x_tmp = x[i].clone()
 
-            x_tmp = cdae[6](x_tmp)
-            x_tmp = cdae[7](x_tmp)
-            x_tmp = cdae[8](x_tmp)
-            x_tmp = cdae[9](x_tmp)
-            x_tmp = cdae[10](x_tmp)
+            x_tmp = cdae[3](x_tmp)
+            x_tmp = cdae[4](x_tmp)
 
             ret[i] = torch.unsqueeze(x_tmp, dim=0)
 
