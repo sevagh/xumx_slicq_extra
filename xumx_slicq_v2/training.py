@@ -201,6 +201,7 @@ def training_main():
     parser.add_argument(
         "--prune-per-epoch",
         default=0.001,
+        type=float,
         help="amount to prune per epoch",
     )
     parser.add_argument(

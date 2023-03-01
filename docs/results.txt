@@ -1,5 +1,4 @@
-
-
+model: mask sum pruning 0.1% by l1 at the end of each epoch
 
 model: mask sum + pruned upper quarter of frequency bins by 50% to 46MB
 	vocals          ==> SDR:   4.604  SIR:   7.771  ISR:   8.580  SAR:   4.375
