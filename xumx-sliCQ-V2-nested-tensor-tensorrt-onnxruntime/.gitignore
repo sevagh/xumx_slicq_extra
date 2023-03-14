@@ -1,0 +1,14 @@
+*.pyc
+/__pycache__
+*.chkpnt
+*.pth
+*.json
+*.wav
+!gspi.wav
+/plots
+logdir
+!pretrained_model*/*.pth
+!pretrained_model*/*.json
+*.whl
+*.egg-info
+/build
