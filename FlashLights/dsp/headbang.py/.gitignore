@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.egg-info
+*.wav
+*.opus
+*.mp3
+*.mp4
+*.m4a
+*.webm
+*.mkv
+/*.png
+docs/_site
+/build
+!docs/*.wav
+!docs/*.mp4

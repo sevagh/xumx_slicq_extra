@@ -1,0 +1,9 @@
+cython
+matplotlib
+mir_eval
+tabulate
+numpy
+librosa==0.8.0
+madmom
+scipy
+pandas
