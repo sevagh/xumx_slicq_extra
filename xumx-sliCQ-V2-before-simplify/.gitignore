@@ -1,0 +1,17 @@
+*.pyc
+/__pycache__
+*.chkpnt
+*.pth
+*.json
+*.wav
+!.github/gspi.wav
+/plots
+logdir
+!pretrained_model*/*.pth
+!pretrained_model*/*.json
+!pretrained_model*/*.onnx
+!pretrained_model*/*.ts
+*.whl
+*.egg-info
+/build
+/cadenza-results
