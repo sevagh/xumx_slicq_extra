@@ -1,0 +1,178 @@
+\documentclass[usenames,dvipsnames]{beamer}
+\usetheme{Boadilla}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{fancyvrb}
+\usepackage{soul}
+\usepackage{multicol}
+\usepackage{optparams}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning}
+\newcommand{\foo}{\hspace{-2.3pt}$\bullet$ \hspace{5pt}}
+\usepackage{subfig}
+\usepackage[
+    backend=biber,
+    natbib=true,
+    style=numeric,
+    sorting=none,
+    style=verbose-ibid,
+    maxcitenames=1, %remove this outside of toy presentations
+]{biblatex}
+\addbibresource{citations.bib}
+\usepackage{pgfpages}
+\usepackage{xcolor}
+\definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+%\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=right}
+\setbeameroption{hide notes}
+
+\title{Better music demixing with sliCQT}
+\subtitle{Submission to Cadenza Challenge CAD1}
+\author{Sevag Hanssian}
+\date{December 08, 2023}
+\setbeamertemplate{navigation symbols}{}
+
+\AtEveryBibitem{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+}
+
+\renewbibmacro{in:}{}
+
+\AtEveryCitekey{%
+  \clearfield{pages}%
+  \clearfield{volume}%
+  \clearfield{number}%
+  \clearfield{doi}%
+  \clearfield{journal}%
+  \clearlist{journal}%
+  \clearfield{booktitle}%
+  \clearfield{isbn}%
+  \clearfield{title}%
+  \clearfield{url}%
+\ifentrytype{article}{
+    \clearfield{journal}%
+}{}
+\ifentrytype{inproceedings}{
+    \clearfield{booktitle}%
+}{}
+}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+	\frametitle{Time-frequency tradeoffs}
+	Median-filtering harmonic/percussive source separation (HPSS)\footfullcite{fitzgerald1, driedger}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.5em}
+		\includegraphics[height=2.3cm]{./images/hpss.png}
+		\includegraphics[height=2.3cm]{./images/hpss_harm.png}
+		\includegraphics[height=2.3cm]{./images/hpss_perc.png}
+		\vspace{-0.5em}
+	\end{figure}
+	\begin{enumerate}
+        \item
+                Short window (256) for percussion, long window (4096) for harmonic
+	\item
+		Short-time Fourier Transform (STFT) window size matters per-target\footfullcite{tftradeoff2} in VDBO problems
+	\item
+		In musical and auditory contexts, frequency resolution should increase from high to low frequencies (vice-versa for time resolution)\footfullcite{cqtransient, doerflerphd}
+	\item
+		CQT\footcite{jbrown} uses long windows in low frequencies and short windows in high frequencies for the 12-tone Western pitch scale
+	\end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{sliCQT vs. STFT}
+	\begin{enumerate}
+	\item
+		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, realtime sliCQ Transform\footcite{invertiblecqt, slicq, variableq1}
+	\item
+		STFT-like transforms with windows that vary with time
+	\item
+		CQT motivates the NSGT/sliCQ, but can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.)
+	\item
+		Outputs the familiar Fourier coefficients with perfect inverse
+	\end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\vspace{-0.5em}
+		\includegraphics[height=3.5cm]{./images/slicq_spectral.png}
+		\vspace{-0.5em}
+		\caption{sliCQ: 262-bin Bark scale, 32.9--22050 Hz}
+		\vspace{-0.5em}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{xumx-sliCQ v1 @ MDX 2021}
+        Use sliCQT (Bark scale, 262 bins, 32.9--22050 Hz) and convolutional autoencoder architecture\footfullcite{plumbley1} to achieve 3.6 dB signal-to-distortion ratio (SDR): \url{https://github.com/sevagh/xumx-sliCQ/tree/v1}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[height=3cm]{./images/gspi_overlap_flatten.png}
+		\includegraphics[height=3cm]{./images/gspi_overlap_proper.png}
+		\includegraphics[height=2.5cm]{./images/xumx_slicq_pertarget.png}
+		\vspace{-0.5em}
+		\caption{xumx-sliCQ: block diagram}
+		\vspace{-0.5em}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{xumx-sliCQ v2 @ CAD1 2023}
+        \begin{enumerate}
+        \item
+                Bark scale may have some benefits for human listeners
+        \item
+                Focused solely on VDBO demixing problem
+        \item
+                \textbf{4.4 dB SDR} up from 3.6, including better handling of overlap-add, mask sum loss, differentiable Wiener filtering, and complex MSE\footfullcite{dannasep}:  \url{https://github.com/sevagh/xumx-sliCQ/tree/v2}
+        \end{enumerate}
+        \vspace{-1em}
+        \begin{figure}[ht]
+		\centering
+		\includegraphics[height=3cm]{./images/slicq_overlap_improved.png}
+	\end{figure}
+        \vspace{-2em}
+                \small \begin{align}
+                        & x_{\text{mix}} = x_{\text{v}} + x_{\text{d}} + x_{\text{b}} + x_{\text{o}}, |X|_{\text{mix}} = M_{\text{v}}|X|_{\text{mix}} + M_{\text{d}}|X|_{\text{mix}} + M_{\text{b}}|X|_{\text{mix}} + M_{\text{o}}|X|_{\text{mix}} \nonumber \\
+                        & \rightarrow 1 = M_{\text{v}} + M_{\text{d}} + M_{\text{b}} + M_{\text{o}} \nonumber
+                \end{align} \normalsize
+        \begin{enumerate}
+        \setcounter{enumi}{3}
+        \item
+                \vspace{-2em}
+                HAAQI score: mean of 0.094 vs. 0.255 of Baseline 1 (demucs)
+        \item
+                BAQ score: mean of 41.84 vs. 41.40 of Baseline 1 (demucs)
+        \end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{New demixing-related project}
+        Aim of these systems are to improve listening experience for those with different hearing.\footnote{http://cadenzachallenge.org/about} VDBO models are not very accessible (inscrutable Python errors, need >64GB RAM, etc.)
+        \vspace{0.5em}
+
+        \url{https://freemusicdemixer.com}\ \\
+        \vspace{0.7em}
+        Optimized C++ inference for UMX + Demucs, compiled to WebAssembly, running in the web, client-side on your browser, under 4 GB of memory
+        \begin{figure}[ht]
+		\centering
+		\includegraphics[height=3.75cm]{./images/freemusicdemixer2.png}
+		\includegraphics[height=3.75cm]{./images/freemusicdemixer.png}
+	\end{figure}
+\end{frame}
+
+\end{document}
