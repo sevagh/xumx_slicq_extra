@@ -95,68 +95,61 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{sliCQT vs. STFT}
+	\frametitle{xumx-sliCQ v1 @ MDX 2021}
 	\begin{enumerate}
 	\item
-		Nonstationary Gabor Transform (NSGT)\footcite{balazs}, realtime sliCQ Transform\footcite{invertiblecqt, slicq, variableq1}
+                sliCQ Transform\footcite{invertiblecqt, slicq} is an STFT-like transform with \textbf{perfect inverse} that uses time-varying windows for nonuniform spectral analysis
+		\includegraphics[height=2.5cm]{./images/slicq_spectral.png}
 	\item
-		STFT-like transforms with windows that vary with time
-	\item
-		CQT motivates the NSGT/sliCQ, but can use any monotonically increasing frequency scale (log/cq, mel, Bark, etc.)
-	\item
-		Outputs the familiar Fourier coefficients with perfect inverse
+                Bark scale (262 bins 32.9--22050 Hz) sliCQT + convolutional denoising autoencoder (CDAE) architecture\footfullcite{plumbley1} to achieve 3.6 dB SDR
 	\end{enumerate}
 	\begin{figure}[ht]
 		\centering
-		\vspace{-0.5em}
-		\includegraphics[height=3.5cm]{./images/slicq_spectral.png}
-		\vspace{-0.5em}
-		\caption{sliCQ: 262-bin Bark scale, 32.9--22050 Hz}
-		\vspace{-0.5em}
+		\includegraphics[height=2.65cm]{./images/xumx_slicq_pertarget.png}
 	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{xumx-sliCQ v1 @ MDX 2021}
-        Use sliCQT (Bark scale, 262 bins, 32.9--22050 Hz) and convolutional autoencoder architecture\footfullcite{plumbley1} to achieve 3.6 dB signal-to-distortion ratio (SDR): \url{https://github.com/sevagh/xumx-sliCQ/tree/v1}
-	\begin{figure}[ht]
-		\centering
-		\includegraphics[height=3cm]{./images/gspi_overlap_flatten.png}
-		\includegraphics[height=3cm]{./images/gspi_overlap_proper.png}
-		\includegraphics[height=2.5cm]{./images/xumx_slicq_pertarget.png}
-		\vspace{-0.5em}
-		\caption{xumx-sliCQ: block diagram}
-		\vspace{-0.5em}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{xumx-sliCQ v2 @ CAD1 2023}
+        \frametitle{xumx-sliCQ v2 @ CAD1 2023}
         \begin{enumerate}
         \item
                 Bark scale may have some benefits for human listeners
         \item
                 Focused solely on VDBO demixing problem
         \item
-                \textbf{4.4 dB SDR} up from 3.6, including better handling of overlap-add, mask sum loss, differentiable Wiener filtering, and complex MSE\footfullcite{dannasep}:  \url{https://github.com/sevagh/xumx-sliCQ/tree/v2}
+                Better handling of overlap-add, mask sum loss, differentiable Wiener filtering, and complex MSE\footfullcite{dannasep}: \href{https://github.com/sevagh/xumx-sliCQ}{github.com/sevagh/xumx-sliCQ}
         \end{enumerate}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[height=3.5cm]{./images/slicq_overlap_improved.png}
+	\end{figure}
         \vspace{-1em}
+        \begin{flalign}
+                        & x_{\text{mix}} = x_{\text{v}} + x_{\text{d}} + x_{\text{b}} + x_{\text{o}} \nonumber \\
+                        & |X|_{\text{mix}} = M_{\text{v}}|X|_{\text{mix}} + M_{\text{d}}|X|_{\text{mix}} + M_{\text{b}}|X|_{\text{mix}} + M_{\text{o}}|X|_{\text{mix}} \nonumber \\
+                        & \rightarrow 1 = M_{\text{v}} + M_{\text{d}} + M_{\text{b}} + M_{\text{o}} \nonumber
+        \end{flalign}
+\end{frame}
+
+\begin{frame}
+	\frametitle{xumx-sliCQ v2: results}
         \begin{figure}[ht]
 		\centering
-		\includegraphics[height=3cm]{./images/slicq_overlap_improved.png}
+		\includegraphics[height=4cm]{./images/xumx_slicq_v2.png}
 	\end{figure}
-        \vspace{-2em}
-                \small \begin{align}
-                        & x_{\text{mix}} = x_{\text{v}} + x_{\text{d}} + x_{\text{b}} + x_{\text{o}}, |X|_{\text{mix}} = M_{\text{v}}|X|_{\text{mix}} + M_{\text{d}}|X|_{\text{mix}} + M_{\text{b}}|X|_{\text{mix}} + M_{\text{o}}|X|_{\text{mix}} \nonumber \\
-                        & \rightarrow 1 = M_{\text{v}} + M_{\text{d}} + M_{\text{b}} + M_{\text{o}} \nonumber
-                \end{align} \normalsize
         \begin{enumerate}
-        \setcounter{enumi}{3}
         \item
-                \vspace{-2em}
+                4.4 dB SDR up from 3.6
+        \item
                 HAAQI score: mean of 0.094 vs. 0.255 of Baseline 1 (demucs)
         \item
                 BAQ score: mean of 41.84 vs. 41.40 of Baseline 1 (demucs)
+        \item
+                More efficient (using bfloat16 for faster training and inference, etc.)
+        \item
+                Weights are 60 MB
+        \item
+                Fast realtime variant with 4.0 dB SDR using causal convolutions
         \end{enumerate}
 \end{frame}
 
